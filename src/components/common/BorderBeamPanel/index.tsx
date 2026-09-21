@@ -4,6 +4,7 @@ import styles from "./index.module.css";
 
 /* Border beam motion adapted from Motiq's MIT-licensed Border Beam Panel. */
 const PARKED_ANGLE = 40;
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 type BorderBeamElement = "article" | "div" | "section";
 
@@ -20,22 +21,22 @@ export interface BorderBeamPanelProps extends React.HTMLAttributes<HTMLElement> 
   thickness?: number;
 }
 
+function subscribeToReducedMotion(onStoreChange: () => void): () => void {
+  const mediaQuery = window.matchMedia(REDUCED_MOTION_QUERY);
+  mediaQuery.addEventListener("change", onStoreChange);
+  return () => mediaQuery.removeEventListener("change", onStoreChange);
+}
+
+function getReducedMotionSnapshot(): boolean {
+  return window.matchMedia(REDUCED_MOTION_QUERY).matches;
+}
+
 function useReducedMotion(): boolean {
-  const [reduced, setReduced] = React.useState(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  return React.useSyncExternalStore(
+    subscribeToReducedMotion,
+    getReducedMotionSnapshot,
+    () => false,
   );
-
-  React.useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const handleChange = (event: MediaQueryListEvent) => setReduced(event.matches);
-    setReduced(mediaQuery.matches);
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
-  }, []);
-
-  return reduced;
 }
 
 function useVisibilityPause(ref: React.RefObject<HTMLElement | null>): boolean {
@@ -117,15 +118,12 @@ export function BorderBeamPanel({
 }: BorderBeamPanelProps) {
   const rootRef = React.useRef<HTMLElement | null>(null);
   const systemReduced = useReducedMotion();
-  const [hydrated, setHydrated] = React.useState(false);
   const visible = useVisibilityPause(rootRef);
-  const staticMode = reducedMotion === true || (hydrated && systemReduced);
+  const staticMode = reducedMotion === true || systemReduced;
   const paused = pauseWhenHidden && !visible;
   const animate = !staticMode && !paused;
   const startAngle = React.useMemo(() => (((seed * 137.508) % 360) + 360) % 360, [seed]);
   const angleRef = React.useRef(startAngle);
-
-  React.useEffect(() => setHydrated(true), []);
 
   const paint = React.useCallback((angle: number) => {
     const normalizedAngle = ((angle % 360) + 360) % 360;
