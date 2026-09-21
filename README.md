@@ -32,7 +32,7 @@ React 18、TypeScript、Vite、TanStack Router、TanStack Query、Arco Design Re
 ## 文档
 
 - [文档索引](./docs/README.md)
-- [工程约定](./docs/CONVENTIONS.md)
+- [工程约定](./docs/ENGINEERING-CONVENTIONS.md)
 - [API 对接流程](./docs/API-INTEGRATION.md)
 - [UI 开发约定](./docs/UI-CONVENTIONS.md)
 - [Agent 执行约定](./AGENTS.md)
