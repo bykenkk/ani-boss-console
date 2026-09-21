@@ -9,200 +9,128 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TenantsRouteImport } from './routes/tenants'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as TenantsIndexRouteImport } from './routes/tenants/index'
-import { Route as TenantsQuotasIndexRouteImport } from './routes/tenants-quotas/index'
-import { Route as TenantsBillingIndexRouteImport } from './routes/tenants-billing/index'
-import { Route as TenantsAdminsIndexRouteImport } from './routes/tenants-admins/index'
-import { Route as SettingsSessionIndexRouteImport } from './routes/settings-session/index'
-import { Route as SettingsPlatformAdminsIndexRouteImport } from './routes/settings-platform-admins/index'
-import { Route as SettingsIdpIndexRouteImport } from './routes/settings-idp/index'
-import { Route as OverviewKbIndexRouteImport } from './routes/overview-kb/index'
-import { Route as OverviewInferenceIndexRouteImport } from './routes/overview-inference/index'
-import { Route as OverviewGpuIndexRouteImport } from './routes/overview-gpu/index'
-import { Route as OverviewCapacityIndexRouteImport } from './routes/overview-capacity/index'
-import { Route as OverviewAlertsIndexRouteImport } from './routes/overview-alerts/index'
-import { Route as OpsStorageIndexRouteImport } from './routes/ops-storage/index'
-import { Route as OpsStorageQuotasIndexRouteImport } from './routes/ops-storage-quotas/index'
-import { Route as OpsRegistryVulnerabilitiesIndexRouteImport } from './routes/ops-registry-vulnerabilities/index'
-import { Route as OpsRegistryQuotaIndexRouteImport } from './routes/ops-registry-quota/index'
-import { Route as OpsRegistryGcIndexRouteImport } from './routes/ops-registry-gc/index'
-import { Route as OpsPoolIndexRouteImport } from './routes/ops-pool/index'
-import { Route as OpsNodesIndexRouteImport } from './routes/ops-nodes/index'
-import { Route as OpsNetworkIndexRouteImport } from './routes/ops-network/index'
-import { Route as OpsGpuIndexRouteImport } from './routes/ops-gpu/index'
-import { Route as MeteringIndexRouteImport } from './routes/metering/index'
-import { Route as MaintSkillsIndexRouteImport } from './routes/maint-skills/index'
-import { Route as MaintJobsIndexRouteImport } from './routes/maint-jobs/index'
-import { Route as MaintIncidentsIndexRouteImport } from './routes/maint-incidents/index'
-import { Route as LoginIndexRouteImport } from './routes/login/index'
-import { Route as IntegrationWebhookIndexRouteImport } from './routes/integration-webhook/index'
-import { Route as IntegrationOpsSystemIndexRouteImport } from './routes/integration-ops-system/index'
-import { Route as IntegrationNotifyIndexRouteImport } from './routes/integration-notify/index'
-import { Route as HealthIndexRouteImport } from './routes/health/index'
-import { Route as HealthTracesIndexRouteImport } from './routes/health-traces/index'
-import { Route as HealthMetricsIndexRouteImport } from './routes/health-metrics/index'
-import { Route as HealthLogsIndexRouteImport } from './routes/health-logs/index'
-import { Route as HealthKbIndexRouteImport } from './routes/health-kb/index'
-import { Route as HealthInferenceIndexRouteImport } from './routes/health-inference/index'
-import { Route as HealthGpuIndexRouteImport } from './routes/health-gpu/index'
-import { Route as HealthAlertRulesIndexRouteImport } from './routes/health-alert-rules/index'
-import { Route as AuditIndexRouteImport } from './routes/audit/index'
-import { Route as AuditInferenceIndexRouteImport } from './routes/audit-inference/index'
-import { Route as AuditExportIndexRouteImport } from './routes/audit-export/index'
+import { Route as TenantsRouteImport } from './routes/tenants'
 import { Route as AuditApiKeysIndexRouteImport } from './routes/audit-api-keys/index'
-import { Route as TenantsTenantIdRouteImport } from './routes/tenants/$tenantId'
-import { Route as TenantsQuotasPlanCodeRouteImport } from './routes/tenants-quotas/$planCode'
-import { Route as TenantsBillingTenantIdRouteImport } from './routes/tenants-billing/$tenantId'
-import { Route as TenantsAdminsAdminIdRouteImport } from './routes/tenants-admins/$adminId'
+import { Route as AuditExportIndexRouteImport } from './routes/audit-export/index'
+import { Route as AuditInferenceIndexRouteImport } from './routes/audit-inference/index'
+import { Route as AuditIndexRouteImport } from './routes/audit/index'
+import { Route as HealthAlertRulesIndexRouteImport } from './routes/health-alert-rules/index'
+import { Route as HealthGpuIndexRouteImport } from './routes/health-gpu/index'
+import { Route as HealthInferenceIndexRouteImport } from './routes/health-inference/index'
+import { Route as HealthKbIndexRouteImport } from './routes/health-kb/index'
+import { Route as HealthLogsIndexRouteImport } from './routes/health-logs/index'
+import { Route as HealthMetricsIndexRouteImport } from './routes/health-metrics/index'
+import { Route as HealthTracesIndexRouteImport } from './routes/health-traces/index'
+import { Route as HealthIndexRouteImport } from './routes/health/index'
+import { Route as IntegrationNotifyIndexRouteImport } from './routes/integration-notify/index'
+import { Route as IntegrationOpsSystemIndexRouteImport } from './routes/integration-ops-system/index'
+import { Route as IntegrationWebhookIndexRouteImport } from './routes/integration-webhook/index'
+import { Route as LoginIndexRouteImport } from './routes/login/index'
+import { Route as MaintIncidentsIndexRouteImport } from './routes/maint-incidents/index'
+import { Route as MaintJobsIndexRouteImport } from './routes/maint-jobs/index'
+import { Route as MaintSkillsIndexRouteImport } from './routes/maint-skills/index'
+import { Route as MeteringIndexRouteImport } from './routes/metering/index'
+import { Route as OpsGpuIndexRouteImport } from './routes/ops-gpu/index'
+import { Route as OpsNetworkIndexRouteImport } from './routes/ops-network/index'
+import { Route as OpsNodesIndexRouteImport } from './routes/ops-nodes/index'
+import { Route as OpsPoolIndexRouteImport } from './routes/ops-pool/index'
+import { Route as OpsRegistryGcIndexRouteImport } from './routes/ops-registry-gc/index'
+import { Route as OpsRegistryQuotaIndexRouteImport } from './routes/ops-registry-quota/index'
+import { Route as OpsRegistryVulnerabilitiesIndexRouteImport } from './routes/ops-registry-vulnerabilities/index'
+import { Route as OpsStorageQuotasIndexRouteImport } from './routes/ops-storage-quotas/index'
+import { Route as OpsStorageIndexRouteImport } from './routes/ops-storage/index'
+import { Route as OverviewAlertsIndexRouteImport } from './routes/overview-alerts/index'
+import { Route as OverviewCapacityIndexRouteImport } from './routes/overview-capacity/index'
+import { Route as OverviewGpuIndexRouteImport } from './routes/overview-gpu/index'
+import { Route as OverviewInferenceIndexRouteImport } from './routes/overview-inference/index'
+import { Route as OverviewKbIndexRouteImport } from './routes/overview-kb/index'
+import { Route as SettingsIdpIndexRouteImport } from './routes/settings-idp/index'
+import { Route as SettingsPlatformAdminsIndexRouteImport } from './routes/settings-platform-admins/index'
 import { Route as SettingsPlatformAdminsUserIdRouteImport } from './routes/settings-platform-admins/$userId'
+import { Route as SettingsSessionIndexRouteImport } from './routes/settings-session/index'
+import { Route as TenantsAdminsIndexRouteImport } from './routes/tenants-admins/index'
+import { Route as TenantsAdminsAdminIdRouteImport } from './routes/tenants-admins/$adminId'
+import { Route as TenantsBillingIndexRouteImport } from './routes/tenants-billing/index'
+import { Route as TenantsBillingTenantIdRouteImport } from './routes/tenants-billing/$tenantId'
+import { Route as TenantsQuotasIndexRouteImport } from './routes/tenants-quotas/index'
+import { Route as TenantsQuotasPlanCodeRouteImport } from './routes/tenants-quotas/$planCode'
+import { Route as TenantsIndexRouteImport } from './routes/tenants/index'
+import { Route as TenantsTenantIdRouteImport } from './routes/tenants/$tenantId'
 
-const TenantsRoute = TenantsRouteImport.update({
-  id: '/tenants',
-  path: '/tenants',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TenantsIndexRoute = TenantsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => TenantsRoute,
-} as any)
-const TenantsQuotasIndexRoute = TenantsQuotasIndexRouteImport.update({
-  id: '/tenants-quotas/',
-  path: '/tenants-quotas/',
+const TenantsRoute = TenantsRouteImport.update({
+  id: '/tenants',
+  path: '/tenants',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TenantsBillingIndexRoute = TenantsBillingIndexRouteImport.update({
-  id: '/tenants-billing/',
-  path: '/tenants-billing/',
+const AuditApiKeysIndexRoute = AuditApiKeysIndexRouteImport.update({
+  id: '/audit-api-keys/',
+  path: '/audit-api-keys/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TenantsAdminsIndexRoute = TenantsAdminsIndexRouteImport.update({
-  id: '/tenants-admins/',
-  path: '/tenants-admins/',
+const AuditExportIndexRoute = AuditExportIndexRouteImport.update({
+  id: '/audit-export/',
+  path: '/audit-export/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsSessionIndexRoute = SettingsSessionIndexRouteImport.update({
-  id: '/settings-session/',
-  path: '/settings-session/',
+const AuditInferenceIndexRoute = AuditInferenceIndexRouteImport.update({
+  id: '/audit-inference/',
+  path: '/audit-inference/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsPlatformAdminsIndexRoute =
-  SettingsPlatformAdminsIndexRouteImport.update({
-    id: '/settings-platform-admins/',
-    path: '/settings-platform-admins/',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const SettingsIdpIndexRoute = SettingsIdpIndexRouteImport.update({
-  id: '/settings-idp/',
-  path: '/settings-idp/',
+const AuditIndexRoute = AuditIndexRouteImport.update({
+  id: '/audit/',
+  path: '/audit/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OverviewKbIndexRoute = OverviewKbIndexRouteImport.update({
-  id: '/overview-kb/',
-  path: '/overview-kb/',
+const HealthAlertRulesIndexRoute = HealthAlertRulesIndexRouteImport.update({
+  id: '/health-alert-rules/',
+  path: '/health-alert-rules/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OverviewInferenceIndexRoute = OverviewInferenceIndexRouteImport.update({
-  id: '/overview-inference/',
-  path: '/overview-inference/',
+const HealthGpuIndexRoute = HealthGpuIndexRouteImport.update({
+  id: '/health-gpu/',
+  path: '/health-gpu/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OverviewGpuIndexRoute = OverviewGpuIndexRouteImport.update({
-  id: '/overview-gpu/',
-  path: '/overview-gpu/',
+const HealthInferenceIndexRoute = HealthInferenceIndexRouteImport.update({
+  id: '/health-inference/',
+  path: '/health-inference/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OverviewCapacityIndexRoute = OverviewCapacityIndexRouteImport.update({
-  id: '/overview-capacity/',
-  path: '/overview-capacity/',
+const HealthKbIndexRoute = HealthKbIndexRouteImport.update({
+  id: '/health-kb/',
+  path: '/health-kb/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OverviewAlertsIndexRoute = OverviewAlertsIndexRouteImport.update({
-  id: '/overview-alerts/',
-  path: '/overview-alerts/',
+const HealthLogsIndexRoute = HealthLogsIndexRouteImport.update({
+  id: '/health-logs/',
+  path: '/health-logs/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OpsStorageIndexRoute = OpsStorageIndexRouteImport.update({
-  id: '/ops-storage/',
-  path: '/ops-storage/',
+const HealthMetricsIndexRoute = HealthMetricsIndexRouteImport.update({
+  id: '/health-metrics/',
+  path: '/health-metrics/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OpsStorageQuotasIndexRoute = OpsStorageQuotasIndexRouteImport.update({
-  id: '/ops-storage-quotas/',
-  path: '/ops-storage-quotas/',
+const HealthTracesIndexRoute = HealthTracesIndexRouteImport.update({
+  id: '/health-traces/',
+  path: '/health-traces/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OpsRegistryVulnerabilitiesIndexRoute =
-  OpsRegistryVulnerabilitiesIndexRouteImport.update({
-    id: '/ops-registry-vulnerabilities/',
-    path: '/ops-registry-vulnerabilities/',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const OpsRegistryQuotaIndexRoute = OpsRegistryQuotaIndexRouteImport.update({
-  id: '/ops-registry-quota/',
-  path: '/ops-registry-quota/',
+const HealthIndexRoute = HealthIndexRouteImport.update({
+  id: '/health/',
+  path: '/health/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OpsRegistryGcIndexRoute = OpsRegistryGcIndexRouteImport.update({
-  id: '/ops-registry-gc/',
-  path: '/ops-registry-gc/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OpsPoolIndexRoute = OpsPoolIndexRouteImport.update({
-  id: '/ops-pool/',
-  path: '/ops-pool/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OpsNodesIndexRoute = OpsNodesIndexRouteImport.update({
-  id: '/ops-nodes/',
-  path: '/ops-nodes/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OpsNetworkIndexRoute = OpsNetworkIndexRouteImport.update({
-  id: '/ops-network/',
-  path: '/ops-network/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OpsGpuIndexRoute = OpsGpuIndexRouteImport.update({
-  id: '/ops-gpu/',
-  path: '/ops-gpu/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MeteringIndexRoute = MeteringIndexRouteImport.update({
-  id: '/metering/',
-  path: '/metering/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MaintSkillsIndexRoute = MaintSkillsIndexRouteImport.update({
-  id: '/maint-skills/',
-  path: '/maint-skills/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MaintJobsIndexRoute = MaintJobsIndexRouteImport.update({
-  id: '/maint-jobs/',
-  path: '/maint-jobs/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MaintIncidentsIndexRoute = MaintIncidentsIndexRouteImport.update({
-  id: '/maint-incidents/',
-  path: '/maint-incidents/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginIndexRoute = LoginIndexRouteImport.update({
-  id: '/login/',
-  path: '/login/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IntegrationWebhookIndexRoute = IntegrationWebhookIndexRouteImport.update({
-  id: '/integration-webhook/',
-  path: '/integration-webhook/',
+const IntegrationNotifyIndexRoute = IntegrationNotifyIndexRouteImport.update({
+  id: '/integration-notify/',
+  path: '/integration-notify/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IntegrationOpsSystemIndexRoute =
@@ -211,84 +139,132 @@ const IntegrationOpsSystemIndexRoute =
     path: '/integration-ops-system/',
     getParentRoute: () => rootRouteImport,
   } as any)
-const IntegrationNotifyIndexRoute = IntegrationNotifyIndexRouteImport.update({
-  id: '/integration-notify/',
-  path: '/integration-notify/',
+const IntegrationWebhookIndexRoute = IntegrationWebhookIndexRouteImport.update({
+  id: '/integration-webhook/',
+  path: '/integration-webhook/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HealthIndexRoute = HealthIndexRouteImport.update({
-  id: '/health/',
-  path: '/health/',
+const LoginIndexRoute = LoginIndexRouteImport.update({
+  id: '/login/',
+  path: '/login/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HealthTracesIndexRoute = HealthTracesIndexRouteImport.update({
-  id: '/health-traces/',
-  path: '/health-traces/',
+const MaintIncidentsIndexRoute = MaintIncidentsIndexRouteImport.update({
+  id: '/maint-incidents/',
+  path: '/maint-incidents/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HealthMetricsIndexRoute = HealthMetricsIndexRouteImport.update({
-  id: '/health-metrics/',
-  path: '/health-metrics/',
+const MaintJobsIndexRoute = MaintJobsIndexRouteImport.update({
+  id: '/maint-jobs/',
+  path: '/maint-jobs/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HealthLogsIndexRoute = HealthLogsIndexRouteImport.update({
-  id: '/health-logs/',
-  path: '/health-logs/',
+const MaintSkillsIndexRoute = MaintSkillsIndexRouteImport.update({
+  id: '/maint-skills/',
+  path: '/maint-skills/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HealthKbIndexRoute = HealthKbIndexRouteImport.update({
-  id: '/health-kb/',
-  path: '/health-kb/',
+const MeteringIndexRoute = MeteringIndexRouteImport.update({
+  id: '/metering/',
+  path: '/metering/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HealthInferenceIndexRoute = HealthInferenceIndexRouteImport.update({
-  id: '/health-inference/',
-  path: '/health-inference/',
+const OpsGpuIndexRoute = OpsGpuIndexRouteImport.update({
+  id: '/ops-gpu/',
+  path: '/ops-gpu/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HealthGpuIndexRoute = HealthGpuIndexRouteImport.update({
-  id: '/health-gpu/',
-  path: '/health-gpu/',
+const OpsNetworkIndexRoute = OpsNetworkIndexRouteImport.update({
+  id: '/ops-network/',
+  path: '/ops-network/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HealthAlertRulesIndexRoute = HealthAlertRulesIndexRouteImport.update({
-  id: '/health-alert-rules/',
-  path: '/health-alert-rules/',
+const OpsNodesIndexRoute = OpsNodesIndexRouteImport.update({
+  id: '/ops-nodes/',
+  path: '/ops-nodes/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuditIndexRoute = AuditIndexRouteImport.update({
-  id: '/audit/',
-  path: '/audit/',
+const OpsPoolIndexRoute = OpsPoolIndexRouteImport.update({
+  id: '/ops-pool/',
+  path: '/ops-pool/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuditInferenceIndexRoute = AuditInferenceIndexRouteImport.update({
-  id: '/audit-inference/',
-  path: '/audit-inference/',
+const OpsRegistryGcIndexRoute = OpsRegistryGcIndexRouteImport.update({
+  id: '/ops-registry-gc/',
+  path: '/ops-registry-gc/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuditExportIndexRoute = AuditExportIndexRouteImport.update({
-  id: '/audit-export/',
-  path: '/audit-export/',
+const OpsRegistryQuotaIndexRoute = OpsRegistryQuotaIndexRouteImport.update({
+  id: '/ops-registry-quota/',
+  path: '/ops-registry-quota/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuditApiKeysIndexRoute = AuditApiKeysIndexRouteImport.update({
-  id: '/audit-api-keys/',
-  path: '/audit-api-keys/',
+const OpsRegistryVulnerabilitiesIndexRoute =
+  OpsRegistryVulnerabilitiesIndexRouteImport.update({
+    id: '/ops-registry-vulnerabilities/',
+    path: '/ops-registry-vulnerabilities/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const OpsStorageQuotasIndexRoute = OpsStorageQuotasIndexRouteImport.update({
+  id: '/ops-storage-quotas/',
+  path: '/ops-storage-quotas/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TenantsTenantIdRoute = TenantsTenantIdRouteImport.update({
-  id: '/$tenantId',
-  path: '/$tenantId',
-  getParentRoute: () => TenantsRoute,
-} as any)
-const TenantsQuotasPlanCodeRoute = TenantsQuotasPlanCodeRouteImport.update({
-  id: '/tenants-quotas/$planCode',
-  path: '/tenants-quotas/$planCode',
+const OpsStorageIndexRoute = OpsStorageIndexRouteImport.update({
+  id: '/ops-storage/',
+  path: '/ops-storage/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TenantsBillingTenantIdRoute = TenantsBillingTenantIdRouteImport.update({
-  id: '/tenants-billing/$tenantId',
-  path: '/tenants-billing/$tenantId',
+const OverviewAlertsIndexRoute = OverviewAlertsIndexRouteImport.update({
+  id: '/overview-alerts/',
+  path: '/overview-alerts/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OverviewCapacityIndexRoute = OverviewCapacityIndexRouteImport.update({
+  id: '/overview-capacity/',
+  path: '/overview-capacity/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OverviewGpuIndexRoute = OverviewGpuIndexRouteImport.update({
+  id: '/overview-gpu/',
+  path: '/overview-gpu/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OverviewInferenceIndexRoute = OverviewInferenceIndexRouteImport.update({
+  id: '/overview-inference/',
+  path: '/overview-inference/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OverviewKbIndexRoute = OverviewKbIndexRouteImport.update({
+  id: '/overview-kb/',
+  path: '/overview-kb/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsIdpIndexRoute = SettingsIdpIndexRouteImport.update({
+  id: '/settings-idp/',
+  path: '/settings-idp/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsPlatformAdminsIndexRoute =
+  SettingsPlatformAdminsIndexRouteImport.update({
+    id: '/settings-platform-admins/',
+    path: '/settings-platform-admins/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const SettingsPlatformAdminsUserIdRoute =
+  SettingsPlatformAdminsUserIdRouteImport.update({
+    id: '/settings-platform-admins/$userId',
+    path: '/settings-platform-admins/$userId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const SettingsSessionIndexRoute = SettingsSessionIndexRouteImport.update({
+  id: '/settings-session/',
+  path: '/settings-session/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TenantsAdminsIndexRoute = TenantsAdminsIndexRouteImport.update({
+  id: '/tenants-admins/',
+  path: '/tenants-admins/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TenantsAdminsAdminIdRoute = TenantsAdminsAdminIdRouteImport.update({
@@ -296,12 +272,36 @@ const TenantsAdminsAdminIdRoute = TenantsAdminsAdminIdRouteImport.update({
   path: '/tenants-admins/$adminId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SettingsPlatformAdminsUserIdRoute =
-  SettingsPlatformAdminsUserIdRouteImport.update({
-    id: '/settings-platform-admins/$userId',
-    path: '/settings-platform-admins/$userId',
-    getParentRoute: () => rootRouteImport,
-  } as any)
+const TenantsBillingIndexRoute = TenantsBillingIndexRouteImport.update({
+  id: '/tenants-billing/',
+  path: '/tenants-billing/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TenantsBillingTenantIdRoute = TenantsBillingTenantIdRouteImport.update({
+  id: '/tenants-billing/$tenantId',
+  path: '/tenants-billing/$tenantId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TenantsQuotasIndexRoute = TenantsQuotasIndexRouteImport.update({
+  id: '/tenants-quotas/',
+  path: '/tenants-quotas/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TenantsQuotasPlanCodeRoute = TenantsQuotasPlanCodeRouteImport.update({
+  id: '/tenants-quotas/$planCode',
+  path: '/tenants-quotas/$planCode',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TenantsIndexRoute = TenantsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TenantsRoute,
+} as any)
+const TenantsTenantIdRoute = TenantsTenantIdRouteImport.update({
+  id: '/$tenantId',
+  path: '/$tenantId',
+  getParentRoute: () => TenantsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -311,46 +311,46 @@ export interface FileRoutesByFullPath {
   '/tenants-billing/$tenantId': typeof TenantsBillingTenantIdRoute
   '/tenants-quotas/$planCode': typeof TenantsQuotasPlanCodeRoute
   '/tenants/$tenantId': typeof TenantsTenantIdRoute
-  '/audit-api-keys': typeof AuditApiKeysIndexRoute
-  '/audit-export': typeof AuditExportIndexRoute
-  '/audit-inference': typeof AuditInferenceIndexRoute
-  '/audit': typeof AuditIndexRoute
-  '/health-alert-rules': typeof HealthAlertRulesIndexRoute
-  '/health-gpu': typeof HealthGpuIndexRoute
-  '/health-inference': typeof HealthInferenceIndexRoute
-  '/health-kb': typeof HealthKbIndexRoute
-  '/health-logs': typeof HealthLogsIndexRoute
-  '/health-metrics': typeof HealthMetricsIndexRoute
-  '/health-traces': typeof HealthTracesIndexRoute
-  '/health': typeof HealthIndexRoute
-  '/integration-notify': typeof IntegrationNotifyIndexRoute
-  '/integration-ops-system': typeof IntegrationOpsSystemIndexRoute
-  '/integration-webhook': typeof IntegrationWebhookIndexRoute
-  '/login': typeof LoginIndexRoute
-  '/maint-incidents': typeof MaintIncidentsIndexRoute
-  '/maint-jobs': typeof MaintJobsIndexRoute
-  '/maint-skills': typeof MaintSkillsIndexRoute
-  '/metering': typeof MeteringIndexRoute
-  '/ops-gpu': typeof OpsGpuIndexRoute
-  '/ops-network': typeof OpsNetworkIndexRoute
-  '/ops-nodes': typeof OpsNodesIndexRoute
-  '/ops-pool': typeof OpsPoolIndexRoute
-  '/ops-registry-gc': typeof OpsRegistryGcIndexRoute
-  '/ops-registry-quota': typeof OpsRegistryQuotaIndexRoute
-  '/ops-registry-vulnerabilities': typeof OpsRegistryVulnerabilitiesIndexRoute
-  '/ops-storage-quotas': typeof OpsStorageQuotasIndexRoute
-  '/ops-storage': typeof OpsStorageIndexRoute
-  '/overview-alerts': typeof OverviewAlertsIndexRoute
-  '/overview-capacity': typeof OverviewCapacityIndexRoute
-  '/overview-gpu': typeof OverviewGpuIndexRoute
-  '/overview-inference': typeof OverviewInferenceIndexRoute
-  '/overview-kb': typeof OverviewKbIndexRoute
-  '/settings-idp': typeof SettingsIdpIndexRoute
-  '/settings-platform-admins': typeof SettingsPlatformAdminsIndexRoute
-  '/settings-session': typeof SettingsSessionIndexRoute
-  '/tenants-admins': typeof TenantsAdminsIndexRoute
-  '/tenants-billing': typeof TenantsBillingIndexRoute
-  '/tenants-quotas': typeof TenantsQuotasIndexRoute
+  '/audit-api-keys/': typeof AuditApiKeysIndexRoute
+  '/audit-export/': typeof AuditExportIndexRoute
+  '/audit-inference/': typeof AuditInferenceIndexRoute
+  '/audit/': typeof AuditIndexRoute
+  '/health-alert-rules/': typeof HealthAlertRulesIndexRoute
+  '/health-gpu/': typeof HealthGpuIndexRoute
+  '/health-inference/': typeof HealthInferenceIndexRoute
+  '/health-kb/': typeof HealthKbIndexRoute
+  '/health-logs/': typeof HealthLogsIndexRoute
+  '/health-metrics/': typeof HealthMetricsIndexRoute
+  '/health-traces/': typeof HealthTracesIndexRoute
+  '/health/': typeof HealthIndexRoute
+  '/integration-notify/': typeof IntegrationNotifyIndexRoute
+  '/integration-ops-system/': typeof IntegrationOpsSystemIndexRoute
+  '/integration-webhook/': typeof IntegrationWebhookIndexRoute
+  '/login/': typeof LoginIndexRoute
+  '/maint-incidents/': typeof MaintIncidentsIndexRoute
+  '/maint-jobs/': typeof MaintJobsIndexRoute
+  '/maint-skills/': typeof MaintSkillsIndexRoute
+  '/metering/': typeof MeteringIndexRoute
+  '/ops-gpu/': typeof OpsGpuIndexRoute
+  '/ops-network/': typeof OpsNetworkIndexRoute
+  '/ops-nodes/': typeof OpsNodesIndexRoute
+  '/ops-pool/': typeof OpsPoolIndexRoute
+  '/ops-registry-gc/': typeof OpsRegistryGcIndexRoute
+  '/ops-registry-quota/': typeof OpsRegistryQuotaIndexRoute
+  '/ops-registry-vulnerabilities/': typeof OpsRegistryVulnerabilitiesIndexRoute
+  '/ops-storage-quotas/': typeof OpsStorageQuotasIndexRoute
+  '/ops-storage/': typeof OpsStorageIndexRoute
+  '/overview-alerts/': typeof OverviewAlertsIndexRoute
+  '/overview-capacity/': typeof OverviewCapacityIndexRoute
+  '/overview-gpu/': typeof OverviewGpuIndexRoute
+  '/overview-inference/': typeof OverviewInferenceIndexRoute
+  '/overview-kb/': typeof OverviewKbIndexRoute
+  '/settings-idp/': typeof SettingsIdpIndexRoute
+  '/settings-platform-admins/': typeof SettingsPlatformAdminsIndexRoute
+  '/settings-session/': typeof SettingsSessionIndexRoute
+  '/tenants-admins/': typeof TenantsAdminsIndexRoute
+  '/tenants-billing/': typeof TenantsBillingIndexRoute
+  '/tenants-quotas/': typeof TenantsQuotasIndexRoute
   '/tenants/': typeof TenantsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -463,46 +463,46 @@ export interface FileRouteTypes {
     | '/tenants-billing/$tenantId'
     | '/tenants-quotas/$planCode'
     | '/tenants/$tenantId'
-    | '/audit-api-keys'
-    | '/audit-export'
-    | '/audit-inference'
-    | '/audit'
-    | '/health-alert-rules'
-    | '/health-gpu'
-    | '/health-inference'
-    | '/health-kb'
-    | '/health-logs'
-    | '/health-metrics'
-    | '/health-traces'
-    | '/health'
-    | '/integration-notify'
-    | '/integration-ops-system'
-    | '/integration-webhook'
-    | '/login'
-    | '/maint-incidents'
-    | '/maint-jobs'
-    | '/maint-skills'
-    | '/metering'
-    | '/ops-gpu'
-    | '/ops-network'
-    | '/ops-nodes'
-    | '/ops-pool'
-    | '/ops-registry-gc'
-    | '/ops-registry-quota'
-    | '/ops-registry-vulnerabilities'
-    | '/ops-storage-quotas'
-    | '/ops-storage'
-    | '/overview-alerts'
-    | '/overview-capacity'
-    | '/overview-gpu'
-    | '/overview-inference'
-    | '/overview-kb'
-    | '/settings-idp'
-    | '/settings-platform-admins'
-    | '/settings-session'
-    | '/tenants-admins'
-    | '/tenants-billing'
-    | '/tenants-quotas'
+    | '/audit-api-keys/'
+    | '/audit-export/'
+    | '/audit-inference/'
+    | '/audit/'
+    | '/health-alert-rules/'
+    | '/health-gpu/'
+    | '/health-inference/'
+    | '/health-kb/'
+    | '/health-logs/'
+    | '/health-metrics/'
+    | '/health-traces/'
+    | '/health/'
+    | '/integration-notify/'
+    | '/integration-ops-system/'
+    | '/integration-webhook/'
+    | '/login/'
+    | '/maint-incidents/'
+    | '/maint-jobs/'
+    | '/maint-skills/'
+    | '/metering/'
+    | '/ops-gpu/'
+    | '/ops-network/'
+    | '/ops-nodes/'
+    | '/ops-pool/'
+    | '/ops-registry-gc/'
+    | '/ops-registry-quota/'
+    | '/ops-registry-vulnerabilities/'
+    | '/ops-storage-quotas/'
+    | '/ops-storage/'
+    | '/overview-alerts/'
+    | '/overview-capacity/'
+    | '/overview-gpu/'
+    | '/overview-inference/'
+    | '/overview-kb/'
+    | '/settings-idp/'
+    | '/settings-platform-admins/'
+    | '/settings-session/'
+    | '/tenants-admins/'
+    | '/tenants-billing/'
+    | '/tenants-quotas/'
     | '/tenants/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -656,13 +656,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/tenants': {
-      id: '/tenants'
-      path: '/tenants'
-      fullPath: '/tenants'
-      preLoaderRoute: typeof TenantsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -670,312 +663,284 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tenants/': {
-      id: '/tenants/'
-      path: '/'
-      fullPath: '/tenants/'
-      preLoaderRoute: typeof TenantsIndexRouteImport
-      parentRoute: typeof TenantsRoute
-    }
-    '/tenants-quotas/': {
-      id: '/tenants-quotas/'
-      path: '/tenants-quotas'
-      fullPath: '/tenants-quotas'
-      preLoaderRoute: typeof TenantsQuotasIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tenants-billing/': {
-      id: '/tenants-billing/'
-      path: '/tenants-billing'
-      fullPath: '/tenants-billing'
-      preLoaderRoute: typeof TenantsBillingIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tenants-admins/': {
-      id: '/tenants-admins/'
-      path: '/tenants-admins'
-      fullPath: '/tenants-admins'
-      preLoaderRoute: typeof TenantsAdminsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings-session/': {
-      id: '/settings-session/'
-      path: '/settings-session'
-      fullPath: '/settings-session'
-      preLoaderRoute: typeof SettingsSessionIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings-platform-admins/': {
-      id: '/settings-platform-admins/'
-      path: '/settings-platform-admins'
-      fullPath: '/settings-platform-admins'
-      preLoaderRoute: typeof SettingsPlatformAdminsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings-idp/': {
-      id: '/settings-idp/'
-      path: '/settings-idp'
-      fullPath: '/settings-idp'
-      preLoaderRoute: typeof SettingsIdpIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/overview-kb/': {
-      id: '/overview-kb/'
-      path: '/overview-kb'
-      fullPath: '/overview-kb'
-      preLoaderRoute: typeof OverviewKbIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/overview-inference/': {
-      id: '/overview-inference/'
-      path: '/overview-inference'
-      fullPath: '/overview-inference'
-      preLoaderRoute: typeof OverviewInferenceIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/overview-gpu/': {
-      id: '/overview-gpu/'
-      path: '/overview-gpu'
-      fullPath: '/overview-gpu'
-      preLoaderRoute: typeof OverviewGpuIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/overview-capacity/': {
-      id: '/overview-capacity/'
-      path: '/overview-capacity'
-      fullPath: '/overview-capacity'
-      preLoaderRoute: typeof OverviewCapacityIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/overview-alerts/': {
-      id: '/overview-alerts/'
-      path: '/overview-alerts'
-      fullPath: '/overview-alerts'
-      preLoaderRoute: typeof OverviewAlertsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ops-storage/': {
-      id: '/ops-storage/'
-      path: '/ops-storage'
-      fullPath: '/ops-storage'
-      preLoaderRoute: typeof OpsStorageIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ops-storage-quotas/': {
-      id: '/ops-storage-quotas/'
-      path: '/ops-storage-quotas'
-      fullPath: '/ops-storage-quotas'
-      preLoaderRoute: typeof OpsStorageQuotasIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ops-registry-vulnerabilities/': {
-      id: '/ops-registry-vulnerabilities/'
-      path: '/ops-registry-vulnerabilities'
-      fullPath: '/ops-registry-vulnerabilities'
-      preLoaderRoute: typeof OpsRegistryVulnerabilitiesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ops-registry-quota/': {
-      id: '/ops-registry-quota/'
-      path: '/ops-registry-quota'
-      fullPath: '/ops-registry-quota'
-      preLoaderRoute: typeof OpsRegistryQuotaIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ops-registry-gc/': {
-      id: '/ops-registry-gc/'
-      path: '/ops-registry-gc'
-      fullPath: '/ops-registry-gc'
-      preLoaderRoute: typeof OpsRegistryGcIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ops-pool/': {
-      id: '/ops-pool/'
-      path: '/ops-pool'
-      fullPath: '/ops-pool'
-      preLoaderRoute: typeof OpsPoolIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ops-nodes/': {
-      id: '/ops-nodes/'
-      path: '/ops-nodes'
-      fullPath: '/ops-nodes'
-      preLoaderRoute: typeof OpsNodesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ops-network/': {
-      id: '/ops-network/'
-      path: '/ops-network'
-      fullPath: '/ops-network'
-      preLoaderRoute: typeof OpsNetworkIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ops-gpu/': {
-      id: '/ops-gpu/'
-      path: '/ops-gpu'
-      fullPath: '/ops-gpu'
-      preLoaderRoute: typeof OpsGpuIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/metering/': {
-      id: '/metering/'
-      path: '/metering'
-      fullPath: '/metering'
-      preLoaderRoute: typeof MeteringIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/maint-skills/': {
-      id: '/maint-skills/'
-      path: '/maint-skills'
-      fullPath: '/maint-skills'
-      preLoaderRoute: typeof MaintSkillsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/maint-jobs/': {
-      id: '/maint-jobs/'
-      path: '/maint-jobs'
-      fullPath: '/maint-jobs'
-      preLoaderRoute: typeof MaintJobsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/maint-incidents/': {
-      id: '/maint-incidents/'
-      path: '/maint-incidents'
-      fullPath: '/maint-incidents'
-      preLoaderRoute: typeof MaintIncidentsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login/': {
-      id: '/login/'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/integration-webhook/': {
-      id: '/integration-webhook/'
-      path: '/integration-webhook'
-      fullPath: '/integration-webhook'
-      preLoaderRoute: typeof IntegrationWebhookIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/integration-ops-system/': {
-      id: '/integration-ops-system/'
-      path: '/integration-ops-system'
-      fullPath: '/integration-ops-system'
-      preLoaderRoute: typeof IntegrationOpsSystemIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/integration-notify/': {
-      id: '/integration-notify/'
-      path: '/integration-notify'
-      fullPath: '/integration-notify'
-      preLoaderRoute: typeof IntegrationNotifyIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/health/': {
-      id: '/health/'
-      path: '/health'
-      fullPath: '/health'
-      preLoaderRoute: typeof HealthIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/health-traces/': {
-      id: '/health-traces/'
-      path: '/health-traces'
-      fullPath: '/health-traces'
-      preLoaderRoute: typeof HealthTracesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/health-metrics/': {
-      id: '/health-metrics/'
-      path: '/health-metrics'
-      fullPath: '/health-metrics'
-      preLoaderRoute: typeof HealthMetricsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/health-logs/': {
-      id: '/health-logs/'
-      path: '/health-logs'
-      fullPath: '/health-logs'
-      preLoaderRoute: typeof HealthLogsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/health-kb/': {
-      id: '/health-kb/'
-      path: '/health-kb'
-      fullPath: '/health-kb'
-      preLoaderRoute: typeof HealthKbIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/health-inference/': {
-      id: '/health-inference/'
-      path: '/health-inference'
-      fullPath: '/health-inference'
-      preLoaderRoute: typeof HealthInferenceIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/health-gpu/': {
-      id: '/health-gpu/'
-      path: '/health-gpu'
-      fullPath: '/health-gpu'
-      preLoaderRoute: typeof HealthGpuIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/health-alert-rules/': {
-      id: '/health-alert-rules/'
-      path: '/health-alert-rules'
-      fullPath: '/health-alert-rules'
-      preLoaderRoute: typeof HealthAlertRulesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/audit/': {
-      id: '/audit/'
-      path: '/audit'
-      fullPath: '/audit'
-      preLoaderRoute: typeof AuditIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/audit-inference/': {
-      id: '/audit-inference/'
-      path: '/audit-inference'
-      fullPath: '/audit-inference'
-      preLoaderRoute: typeof AuditInferenceIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/audit-export/': {
-      id: '/audit-export/'
-      path: '/audit-export'
-      fullPath: '/audit-export'
-      preLoaderRoute: typeof AuditExportIndexRouteImport
+    '/tenants': {
+      id: '/tenants'
+      path: '/tenants'
+      fullPath: '/tenants'
+      preLoaderRoute: typeof TenantsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/audit-api-keys/': {
       id: '/audit-api-keys/'
       path: '/audit-api-keys'
-      fullPath: '/audit-api-keys'
+      fullPath: '/audit-api-keys/'
       preLoaderRoute: typeof AuditApiKeysIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tenants/$tenantId': {
-      id: '/tenants/$tenantId'
-      path: '/$tenantId'
-      fullPath: '/tenants/$tenantId'
-      preLoaderRoute: typeof TenantsTenantIdRouteImport
-      parentRoute: typeof TenantsRoute
-    }
-    '/tenants-quotas/$planCode': {
-      id: '/tenants-quotas/$planCode'
-      path: '/tenants-quotas/$planCode'
-      fullPath: '/tenants-quotas/$planCode'
-      preLoaderRoute: typeof TenantsQuotasPlanCodeRouteImport
+    '/audit-export/': {
+      id: '/audit-export/'
+      path: '/audit-export'
+      fullPath: '/audit-export/'
+      preLoaderRoute: typeof AuditExportIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tenants-billing/$tenantId': {
-      id: '/tenants-billing/$tenantId'
-      path: '/tenants-billing/$tenantId'
-      fullPath: '/tenants-billing/$tenantId'
-      preLoaderRoute: typeof TenantsBillingTenantIdRouteImport
+    '/audit-inference/': {
+      id: '/audit-inference/'
+      path: '/audit-inference'
+      fullPath: '/audit-inference/'
+      preLoaderRoute: typeof AuditInferenceIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/audit/': {
+      id: '/audit/'
+      path: '/audit'
+      fullPath: '/audit/'
+      preLoaderRoute: typeof AuditIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health-alert-rules/': {
+      id: '/health-alert-rules/'
+      path: '/health-alert-rules'
+      fullPath: '/health-alert-rules/'
+      preLoaderRoute: typeof HealthAlertRulesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health-gpu/': {
+      id: '/health-gpu/'
+      path: '/health-gpu'
+      fullPath: '/health-gpu/'
+      preLoaderRoute: typeof HealthGpuIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health-inference/': {
+      id: '/health-inference/'
+      path: '/health-inference'
+      fullPath: '/health-inference/'
+      preLoaderRoute: typeof HealthInferenceIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health-kb/': {
+      id: '/health-kb/'
+      path: '/health-kb'
+      fullPath: '/health-kb/'
+      preLoaderRoute: typeof HealthKbIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health-logs/': {
+      id: '/health-logs/'
+      path: '/health-logs'
+      fullPath: '/health-logs/'
+      preLoaderRoute: typeof HealthLogsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health-metrics/': {
+      id: '/health-metrics/'
+      path: '/health-metrics'
+      fullPath: '/health-metrics/'
+      preLoaderRoute: typeof HealthMetricsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health-traces/': {
+      id: '/health-traces/'
+      path: '/health-traces'
+      fullPath: '/health-traces/'
+      preLoaderRoute: typeof HealthTracesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health/': {
+      id: '/health/'
+      path: '/health'
+      fullPath: '/health/'
+      preLoaderRoute: typeof HealthIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integration-notify/': {
+      id: '/integration-notify/'
+      path: '/integration-notify'
+      fullPath: '/integration-notify/'
+      preLoaderRoute: typeof IntegrationNotifyIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integration-ops-system/': {
+      id: '/integration-ops-system/'
+      path: '/integration-ops-system'
+      fullPath: '/integration-ops-system/'
+      preLoaderRoute: typeof IntegrationOpsSystemIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integration-webhook/': {
+      id: '/integration-webhook/'
+      path: '/integration-webhook'
+      fullPath: '/integration-webhook/'
+      preLoaderRoute: typeof IntegrationWebhookIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login/': {
+      id: '/login/'
+      path: '/login'
+      fullPath: '/login/'
+      preLoaderRoute: typeof LoginIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/maint-incidents/': {
+      id: '/maint-incidents/'
+      path: '/maint-incidents'
+      fullPath: '/maint-incidents/'
+      preLoaderRoute: typeof MaintIncidentsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/maint-jobs/': {
+      id: '/maint-jobs/'
+      path: '/maint-jobs'
+      fullPath: '/maint-jobs/'
+      preLoaderRoute: typeof MaintJobsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/maint-skills/': {
+      id: '/maint-skills/'
+      path: '/maint-skills'
+      fullPath: '/maint-skills/'
+      preLoaderRoute: typeof MaintSkillsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/metering/': {
+      id: '/metering/'
+      path: '/metering'
+      fullPath: '/metering/'
+      preLoaderRoute: typeof MeteringIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ops-gpu/': {
+      id: '/ops-gpu/'
+      path: '/ops-gpu'
+      fullPath: '/ops-gpu/'
+      preLoaderRoute: typeof OpsGpuIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ops-network/': {
+      id: '/ops-network/'
+      path: '/ops-network'
+      fullPath: '/ops-network/'
+      preLoaderRoute: typeof OpsNetworkIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ops-nodes/': {
+      id: '/ops-nodes/'
+      path: '/ops-nodes'
+      fullPath: '/ops-nodes/'
+      preLoaderRoute: typeof OpsNodesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ops-pool/': {
+      id: '/ops-pool/'
+      path: '/ops-pool'
+      fullPath: '/ops-pool/'
+      preLoaderRoute: typeof OpsPoolIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ops-registry-gc/': {
+      id: '/ops-registry-gc/'
+      path: '/ops-registry-gc'
+      fullPath: '/ops-registry-gc/'
+      preLoaderRoute: typeof OpsRegistryGcIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ops-registry-quota/': {
+      id: '/ops-registry-quota/'
+      path: '/ops-registry-quota'
+      fullPath: '/ops-registry-quota/'
+      preLoaderRoute: typeof OpsRegistryQuotaIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ops-registry-vulnerabilities/': {
+      id: '/ops-registry-vulnerabilities/'
+      path: '/ops-registry-vulnerabilities'
+      fullPath: '/ops-registry-vulnerabilities/'
+      preLoaderRoute: typeof OpsRegistryVulnerabilitiesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ops-storage-quotas/': {
+      id: '/ops-storage-quotas/'
+      path: '/ops-storage-quotas'
+      fullPath: '/ops-storage-quotas/'
+      preLoaderRoute: typeof OpsStorageQuotasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ops-storage/': {
+      id: '/ops-storage/'
+      path: '/ops-storage'
+      fullPath: '/ops-storage/'
+      preLoaderRoute: typeof OpsStorageIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/overview-alerts/': {
+      id: '/overview-alerts/'
+      path: '/overview-alerts'
+      fullPath: '/overview-alerts/'
+      preLoaderRoute: typeof OverviewAlertsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/overview-capacity/': {
+      id: '/overview-capacity/'
+      path: '/overview-capacity'
+      fullPath: '/overview-capacity/'
+      preLoaderRoute: typeof OverviewCapacityIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/overview-gpu/': {
+      id: '/overview-gpu/'
+      path: '/overview-gpu'
+      fullPath: '/overview-gpu/'
+      preLoaderRoute: typeof OverviewGpuIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/overview-inference/': {
+      id: '/overview-inference/'
+      path: '/overview-inference'
+      fullPath: '/overview-inference/'
+      preLoaderRoute: typeof OverviewInferenceIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/overview-kb/': {
+      id: '/overview-kb/'
+      path: '/overview-kb'
+      fullPath: '/overview-kb/'
+      preLoaderRoute: typeof OverviewKbIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings-idp/': {
+      id: '/settings-idp/'
+      path: '/settings-idp'
+      fullPath: '/settings-idp/'
+      preLoaderRoute: typeof SettingsIdpIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings-platform-admins/': {
+      id: '/settings-platform-admins/'
+      path: '/settings-platform-admins'
+      fullPath: '/settings-platform-admins/'
+      preLoaderRoute: typeof SettingsPlatformAdminsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings-platform-admins/$userId': {
+      id: '/settings-platform-admins/$userId'
+      path: '/settings-platform-admins/$userId'
+      fullPath: '/settings-platform-admins/$userId'
+      preLoaderRoute: typeof SettingsPlatformAdminsUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings-session/': {
+      id: '/settings-session/'
+      path: '/settings-session'
+      fullPath: '/settings-session/'
+      preLoaderRoute: typeof SettingsSessionIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tenants-admins/': {
+      id: '/tenants-admins/'
+      path: '/tenants-admins'
+      fullPath: '/tenants-admins/'
+      preLoaderRoute: typeof TenantsAdminsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tenants-admins/$adminId': {
@@ -985,12 +950,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TenantsAdminsAdminIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/settings-platform-admins/$userId': {
-      id: '/settings-platform-admins/$userId'
-      path: '/settings-platform-admins/$userId'
-      fullPath: '/settings-platform-admins/$userId'
-      preLoaderRoute: typeof SettingsPlatformAdminsUserIdRouteImport
+    '/tenants-billing/': {
+      id: '/tenants-billing/'
+      path: '/tenants-billing'
+      fullPath: '/tenants-billing/'
+      preLoaderRoute: typeof TenantsBillingIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/tenants-billing/$tenantId': {
+      id: '/tenants-billing/$tenantId'
+      path: '/tenants-billing/$tenantId'
+      fullPath: '/tenants-billing/$tenantId'
+      preLoaderRoute: typeof TenantsBillingTenantIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tenants-quotas/': {
+      id: '/tenants-quotas/'
+      path: '/tenants-quotas'
+      fullPath: '/tenants-quotas/'
+      preLoaderRoute: typeof TenantsQuotasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tenants-quotas/$planCode': {
+      id: '/tenants-quotas/$planCode'
+      path: '/tenants-quotas/$planCode'
+      fullPath: '/tenants-quotas/$planCode'
+      preLoaderRoute: typeof TenantsQuotasPlanCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tenants/': {
+      id: '/tenants/'
+      path: '/'
+      fullPath: '/tenants/'
+      preLoaderRoute: typeof TenantsIndexRouteImport
+      parentRoute: typeof TenantsRoute
+    }
+    '/tenants/$tenantId': {
+      id: '/tenants/$tenantId'
+      path: '/$tenantId'
+      fullPath: '/tenants/$tenantId'
+      preLoaderRoute: typeof TenantsTenantIdRouteImport
+      parentRoute: typeof TenantsRoute
     }
   }
 }
