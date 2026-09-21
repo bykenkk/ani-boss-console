@@ -50,7 +50,7 @@ type SidebarRowStyle = CSSProperties & { "--sidebar-row-padding-left": string };
 
 function rowStyle(depth: number): SidebarRowStyle {
   return {
-    "--sidebar-row-padding-left": `${12 + depth * 16}px`,
+    "--sidebar-row-padding-left": `${depth <= 1 ? 12 : 28 + (depth - 2) * 20}px`,
   };
 }
 

@@ -1,24 +1,16 @@
-import { Dropdown, Modal } from "@arco-design/web-react";
-import {
-  IconCalendar,
-  IconExport,
-  IconInfoCircle,
-  IconRight,
-  IconTag,
-  IconUser,
-} from "@arco-design/web-react/icon";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
-import { useState } from "react";
 import { logoutPlatform } from "@/api/auth";
 import { clearAuthSession, useAuthState } from "@/components/auth/store";
 import { formatDateTime } from "@/lib/date";
+import { Dropdown, Modal } from "@arco-design/web-react";
+import { IconCalendar, IconExport, IconTag, IconUser } from "@arco-design/web-react/icon";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 
 export function TopNav() {
   const queryClient = useQueryClient();
   const authState = useAuthState();
   const [userMenuVisible, setUserMenuVisible] = useState(false);
-  const [aboutVisible, setAboutVisible] = useState(false);
   const username = authState.username || (authState.developmentBypass ? "admin" : "平台管理员");
   const sessionIssuedAt = authState.tokens?.issued_at;
 
@@ -70,19 +62,6 @@ export function TopNav() {
       </div>
       <div className="topnav-user-card-menu">
         <span className="topnav-user-card-divider" aria-hidden="true" />
-        <button
-          type="button"
-          role="menuitem"
-          className="topnav-user-card-action"
-          onClick={() => {
-            setUserMenuVisible(false);
-            setAboutVisible(true);
-          }}
-        >
-          <IconInfoCircle />
-          <span className="topnav-user-card-action-label">关于我们</span>
-          <IconRight className="topnav-user-card-action-arrow" />
-        </button>
       </div>
       <div className="topnav-user-card-footer">
         <button
@@ -131,26 +110,6 @@ export function TopNav() {
           </Dropdown>
         </div>
       </header>
-      <Modal
-        className="topnav-about-modal"
-        title="关于我们"
-        visible={aboutVisible}
-        footer={null}
-        onCancel={() => setAboutVisible(false)}
-      >
-        <div className="topnav-about-overview">
-          <span className="topnav-about-mark" aria-hidden="true">
-            A
-          </span>
-          <div>
-            <h3>ANI BOSS</h3>
-            <p>系统介绍</p>
-          </div>
-        </div>
-        <div className="topnav-about-placeholder">
-          系统定位、核心能力与相关说明将在文案确认后补充。
-        </div>
-      </Modal>
     </>
   );
 }
