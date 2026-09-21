@@ -90,25 +90,25 @@ export function isNavigationGroup(item: NavigationItem): item is NavigationGroup
 }
 
 export const topNavigation: readonly TopNavigationItem[] = [
-  { label: "平台运营总览", to: "/overview-capacity", icon: <IconDashboard /> },
+  { label: "运营概览", to: "/overview-capacity", icon: <IconDashboard /> },
   { label: "租户管理", to: "/tenants", icon: <IconUserGroup /> },
-  { label: "资源池与基础设施", to: "/ops-pool", icon: <IconCloud /> },
-  { label: "运维与可观测", to: "/health", icon: <IconTool /> },
-  { label: "平台计量与结算", to: "/metering", icon: <IconCalendarClock /> },
-  { label: "安全审计与合规", to: "/audit", icon: <IconSafe /> },
-  { label: "平台设置", to: "/settings-platform-admins", icon: <IconSettings /> },
+  { label: "资源池管理", to: "/ops-pool", icon: <IconCloud /> },
+  { label: "监控告警", to: "/health", icon: <IconTool /> },
+  { label: "用量计量", to: "/metering", icon: <IconCalendarClock /> },
+  { label: "审计合规", to: "/audit", icon: <IconSafe /> },
+  { label: "系统设置", to: "/settings-platform-admins", icon: <IconSettings /> },
   { label: "平台集成与通知", to: "/integration-webhook", icon: <IconApps /> },
 ];
 
 export const overviewNavigation: readonly NavigationLeaf[] = [
   { label: "运营总览", to: "/", icon: <IconDashboard /> },
   {
-    label: "资源池与容量态势",
+    label: "容量概览",
     to: "/overview-capacity",
     icon: <IconCloud />,
   },
   {
-    label: "GPU 资源池态势",
+    label: "GPU总览",
     to: "/overview-gpu",
     icon: <IconThunderbolt />,
   },
@@ -147,7 +147,7 @@ export const infrastructureNavigation: readonly NavigationItem[] = [
     icon: <IconCloud />,
     children: [
       { label: "平台资源池总览", to: "/ops-pool" },
-      { label: "GPU 资源池管理", to: "/ops-gpu" },
+      { label: "GPU资源池", to: "/ops-gpu", icon: <IconThunderbolt /> },
       { label: "节点状态", to: "/ops-nodes" },
     ],
   },
@@ -179,12 +179,12 @@ export const observabilityNavigation: readonly NavigationItem[] = [
     label: "监控",
     icon: <IconDashboard />,
     children: [
-      { label: "平台健康", to: "/health" },
+      { label: "平台健康", to: "/health", icon: <IconDashboard /> },
       { label: "GPU 监控", to: "/health-gpu" },
       { label: "推理监控", to: "/health-inference" },
       { label: "知识库监控", to: "/health-kb" },
       { label: "组件指标", to: "/health-metrics" },
-      { label: "日志", to: "/health-logs" },
+      { label: "运行日志", to: "/health-logs", icon: <IconBook /> },
       { label: "Trace", to: "/health-traces" },
     ],
   },
@@ -206,7 +206,7 @@ export const meteringNavigation: readonly NavigationLeaf[] = [
 ];
 
 export const auditNavigation: readonly NavigationLeaf[] = [
-  { label: "平台审计日志", to: "/audit", icon: <IconSafe /> },
+  { label: "集群审计", to: "/audit", icon: <IconSafe /> },
   { label: "API Key 审计", to: "/audit-api-keys", icon: <IconLock /> },
   { label: "推理调用审计", to: "/audit-inference", icon: <IconRobot /> },
   { label: "合规导出与取证", to: "/audit-export", icon: <IconExport /> },
@@ -214,7 +214,7 @@ export const auditNavigation: readonly NavigationLeaf[] = [
 
 export const settingsNavigation: readonly NavigationLeaf[] = [
   {
-    label: "平台运营账号",
+    label: "平台管理员",
     to: "/settings-platform-admins",
     icon: <IconUserGroup />,
   },
@@ -235,6 +235,9 @@ export const integrationNavigation: readonly NavigationLeaf[] = [
 const visibleAppRoutes = new Set<AppRoute>([
   "/overview-capacity",
   "/overview-gpu",
+  "/tenants",
+  "/tenants-quotas",
+  "/tenants-admins",
   "/ops-gpu",
   "/health",
   "/health-logs",
@@ -276,13 +279,17 @@ const completeAppNavigation: readonly NavigationGroup[] = [
     key: "infrastructure-operations",
     label: topNavigation[2].label,
     icon: topNavigation[2].icon,
-    children: infrastructureNavigation,
+    children: infrastructureNavigation.flatMap((item) =>
+      isNavigationGroup(item) ? item.children : [item],
+    ),
   },
   {
     key: "operations-observability",
     label: topNavigation[3].label,
     icon: topNavigation[3].icon,
-    children: observabilityNavigation,
+    children: observabilityNavigation.flatMap((item) =>
+      isNavigationGroup(item) ? item.children : [item],
+    ),
   },
   {
     key: "platform-metering",

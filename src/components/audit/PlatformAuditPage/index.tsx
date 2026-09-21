@@ -100,7 +100,7 @@ export function PlatformAuditPage() {
     <ListPageFrame
       header={
         <ListPageHeader
-          title="平台审计日志"
+          title="集群审计"
           subtitle="查询 Kubernetes 控制面写操作；数据按时间倒序展示。"
           extra={
             <Space>

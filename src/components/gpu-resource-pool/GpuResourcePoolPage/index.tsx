@@ -155,7 +155,7 @@ export function GpuResourcePoolPage() {
   return (
     <div className={styles.page}>
       <ListPageHeader
-        title="GPU 资源池管理"
+        title="GPU资源池"
         subtitle="查看 GPU 库存与租户配额，并在集群上统一配置空闲整卡的切分规则。"
         extra={
           <Button loading={refreshing} onClick={() => void refreshAll()}>

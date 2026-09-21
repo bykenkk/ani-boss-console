@@ -330,7 +330,7 @@ export async function fetchTenantGpuAllocations(): Promise<TenantGpuAllocation[]
     allocatedGpuCount: quota.gpu_reservation?.allocated_gpu_count ?? 0,
     used: quota.gpu_reservation?.used ?? gpu.used,
     reserved: quota.gpu_reservation?.reserved ?? gpu.reserved,
-    available: quota.gpu_reservation?.available ?? gpu.available,
+    available: quota.gpu_reservation?.available ?? gpu.total - gpu.used - gpu.reserved,
   }));
 }
 

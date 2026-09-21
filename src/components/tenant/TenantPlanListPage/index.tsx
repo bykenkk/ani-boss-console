@@ -1,0 +1,295 @@
+import { Button, Input, Modal, Select, Tag } from "@arco-design/web-react";
+import { IconPlus, IconRefresh } from "@arco-design/web-react/icon";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import { useDeferredValue, useMemo, useState } from "react";
+import {
+  createTenantPlan,
+  deleteTenantPlan,
+  fetchTenantPlans,
+  fetchTenantQuotaMeta,
+  getTenantManagementErrorMessage,
+  tenantManagementQueryKeys,
+  updateTenantPlanStatus,
+  type CreateTenantPlanInput,
+  type TenantPlanListFilters,
+  type TenantPlanListItem,
+  type TenantPlanStatus,
+} from "@/api/tenant";
+import {
+  DataTableNameCell,
+  ListDataTable,
+  ListPageFrame,
+  ListPageHeader,
+  ListToolbar,
+  type ListColumn,
+} from "@/components/common";
+import { formatDateTime } from "@/lib/date";
+import { tenantPlanStatusMeta } from "../apiModel";
+import { TenantPlanModal } from "../TenantManagementModals";
+import { useTenantManagementAccess } from "../useTenantManagementAccess";
+
+async function runTenantPlanOperation<T>(operation: () => Promise<T>): Promise<T> {
+  try {
+    return await operation();
+  } catch (error) {
+    throw new Error(getTenantManagementErrorMessage(error));
+  }
+}
+
+export function TenantPlanListPage() {
+  const queryClient = useQueryClient();
+  const { canManage } = useTenantManagementAccess();
+  const [keyword, setKeyword] = useState("");
+  const [status, setStatus] = useState<"all" | TenantPlanStatus>("all");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [createVisible, setCreateVisible] = useState(false);
+  const deferredKeyword = useDeferredValue(keyword.trim());
+  const filters = useMemo<TenantPlanListFilters>(() => {
+    const next: TenantPlanListFilters = {};
+    if (status !== "all") next.status = status;
+    if (deferredKeyword) next.search = deferredKeyword;
+    return next;
+  }, [deferredKeyword, status]);
+
+  const listQuery = useQuery({
+    meta: {
+      errorNotification: {
+        id: "tenant-plans",
+        action: "配额套餐加载",
+        fallback: "请求失败，请稍后重试",
+      },
+    },
+    queryKey: tenantManagementQueryKeys.planList(filters),
+    queryFn: () => fetchTenantPlans(filters),
+  });
+  const quotaMetaQuery = useQuery({
+    meta: {
+      errorNotification: {
+        id: "tenant-quota-meta",
+        action: "配额维度加载",
+        fallback: "请求失败，请稍后重试",
+      },
+    },
+    queryKey: tenantManagementQueryKeys.quotaMeta,
+    queryFn: fetchTenantQuotaMeta,
+  });
+
+  const invalidateAll = () =>
+    queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
+  const createMutation = useMutation({
+    meta: {
+      feedback: {
+        channel: "message",
+        action: "配额套餐创建",
+        successText: "配额套餐草稿已创建",
+        errorFallback: "配额套餐创建失败，请稍后重试",
+      },
+    },
+    mutationFn: (input: CreateTenantPlanInput) =>
+      runTenantPlanOperation(() => createTenantPlan(input)),
+    onSuccess: async () => {
+      await invalidateAll();
+      setCreateVisible(false);
+    },
+  });
+  const statusMutation = useMutation({
+    meta: {
+      feedback: {
+        channel: "notification",
+        id: "tenant-plan-status",
+        action: "配额套餐状态更新",
+        successText: "配额套餐状态已更新",
+        errorFallback: "配额套餐状态更新失败，请稍后重试",
+      },
+    },
+    mutationFn: ({ planId, action }: { planId: string; action: "activate" | "disable" }) =>
+      runTenantPlanOperation(() => updateTenantPlanStatus(planId, action)),
+    onSuccess: async () => {
+      await invalidateAll();
+    },
+  });
+  const deleteMutation = useMutation({
+    meta: {
+      feedback: {
+        channel: "notification",
+        id: "tenant-plan-delete",
+        action: "配额套餐删除",
+        successText: "配额套餐已删除",
+        errorFallback: "配额套餐删除失败，请稍后重试",
+      },
+    },
+    mutationFn: (planId: string) => runTenantPlanOperation(() => deleteTenantPlan(planId)),
+    onSuccess: async () => {
+      await invalidateAll();
+    },
+  });
+
+  const confirmStatus = (plan: TenantPlanListItem) => {
+    const action = plan.status === "active" ? "disable" : "activate";
+    const label = action === "activate" ? "发布" : "停用";
+    Modal.confirm({
+      title: `${label}套餐 ${plan.name}？`,
+      content: action === "disable" ? "停用后不能再用于新租户开通或套餐绑定。" : undefined,
+      onOk: () => statusMutation.mutateAsync({ planId: plan.id, action }),
+    });
+  };
+  const confirmDelete = (plan: TenantPlanListItem) => {
+    Modal.confirm({
+      title: `删除套餐 ${plan.name}？`,
+      content: "仍有关联租户时后端会拒绝删除。",
+      okButtonProps: { status: "danger" },
+      onOk: () => deleteMutation.mutateAsync(plan.id),
+    });
+  };
+
+  const columns: ListColumn<TenantPlanListItem>[] = [
+    {
+      key: "name",
+      title: "套餐",
+      width: 260,
+      render: (_, plan) => (
+        <DataTableNameCell
+          name={
+            <Link to="/tenants-quotas/$planCode" params={{ planCode: plan.id }}>
+              {plan.name}
+            </Link>
+          }
+          id={plan.code}
+        />
+      ),
+    },
+    {
+      title: "状态",
+      width: 100,
+      render: (_, plan) => {
+        const meta = tenantPlanStatusMeta[plan.status];
+        return <Tag color={meta.color}>{meta.label}</Tag>;
+      },
+    },
+    { title: "关联租户", dataIndex: "tenantCount", width: 110, align: "right" },
+    { title: "说明", dataIndex: "description", width: 260 },
+    {
+      title: "更新时间",
+      dataIndex: "updatedAt",
+      width: 190,
+      render: (value: string) => formatDateTime(value),
+    },
+  ];
+  const data = listQuery.data || [];
+  const operationPending =
+    createMutation.isPending || statusMutation.isPending || deleteMutation.isPending;
+
+  return (
+    <>
+      <ListPageFrame
+        header={
+          <ListPageHeader
+            title="配额策略"
+            subtitle="维护租户配额套餐、资源限额与套餐绑定关系。"
+            extra={
+              <div className="flex gap-2">
+                <Button
+                  icon={<IconRefresh />}
+                  loading={listQuery.isFetching || quotaMetaQuery.isFetching}
+                  onClick={() => void Promise.all([listQuery.refetch(), quotaMetaQuery.refetch()])}
+                >
+                  刷新
+                </Button>
+                <Button
+                  type="primary"
+                  icon={<IconPlus />}
+                  disabled={!canManage || !quotaMetaQuery.data?.length}
+                  onClick={() => setCreateVisible(true)}
+                >
+                  新建套餐
+                </Button>
+              </div>
+            }
+          />
+        }
+        toolbar={
+          <ListToolbar
+            filters={
+              <div className="flex flex-wrap items-center gap-3">
+                <Input.Search
+                  value={keyword}
+                  allowClear
+                  placeholder="搜索套餐编码或名称"
+                  style={{ width: 320 }}
+                  onChange={(value) => {
+                    setKeyword(value);
+                    setPage(1);
+                  }}
+                />
+                <Select
+                  value={status}
+                  style={{ width: 150 }}
+                  onChange={(value) => {
+                    setStatus(value as "all" | TenantPlanStatus);
+                    setPage(1);
+                  }}
+                >
+                  <Select.Option value="all">全部状态</Select.Option>
+                  <Select.Option value="draft">草稿</Select.Option>
+                  <Select.Option value="active">已发布</Select.Option>
+                  <Select.Option value="disabled">已停用</Select.Option>
+                </Select>
+              </div>
+            }
+            tools={<span className="text-xs text-gray-500">共 {data.length} 个套餐</span>}
+          />
+        }
+      >
+        <ListDataTable
+          rowKey="id"
+          columns={columns}
+          data={data}
+          loading={listQuery.isPending}
+          pagination={{
+            page,
+            pageSize,
+            total: data.length,
+            onPageChange: setPage,
+            onPageSizeChange: (nextPageSize) => {
+              setPage(1);
+              setPageSize(nextPageSize);
+            },
+          }}
+          rowActions={[
+            {
+              key: "status",
+              label: (plan) => (plan.status === "active" ? "停用" : "发布"),
+              widthLabel: "发布",
+              visible: (plan) => plan.status !== "disabled",
+              disabled: () => !canManage || operationPending,
+              onClick: confirmStatus,
+            },
+            {
+              key: "delete",
+              label: "删除",
+              intent: "danger",
+              visible: (plan) => plan.status !== "active",
+              disabled: () => !canManage || operationPending,
+              onClick: confirmDelete,
+            },
+          ]}
+          scroll={{ x: 1100, y: true }}
+          emptyText="暂无符合条件的配额套餐"
+        />
+      </ListPageFrame>
+
+      {createVisible ? (
+        <TenantPlanModal
+          quotaMeta={quotaMetaQuery.data || []}
+          loading={createMutation.isPending}
+          onCancel={() => setCreateVisible(false)}
+          onSubmit={(input) => {
+            if ("code" in input) createMutation.mutate(input);
+          }}
+        />
+      ) : null}
+    </>
+  );
+}

@@ -165,7 +165,7 @@ export function GpuResourcePoolStatusPage() {
       header={
         <>
           <ListPageHeader
-            title="GPU 资源池态势"
+            title="GPU总览"
             subtitle="查看物理卡、逻辑卡及设备切分、占用和异常状态。"
             extra={
               <Button loading={refreshing} onClick={() => void refreshAll()}>

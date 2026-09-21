@@ -172,7 +172,7 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
     <ListPageFrame
       header={
         <ListPageHeader
-          title="日志"
+          title="运行日志"
           subtitle="按组件查看平台工作负载实时日志；流结束后页面会自动重连。"
           extra={
             <div className="flex items-center gap-2">

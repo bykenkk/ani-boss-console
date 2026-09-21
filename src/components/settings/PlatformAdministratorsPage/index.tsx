@@ -281,7 +281,7 @@ export function PlatformAdministratorsPage() {
         header={
           <>
             <ListPageHeader
-              title="平台运营账号"
+              title="平台管理员"
               subtitle="管理平台本地登录账号；这些账号不属于租户，也不会同步为租户成员。"
               extra={
                 <div className="flex gap-2">

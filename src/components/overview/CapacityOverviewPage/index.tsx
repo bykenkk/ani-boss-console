@@ -50,7 +50,7 @@ export function CapacityOverviewPage() {
   return (
     <>
       <OverviewPageHeader
-        title="资源池与容量态势"
+        title="容量概览"
         subtitle="查看整平台 GPU、节点、CPU、内存与租户容量汇总。"
         extra={
           <Button loading={capacityQuery.isFetching} onClick={() => void capacityQuery.refetch()}>

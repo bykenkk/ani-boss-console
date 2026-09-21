@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { QuotaPolicyList } from "@/components/tenant/TenantQuotaUsage/QuotaPolicyList";
+import { TenantPlanListPage } from "@/components/tenant/TenantPlanListPage";
 
 export const Route = createFileRoute("/tenants-quotas/")({
-  component: QuotaPolicyList,
+  component: TenantPlanListPage,
 });

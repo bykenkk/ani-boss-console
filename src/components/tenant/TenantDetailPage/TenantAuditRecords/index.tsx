@@ -1,0 +1,57 @@
+import { Tag } from "@arco-design/web-react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchTenantAuditLogs, tenantManagementQueryKeys } from "@/api/tenant";
+import { DataTable } from "@/components/common";
+import { formatDateTime } from "@/lib/date";
+import { withId } from "@/lib/id";
+
+interface TenantAuditRecordsProps {
+  tenantId: string;
+}
+
+export function TenantAuditRecords({ tenantId }: TenantAuditRecordsProps) {
+  const auditQuery = useQuery({
+    meta: {
+      errorNotification: {
+        id: withId("tenant-audit", tenantId),
+        action: "租户审计记录加载",
+        fallback: "请求失败，请稍后重试",
+      },
+    },
+    queryKey: tenantManagementQueryKeys.tenantAudit(tenantId),
+    queryFn: () => fetchTenantAuditLogs(tenantId),
+  });
+
+  return (
+    <div className="py-4">
+      <DataTable
+        rowKey="id"
+        columns={[
+          { title: "动作", dataIndex: "action", width: 180 },
+          { title: "资源", dataIndex: "resource", width: 200 },
+          {
+            title: "结果",
+            width: 100,
+            render: (_, item) => (
+              <Tag color={item.result === "success" ? "green" : "red"}>
+                {item.result === "success" ? "成功" : "失败"}
+              </Tag>
+            ),
+          },
+          { title: "操作人", dataIndex: "userId", width: 180 },
+          {
+            title: "时间",
+            dataIndex: "createdAt",
+            width: 180,
+            render: (value: string) => formatDateTime(value),
+          },
+        ]}
+        data={auditQuery.data || []}
+        loading={auditQuery.isPending}
+        pagination={false}
+        scroll={{ x: 900 }}
+        noDataElement={<div className="py-8 text-center text-gray-500">暂无审计记录</div>}
+      />
+    </div>
+  );
+}
