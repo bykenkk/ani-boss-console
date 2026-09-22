@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import type { ReactNode } from "react";
 import { Table, type TableColumnProps, type TableProps } from "@arco-design/web-react";
 import {
@@ -96,7 +97,7 @@ export function DataTable<T>({
 
   return (
     <Table<T>
-      className={className}
+      className={clsx(styles.dataTable, className)}
       aria-label={tableLabel}
       rowKey={rowKey}
       columns={resolvedColumns}
