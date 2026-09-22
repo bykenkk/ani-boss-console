@@ -1,4 +1,4 @@
-import { Alert, Button, Tabs } from "@arco-design/web-react";
+import { Button, Tabs } from "@arco-design/web-react";
 import { IconRefresh } from "@arco-design/web-react/icon";
 import { useState } from "react";
 import { ListPageHeader } from "@/components/common";
@@ -47,14 +47,6 @@ export function PlatformMeteringPage() {
           <Tabs.TabPane key={item.key} title={item.label} />
         ))}
       </Tabs>
-
-      {view && !view.profile.realProvider ? (
-        <Alert
-          type="warning"
-          showIcon
-          content={`当前计量数据来自 ${view.profile.provider} 开发 Provider，不代表真实生产用量。${view.profile.reason ? ` ${view.profile.reason}` : ""}`}
-        />
-      ) : null}
 
       <section className="grid grid-cols-4 gap-3.5 max-[1100px]:grid-cols-2">
         <Metric

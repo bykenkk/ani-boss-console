@@ -1,4 +1,4 @@
-import { Alert, Button, Tooltip } from "@arco-design/web-react";
+import { Button, Tooltip } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
@@ -136,7 +136,7 @@ export function PlatformHealthPage() {
   ] as const;
 
   return (
-    <div className="space-y-4">
+    <div className="flex min-h-(--app-content-available-height) flex-col gap-4">
       <ListPageHeader
         title="平台健康"
         subtitle="查看 ANI 服务、基础依赖和平台组件的实时运行状态。"
@@ -149,18 +149,6 @@ export function PlatformHealthPage() {
           </Button>
         }
       />
-
-      {!componentsQuery.data?.profile.realProvider && componentsQuery.data ? (
-        <Alert
-          type="warning"
-          content={`组件状态数据源已降级：${componentsQuery.data.profile.reason || "当前未连接真实运行时 Provider"}`}
-        />
-      ) : null}
-      <Alert
-        type="info"
-        content="组件运行状态来自运行时副本；“观测异常”只表示可观测链路未返回有效结果，不计为组件故障。当前接口不提供 P99、错误率或依赖检查结果。"
-      />
-
       <section className="grid grid-cols-4 gap-3.5 max-[1100px]:grid-cols-2">
         <Metric label="整体状态" value={overall} hint={`${total} 个组件`} tone={overallTone} />
         <Metric
@@ -221,28 +209,23 @@ export function PlatformHealthPage() {
         </div>
       </section>
 
-      <TableSectionFrame
-        header={
-          <div className="flex items-center justify-between px-5 pt-5">
-            <div>
-              <div className="text-base font-semibold text-gray-900">组件健康明细</div>
-              <div className="mt-1 text-xs text-gray-500">
-                故障和降级组件优先展示；本页只读，不提供重启或扩缩容操作。
-              </div>
-            </div>
-            <span className="text-xs text-gray-500">共 {total} 个组件</span>
-          </div>
-        }
-      >
+      <TableSectionFrame>
         <ListDataTable
+          header={{
+            title: (
+              <span className="flex flex-col gap-1">
+                <span className="text-base font-semibold text-gray-900">组件健康明细</span>
+                <span className="text-xs font-normal text-gray-500">
+                  故障和降级组件优先展示；本页只读，不提供重启或扩缩容操作。
+                </span>
+              </span>
+            ),
+            extra: <span className="text-xs text-gray-500">共 {total} 个组件</span>,
+            className: "mb-3 pt-5",
+          }}
           rowKey={(component) => `${component.group}:${component.namespace}:${component.name}`}
           columns={columns}
           rowActions={[
-            {
-              key: "metrics",
-              label: "查看指标",
-              onClick: () => void navigate({ to: "/health-metrics" }),
-            },
             {
               key: "logs",
               label: "查看日志",
@@ -251,11 +234,6 @@ export function PlatformHealthPage() {
                   to: "/health-logs",
                   search: { component: component.name },
                 }),
-            },
-            {
-              key: "traces",
-              label: "查看链路",
-              onClick: () => void navigate({ to: "/health-traces" }),
             },
           ]}
           data={[...components].sort((left, right) => {

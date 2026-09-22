@@ -2,15 +2,17 @@ import {
   Alert,
   Button,
   Descriptions,
+  Dropdown,
   Form,
+  Menu,
   Modal,
-  Popconfirm,
   Result,
   Select,
-  Space,
   Tag,
+  Tooltip,
   Typography,
 } from "@arco-design/web-react";
+import { IconMoreVertical } from "@arco-design/web-react/icon";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { showMessage } from "@/lib/feedback";
@@ -101,6 +103,29 @@ export function QuotaPolicyDetail({ planCode }: QuotaPolicyDetailProps) {
     showMessage({ type: "success", content: `套餐 ${quotaPackage.name} 已删除` });
     returnToList();
   };
+
+  const confirmRemove = () => {
+    Modal.confirm({
+      title: `确定删除套餐“${quotaPackage.name}”吗？`,
+      content: "有关联租户时不可删除。",
+      okButtonProps: { status: "danger" },
+      onOk: remove,
+    });
+  };
+
+  const moreMenu = (
+    <Menu
+      onClickMenuItem={(key) => {
+        if (key === "publish") publish();
+        if (key === "delete") confirmRemove();
+      }}
+    >
+      {quotaPackage.status === "draft" ? <Menu.Item key="publish">发布</Menu.Item> : null}
+      <Menu.Item key="delete" disabled={boundTenants.length > 0}>
+        删除套餐
+      </Menu.Item>
+    </Menu>
+  );
 
   const assign = () => {
     if (!targetTenantId) {
@@ -286,22 +311,11 @@ export function QuotaPolicyDetail({ planCode }: QuotaPolicyDetailProps) {
           { label: "更新时间", value: formatDateTimeMinute(quotaPackage.updatedAt) },
         ]}
         actions={
-          <Space wrap>
-            {quotaPackage.status === "draft" ? (
-              <Button type="primary" onClick={publish}>
-                发布
-              </Button>
-            ) : null}
-            <Popconfirm
-              title={`确定删除套餐“${quotaPackage.name}”吗？`}
-              content="有关联租户时不可删除。"
-              onOk={remove}
-            >
-              <Button status="danger" disabled={boundTenants.length > 0}>
-                删除套餐
-              </Button>
-            </Popconfirm>
-          </Space>
+          <Tooltip content="更多操作">
+            <Dropdown trigger="click" position="br" droplist={moreMenu}>
+              <Button icon={<IconMoreVertical />} aria-label="更多操作" />
+            </Dropdown>
+          </Tooltip>
         }
         cards={infoCards}
         tabs={detailTabs}

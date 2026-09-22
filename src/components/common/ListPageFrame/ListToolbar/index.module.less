@@ -1,0 +1,148 @@
+.toolbar {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0 0;
+  flex-wrap: wrap;
+}
+
+.toolbarActions,
+.toolbarFilters,
+.toolbarTools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbarActions,
+.toolbarTools {
+  flex-shrink: 0;
+}
+
+.toolbarTools {
+  margin-left: auto;
+}
+
+.toolbarIconButton {
+  display: inline-flex;
+  flex: 0 0 32px;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--list-border);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--list-text);
+  cursor: pointer;
+}
+
+.toolbarIconButton:hover:not(:disabled) {
+  border-color: var(--list-primary);
+  color: var(--list-primary);
+}
+
+.toolbarIconButton:focus-visible {
+  outline: 2px solid rgba(0, 121, 211, 0.25);
+  outline-offset: 1px;
+}
+
+.toolbarIconButton :global(.iconfont) {
+  font-size: 16px;
+}
+
+.spinning :global(.iconfont) {
+  animation: list-spin 0.6s linear infinite;
+}
+
+@keyframes list-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.searchControl {
+  display: flex;
+  align-items: center;
+  width: 320px;
+  height: 32px;
+  overflow: hidden;
+  border: 1px solid var(--list-border);
+  border-radius: 4px;
+  background: #fff;
+}
+
+.searchControl:focus-within {
+  border-color: var(--list-primary);
+  box-shadow: 0 0 0 1px rgba(0, 121, 211, 0.08);
+}
+
+.searchField {
+  flex: 0 0 90px;
+  width: 90px;
+  height: 100%;
+  border-right: 1px solid var(--list-divider);
+}
+
+.searchField :global(.arco-select-view) {
+  height: 30px;
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 8px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--list-text);
+  font: inherit;
+}
+
+.searchInput::placeholder {
+  color: var(--list-text-tertiary);
+}
+
+.searchIcon {
+  display: flex;
+  flex: 0 0 32px;
+  align-items: center;
+  justify-content: center;
+  color: var(--list-text-secondary);
+}
+
+.searchIcon :global(.iconfont) {
+  font-size: 16px;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  overflow: hidden;
+  height: 1px;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 1366px) {
+  .toolbar {
+    gap: 8px;
+  }
+
+  .searchControl {
+    width: 280px;
+  }
+}
+
+@media (max-width: 980px) {
+  .toolbarTools {
+    margin-left: 0;
+  }
+}

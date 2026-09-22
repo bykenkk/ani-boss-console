@@ -1,5 +1,5 @@
-import { Button, Input, Modal, Select } from "@arco-design/web-react";
-import { IconPlus, IconRefresh } from "@arco-design/web-react/icon";
+import { Button, Modal, Select } from "@arco-design/web-react";
+import { IconPlus } from "@arco-design/web-react/icon";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useDeferredValue, useMemo, useState } from "react";
@@ -23,12 +23,9 @@ import {
   DataTableNameCell,
   ListDataTable,
   ListPageFrame,
-  ListPageHeader,
-  ListToolbar,
   type ListColumn,
 } from "@/components/common";
 import { getAccessTokenRoles, useAuthState } from "@/components/auth/store";
-import { Metric } from "@/components/overview/Metric";
 import { formatDateTime } from "@/lib/date";
 import { PlatformAdministratorStatusBadge } from "../PlatformAdministratorStatusBadge";
 import { platformAdministratorRoleLabels, platformAdministratorSourceLabels } from "../model";
@@ -75,17 +72,6 @@ export function PlatformAdministratorsPage() {
     return result;
   }, [deferredKeyword, roleId, status]);
 
-  const overviewQuery = useQuery({
-    meta: {
-      errorNotification: {
-        id: "platform-administrators",
-        action: "平台运营账号汇总加载",
-        fallback: "请求失败，请稍后重试",
-      },
-    },
-    queryKey: platformAdministratorQueryKeys.list(),
-    queryFn: () => fetchPlatformAdministrators(),
-  });
   const listQuery = useQuery({
     meta: {
       errorNotification: {
@@ -266,107 +252,74 @@ export function PlatformAdministratorsPage() {
     },
   ];
 
-  const overview = overviewQuery.data || [];
-  const overviewUnavailable = overviewQuery.isPending || !overviewQuery.data;
-  const activeCount = overview.filter((item) => item.status === "active").length;
-  const superCount = overview.filter(
-    (item) => item.status === "active" && item.role === "platform-admin",
-  ).length;
-  const metricValue = (value: number) => (overviewUnavailable ? "-" : String(value));
-  const refreshing = overviewQuery.isFetching || listQuery.isFetching || rolesQuery.isFetching;
+  const refreshing = listQuery.isFetching || rolesQuery.isFetching;
 
   return (
     <>
       <ListPageFrame
-        header={
-          <>
-            <ListPageHeader
-              title="平台管理员"
-              subtitle="管理平台本地登录账号；这些账号不属于租户，也不会同步为租户成员。"
-              extra={
-                <div className="flex gap-2">
-                  <Button
-                    icon={<IconRefresh />}
-                    loading={refreshing}
-                    onClick={() =>
-                      void Promise.all([
-                        overviewQuery.refetch(),
-                        listQuery.refetch(),
-                        rolesQuery.refetch(),
-                      ])
-                    }
-                  >
-                    刷新
-                  </Button>
-                  <Button
-                    type="primary"
-                    icon={<IconPlus />}
-                    disabled={!canManage}
-                    title={canManage ? undefined : "仅平台超级管理员可创建账号"}
-                    onClick={() => setCreateVisible(true)}
-                  >
-                    新建账号
-                  </Button>
-                </div>
-              }
-            />
-
-            <section className="grid flex-none grid-cols-4 gap-3.5 max-[1100px]:grid-cols-2">
-              <Metric label="全部账号" value={metricValue(overview.length)} hint="平台登录身份" />
-              <Metric label="活跃" value={metricValue(activeCount)} hint="可登录管理端" />
-              <Metric label="活跃超级管理员" value={metricValue(superCount)} hint="至少保留 1 名" />
-              <Metric label="已启用 MFA" value="-" hint="接口未返回 MFA 状态" />
-            </section>
-          </>
-        }
-        toolbar={
-          <ListToolbar
-            filters={
-              <div className="flex flex-wrap items-center gap-3">
-                <Input.Search
-                  value={keyword}
-                  onChange={(value) => {
-                    setKeyword(value);
-                    setPage(1);
-                  }}
-                  allowClear
-                  placeholder="搜索用户名或邮箱"
-                  style={{ width: 320 }}
-                />
-                <Select
-                  value={roleId}
-                  onChange={(value) => {
-                    setRoleId(value);
-                    setPage(1);
-                  }}
-                  style={{ width: 180 }}
-                >
-                  <Select.Option value="all">全部角色</Select.Option>
-                  {(rolesQuery.data || []).map((roleOption) => (
-                    <Select.Option key={roleOption.id} value={roleOption.id}>
-                      {platformAdministratorRoleLabels[roleOption.name]}
-                    </Select.Option>
-                  ))}
-                </Select>
-                <Select
-                  value={status}
-                  onChange={(value) => {
-                    setStatus(value as "all" | PlatformAdministratorStatus);
-                    setPage(1);
-                  }}
-                  style={{ width: 140 }}
-                >
-                  <Select.Option value="all">全部状态</Select.Option>
-                  <Select.Option value="active">活跃</Select.Option>
-                  <Select.Option value="disabled">已禁用</Select.Option>
-                </Select>
-              </div>
-            }
-            tools={
-              <span className="text-xs text-gray-500">共 {listQuery.data?.length ?? 0} 个账号</span>
-            }
-          />
-        }
+        header={{
+          title: "平台管理员",
+          subtitle: "管理平台本地登录账号；这些账号不属于租户，也不会同步为租户成员。",
+          extra: (
+            <Button
+              type="primary"
+              icon={<IconPlus />}
+              disabled={!canManage}
+              title={canManage ? undefined : "仅平台超级管理员可创建账号"}
+              onClick={() => setCreateVisible(true)}
+            >
+              新建账号
+            </Button>
+          ),
+        }}
+        tabs={{
+          value: status,
+          onChange: (value) => {
+            setStatus(value);
+            setPage(1);
+          },
+          items: [
+            { value: "all", label: "全部" },
+            { value: "active", label: "活跃" },
+            { value: "disabled", label: "已禁用" },
+          ],
+        }}
+        toolbar={{
+          search: {
+            fields: [{ value: "keyword", label: "关键词" }],
+            field: "keyword",
+            value: keyword,
+            placeholder: "搜索用户名或邮箱",
+            onFieldChange: () => undefined,
+            onChange: (value) => {
+              setKeyword(value);
+              setPage(1);
+            },
+          },
+          filters: (
+            <Select
+              value={roleId}
+              onChange={(value) => {
+                setRoleId(value);
+                setPage(1);
+              }}
+            >
+              <Select.Option value="all">全部角色</Select.Option>
+              {(rolesQuery.data || []).map((roleOption) => (
+                <Select.Option key={roleOption.id} value={roleOption.id}>
+                  {platformAdministratorRoleLabels[roleOption.name]}
+                </Select.Option>
+              ))}
+            </Select>
+          ),
+          refresh: {
+            spinning: refreshing,
+            onClick: () => void Promise.all([listQuery.refetch(), rolesQuery.refetch()]),
+          },
+          tools: (
+            <span className="text-xs text-gray-500">共 {listQuery.data?.length ?? 0} 个账号</span>
+          ),
+        }}
       >
         <ListDataTable
           rowKey="id"

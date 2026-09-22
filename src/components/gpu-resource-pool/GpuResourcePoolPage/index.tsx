@@ -150,7 +150,6 @@ export function GpuResourcePoolPage() {
   const refreshing =
     inventoryQuery.isFetching || occupancyQuery.isFetching || tenantsQuery.isFetching;
   const inventory = inventoryQuery.data?.items || [];
-  const inventoryProfile = inventoryQuery.data?.profile;
 
   return (
     <div className={styles.page}>
@@ -163,18 +162,6 @@ export function GpuResourcePoolPage() {
           </Button>
         }
       />
-
-      <Alert
-        type="info"
-        content="集群切分会应用到所有空闲整卡，忙碌、离线或已切分节点会自动跳过。当前仍未提供指定物理卡分配、维护/恢复、平台级调度队列与资源池事件接口；库存中的租户/实例关系来自节点级占用推算，不能视为精确物理卡绑定。"
-      />
-
-      {inventoryProfile && !inventoryProfile.realProvider ? (
-        <Alert
-          type="warning"
-          content={`当前库存来自开发 Provider“${inventoryProfile.provider || "-"}”，不是实际 Kubernetes 集群数据。${inventoryProfile.reason ? ` ${inventoryProfile.reason}` : ""}`}
-        />
-      ) : null}
 
       <GpuSummary
         occupancy={occupancyQuery.data}

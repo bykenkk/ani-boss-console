@@ -81,7 +81,7 @@ export function TopNav() {
     <>
       <header className="top-nav">
         <div className="topnav-left">
-          <Link to="/overview-capacity" className="topnav-brand" aria-label="ANI BOSS">
+          <Link to="/" className="topnav-brand" aria-label="ANI BOSS">
             <span className="topnav-brand-mark">A</span>
             <span className="topnav-brand-name">ANI BOSS</span>
           </Link>

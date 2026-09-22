@@ -1,4 +1,5 @@
 import "@arco-design/web-react/dist/css/arco.css";
+import "@/assets/iconfont/iconfont.css";
 import "@/styles/tailwind.css";
 import "@/styles/global.less";
 import { ConfigProvider } from "@arco-design/web-react";

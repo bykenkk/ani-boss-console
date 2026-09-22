@@ -3,6 +3,7 @@ import type { GpuInventoryDevice, GpuInventoryStatus } from "@/api/gpu-inventory
 import { ListDataTable, type ListColumn } from "@/components/common";
 
 const TABLE_SCROLL_X = 1780;
+const TABLE_SCROLL_Y = 300;
 
 const statusMeta: Record<GpuInventoryStatus, { label: string; color: string }> = {
   available: { label: "空闲未分配", color: "green" },
@@ -80,7 +81,7 @@ export function GpuDeviceTable({ data, loading }: GpuDeviceTableProps) {
       loading={loading}
       pagination={false}
       columns={columns}
-      scroll={{ x: TABLE_SCROLL_X }}
+      scroll={{ x: TABLE_SCROLL_X, y: TABLE_SCROLL_Y }}
       emptyText="暂无 GPU 设备"
     />
   );

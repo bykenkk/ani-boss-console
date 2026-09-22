@@ -7,7 +7,6 @@ import {
   ListDataTable,
   DataTableNameCell,
   ListPageFrame,
-  ListPageHeader,
   type ListColumn,
 } from "@/components/common";
 import { AdministratorPasswordModal } from "@/components/tenant/TenantAdministrators/AdministratorPasswordModal";
@@ -153,35 +152,33 @@ export function TenantAdministratorList() {
   return (
     <>
       <ListPageFrame
-        header={
-          <ListPageHeader
-            title="租户管理员"
-            subtitle="管理租户管理员邀请、角色、状态与运维模拟登录。"
-            extra={
-              <Space>
-                <Button
-                  icon={<IconDownload />}
-                  onClick={() => showMessage({ type: "success", content: "租户管理员数据已导出" })}
-                >
-                  导出
-                </Button>
-                <Button
-                  type="primary"
-                  icon={<IconPlus />}
-                  onClick={() => {
-                    setInviteTenantId(
-                      tenants.find((tenant) => tenant.status !== "disabled")?.id ?? "",
-                    );
-                    setInviteDraft(initialInviteDraft);
-                    setInviteVisible(true);
-                  }}
-                >
-                  邀请管理员
-                </Button>
-              </Space>
-            }
-          />
-        }
+        header={{
+          title: "租户管理员",
+          subtitle: "管理租户管理员邀请、角色、状态与运维模拟登录。",
+          extra: (
+            <Space>
+              <Button
+                icon={<IconDownload />}
+                onClick={() => showMessage({ type: "success", content: "租户管理员数据已导出" })}
+              >
+                导出
+              </Button>
+              <Button
+                type="primary"
+                icon={<IconPlus />}
+                onClick={() => {
+                  setInviteTenantId(
+                    tenants.find((tenant) => tenant.status !== "disabled")?.id ?? "",
+                  );
+                  setInviteDraft(initialInviteDraft);
+                  setInviteVisible(true);
+                }}
+              >
+                邀请管理员
+              </Button>
+            </Space>
+          ),
+        }}
       >
         <ListDataTable
           rowKey="id"

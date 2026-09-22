@@ -1,4 +1,4 @@
-import { Button, Input, Select } from "@arco-design/web-react";
+import { Button, Input, Select, Space } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import {
@@ -10,8 +10,6 @@ import {
   DataTableNameCell,
   ListDataTable,
   ListPageFrame,
-  ListPageHeader,
-  ListToolbar,
   type ListColumn,
 } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
@@ -170,63 +168,56 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
 
   return (
     <ListPageFrame
-      header={
-        <ListPageHeader
-          title="运行日志"
-          subtitle="按组件查看平台工作负载实时日志；流结束后页面会自动重连。"
-          extra={
-            <div className="flex items-center gap-2">
-              <span className={`rounded px-2 py-1 text-xs ${connection.className}`}>
-                {connection.label}
-              </span>
-              <Button disabled={!component} onClick={stream.restart}>
-                重新连接
-              </Button>
-            </div>
-          }
-        />
-      }
-      toolbar={
-        <ListToolbar
-          filters={
-            <div className="flex flex-wrap items-center gap-3">
-              <Select
-                value={component || undefined}
-                loading={componentsQuery.isPending}
-                onChange={setComponentOverride}
-                placeholder="选择组件"
-                style={{ width: 260 }}
-                options={componentOptions}
-              />
-              <Select
-                value={level}
-                onChange={setLevel}
-                style={{ width: 130 }}
-                options={[
-                  { label: "全部级别", value: "all" },
-                  { label: "error", value: "error" },
-                  { label: "warn", value: "warn" },
-                  { label: "info", value: "info" },
-                  { label: "debug", value: "debug" },
-                ]}
-              />
-              <Input.Search
-                allowClear
-                value={keyword}
-                onChange={setKeyword}
-                placeholder="搜索 request_id、Pod、容器或摘要"
-                style={{ width: 320 }}
-              />
-            </div>
-          }
-          actions={
-            <Button disabled={stream.logs.length === 0} onClick={stream.clear}>
-              清空
+      header={{
+        title: "运行日志",
+        subtitle: "按组件查看平台工作负载实时日志；流结束后页面会自动重连。",
+        extra: (
+          <div className="flex items-center gap-2">
+            <span className={`rounded px-2 py-1 text-xs ${connection.className}`}>
+              {connection.label}
+            </span>
+            <Button disabled={!component} onClick={stream.restart}>
+              重新连接
             </Button>
-          }
-          tools={<span className="text-xs text-gray-500">显示 {filteredLogs.length} 条</span>}
-        />
-      }
+          </div>
+        ),
+      }}
+      toolbar={{
+        filters: (
+          <Space>
+            <Select
+              value={component || undefined}
+              loading={componentsQuery.isPending}
+              onChange={setComponentOverride}
+              placeholder="选择组件"
+              options={componentOptions}
+            />
+            <Select
+              value={level}
+              onChange={setLevel}
+              options={[
+                { label: "全部级别", value: "all" },
+                { label: "error", value: "error" },
+                { label: "warn", value: "warn" },
+                { label: "info", value: "info" },
+                { label: "debug", value: "debug" },
+              ]}
+            />
+            <Input.Search
+              allowClear
+              value={keyword}
+              onChange={setKeyword}
+              placeholder="搜索 request_id、Pod、容器或摘要"
+            />
+          </Space>
+        ),
+        actions: (
+          <Button disabled={stream.logs.length === 0} onClick={stream.clear}>
+            清空
+          </Button>
+        ),
+        tools: <span className="text-xs text-gray-500">显示 {filteredLogs.length} 条</span>,
+      }}
     >
       <ListDataTable
         rowKey="id"

@@ -1,63 +1,59 @@
-import { Card, Typography } from "@arco-design/web-react";
-import type { ReactNode } from "react";
+import { ListPageHeader, ResourcePageFrame } from "../ResourcePageFrame";
+import { ListToolbar, ToolbarIconButton, ToolbarSearch } from "./ListToolbar";
+import { StatusTabs } from "./StatusTabs";
+import type { ListPageFrameProps } from "./types";
 import styles from "./index.module.less";
 
-interface ListPageHeaderProps {
-  title: ReactNode;
-  subtitle?: ReactNode;
-  extra?: ReactNode;
-}
-
-export function ListPageHeader({ title, subtitle, extra }: ListPageHeaderProps) {
-  return (
-    <header className={styles.pageHeader}>
-      <div className={styles.pageHeaderTitleArea}>
-        <Typography.Title heading={5} className={styles.pageHeaderTitle}>
-          {title}
-        </Typography.Title>
-        {subtitle ? (
-          <Typography.Text type="secondary" className={styles.pageHeaderSubtitle}>
-            {subtitle}
-          </Typography.Text>
+export function ListPageFrame<
+  TStatus extends string = string,
+  TSearchField extends string = string,
+>({ header, tabs, toolbar, children }: ListPageFrameProps<TStatus, TSearchField>) {
+  const toolbarFilters =
+    toolbar?.search || toolbar?.filters ? (
+      <>
+        {toolbar.search ? <ToolbarSearch {...toolbar.search} /> : null}
+        {toolbar.filters}
+      </>
+    ) : undefined;
+  const toolbarTools =
+    toolbar?.tools || toolbar?.refresh ? (
+      <>
+        {toolbar.tools}
+        {toolbar.refresh ? (
+          <ToolbarIconButton
+            iconClassName="icon-refresh-1"
+            label={toolbar.refresh.label ?? "刷新"}
+            spinning={toolbar.refresh.spinning}
+            disabled={toolbar.refresh.disabled}
+            onClick={toolbar.refresh.onClick}
+          />
         ) : null}
-      </div>
-      {extra ? <div className={styles.pageHeaderExtra}>{extra}</div> : null}
-    </header>
-  );
-}
+      </>
+    ) : undefined;
 
-interface ListToolbarProps {
-  actions?: ReactNode;
-  filters?: ReactNode;
-  tools?: ReactNode;
-}
-
-export function ListToolbar({ actions, filters, tools }: ListToolbarProps) {
   return (
-    <div className={styles.toolbar}>
-      {actions ? <div className={styles.toolbarActions}>{actions}</div> : null}
-      {filters ? <div className={styles.toolbarFilters}>{filters}</div> : null}
-      {tools ? <div className={styles.toolbarTools}>{tools}</div> : null}
-    </div>
+    <ResourcePageFrame header={header}>
+      <section className={styles.contentPanel}>
+        {tabs ? <StatusTabs {...tabs} /> : null}
+        {toolbar ? (
+          <ListToolbar actions={toolbar.actions} filters={toolbarFilters} tools={toolbarTools} />
+        ) : null}
+        <div className={styles.tableSlot}>{children}</div>
+      </section>
+    </ResourcePageFrame>
   );
 }
 
-interface ListPageFrameProps {
-  header: ReactNode;
-  tabs?: ReactNode;
-  toolbar?: ReactNode;
-  children: ReactNode;
-}
-
-export function ListPageFrame({ header, tabs, toolbar, children }: ListPageFrameProps) {
-  return (
-    <div className={styles.page}>
-      {header}
-      <Card className={styles.contentPanel}>
-        {tabs}
-        {toolbar}
-        {children}
-      </Card>
-    </div>
-  );
-}
+export { ListPageHeader };
+export type {
+  ListPageHeaderProps,
+  ResourcePageHeaderAction,
+  ResourcePageHeaderConfig,
+} from "../ResourcePageFrame";
+export type {
+  ListPageFrameProps,
+  ListPageRefreshConfig,
+  ListPageSearchConfig,
+  ListPageTabsConfig,
+  ListPageToolbarConfig,
+} from "./types";

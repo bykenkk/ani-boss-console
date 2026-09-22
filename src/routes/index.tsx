@@ -1,7 +1,6 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { PlatformOverviewPage } from "@/components/overview/PlatformOverviewPage";
 
 export const Route = createFileRoute("/")({
-  beforeLoad: () => {
-    throw redirect({ to: "/overview-capacity" });
-  },
+  component: () => <PlatformOverviewPage />,
 });

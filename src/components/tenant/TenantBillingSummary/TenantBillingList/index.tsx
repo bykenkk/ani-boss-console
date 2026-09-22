@@ -7,7 +7,6 @@ import {
   ListDataTable,
   DataTableNameCell,
   ListPageFrame,
-  ListPageHeader,
   type ListColumn,
 } from "@/components/common";
 import { CreditAdjustmentModal } from "@/components/tenant/TenantBillingSummary/CreditAdjustmentModal";
@@ -187,25 +186,23 @@ export function TenantBillingList() {
   return (
     <>
       <ListPageFrame
-        header={
-          <ListPageHeader
-            title="租户计费与用量"
-            subtitle="面向企业云租户的计量结算视图；平台级资源计量请前往平台计量与结算。"
-            extra={
-              <Button
-                icon={<IconDownload />}
-                onClick={() =>
-                  showMessage({
-                    type: "success",
-                    content: `已导出 ${tenantBillings.length} 条计费记录`,
-                  })
-                }
-              >
-                导出计费记录
-              </Button>
-            }
-          />
-        }
+        header={{
+          title: "租户计费与用量",
+          subtitle: "面向企业云租户的计量结算视图；平台级资源计量请前往平台计量与结算。",
+          extra: (
+            <Button
+              icon={<IconDownload />}
+              onClick={() =>
+                showMessage({
+                  type: "success",
+                  content: `已导出 ${tenantBillings.length} 条计费记录`,
+                })
+              }
+            >
+              导出计费记录
+            </Button>
+          ),
+        }}
       >
         <ListDataTable
           rowKey="id"

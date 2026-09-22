@@ -1,146 +1,25 @@
-.page,
-.pageHeader {
-  --list-primary: #0079d3;
-  --list-primary-hover: #006cbd;
-  --list-primary-active: #0060ac;
-  --list-primary-soft: rgba(0, 121, 211, 0.08);
-  --list-primary-header: #f2f8fd;
-  --list-text: rgba(0, 0, 0, 0.9);
-  --list-text-secondary: rgba(0, 0, 0, 0.6);
-  --list-text-tertiary: rgba(0, 0, 0, 0.4);
-  --list-text-disabled: rgba(0, 0, 0, 0.26);
-  --list-border: #dcdcdc;
-  --list-divider: #e7e7e7;
-  --list-table-divider: #e5e6eb;
-}
-
-.page {
+.contentPanel {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  height: calc(100dvh - 120px);
-  min-width: 0;
   min-height: 0;
   overflow: hidden;
-  gap: 16px;
-  color: var(--list-text);
-  font-size: 14px;
-}
-
-.pageHeader {
-  position: relative;
-  display: flex;
-  flex: 0 0 80px;
-  align-items: center;
-  min-width: 0;
-  min-height: 80px;
-  overflow: hidden;
-  padding: 0 16px 0 32px;
+  padding: 0 16px 16px;
   border-radius: 6px;
-  background: var(--color-bg-2, #fff);
-  box-shadow: var(--surface-shadow, 0 2px 10px rgba(0, 73, 128, 0.05));
-
-  &::before {
-    position: absolute;
-    top: 24px;
-    left: 0;
-    width: 5px;
-    height: 32px;
-    background: var(--list-primary);
-    content: "";
-  }
+  background: #fff;
 }
 
-.pageHeaderTitleArea {
-  min-width: 0;
-}
-
-.pageHeaderTitle {
-  margin: 0 !important;
-  color: var(--list-text) !important;
-  font-size: 18px !important;
-  font-weight: 700 !important;
-  line-height: 24px !important;
-}
-
-.pageHeaderSubtitle {
-  display: block;
-  max-width: min(760px, 60vw);
-  margin-top: 4px;
-  overflow: hidden;
-  font-size: 12px;
-  line-height: 16px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-
-  @media (max-width: 980px) {
-    max-width: 55vw;
-  }
-}
-
-.pageHeaderExtra {
-  flex-shrink: 0;
-  margin-left: auto;
-  padding-left: 24px;
-}
-
-.contentPanel {
+.tableSlot {
   display: flex;
   flex: 1;
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  overflow: hidden;
-  border-color: transparent;
-  border-radius: 6px;
-  background: var(--color-bg-2, #fff);
-
-  :global(.arco-card-body) {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    min-width: 0;
-    min-height: 0;
-    padding: 0;
-  }
+  padding-top: 16px;
 }
 
-.toolbar {
-  display: flex;
-  flex: 0 0 auto;
-  flex-wrap: wrap;
-  align-items: center;
-  min-height: 64px;
-  padding: 16px;
-  gap: 16px;
-  border-bottom: 1px solid var(--list-divider);
-
-  @media (max-width: 980px) {
-    gap: 8px;
-  }
-}
-
-.toolbarActions,
-.toolbarFilters,
-.toolbarTools {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  gap: 8px;
-}
-
-.toolbarFilters {
-  flex: 1 1 auto;
-}
-
-.toolbarActions,
-.toolbarTools {
-  flex-shrink: 0;
-}
-
-.toolbarTools {
-  margin-left: auto;
-
-  @media (max-width: 980px) {
-    margin-left: 0;
+@media (max-width: 980px) {
+  .contentPanel {
+    min-height: 600px;
   }
 }

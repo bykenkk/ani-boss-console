@@ -1,5 +1,5 @@
-import { Button, Input, Modal, Select, Tag } from "@arco-design/web-react";
-import { IconPlus, IconRefresh } from "@arco-design/web-react/icon";
+import { Button, Modal, Tag } from "@arco-design/web-react";
+import { IconPlus } from "@arco-design/web-react/icon";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useDeferredValue, useMemo, useState } from "react";
@@ -20,8 +20,6 @@ import {
   DataTableNameCell,
   ListDataTable,
   ListPageFrame,
-  ListPageHeader,
-  ListToolbar,
   type ListColumn,
 } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
@@ -184,63 +182,51 @@ export function TenantPlanListPage() {
   return (
     <>
       <ListPageFrame
-        header={
-          <ListPageHeader
-            title="配额策略"
-            subtitle="维护租户配额套餐、资源限额与套餐绑定关系。"
-            extra={
-              <div className="flex gap-2">
-                <Button
-                  icon={<IconRefresh />}
-                  loading={listQuery.isFetching || quotaMetaQuery.isFetching}
-                  onClick={() => void Promise.all([listQuery.refetch(), quotaMetaQuery.refetch()])}
-                >
-                  刷新
-                </Button>
-                <Button
-                  type="primary"
-                  icon={<IconPlus />}
-                  disabled={!canManage || !quotaMetaQuery.data?.length}
-                  onClick={() => setCreateVisible(true)}
-                >
-                  新建套餐
-                </Button>
-              </div>
-            }
-          />
-        }
-        toolbar={
-          <ListToolbar
-            filters={
-              <div className="flex flex-wrap items-center gap-3">
-                <Input.Search
-                  value={keyword}
-                  allowClear
-                  placeholder="搜索套餐编码或名称"
-                  style={{ width: 320 }}
-                  onChange={(value) => {
-                    setKeyword(value);
-                    setPage(1);
-                  }}
-                />
-                <Select
-                  value={status}
-                  style={{ width: 150 }}
-                  onChange={(value) => {
-                    setStatus(value as "all" | TenantPlanStatus);
-                    setPage(1);
-                  }}
-                >
-                  <Select.Option value="all">全部状态</Select.Option>
-                  <Select.Option value="draft">草稿</Select.Option>
-                  <Select.Option value="active">已发布</Select.Option>
-                  <Select.Option value="disabled">已停用</Select.Option>
-                </Select>
-              </div>
-            }
-            tools={<span className="text-xs text-gray-500">共 {data.length} 个套餐</span>}
-          />
-        }
+        header={{
+          title: "配额策略",
+          subtitle: "维护租户配额套餐、资源限额与套餐绑定关系。",
+          extra: (
+            <Button
+              type="primary"
+              icon={<IconPlus />}
+              disabled={!canManage || !quotaMetaQuery.data?.length}
+              onClick={() => setCreateVisible(true)}
+            >
+              新建套餐
+            </Button>
+          ),
+        }}
+        tabs={{
+          value: status,
+          onChange: (value) => {
+            setStatus(value);
+            setPage(1);
+          },
+          items: [
+            { value: "all", label: "全部" },
+            { value: "draft", label: "草稿" },
+            { value: "active", label: "已发布" },
+            { value: "disabled", label: "已停用" },
+          ],
+        }}
+        toolbar={{
+          search: {
+            fields: [{ value: "keyword", label: "关键词" }],
+            field: "keyword",
+            value: keyword,
+            placeholder: "搜索套餐编码或名称",
+            onFieldChange: () => undefined,
+            onChange: (value) => {
+              setKeyword(value);
+              setPage(1);
+            },
+          },
+          refresh: {
+            spinning: listQuery.isFetching || quotaMetaQuery.isFetching,
+            onClick: () => void Promise.all([listQuery.refetch(), quotaMetaQuery.refetch()]),
+          },
+          tools: <span className="text-xs text-gray-500">共 {data.length} 个套餐</span>,
+        }}
       >
         <ListDataTable
           rowKey="id"

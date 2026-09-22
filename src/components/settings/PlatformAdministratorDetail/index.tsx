@@ -1,4 +1,5 @@
-import { Button, Dropdown, Menu, Modal, Space, Spin } from "@arco-design/web-react";
+import { Button, Dropdown, Menu, Modal, Spin, Tooltip } from "@arco-design/web-react";
+import { IconMoreVertical } from "@arco-design/web-react/icon";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
@@ -20,7 +21,7 @@ import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
 import { AccountOverview } from "./AccountOverview";
 import { OperationRecords } from "./OperationRecords";
-import { PermissionMatrix } from "./PermissionMatrix";
+// import { PermissionMatrix } from "./PermissionMatrix";
 import {
   PlatformAdministratorPasswordModal,
   PlatformAdministratorRoleModal,
@@ -171,8 +172,8 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
     return (
       <DetailPageFrame
         breadcrumbs={[
-          { label: "平台设置" },
-          { label: "平台运营账号", onClick: returnToList },
+          { label: "系统设置" },
+          { label: "平台管理员", onClick: returnToList },
           { label: userId },
         ]}
         title={userId}
@@ -224,11 +225,13 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
   const moreMenu = (
     <Menu
       onClickMenuItem={(key) => {
+        if (key === "role") setRoleVisible(true);
         if (key === "password") setPasswordVisible(true);
         if (key === "status") confirmStatusChange();
         if (key === "delete") confirmDelete();
       }}
     >
+      <Menu.Item key="role">修改角色</Menu.Item>
       <Menu.Item key="password" disabled={detail.source !== "local"}>
         重置密码
       </Menu.Item>
@@ -246,6 +249,7 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
   ];
 
   const detailTabs: DetailTab[] = [
+    /* 权限功能暂时隐藏，恢复时同时还原下方 defaultTabKey。
     {
       key: "permissions",
       title: "权限",
@@ -257,6 +261,7 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
         />
       ),
     },
+    */
     {
       key: "operations",
       title: "操作记录",
@@ -268,8 +273,8 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
     <>
       <DetailPageFrame
         breadcrumbs={[
-          { label: "平台设置" },
-          { label: "平台运营账号", onClick: returnToList },
+          { label: "系统设置" },
+          { label: "平台管理员", onClick: returnToList },
           { label: detail.displayName || detail.username },
         ]}
         title={detail.displayName || detail.username}
@@ -282,22 +287,16 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
           { label: "创建时间", value: formatDateTime(detail.createdAt) },
         ]}
         actions={
-          <Space wrap>
-            <Button
-              type="primary"
-              disabled={!canManage || operationPending}
-              onClick={() => setRoleVisible(true)}
-            >
-              修改角色
-            </Button>
+          <Tooltip content="更多操作">
             <Dropdown trigger="click" droplist={moreMenu} disabled={!canManage || operationPending}>
-              <Button>更多操作</Button>
+              <Button icon={<IconMoreVertical />} aria-label="更多操作" />
             </Dropdown>
-          </Space>
+          </Tooltip>
         }
         cards={infoCards}
         tabs={detailTabs}
-        defaultTabKey="permissions"
+        /* defaultTabKey="permissions" */
+        defaultTabKey="operations"
         onBack={returnToList}
       />
 

@@ -305,10 +305,6 @@ export function GpuClusterPartitionModal({
               <Alert type="warning" content="当前没有可应用切分规则的空闲整卡。" />
             )}
           </div>
-          <Alert
-            type="info"
-            content="当前仅支持集群级 2、4、8 等分；暂不支持单卡切分、不等显存、任意份数和算力比例分配。"
-          />
         </Space>
       )}
     </Modal>

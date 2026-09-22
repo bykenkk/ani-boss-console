@@ -1,11 +1,10 @@
-import { Input, Progress, Select } from "@arco-design/web-react";
+import { Progress, Select, Space } from "@arco-design/web-react";
 import clsx from "clsx";
 import { useMemo, useState } from "react";
 import {
   DataTableNameCell,
   ListDataTable,
   ListPageHeader,
-  ListToolbar,
   TableSectionFrame,
   type ListColumn,
 } from "@/components/common";
@@ -306,41 +305,38 @@ export function NetworkInfrastructurePage() {
             </span>
           </div>
         }
-        toolbar={
-          <ListToolbar
-            filters={
-              <div className="flex flex-wrap items-center gap-3">
-                <Select
-                  value={region}
-                  onChange={setRegion}
-                  style={{ width: 145 }}
-                  options={[
-                    { label: "全部区域", value: "all" },
-                    { label: "cn-east-1", value: "cn-east-1" },
-                    { label: "cn-north-1", value: "cn-north-1" },
-                  ]}
-                />
-                <Select
-                  value={status}
-                  onChange={setStatus}
-                  style={{ width: 130 }}
-                  options={[
-                    { label: "全部状态", value: "all" },
-                    { label: "健康", value: "healthy" },
-                    { label: "降级", value: "degraded" },
-                  ]}
-                />
-                <Input.Search
-                  allowClear
-                  value={keyword}
-                  onChange={setKeyword}
-                  placeholder="搜索组件、类型或集群"
-                  style={{ width: 260 }}
-                />
-              </div>
-            }
-          />
-        }
+        toolbar={{
+          search: {
+            fields: [{ value: "keyword", label: "关键词" }],
+            field: "keyword",
+            value: keyword,
+            placeholder: "搜索组件、类型或集群",
+            onFieldChange: () => undefined,
+            onChange: setKeyword,
+          },
+          filters: (
+            <Space>
+              <Select
+                value={region}
+                onChange={setRegion}
+                options={[
+                  { label: "全部区域", value: "all" },
+                  { label: "cn-east-1", value: "cn-east-1" },
+                  { label: "cn-north-1", value: "cn-north-1" },
+                ]}
+              />
+              <Select
+                value={status}
+                onChange={setStatus}
+                options={[
+                  { label: "全部状态", value: "all" },
+                  { label: "健康", value: "healthy" },
+                  { label: "降级", value: "degraded" },
+                ]}
+              />
+            </Space>
+          ),
+        }}
       >
         <ListDataTable
           rowKey="id"

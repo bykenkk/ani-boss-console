@@ -5,9 +5,10 @@ import {
   Menu,
   Modal,
   Result,
-  Space,
   Tag,
+  Tooltip,
 } from "@arco-design/web-react";
+import { IconMoreVertical } from "@arco-design/web-react/icon";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { showMessage } from "@/lib/feedback";
@@ -133,6 +134,36 @@ export function TenantAdministratorDetail({ adminId }: TenantAdministratorDetail
 
   const moreMenu = (
     <Menu>
+      {admin.status === "invited" ? (
+        <>
+          <Menu.Item
+            key="resend-invite"
+            onClick={() =>
+              confirmAction(
+                "resend_invite",
+                "重发邀请",
+                `确认向 ${admin.email} 重新发送邀请？`,
+                "邀请已重新发送",
+              )
+            }
+          >
+            重发邀请
+          </Menu.Item>
+          <Menu.Item
+            key="accept-invite"
+            onClick={() =>
+              confirmAction(
+                "accept_invite",
+                "模拟接受邀请",
+                `确认模拟 ${admin.email} 接受邀请？`,
+                "邀请已接受，管理员已激活",
+              )
+            }
+          >
+            模拟接受
+          </Menu.Item>
+        </>
+      ) : null}
       <Menu.Item
         key="role"
         onClick={() => {
@@ -348,40 +379,11 @@ export function TenantAdministratorDetail({ adminId }: TenantAdministratorDetail
           { label: "最近登录", value: formatDateTimeMinute(admin.lastLogin) },
         ]}
         actions={
-          <Space wrap>
-            {admin.status === "invited" ? (
-              <>
-                <Button
-                  onClick={() =>
-                    confirmAction(
-                      "resend_invite",
-                      "重发邀请",
-                      `确认向 ${admin.email} 重新发送邀请？`,
-                      "邀请已重新发送",
-                    )
-                  }
-                >
-                  重发邀请
-                </Button>
-                <Button
-                  type="primary"
-                  onClick={() =>
-                    confirmAction(
-                      "accept_invite",
-                      "模拟接受邀请",
-                      `确认模拟 ${admin.email} 接受邀请？`,
-                      "邀请已接受，管理员已激活",
-                    )
-                  }
-                >
-                  模拟接受
-                </Button>
-              </>
-            ) : null}
-            <Dropdown trigger="click" droplist={moreMenu}>
-              <Button>更多操作</Button>
+          <Tooltip content="更多操作">
+            <Dropdown trigger="click" position="br" droplist={moreMenu}>
+              <Button icon={<IconMoreVertical />} aria-label="更多操作" />
             </Dropdown>
-          </Space>
+          </Tooltip>
         }
         cards={infoCards}
         tabs={detailTabs}

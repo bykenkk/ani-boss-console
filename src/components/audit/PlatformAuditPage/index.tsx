@@ -1,5 +1,5 @@
-import { Alert, Button, DatePicker, Input, Select, Space } from "@arco-design/web-react";
-import { IconDownload, IconRefresh } from "@arco-design/web-react/icon";
+import { Button, DatePicker, Input, Select, Space } from "@arco-design/web-react";
+import { IconDownload } from "@arco-design/web-react/icon";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import {
@@ -9,7 +9,7 @@ import {
   type PlatformAuditLogQuery,
   type PlatformAuditVerb,
 } from "@/api/audit";
-import { ListDataTable, ListPageFrame, ListPageHeader, ListToolbar } from "@/components/common";
+import { ListDataTable, ListPageFrame } from "@/components/common";
 import { getRecentDateTimeRange, toRfc3339DateTime } from "@/lib/date";
 import { showMessage } from "@/lib/feedback";
 import { PlatformAuditDetailDrawer } from "./PlatformAuditDetailDrawer";
@@ -98,84 +98,58 @@ export function PlatformAuditPage() {
 
   return (
     <ListPageFrame
-      header={
-        <ListPageHeader
-          title="集群审计"
-          subtitle="查询 Kubernetes 控制面写操作；数据按时间倒序展示。"
-          extra={
-            <Space>
-              <Button
-                icon={<IconRefresh />}
-                loading={auditQuery.isFetching}
-                onClick={() => void auditQuery.refetch()}
-              >
-                刷新
-              </Button>
-              <Button
-                type="primary"
-                icon={<IconDownload />}
-                disabled={!items.length || auditQuery.isPlaceholderData}
-                onClick={exportCurrentPage}
-              >
-                导出当前页
-              </Button>
-            </Space>
-          }
-        />
-      }
-      toolbar={
-        <ListToolbar
-          filters={
-            <div className="flex flex-wrap items-center gap-2">
-              <Input.Search
-                allowClear
-                value={keywordDraft}
-                placeholder="搜索操作者 / 动作 / 资源"
-                style={{ width: 300, flex: "0 0 300px" }}
-                onChange={setKeywordDraft}
-                onSearch={applyKeyword}
-              />
-              <Select
-                value={verb}
-                style={{ width: 140, flex: "0 0 140px" }}
-                options={auditVerbOptions}
-                onChange={(value) => {
-                  setVerb(value as PlatformAuditVerb | "all");
-                  resetPagination();
-                }}
-              />
-              <DatePicker.RangePicker
-                showTime
-                allowClear={false}
-                format="YYYY-MM-DD HH:mm:ss"
-                value={timeRange}
-                style={{ width: 340, flex: "0 0 340px" }}
-                onChange={(value) => {
-                  if (value.length !== 2) return;
-                  setTimeRange([value[0], value[1]]);
-                  resetPagination();
-                }}
-              />
-            </div>
-          }
-        />
-      }
+      header={{
+        title: "集群审计",
+        subtitle: "查询 Kubernetes 控制面写操作；数据按时间倒序展示。",
+        extra: (
+          <Button
+            type="primary"
+            icon={<IconDownload />}
+            disabled={!items.length || auditQuery.isPlaceholderData}
+            onClick={exportCurrentPage}
+          >
+            导出当前页
+          </Button>
+        ),
+      }}
+      toolbar={{
+        filters: (
+          <Space>
+            <Input.Search
+              allowClear
+              value={keywordDraft}
+              placeholder="搜索操作者 / 动作 / 资源"
+              onChange={setKeywordDraft}
+              onSearch={applyKeyword}
+            />
+            <Select
+              value={verb}
+              options={auditVerbOptions}
+              onChange={(value) => {
+                setVerb(value as PlatformAuditVerb | "all");
+                resetPagination();
+              }}
+            />
+            <DatePicker.RangePicker
+              showTime
+              allowClear={false}
+              format="YYYY-MM-DD HH:mm:ss"
+              value={timeRange}
+              onChange={(value) => {
+                if (value.length !== 2) return;
+                setTimeRange([value[0], value[1]]);
+                resetPagination();
+              }}
+            />
+          </Space>
+        ),
+        refresh: {
+          spinning: auditQuery.isFetching,
+          onClick: () => void auditQuery.refetch(),
+        },
+      }}
     >
-      {auditQuery.data && !auditQuery.data.profile.realProvider ? (
-        <Alert
-          type="warning"
-          showIcon
-          content={`当前审计数据来自 ${auditQuery.data.profile.provider} 开发 Provider，不代表真实生产记录。${auditQuery.data.profile.reason ? ` ${auditQuery.data.profile.reason}` : ""}`}
-        />
-      ) : (
-        <Alert
-          type="info"
-          showIcon
-          content="仅包含 Kubernetes 控制面的创建、更新、修改和删除操作；记录总数为近似值。"
-        />
-      )}
-
-      <div className="mt-4 flex min-h-0 flex-1 flex-col">
+      <div className="flex min-h-0 flex-1 flex-col">
         <ListDataTable
           rowKey="auditId"
           columns={columns}

@@ -1,4 +1,4 @@
-import { Alert, Form, Input, Modal, Select } from "@arco-design/web-react";
+import { Form, Input, Modal, Select } from "@arco-design/web-react";
 import { useEffect, type ReactNode } from "react";
 import type {
   CreatePlatformAdministratorInput,
@@ -88,11 +88,6 @@ export function PlatformAdministratorCreateModal({
       afterClose={() => form.resetFields()}
       unmountOnExit={false}
     >
-      <Alert
-        type="info"
-        className="mb-4"
-        content="当前接口仅支持直接创建本地账号并设置初始密码，邀请流程需后端补充后再开放。"
-      />
       <Form form={form} layout="vertical">
         <Form.Item
           label="邮箱"

@@ -1,6 +1,3 @@
-import { Progress, Tag } from "@arco-design/web-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import {
   fetchTenantQuota,
   fetchTenantQuotaChangeRequests,
@@ -13,6 +10,9 @@ import {
 import { DataTable, type ListColumn } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
+import { Progress, Tag } from "@arco-design/web-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { quotaRequestStatusMeta } from "../../apiModel";
 import { TenantQuotaRequestModal } from "../../TenantManagementModals";
 
@@ -110,80 +110,77 @@ export function TenantQuotaManagement({ tenantId, canManage }: TenantQuotaManage
 
   return (
     <>
-      <div className="space-y-6 py-4">
-        <section>
-          <h3 className="mb-3 text-sm font-medium">当前配额</h3>
-          <DataTable
-            rowKey="resourceType"
-            columns={quotaColumns}
-            data={quotaQuery.data || []}
-            loading={quotaQuery.isPending}
-            pagination={false}
-            rowActions={[
-              {
-                key: "request",
-                label: "申请调整",
-                disabled: () => !canManage || operationPending,
-                onClick: setQuotaTarget,
+      <section>
+        <DataTable
+          header={{ title: "当前配额" }}
+          rowKey="resourceType"
+          columns={quotaColumns}
+          data={quotaQuery.data || []}
+          loading={quotaQuery.isPending}
+          pagination={false}
+          rowActions={[
+            {
+              key: "request",
+              label: "申请调整",
+              disabled: () => !canManage || operationPending,
+              onClick: setQuotaTarget,
+            },
+          ]}
+          scroll={{ x: 1000 }}
+          noDataElement={<div className="py-8 text-center text-gray-500">暂无配额</div>}
+        />
+      </section>
+      <section>
+        <DataTable
+          header={{ title: "调整申请" }}
+          rowKey={(item) => `${item.requestId}-${item.resourceType}`}
+          columns={[
+            { title: "申请单", dataIndex: "requestId", width: 180 },
+            { title: "资源维度", dataIndex: "resourceType", width: 160 },
+            { title: "原值", dataIndex: "oldValue", width: 90, align: "right" },
+            { title: "新值", dataIndex: "newValue", width: 90, align: "right" },
+            {
+              title: "状态",
+              width: 100,
+              render: (_, item) => {
+                const meta = quotaRequestStatusMeta[item.status];
+                return <Tag color={meta.color}>{meta.label}</Tag>;
               },
-            ]}
-            scroll={{ x: 1000 }}
-            noDataElement={<div className="py-8 text-center text-gray-500">暂无配额</div>}
-          />
-        </section>
-        <section>
-          <h3 className="mb-3 text-sm font-medium">调整申请</h3>
-          <DataTable
-            rowKey={(item) => `${item.requestId}-${item.resourceType}`}
-            columns={[
-              { title: "申请单", dataIndex: "requestId", width: 180 },
-              { title: "资源维度", dataIndex: "resourceType", width: 160 },
-              { title: "原值", dataIndex: "oldValue", width: 90, align: "right" },
-              { title: "新值", dataIndex: "newValue", width: 90, align: "right" },
-              {
-                title: "状态",
-                width: 100,
-                render: (_, item) => {
-                  const meta = quotaRequestStatusMeta[item.status];
-                  return <Tag color={meta.color}>{meta.label}</Tag>;
-                },
-              },
-              { title: "申请人", dataIndex: "requestedBy", width: 140 },
-              {
-                title: "申请时间",
-                dataIndex: "createdAt",
-                width: 180,
-                render: (value: string) => formatDateTime(value),
-              },
-            ]}
-            data={quotaRequestsQuery.data || []}
-            loading={quotaRequestsQuery.isPending}
-            pagination={false}
-            rowActions={[
-              {
-                key: "approve",
-                label: "通过",
-                visible: (item) => item.status === "pending",
-                disabled: () => !canManage || operationPending,
-                onClick: (item) =>
-                  quotaReviewMutation.mutate({ requestId: item.requestId, approved: true }),
-              },
-              {
-                key: "reject",
-                label: "驳回",
-                intent: "danger",
-                visible: (item) => item.status === "pending",
-                disabled: () => !canManage || operationPending,
-                onClick: (item) =>
-                  quotaReviewMutation.mutate({ requestId: item.requestId, approved: false }),
-              },
-            ]}
-            scroll={{ x: 1100 }}
-            noDataElement={<div className="py-8 text-center text-gray-500">暂无调整申请</div>}
-          />
-        </section>
-      </div>
-
+            },
+            { title: "申请人", dataIndex: "requestedBy", width: 140 },
+            {
+              title: "申请时间",
+              dataIndex: "createdAt",
+              width: 180,
+              render: (value: string) => formatDateTime(value),
+            },
+          ]}
+          data={quotaRequestsQuery.data || []}
+          loading={quotaRequestsQuery.isPending}
+          pagination={false}
+          rowActions={[
+            {
+              key: "approve",
+              label: "通过",
+              visible: (item) => item.status === "pending",
+              disabled: () => !canManage || operationPending,
+              onClick: (item) =>
+                quotaReviewMutation.mutate({ requestId: item.requestId, approved: true }),
+            },
+            {
+              key: "reject",
+              label: "驳回",
+              intent: "danger",
+              visible: (item) => item.status === "pending",
+              disabled: () => !canManage || operationPending,
+              onClick: (item) =>
+                quotaReviewMutation.mutate({ requestId: item.requestId, approved: false }),
+            },
+          ]}
+          scroll={{ x: 1100 }}
+          noDataElement={<div className="py-8 text-center text-gray-500">暂无调整申请</div>}
+        />
+      </section>
       {quotaTarget ? (
         <TenantQuotaRequestModal
           item={quotaTarget}

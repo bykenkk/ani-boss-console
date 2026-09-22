@@ -1,5 +1,5 @@
-import { Button, Input, Modal, Select, Tag } from "@arco-design/web-react";
-import { IconPlus, IconRefresh } from "@arco-design/web-react/icon";
+import { Button, Modal, Select, Tag } from "@arco-design/web-react";
+import { IconPlus } from "@arco-design/web-react/icon";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useDeferredValue, useMemo, useState } from "react";
@@ -21,8 +21,6 @@ import {
   DataTableNameCell,
   ListDataTable,
   ListPageFrame,
-  ListPageHeader,
-  ListToolbar,
   type ListColumn,
 } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
@@ -239,77 +237,66 @@ export function TenantAdministratorListPage() {
   return (
     <>
       <ListPageFrame
-        header={
-          <ListPageHeader
-            title="租户管理员"
-            subtitle="集中维护租户管理员邀请、角色、密码和账号状态。"
-            extra={
-              <div className="flex gap-2">
-                <Button
-                  icon={<IconRefresh />}
-                  loading={listQuery.isFetching || tenantsQuery.isFetching}
-                  onClick={() => void Promise.all([listQuery.refetch(), tenantsQuery.refetch()])}
-                >
-                  刷新
-                </Button>
-                <Button
-                  type="primary"
-                  icon={<IconPlus />}
-                  disabled={!canManage || !tenantsQuery.data?.length}
-                  onClick={() => setInviteVisible(true)}
-                >
-                  邀请管理员
-                </Button>
-              </div>
-            }
-          />
-        }
-        toolbar={
-          <ListToolbar
-            filters={
-              <div className="flex flex-wrap items-center gap-3">
-                <Input.Search
-                  value={keyword}
-                  allowClear
-                  placeholder="搜索邮箱、用户名或显示名"
-                  style={{ width: 320 }}
-                  onChange={(value) => {
-                    setKeyword(value);
-                    setPage(1);
-                  }}
-                />
-                <Select
-                  value={tenantId}
-                  style={{ width: 220 }}
-                  onChange={(value) => {
-                    setTenantId(value);
-                    setPage(1);
-                  }}
-                >
-                  <Select.Option value="all">全部租户</Select.Option>
-                  {(tenantsQuery.data || []).map((tenant) => (
-                    <Select.Option key={tenant.id} value={tenant.id}>
-                      {tenant.displayName || tenant.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-                <Select
-                  value={status}
-                  style={{ width: 150 }}
-                  onChange={(value) => {
-                    setStatus(value as "all" | TenantAdministratorStatus);
-                    setPage(1);
-                  }}
-                >
-                  <Select.Option value="all">全部状态</Select.Option>
-                  <Select.Option value="active">活跃</Select.Option>
-                  <Select.Option value="disabled">已禁用</Select.Option>
-                </Select>
-              </div>
-            }
-            tools={<span className="text-xs text-gray-500">共 {data.length} 个管理员</span>}
-          />
-        }
+        header={{
+          title: "租户管理员",
+          subtitle: "集中维护租户管理员邀请、角色、密码和账号状态。",
+          extra: (
+            <Button
+              type="primary"
+              icon={<IconPlus />}
+              disabled={!canManage || !tenantsQuery.data?.length}
+              onClick={() => setInviteVisible(true)}
+            >
+              邀请管理员
+            </Button>
+          ),
+        }}
+        tabs={{
+          value: status,
+          onChange: (value) => {
+            setStatus(value);
+            setPage(1);
+          },
+          items: [
+            { value: "all", label: "全部" },
+            { value: "active", label: "活跃" },
+            { value: "disabled", label: "已禁用" },
+          ],
+        }}
+        toolbar={{
+          search: {
+            fields: [{ value: "keyword", label: "关键词" }],
+            field: "keyword",
+            value: keyword,
+            placeholder: "搜索邮箱、用户名或显示名",
+            onFieldChange: () => undefined,
+            onChange: (value) => {
+              setKeyword(value);
+              setPage(1);
+            },
+          },
+          filters: (
+            <Select
+              value={tenantId}
+              onChange={(value) => {
+                setTenantId(value);
+                setPage(1);
+              }}
+            >
+              <Select.Option value="all">全部租户</Select.Option>
+              {(tenantsQuery.data || []).map((tenant) => (
+                <Select.Option key={tenant.id} value={tenant.id}>
+                  {tenant.displayName || tenant.name}
+                </Select.Option>
+              ))}
+            </Select>
+          ),
+          refresh: {
+            spinning: listQuery.isFetching || tenantsQuery.isFetching,
+            onClick: () => void Promise.all([listQuery.refetch(), tenantsQuery.refetch()]),
+          },
+          tools: <span className="text-xs text-gray-500">共 {data.length} 个管理员</span>,
+        }}
       >
         <ListDataTable
           rowKey={(administrator) => `${administrator.tenant.id}-${administrator.id}`}

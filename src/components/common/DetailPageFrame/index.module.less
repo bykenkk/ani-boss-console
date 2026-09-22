@@ -3,7 +3,11 @@
   --detail-shadow: var(--surface-shadow, 0 2px 8px rgba(0, 73, 128, 0.05));
   display: flex;
   flex-direction: column;
+  width: 100%;
+  height: var(--app-content-available-height);
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
   gap: 16px;
   color: var(--color-text-1);
   font-size: 14px;
@@ -11,6 +15,7 @@
 
 .breadcrumbRow {
   display: flex;
+  flex: 0 0 22px;
   align-items: center;
   min-width: 0;
   height: 22px;
@@ -71,21 +76,18 @@
 
 .headerCard {
   display: flex;
+  flex: 0 0 80px;
   align-items: center;
+  box-sizing: border-box;
   width: 100%;
+  height: 80px;
   min-width: 0;
-  min-height: 80px;
   padding: 16px 24px;
   overflow: hidden;
   gap: 32px;
   border-radius: 8px;
   background: var(--detail-surface);
   box-shadow: var(--detail-shadow);
-
-  @media (max-width: 1100px) {
-    gap: 20px;
-    padding: 16px 20px;
-  }
 }
 
 .identity {
@@ -95,12 +97,6 @@
   min-width: 160px;
   max-width: 260px;
   gap: 16px;
-
-  @media (max-width: 1100px) {
-    flex-basis: 210px;
-    max-width: 210px;
-    gap: 12px;
-  }
 }
 
 .identityIcon {
@@ -158,9 +154,8 @@
   flex: 1 1 auto;
   align-items: center;
   min-width: 0;
+  overflow: hidden;
   gap: 16px;
-  overflow-x: auto;
-  overflow-y: hidden;
 }
 
 .headerItem {
@@ -213,37 +208,34 @@
 
 .workspace {
   display: grid;
+  flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
   gap: 16px;
 }
 
 .workspaceSplit {
   grid-template-columns: min(400px, 42%) minmax(0, 1fr);
-
-  @media (max-width: 1100px) {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 12px;
-  }
 }
 
 .workspaceSingle {
   grid-template-columns: minmax(0, 1fr);
-
-  @media (max-width: 1100px) {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 12px;
-  }
 }
 
 .leftPane {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
   gap: 12px;
+  overscroll-behavior: contain;
 }
 
 .infoCard {
+  flex: 0 0 auto;
   overflow: hidden;
   border-color: transparent;
   border-radius: 8px;
@@ -269,21 +261,24 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  min-height: 520px;
+  min-height: 0;
   overflow: hidden;
   border-radius: 8px;
   background: var(--detail-surface);
   box-shadow: var(--detail-shadow);
-
-  @media (max-width: 1100px) {
-    min-height: 600px;
-  }
 }
 
 .tabs {
+  display: flex;
+  flex-direction: column;
   height: 100%;
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
+
+  :global(.arco-tabs-header) {
+    flex: 0 0 auto;
+  }
 
   :global(.arco-tabs-header-nav) {
     box-sizing: border-box;
@@ -311,14 +306,68 @@
   }
 
   :global(.arco-tabs-content) {
+    display: flex;
+    flex: 1 1 0;
     min-width: 0;
     min-height: 0;
+    overflow: hidden;
     padding: 0;
   }
 
-  :global(.arco-tabs-content-item.arco-tabs-content-item-active) {
-    box-sizing: border-box;
+  :global(.arco-tabs-content-inner) {
+    width: 100%;
+    height: 100%;
+  }
+
+  :global(.arco-tabs-content-item),
+  :global(.arco-tabs-pane) {
     min-width: 0;
+    min-height: 0;
+  }
+
+  :global(.arco-tabs-content .arco-tabs-content-item.arco-tabs-content-item-active) {
+    box-sizing: border-box;
+    height: 100%;
+    min-width: 0;
+    overflow: auto;
     padding: 16px;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (max-width: 1100px) {
+  .headerCard {
+    padding: 16px 20px;
+    gap: 20px;
+  }
+
+  .identity {
+    flex-basis: 210px;
+    max-width: 210px;
+    gap: 12px;
+  }
+
+  .page {
+    height: auto;
+    min-height: var(--app-content-available-height);
+    overflow: visible;
+  }
+
+  .workspace {
+    overflow: visible;
+  }
+
+  .workspaceSplit,
+  .workspaceSingle {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .leftPane {
+    max-height: 520px;
+  }
+
+  .rightPane {
+    min-height: 600px;
   }
 }

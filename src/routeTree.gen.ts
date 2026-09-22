@@ -41,13 +41,12 @@ import { Route as OpsRegistryVulnerabilitiesIndexRouteImport } from './routes/op
 import { Route as OpsStorageQuotasIndexRouteImport } from './routes/ops-storage-quotas/index'
 import { Route as OpsStorageIndexRouteImport } from './routes/ops-storage/index'
 import { Route as OverviewAlertsIndexRouteImport } from './routes/overview-alerts/index'
-import { Route as OverviewCapacityIndexRouteImport } from './routes/overview-capacity/index'
-import { Route as OverviewGpuIndexRouteImport } from './routes/overview-gpu/index'
 import { Route as OverviewInferenceIndexRouteImport } from './routes/overview-inference/index'
 import { Route as OverviewKbIndexRouteImport } from './routes/overview-kb/index'
 import { Route as SettingsIdpIndexRouteImport } from './routes/settings-idp/index'
 import { Route as SettingsPlatformAdminsIndexRouteImport } from './routes/settings-platform-admins/index'
 import { Route as SettingsPlatformAdminsUserIdRouteImport } from './routes/settings-platform-admins/$userId'
+import { Route as SettingsPlatformRolesIndexRouteImport } from './routes/settings-platform-roles/index'
 import { Route as SettingsSessionIndexRouteImport } from './routes/settings-session/index'
 import { Route as TenantsAdminsIndexRouteImport } from './routes/tenants-admins/index'
 import { Route as TenantsAdminsAdminIdRouteImport } from './routes/tenants-admins/$adminId'
@@ -220,16 +219,6 @@ const OverviewAlertsIndexRoute = OverviewAlertsIndexRouteImport.update({
   path: '/overview-alerts/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OverviewCapacityIndexRoute = OverviewCapacityIndexRouteImport.update({
-  id: '/overview-capacity/',
-  path: '/overview-capacity/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OverviewGpuIndexRoute = OverviewGpuIndexRouteImport.update({
-  id: '/overview-gpu/',
-  path: '/overview-gpu/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const OverviewInferenceIndexRoute = OverviewInferenceIndexRouteImport.update({
   id: '/overview-inference/',
   path: '/overview-inference/',
@@ -255,6 +244,12 @@ const SettingsPlatformAdminsUserIdRoute =
   SettingsPlatformAdminsUserIdRouteImport.update({
     id: '/settings-platform-admins/$userId',
     path: '/settings-platform-admins/$userId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const SettingsPlatformRolesIndexRoute =
+  SettingsPlatformRolesIndexRouteImport.update({
+    id: '/settings-platform-roles/',
+    path: '/settings-platform-roles/',
     getParentRoute: () => rootRouteImport,
   } as any)
 const SettingsSessionIndexRoute = SettingsSessionIndexRouteImport.update({
@@ -341,12 +336,11 @@ export interface FileRoutesByFullPath {
   '/ops-storage-quotas/': typeof OpsStorageQuotasIndexRoute
   '/ops-storage/': typeof OpsStorageIndexRoute
   '/overview-alerts/': typeof OverviewAlertsIndexRoute
-  '/overview-capacity/': typeof OverviewCapacityIndexRoute
-  '/overview-gpu/': typeof OverviewGpuIndexRoute
   '/overview-inference/': typeof OverviewInferenceIndexRoute
   '/overview-kb/': typeof OverviewKbIndexRoute
   '/settings-idp/': typeof SettingsIdpIndexRoute
   '/settings-platform-admins/': typeof SettingsPlatformAdminsIndexRoute
+  '/settings-platform-roles/': typeof SettingsPlatformRolesIndexRoute
   '/settings-session/': typeof SettingsSessionIndexRoute
   '/tenants-admins/': typeof TenantsAdminsIndexRoute
   '/tenants-billing/': typeof TenantsBillingIndexRoute
@@ -390,12 +384,11 @@ export interface FileRoutesByTo {
   '/ops-storage-quotas': typeof OpsStorageQuotasIndexRoute
   '/ops-storage': typeof OpsStorageIndexRoute
   '/overview-alerts': typeof OverviewAlertsIndexRoute
-  '/overview-capacity': typeof OverviewCapacityIndexRoute
-  '/overview-gpu': typeof OverviewGpuIndexRoute
   '/overview-inference': typeof OverviewInferenceIndexRoute
   '/overview-kb': typeof OverviewKbIndexRoute
   '/settings-idp': typeof SettingsIdpIndexRoute
   '/settings-platform-admins': typeof SettingsPlatformAdminsIndexRoute
+  '/settings-platform-roles': typeof SettingsPlatformRolesIndexRoute
   '/settings-session': typeof SettingsSessionIndexRoute
   '/tenants-admins': typeof TenantsAdminsIndexRoute
   '/tenants-billing': typeof TenantsBillingIndexRoute
@@ -441,12 +434,11 @@ export interface FileRoutesById {
   '/ops-storage-quotas/': typeof OpsStorageQuotasIndexRoute
   '/ops-storage/': typeof OpsStorageIndexRoute
   '/overview-alerts/': typeof OverviewAlertsIndexRoute
-  '/overview-capacity/': typeof OverviewCapacityIndexRoute
-  '/overview-gpu/': typeof OverviewGpuIndexRoute
   '/overview-inference/': typeof OverviewInferenceIndexRoute
   '/overview-kb/': typeof OverviewKbIndexRoute
   '/settings-idp/': typeof SettingsIdpIndexRoute
   '/settings-platform-admins/': typeof SettingsPlatformAdminsIndexRoute
+  '/settings-platform-roles/': typeof SettingsPlatformRolesIndexRoute
   '/settings-session/': typeof SettingsSessionIndexRoute
   '/tenants-admins/': typeof TenantsAdminsIndexRoute
   '/tenants-billing/': typeof TenantsBillingIndexRoute
@@ -493,12 +485,11 @@ export interface FileRouteTypes {
     | '/ops-storage-quotas/'
     | '/ops-storage/'
     | '/overview-alerts/'
-    | '/overview-capacity/'
-    | '/overview-gpu/'
     | '/overview-inference/'
     | '/overview-kb/'
     | '/settings-idp/'
     | '/settings-platform-admins/'
+    | '/settings-platform-roles/'
     | '/settings-session/'
     | '/tenants-admins/'
     | '/tenants-billing/'
@@ -542,12 +533,11 @@ export interface FileRouteTypes {
     | '/ops-storage-quotas'
     | '/ops-storage'
     | '/overview-alerts'
-    | '/overview-capacity'
-    | '/overview-gpu'
     | '/overview-inference'
     | '/overview-kb'
     | '/settings-idp'
     | '/settings-platform-admins'
+    | '/settings-platform-roles'
     | '/settings-session'
     | '/tenants-admins'
     | '/tenants-billing'
@@ -592,12 +582,11 @@ export interface FileRouteTypes {
     | '/ops-storage-quotas/'
     | '/ops-storage/'
     | '/overview-alerts/'
-    | '/overview-capacity/'
-    | '/overview-gpu/'
     | '/overview-inference/'
     | '/overview-kb/'
     | '/settings-idp/'
     | '/settings-platform-admins/'
+    | '/settings-platform-roles/'
     | '/settings-session/'
     | '/tenants-admins/'
     | '/tenants-billing/'
@@ -642,12 +631,11 @@ export interface RootRouteChildren {
   OpsStorageQuotasIndexRoute: typeof OpsStorageQuotasIndexRoute
   OpsStorageIndexRoute: typeof OpsStorageIndexRoute
   OverviewAlertsIndexRoute: typeof OverviewAlertsIndexRoute
-  OverviewCapacityIndexRoute: typeof OverviewCapacityIndexRoute
-  OverviewGpuIndexRoute: typeof OverviewGpuIndexRoute
   OverviewInferenceIndexRoute: typeof OverviewInferenceIndexRoute
   OverviewKbIndexRoute: typeof OverviewKbIndexRoute
   SettingsIdpIndexRoute: typeof SettingsIdpIndexRoute
   SettingsPlatformAdminsIndexRoute: typeof SettingsPlatformAdminsIndexRoute
+  SettingsPlatformRolesIndexRoute: typeof SettingsPlatformRolesIndexRoute
   SettingsSessionIndexRoute: typeof SettingsSessionIndexRoute
   TenantsAdminsIndexRoute: typeof TenantsAdminsIndexRoute
   TenantsBillingIndexRoute: typeof TenantsBillingIndexRoute
@@ -880,20 +868,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OverviewAlertsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/overview-capacity/': {
-      id: '/overview-capacity/'
-      path: '/overview-capacity'
-      fullPath: '/overview-capacity/'
-      preLoaderRoute: typeof OverviewCapacityIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/overview-gpu/': {
-      id: '/overview-gpu/'
-      path: '/overview-gpu'
-      fullPath: '/overview-gpu/'
-      preLoaderRoute: typeof OverviewGpuIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/overview-inference/': {
       id: '/overview-inference/'
       path: '/overview-inference'
@@ -927,6 +901,13 @@ declare module '@tanstack/react-router' {
       path: '/settings-platform-admins/$userId'
       fullPath: '/settings-platform-admins/$userId'
       preLoaderRoute: typeof SettingsPlatformAdminsUserIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings-platform-roles/': {
+      id: '/settings-platform-roles/'
+      path: '/settings-platform-roles'
+      fullPath: '/settings-platform-roles/'
+      preLoaderRoute: typeof SettingsPlatformRolesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings-session/': {
@@ -1045,12 +1026,11 @@ const rootRouteChildren: RootRouteChildren = {
   OpsStorageQuotasIndexRoute: OpsStorageQuotasIndexRoute,
   OpsStorageIndexRoute: OpsStorageIndexRoute,
   OverviewAlertsIndexRoute: OverviewAlertsIndexRoute,
-  OverviewCapacityIndexRoute: OverviewCapacityIndexRoute,
-  OverviewGpuIndexRoute: OverviewGpuIndexRoute,
   OverviewInferenceIndexRoute: OverviewInferenceIndexRoute,
   OverviewKbIndexRoute: OverviewKbIndexRoute,
   SettingsIdpIndexRoute: SettingsIdpIndexRoute,
   SettingsPlatformAdminsIndexRoute: SettingsPlatformAdminsIndexRoute,
+  SettingsPlatformRolesIndexRoute: SettingsPlatformRolesIndexRoute,
   SettingsSessionIndexRoute: SettingsSessionIndexRoute,
   TenantsAdminsIndexRoute: TenantsAdminsIndexRoute,
   TenantsBillingIndexRoute: TenantsBillingIndexRoute,

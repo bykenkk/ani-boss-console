@@ -1,4 +1,4 @@
-import { Alert, Drawer, Empty, Tabs } from "@arco-design/web-react";
+import { Drawer, Empty, Tabs } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import {
@@ -118,14 +118,6 @@ export function TenantMeteringDrawer({
           <Tabs.TabPane key="day" title="按天" />
           <Tabs.TabPane key="hour" title="按小时" />
         </Tabs>
-
-        {detailQuery.data && !detailQuery.data.profile.realProvider ? (
-          <Alert
-            type="warning"
-            showIcon
-            content={`当前明细来自 ${detailQuery.data.profile.provider || "-"}，数据仅供开发联调。${detailQuery.data.profile.reason ? ` ${detailQuery.data.profile.reason}` : ""}`}
-          />
-        ) : null}
 
         <MeteringTrend
           labels={rows.map((row) => row.period)}

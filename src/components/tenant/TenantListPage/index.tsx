@@ -1,5 +1,5 @@
-import { Button, Input, Modal, Select, Tag } from "@arco-design/web-react";
-import { IconPlus, IconRefresh } from "@arco-design/web-react/icon";
+import { Button, Modal, Tag } from "@arco-design/web-react";
+import { IconPlus } from "@arco-design/web-react/icon";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useDeferredValue, useMemo, useState } from "react";
@@ -19,8 +19,6 @@ import {
   DataTableNameCell,
   ListDataTable,
   ListPageFrame,
-  ListPageHeader,
-  ListToolbar,
   type ListColumn,
 } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
@@ -172,64 +170,52 @@ export function TenantListPage() {
   return (
     <>
       <ListPageFrame
-        header={
-          <ListPageHeader
-            title="租户列表"
-            subtitle="管理租户开通、基本信息、认证、配额与生命周期。"
-            extra={
-              <div className="flex gap-2">
-                <Button
-                  icon={<IconRefresh />}
-                  loading={listQuery.isFetching || plansQuery.isFetching}
-                  onClick={() => void Promise.all([listQuery.refetch(), plansQuery.refetch()])}
-                >
-                  刷新
-                </Button>
-                <Button
-                  type="primary"
-                  icon={<IconPlus />}
-                  disabled={!canManage || !plansQuery.data?.length}
-                  title={canManage ? undefined : "当前账号只有只读权限"}
-                  onClick={() => setCreateVisible(true)}
-                >
-                  开通租户
-                </Button>
-              </div>
-            }
-          />
-        }
-        toolbar={
-          <ListToolbar
-            filters={
-              <div className="flex flex-wrap items-center gap-3">
-                <Input.Search
-                  value={keyword}
-                  allowClear
-                  placeholder="搜索租户标识或显示名"
-                  style={{ width: 320 }}
-                  onChange={(value) => {
-                    setKeyword(value);
-                    setPage(1);
-                  }}
-                />
-                <Select
-                  value={status}
-                  style={{ width: 150 }}
-                  onChange={(value) => {
-                    setStatus(value as "all" | TenantStatus);
-                    setPage(1);
-                  }}
-                >
-                  <Select.Option value="all">全部状态</Select.Option>
-                  <Select.Option value="active">活跃</Select.Option>
-                  <Select.Option value="frozen">冻结</Select.Option>
-                  <Select.Option value="disabled">禁用</Select.Option>
-                </Select>
-              </div>
-            }
-            tools={<span className="text-xs text-gray-500">共 {data.length} 个租户</span>}
-          />
-        }
+        header={{
+          title: "租户列表",
+          subtitle: "管理租户开通、基本信息、认证、配额与生命周期。",
+          extra: (
+            <Button
+              type="primary"
+              icon={<IconPlus />}
+              disabled={!canManage || !plansQuery.data?.length}
+              title={canManage ? undefined : "当前账号只有只读权限"}
+              onClick={() => setCreateVisible(true)}
+            >
+              开通租户
+            </Button>
+          ),
+        }}
+        tabs={{
+          value: status,
+          onChange: (value) => {
+            setStatus(value);
+            setPage(1);
+          },
+          items: [
+            { value: "all", label: "全部" },
+            { value: "active", label: "活跃" },
+            { value: "frozen", label: "冻结" },
+            { value: "disabled", label: "禁用" },
+          ],
+        }}
+        toolbar={{
+          search: {
+            fields: [{ value: "keyword", label: "关键词" }],
+            field: "keyword",
+            value: keyword,
+            placeholder: "搜索租户标识或显示名",
+            onFieldChange: () => undefined,
+            onChange: (value) => {
+              setKeyword(value);
+              setPage(1);
+            },
+          },
+          refresh: {
+            spinning: listQuery.isFetching || plansQuery.isFetching,
+            onClick: () => void Promise.all([listQuery.refetch(), plansQuery.refetch()]),
+          },
+          tools: <span className="text-xs text-gray-500">共 {data.length} 个租户</span>,
+        }}
       >
         <ListDataTable
           rowKey="id"

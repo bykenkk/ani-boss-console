@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import {
   IconApps,
-  IconArchive,
   IconBook,
   IconCalendarClock,
   IconCloud,
@@ -10,11 +9,9 @@ import {
   IconExport,
   IconLink,
   IconLock,
-  IconNotification,
   IconRobot,
   IconSafe,
   IconSettings,
-  IconStorage,
   IconThunderbolt,
   IconTool,
   IconUser,
@@ -23,8 +20,6 @@ import {
 
 export type AppRoute =
   | "/"
-  | "/overview-capacity"
-  | "/overview-gpu"
   | "/overview-inference"
   | "/overview-kb"
   | "/overview-alerts"
@@ -58,6 +53,7 @@ export type AppRoute =
   | "/audit-inference"
   | "/audit-export"
   | "/settings-platform-admins"
+  | "/settings-platform-roles"
   | "/settings-idp"
   | "/settings-session"
   | "/integration-webhook"
@@ -90,7 +86,7 @@ export function isNavigationGroup(item: NavigationItem): item is NavigationGroup
 }
 
 export const topNavigation: readonly TopNavigationItem[] = [
-  { label: "运营概览", to: "/overview-capacity", icon: <IconDashboard /> },
+  { label: "运营概览", to: "/", icon: <IconDashboard /> },
   { label: "租户管理", to: "/tenants", icon: <IconUserGroup /> },
   { label: "资源池管理", to: "/ops-pool", icon: <IconCloud /> },
   { label: "监控告警", to: "/health", icon: <IconTool /> },
@@ -98,35 +94,6 @@ export const topNavigation: readonly TopNavigationItem[] = [
   { label: "审计合规", to: "/audit", icon: <IconSafe /> },
   { label: "系统设置", to: "/settings-platform-admins", icon: <IconSettings /> },
   { label: "平台集成与通知", to: "/integration-webhook", icon: <IconApps /> },
-];
-
-export const overviewNavigation: readonly NavigationLeaf[] = [
-  { label: "运营总览", to: "/", icon: <IconDashboard /> },
-  {
-    label: "容量概览",
-    to: "/overview-capacity",
-    icon: <IconCloud />,
-  },
-  {
-    label: "GPU总览",
-    to: "/overview-gpu",
-    icon: <IconThunderbolt />,
-  },
-  {
-    label: "AI 服务运营态势",
-    to: "/overview-inference",
-    icon: <IconRobot />,
-  },
-  {
-    label: "知识库运营态势",
-    to: "/overview-kb",
-    icon: <IconBook />,
-  },
-  {
-    label: "平台告警与待处理",
-    to: "/overview-alerts",
-    icon: <IconNotification />,
-  },
 ];
 
 export const tenantNavigation: readonly NavigationLeaf[] = [
@@ -140,65 +107,30 @@ export const tenantNavigation: readonly NavigationLeaf[] = [
   },
 ];
 
-export const infrastructureNavigation: readonly NavigationItem[] = [
-  {
-    key: "resource-pool",
-    label: "资源池",
-    icon: <IconCloud />,
-    children: [
-      { label: "平台资源池总览", to: "/ops-pool" },
-      { label: "GPU资源池", to: "/ops-gpu", icon: <IconThunderbolt /> },
-      { label: "节点状态", to: "/ops-nodes" },
-    ],
-  },
-  {
-    key: "infrastructure",
-    label: "基础设施",
-    icon: <IconStorage />,
-    children: [
-      { label: "存储基础设施", to: "/ops-storage" },
-      { label: "租户存储配额", to: "/ops-storage-quotas" },
-      { label: "网络基础设施", to: "/ops-network" },
-    ],
-  },
-  {
-    key: "registry-operations",
-    label: "镜像仓库运维",
-    icon: <IconArchive />,
-    children: [
-      { label: "镜像配额", to: "/ops-registry-quota" },
-      { label: "漏洞扫描", to: "/ops-registry-vulnerabilities" },
-      { label: "垃圾回收", to: "/ops-registry-gc" },
-    ],
-  },
+export const infrastructureNavigation: readonly NavigationLeaf[] = [
+  { label: "平台资源池总览", to: "/ops-pool" },
+  { label: "GPU资源池", to: "/ops-gpu", icon: <IconThunderbolt /> },
+  { label: "节点状态", to: "/ops-nodes" },
+  { label: "存储基础设施", to: "/ops-storage" },
+  { label: "租户存储配额", to: "/ops-storage-quotas" },
+  { label: "网络基础设施", to: "/ops-network" },
+  { label: "镜像配额", to: "/ops-registry-quota" },
+  { label: "漏洞扫描", to: "/ops-registry-vulnerabilities" },
+  { label: "垃圾回收", to: "/ops-registry-gc" },
 ];
 
-export const observabilityNavigation: readonly NavigationItem[] = [
-  {
-    key: "monitoring",
-    label: "监控",
-    icon: <IconDashboard />,
-    children: [
-      { label: "平台健康", to: "/health", icon: <IconDashboard /> },
-      { label: "GPU 监控", to: "/health-gpu" },
-      { label: "推理监控", to: "/health-inference" },
-      { label: "知识库监控", to: "/health-kb" },
-      { label: "组件指标", to: "/health-metrics" },
-      { label: "运行日志", to: "/health-logs", icon: <IconBook /> },
-      { label: "Trace", to: "/health-traces" },
-    ],
-  },
-  {
-    key: "maintenance-jobs",
-    label: "运维作业",
-    icon: <IconTool />,
-    children: [
-      { label: "告警规则", to: "/health-alert-rules" },
-      { label: "运维 Skills", to: "/maint-skills" },
-      { label: "任务历史", to: "/maint-jobs" },
-      { label: "故障处理", to: "/maint-incidents" },
-    ],
-  },
+export const observabilityNavigation: readonly NavigationLeaf[] = [
+  { label: "平台健康", to: "/health", icon: <IconDashboard /> },
+  { label: "GPU 监控", to: "/health-gpu" },
+  { label: "推理监控", to: "/health-inference" },
+  { label: "知识库监控", to: "/health-kb" },
+  { label: "组件指标", to: "/health-metrics" },
+  { label: "运行日志", to: "/health-logs", icon: <IconBook /> },
+  { label: "Trace", to: "/health-traces" },
+  { label: "告警规则", to: "/health-alert-rules" },
+  { label: "运维 Skills", to: "/maint-skills" },
+  { label: "任务历史", to: "/maint-jobs" },
+  { label: "故障处理", to: "/maint-incidents" },
 ];
 
 export const meteringNavigation: readonly NavigationLeaf[] = [
@@ -218,6 +150,11 @@ export const settingsNavigation: readonly NavigationLeaf[] = [
     to: "/settings-platform-admins",
     icon: <IconUserGroup />,
   },
+  {
+    label: "平台角色",
+    to: "/settings-platform-roles",
+    icon: <IconSafe />,
+  },
   { label: "登录与 IdP（预留）", to: "/settings-idp", icon: <IconLock /> },
   {
     label: "会话与安全策略（预留）",
@@ -233,8 +170,7 @@ export const integrationNavigation: readonly NavigationLeaf[] = [
 ];
 
 const visibleAppRoutes = new Set<AppRoute>([
-  "/overview-capacity",
-  "/overview-gpu",
+  "/",
   "/tenants",
   "/tenants-quotas",
   "/tenants-admins",
@@ -244,6 +180,7 @@ const visibleAppRoutes = new Set<AppRoute>([
   "/metering",
   "/audit",
   "/settings-platform-admins",
+  "/settings-platform-roles",
 ]);
 
 function filterVisibleNavigation(items: readonly NavigationItem[]): NavigationItem[] {
@@ -262,13 +199,8 @@ function filterVisibleNavigation(items: readonly NavigationItem[]): NavigationIt
   return visibleItems;
 }
 
-const completeAppNavigation: readonly NavigationGroup[] = [
-  {
-    key: "platform-overview",
-    label: topNavigation[0].label,
-    icon: topNavigation[0].icon,
-    children: overviewNavigation,
-  },
+const completeAppNavigation: readonly NavigationItem[] = [
+  { label: "概览", to: "/", icon: <IconDashboard /> },
   {
     key: "tenant-management",
     label: topNavigation[1].label,
@@ -279,17 +211,13 @@ const completeAppNavigation: readonly NavigationGroup[] = [
     key: "infrastructure-operations",
     label: topNavigation[2].label,
     icon: topNavigation[2].icon,
-    children: infrastructureNavigation.flatMap((item) =>
-      isNavigationGroup(item) ? item.children : [item],
-    ),
+    children: infrastructureNavigation,
   },
   {
     key: "operations-observability",
     label: topNavigation[3].label,
     icon: topNavigation[3].icon,
-    children: observabilityNavigation.flatMap((item) =>
-      isNavigationGroup(item) ? item.children : [item],
-    ),
+    children: observabilityNavigation,
   },
   {
     key: "platform-metering",
@@ -317,6 +245,5 @@ const completeAppNavigation: readonly NavigationGroup[] = [
   },
 ];
 
-export const appNavigation: readonly NavigationGroup[] = completeAppNavigation
-  .map((group) => ({ ...group, children: filterVisibleNavigation(group.children) }))
-  .filter((group) => group.children.length > 0);
+export const appNavigation: readonly NavigationItem[] =
+  filterVisibleNavigation(completeAppNavigation);

@@ -27,7 +27,7 @@ import { tenantStatusMeta } from "../apiModel";
 import { TenantProfileModal } from "../TenantManagementModals";
 import { useTenantManagementAccess } from "../useTenantManagementAccess";
 import { TenantAuditRecords } from "./TenantAuditRecords";
-import { TenantIdentitySettings } from "./TenantIdentitySettings";
+// import { TenantIdentitySettings } from "./TenantIdentitySettings";
 import { TenantLifecycleRecords } from "./TenantLifecycleRecords";
 import { TenantQuotaManagement } from "./TenantQuotaManagement";
 import { TenantScopedAdministrators } from "./TenantScopedAdministrators";
@@ -174,11 +174,13 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
     },
   ];
   const detailTabs: DetailTab[] = [
+    /* 认证与安全功能暂时隐藏，恢复时同时还原下方 defaultTabKey。
     {
       key: "identity",
       title: "认证与安全",
       content: <TenantIdentitySettings tenantId={tenant.id} canManage={canManage} />,
     },
+    */
     {
       key: "quota",
       title: "配额与申请",
@@ -207,6 +209,8 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
       content: <TenantAuditRecords tenantId={tenant.id} />,
     },
   ];
+  // const defaultTabKey = "identity";
+  const defaultTabKey = "quota";
 
   return (
     <>
@@ -234,7 +238,7 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
         }
         cards={infoCards}
         tabs={detailTabs}
-        defaultTabKey="identity"
+        defaultTabKey={defaultTabKey}
         onBack={returnToList}
       />
 

@@ -1,12 +1,5 @@
-import { Input } from "@arco-design/web-react";
-import { IconSearch } from "@arco-design/web-react/icon";
 import { useMemo, useState } from "react";
-import {
-  ListDataTable,
-  ListToolbar,
-  TableSectionFrame,
-  type ListColumn,
-} from "@/components/common";
+import { ListDataTable, TableSectionFrame, type ListColumn } from "@/components/common";
 import type { MeteringTenantRow } from "../../model";
 import { formatUsage, getChangeRate } from "../usePlatformGpuMetering";
 
@@ -81,27 +74,21 @@ export function MeteringTenantTable({
         <div className="flex items-center justify-between px-5 pt-5">
           <div>
             <div className="text-base font-semibold text-gray-900">租户用量排行</div>
-            <div className="mt-1 text-xs text-gray-500">
-              按本月累计用量降序排列；接口当前仅返回租户 ID。
-            </div>
+            <div className="mt-1 text-xs text-gray-500">按本月累计用量降序排列。</div>
           </div>
           <span className="text-xs text-gray-500">共 {filteredRows.length} 个租户</span>
         </div>
       }
-      toolbar={
-        <ListToolbar
-          filters={
-            <Input
-              value={keyword}
-              onChange={setKeyword}
-              allowClear
-              prefix={<IconSearch />}
-              placeholder="搜索租户 ID"
-              className="w-72"
-            />
-          }
-        />
-      }
+      toolbar={{
+        search: {
+          fields: [{ value: "tenantId", label: "租户 ID" }],
+          field: "tenantId",
+          value: keyword,
+          placeholder: "搜索租户 ID",
+          onFieldChange: () => undefined,
+          onChange: setKeyword,
+        },
+      }}
     >
       <ListDataTable
         rowKey="id"

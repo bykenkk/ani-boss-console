@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import type { ReactNode } from "react";
 import { Table, type TableColumnProps, type TableProps } from "@arco-design/web-react";
+import { DataTableSectionHeader, type DataTableSectionHeaderProps } from "./DataTableSectionHeader";
 import {
   getRowActionsColumnWidth,
   normalizeDataTableColumns,
@@ -12,6 +13,7 @@ import styles from "./index.module.less";
 
 export { DataTableRowActionButton, DataTableRowActions } from "./RowActions";
 export type { RowAction, RowActionIntent } from "./types";
+export type { DataTableSectionHeaderProps } from "./DataTableSectionHeader";
 
 export type ListColumn<T> = TableColumnProps<T>;
 
@@ -26,6 +28,7 @@ export type ListPagination = {
 
 export type DataTableProps<T> = {
   className?: string;
+  header?: DataTableSectionHeaderProps;
   data: T[];
   rowKey?: string | ((row: T) => string);
   columns: Array<TableColumnProps<T>>;
@@ -40,6 +43,7 @@ export type DataTableProps<T> = {
 
 export function DataTable<T>({
   className,
+  header,
   data,
   rowKey = "id",
   columns,
@@ -51,9 +55,12 @@ export function DataTable<T>({
   scroll,
   rowActions,
 }: DataTableProps<T>) {
-  const hasRowActions = Boolean(rowActions?.length);
+  const hasConfiguredRowActions = Boolean(rowActions?.length);
+  const hasRowActions = Boolean(
+    rowActions?.some((action) => data.some((record) => action.visible?.(record) !== false)),
+  );
   if (
-    hasRowActions &&
+    hasConfiguredRowActions &&
     columns.some((column) => column.key === "__actions" || column.key === "actions")
   ) {
     throw new Error("DataTable cannot combine rowActions with a manual actions column");
@@ -65,9 +72,9 @@ export function DataTable<T>({
           ...columns,
           {
             key: "__actions",
-            title: "操作",
+            title: null,
             fixed: scroll?.x === false ? undefined : "right",
-            width: getRowActionsColumnWidth(rowActions),
+            width: getRowActionsColumnWidth(),
             render: (_value, record) => (
               <ConfiguredDataTableRowActions actions={rowActions} record={record} />
             ),
@@ -96,35 +103,38 @@ export function DataTable<T>({
         };
 
   return (
-    <Table<T>
-      className={clsx(styles.dataTable, className)}
-      aria-label={tableLabel}
-      rowKey={rowKey}
-      columns={resolvedColumns}
-      data={data}
-      loading={loading}
-      noDataElement={noDataElement}
-      pagination={tablePagination}
-      tableLayoutFixed
-      onChange={
-        pagination === false
-          ? undefined
-          : (nextPagination, _sorter, _filters, extra) => {
-              if (extra.action !== "paginate") return;
-              const nextPageSize = nextPagination.pageSize ?? pagination.pageSize;
-              const nextPage = nextPagination.current ?? pagination.page;
-              if (nextPageSize !== pagination.pageSize) {
-                pagination.onPageSizeChange(nextPageSize);
-                return;
+    <>
+      {header ? <DataTableSectionHeader {...header} /> : null}
+      <Table<T>
+        className={clsx(styles.dataTable, className)}
+        aria-label={tableLabel}
+        rowKey={rowKey}
+        columns={resolvedColumns}
+        data={data}
+        loading={loading}
+        noDataElement={noDataElement}
+        pagination={tablePagination}
+        tableLayoutFixed
+        onChange={
+          pagination === false
+            ? undefined
+            : (nextPagination, _sorter, _filters, extra) => {
+                if (extra.action !== "paginate") return;
+                const nextPageSize = nextPagination.pageSize ?? pagination.pageSize;
+                const nextPage = nextPagination.current ?? pagination.page;
+                if (nextPageSize !== pagination.pageSize) {
+                  pagination.onPageSizeChange(nextPageSize);
+                  return;
+                }
+                if (nextPage !== pagination.page) pagination.onPageChange(nextPage);
               }
-              if (nextPage !== pagination.page) pagination.onPageChange(nextPage);
-            }
-      }
-      border={false}
-      hover
-      scroll={resolvedScroll}
-      rowSelection={rowSelection}
-    />
+        }
+        border={false}
+        hover
+        scroll={resolvedScroll}
+        rowSelection={rowSelection}
+      />
+    </>
   );
 }
 

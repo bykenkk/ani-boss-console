@@ -1,4 +1,4 @@
-import { Button, Input, Select } from "@arco-design/web-react";
+import { Button, Select, Space } from "@arco-design/web-react";
 import { IconRefresh } from "@arco-design/web-react/icon";
 import { createFileRoute } from "@tanstack/react-router";
 import clsx from "clsx";
@@ -7,7 +7,6 @@ import {
   ListDataTable,
   DataTableNameCell,
   ListPageHeader,
-  ListToolbar,
   TableSectionFrame,
   type ListColumn,
 } from "@/components/common";
@@ -216,49 +215,45 @@ export const Route = createFileRoute("/ops-nodes/")({
               </span>
             </div>
           }
-          toolbar={
-            <ListToolbar
-              filters={
-                <div className="flex flex-wrap items-center gap-3">
-                  <Select
-                    value={region}
-                    onChange={setRegion}
-                    style={{ width: 150 }}
-                    options={[
-                      { label: "全部区域", value: "all" },
-                      ...regions.map((value) => ({ label: value, value })),
-                    ]}
-                  />
-                  <Select
-                    value={pool}
-                    onChange={setPool}
-                    style={{ width: 160 }}
-                    options={[
-                      { label: "全部资源池", value: "all" },
-                      ...pools.map((value) => ({ label: value, value })),
-                    ]}
-                  />
-                  <Select
-                    value={status}
-                    onChange={setStatus}
-                    style={{ width: 140 }}
-                    options={[
-                      { label: "全部状态", value: "all" },
-                      { label: "Ready", value: "Ready" },
-                      { label: "NotReady", value: "NotReady" },
-                    ]}
-                  />
-                  <Input.Search
-                    allowClear
-                    value={keyword}
-                    onChange={setKeyword}
-                    placeholder="搜索节点、ID、资源池或区域"
-                    style={{ width: 260 }}
-                  />
-                </div>
-              }
-            />
-          }
+          toolbar={{
+            search: {
+              fields: [{ value: "keyword", label: "关键词" }],
+              field: "keyword",
+              value: keyword,
+              placeholder: "搜索节点、ID、资源池或区域",
+              onFieldChange: () => undefined,
+              onChange: setKeyword,
+            },
+            filters: (
+              <Space>
+                <Select
+                  value={region}
+                  onChange={setRegion}
+                  options={[
+                    { label: "全部区域", value: "all" },
+                    ...regions.map((value) => ({ label: value, value })),
+                  ]}
+                />
+                <Select
+                  value={pool}
+                  onChange={setPool}
+                  options={[
+                    { label: "全部资源池", value: "all" },
+                    ...pools.map((value) => ({ label: value, value })),
+                  ]}
+                />
+                <Select
+                  value={status}
+                  onChange={setStatus}
+                  options={[
+                    { label: "全部状态", value: "all" },
+                    { label: "Ready", value: "Ready" },
+                    { label: "NotReady", value: "NotReady" },
+                  ]}
+                />
+              </Space>
+            ),
+          }}
         >
           <ListDataTable
             rowKey="id"

@@ -18,7 +18,6 @@ import { showMessage } from "@/lib/feedback";
 import {
   ListDataTable,
   ListPageFrame,
-  ListPageHeader,
   DataTableNameCell,
   type ListColumn,
 } from "@/components/common";
@@ -232,25 +231,23 @@ export function QuotaPolicyList() {
   return (
     <>
       <ListPageFrame
-        header={
-          <ListPageHeader
-            title="配额策略"
-            subtitle="管理租户配额套餐；套餐发布后限额只读，变更请新建套餐。"
-            extra={
-              <Space>
-                <Button
-                  icon={<IconDownload />}
-                  onClick={() => showMessage({ type: "success", content: "配额套餐已导出" })}
-                >
-                  导出
-                </Button>
-                <Button type="primary" icon={<IconPlus />} onClick={() => setCreateVisible(true)}>
-                  新建套餐
-                </Button>
-              </Space>
-            }
-          />
-        }
+        header={{
+          title: "配额策略",
+          subtitle: "管理租户配额套餐；套餐发布后限额只读，变更请新建套餐。",
+          extra: (
+            <Space>
+              <Button
+                icon={<IconDownload />}
+                onClick={() => showMessage({ type: "success", content: "配额套餐已导出" })}
+              >
+                导出
+              </Button>
+              <Button type="primary" icon={<IconPlus />} onClick={() => setCreateVisible(true)}>
+                新建套餐
+              </Button>
+            </Space>
+          ),
+        }}
       >
         <ListDataTable
           rowKey="id"

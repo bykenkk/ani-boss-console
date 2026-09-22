@@ -1,11 +1,10 @@
-import { Input, Progress, Select } from "@arco-design/web-react";
+import { Progress, Select, Space } from "@arco-design/web-react";
 import clsx from "clsx";
 import { useMemo, useState } from "react";
 import {
   DataTableNameCell,
   ListDataTable,
   ListPageHeader,
-  ListToolbar,
   TableSectionFrame,
   type ListColumn,
 } from "@/components/common";
@@ -275,32 +274,30 @@ export function TenantStorageQuotaPage() {
             </span>
           </div>
         }
-        toolbar={
-          <ListToolbar
-            filters={
-              <div className="flex flex-wrap items-center gap-3">
-                <Select
-                  value={scope}
-                  onChange={setScope}
-                  style={{ width: 150 }}
-                  options={[
-                    { label: "全部租户", value: "all" },
-                    { label: "待扩容", value: "pending" },
-                    { label: "高水位", value: "high" },
-                    { label: "正常", value: "normal" },
-                  ]}
-                />
-                <Input.Search
-                  allowClear
-                  value={keyword}
-                  onChange={setKeyword}
-                  placeholder="搜索租户名称或 ID"
-                  style={{ width: 260 }}
-                />
-              </div>
-            }
-          />
-        }
+        toolbar={{
+          search: {
+            fields: [{ value: "keyword", label: "关键词" }],
+            field: "keyword",
+            value: keyword,
+            placeholder: "搜索租户名称或 ID",
+            onFieldChange: () => undefined,
+            onChange: setKeyword,
+          },
+          filters: (
+            <Space>
+              <Select
+                value={scope}
+                onChange={setScope}
+                options={[
+                  { label: "全部租户", value: "all" },
+                  { label: "待扩容", value: "pending" },
+                  { label: "高水位", value: "high" },
+                  { label: "正常", value: "normal" },
+                ]}
+              />
+            </Space>
+          ),
+        }}
       >
         <ListDataTable
           rowKey="id"
