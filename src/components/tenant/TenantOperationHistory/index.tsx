@@ -13,7 +13,7 @@ const operationLabels: Record<string, string> = {
   suspend: "冻结租户",
   resume: "解冻租户",
   disable: "禁用租户",
-  rebind_quota: "改绑套餐",
+  rebind_quota: "改绑配额策略",
   submit_quota_request: "提交配额申请",
   approve_quota_request: "通过配额申请",
   reject_quota_request: "驳回配额申请",

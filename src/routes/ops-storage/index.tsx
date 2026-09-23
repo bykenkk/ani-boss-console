@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import {
   ListDataTable,
   DataTableNameCell,
-  ListPageHeader,
+  ResourcePageFrame,
   TableSectionFrame,
   type ListColumn,
 } from "@/components/common";
@@ -204,12 +204,12 @@ export const Route = createFileRoute("/ops-storage/")({
     ];
 
     return (
-      <div className="space-y-4">
-        <ListPageHeader
-          title="存储基础设施"
-          subtitle="查看平台块、对象、文件和向量存储后端的健康与容量状态。"
-        />
-
+      <ResourcePageFrame
+        header={{
+          title: "存储基础设施",
+          subtitle: "查看平台块、对象、文件和向量存储后端的健康与容量状态。",
+        }}
+      >
         <section className="grid grid-cols-4 gap-3.5 max-[1180px]:grid-cols-2">
           <Metric
             label="存储后端"
@@ -295,7 +295,7 @@ export const Route = createFileRoute("/ops-storage/")({
 
         <StorageClassOperations />
         <RecentStorageEvents />
-      </div>
+      </ResourcePageFrame>
     );
   },
 });

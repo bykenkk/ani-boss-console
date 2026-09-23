@@ -31,6 +31,7 @@ import { Route as MaintIncidentsIndexRouteImport } from './routes/maint-incident
 import { Route as MaintJobsIndexRouteImport } from './routes/maint-jobs/index'
 import { Route as MaintSkillsIndexRouteImport } from './routes/maint-skills/index'
 import { Route as MeteringIndexRouteImport } from './routes/metering/index'
+import { Route as OpsGpuQuotasIndexRouteImport } from './routes/ops-gpu-quotas/index'
 import { Route as OpsGpuIndexRouteImport } from './routes/ops-gpu/index'
 import { Route as OpsNetworkIndexRouteImport } from './routes/ops-network/index'
 import { Route as OpsNodesIndexRouteImport } from './routes/ops-nodes/index'
@@ -166,6 +167,11 @@ const MaintSkillsIndexRoute = MaintSkillsIndexRouteImport.update({
 const MeteringIndexRoute = MeteringIndexRouteImport.update({
   id: '/metering/',
   path: '/metering/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpsGpuQuotasIndexRoute = OpsGpuQuotasIndexRouteImport.update({
+  id: '/ops-gpu-quotas/',
+  path: '/ops-gpu-quotas/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OpsGpuIndexRoute = OpsGpuIndexRouteImport.update({
@@ -326,6 +332,7 @@ export interface FileRoutesByFullPath {
   '/maint-jobs/': typeof MaintJobsIndexRoute
   '/maint-skills/': typeof MaintSkillsIndexRoute
   '/metering/': typeof MeteringIndexRoute
+  '/ops-gpu-quotas/': typeof OpsGpuQuotasIndexRoute
   '/ops-gpu/': typeof OpsGpuIndexRoute
   '/ops-network/': typeof OpsNetworkIndexRoute
   '/ops-nodes/': typeof OpsNodesIndexRoute
@@ -374,6 +381,7 @@ export interface FileRoutesByTo {
   '/maint-jobs': typeof MaintJobsIndexRoute
   '/maint-skills': typeof MaintSkillsIndexRoute
   '/metering': typeof MeteringIndexRoute
+  '/ops-gpu-quotas': typeof OpsGpuQuotasIndexRoute
   '/ops-gpu': typeof OpsGpuIndexRoute
   '/ops-network': typeof OpsNetworkIndexRoute
   '/ops-nodes': typeof OpsNodesIndexRoute
@@ -424,6 +432,7 @@ export interface FileRoutesById {
   '/maint-jobs/': typeof MaintJobsIndexRoute
   '/maint-skills/': typeof MaintSkillsIndexRoute
   '/metering/': typeof MeteringIndexRoute
+  '/ops-gpu-quotas/': typeof OpsGpuQuotasIndexRoute
   '/ops-gpu/': typeof OpsGpuIndexRoute
   '/ops-network/': typeof OpsNetworkIndexRoute
   '/ops-nodes/': typeof OpsNodesIndexRoute
@@ -475,6 +484,7 @@ export interface FileRouteTypes {
     | '/maint-jobs/'
     | '/maint-skills/'
     | '/metering/'
+    | '/ops-gpu-quotas/'
     | '/ops-gpu/'
     | '/ops-network/'
     | '/ops-nodes/'
@@ -523,6 +533,7 @@ export interface FileRouteTypes {
     | '/maint-jobs'
     | '/maint-skills'
     | '/metering'
+    | '/ops-gpu-quotas'
     | '/ops-gpu'
     | '/ops-network'
     | '/ops-nodes'
@@ -572,6 +583,7 @@ export interface FileRouteTypes {
     | '/maint-jobs/'
     | '/maint-skills/'
     | '/metering/'
+    | '/ops-gpu-quotas/'
     | '/ops-gpu/'
     | '/ops-network/'
     | '/ops-nodes/'
@@ -621,6 +633,7 @@ export interface RootRouteChildren {
   MaintJobsIndexRoute: typeof MaintJobsIndexRoute
   MaintSkillsIndexRoute: typeof MaintSkillsIndexRoute
   MeteringIndexRoute: typeof MeteringIndexRoute
+  OpsGpuQuotasIndexRoute: typeof OpsGpuQuotasIndexRoute
   OpsGpuIndexRoute: typeof OpsGpuIndexRoute
   OpsNetworkIndexRoute: typeof OpsNetworkIndexRoute
   OpsNodesIndexRoute: typeof OpsNodesIndexRoute
@@ -796,6 +809,13 @@ declare module '@tanstack/react-router' {
       path: '/metering'
       fullPath: '/metering/'
       preLoaderRoute: typeof MeteringIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ops-gpu-quotas/': {
+      id: '/ops-gpu-quotas/'
+      path: '/ops-gpu-quotas'
+      fullPath: '/ops-gpu-quotas/'
+      preLoaderRoute: typeof OpsGpuQuotasIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ops-gpu/': {
@@ -1016,6 +1036,7 @@ const rootRouteChildren: RootRouteChildren = {
   MaintJobsIndexRoute: MaintJobsIndexRoute,
   MaintSkillsIndexRoute: MaintSkillsIndexRoute,
   MeteringIndexRoute: MeteringIndexRoute,
+  OpsGpuQuotasIndexRoute: OpsGpuQuotasIndexRoute,
   OpsGpuIndexRoute: OpsGpuIndexRoute,
   OpsNetworkIndexRoute: OpsNetworkIndexRoute,
   OpsNodesIndexRoute: OpsNodesIndexRoute,

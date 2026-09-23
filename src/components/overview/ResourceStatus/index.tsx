@@ -1,3 +1,4 @@
+import { ResourcePageFrame } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
 import { OverviewPageHeader } from "@/components/overview/OverviewPageHeader";
 import { Panel } from "@/components/overview/Panel";
@@ -11,9 +12,8 @@ export function ResourceStatusPage({ kind }: { kind: ResourceStatusKind }) {
   const data = statusData[kind];
 
   return (
-    <>
-      <OverviewPageHeader title={data.title} subtitle={data.subtitle} />
-      <section className="mb-4 grid grid-cols-4 gap-3.5">
+    <ResourcePageFrame header={<OverviewPageHeader title={data.title} subtitle={data.subtitle} />}>
+      <section className="grid grid-cols-4 gap-3.5">
         {data.metrics.map((item, index) => (
           <Metric
             key={item[0]}
@@ -24,7 +24,7 @@ export function ResourceStatusPage({ kind }: { kind: ResourceStatusKind }) {
           />
         ))}
       </section>
-      <div className="mb-3.5 grid grid-cols-2 gap-3.5">
+      <div className="grid grid-cols-2 gap-3.5">
         <Panel title={data.trendTitle}>
           <TrendChart />
         </Panel>
@@ -32,6 +32,6 @@ export function ResourceStatusPage({ kind }: { kind: ResourceStatusKind }) {
           <StatusDonutChart />
         </Panel>
       </div>
-    </>
+    </ResourcePageFrame>
   );
 }

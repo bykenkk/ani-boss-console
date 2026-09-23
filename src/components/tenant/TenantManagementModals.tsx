@@ -165,13 +165,14 @@ export function TenantQuotaRequestModal({
 
   return (
     <Modal
-      title={`申请调整：${item.displayName}`}
+      title={`配额调整：${item.displayName}`}
       visible
-      okText="提交申请"
+      okText="确认调整"
       confirmLoading={loading}
       onOk={submit}
       onCancel={onCancel}
     >
+      <div className="mb-4 text-sm text-gray-500">确认后将直接调整配额，无需审批。</div>
       <Form layout="vertical">
         <Form.Item label={`新上限（${item.unit}）`} required>
           <InputNumber
@@ -207,7 +208,7 @@ export function TenantPlanModal({
 
   const submit = () => {
     if (!draft.name.trim() || (!plan && !draft.code.trim())) {
-      showMessage({ type: "warning", content: "请填写套餐编码和名称" });
+      showMessage({ type: "warning", content: "请填写策略编码和名称" });
       return;
     }
     if (plan) {
@@ -227,7 +228,7 @@ export function TenantPlanModal({
 
   return (
     <Modal
-      title={plan ? "编辑配额套餐" : "新建配额套餐"}
+      title={plan ? "编辑配额策略" : "新建配额策略"}
       visible
       style={{ width: 720 }}
       okText={plan ? "保存" : "创建草稿"}
@@ -237,14 +238,14 @@ export function TenantPlanModal({
     >
       <Form layout="vertical">
         <div className="grid grid-cols-2 gap-x-4">
-          <Form.Item label="套餐编码" required>
+          <Form.Item label="策略编码" required>
             <Input
               value={draft.code}
               disabled={Boolean(plan)}
               onChange={(code) => setDraft((current) => ({ ...current, code }))}
             />
           </Form.Item>
-          <Form.Item label="套餐名称" required>
+          <Form.Item label="策略名称" required>
             <Input
               value={draft.name}
               onChange={(name) => setDraft((current) => ({ ...current, name }))}
@@ -300,7 +301,7 @@ export function TenantPlanLimitsModal({
 
   return (
     <Modal
-      title="编辑套餐限额"
+      title="编辑配额上限"
       visible
       style={{ width: 680 }}
       okText="保存限额"

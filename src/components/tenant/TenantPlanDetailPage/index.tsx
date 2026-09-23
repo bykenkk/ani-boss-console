@@ -52,7 +52,7 @@ export function TenantPlanDetailPage({ planId }: TenantPlanDetailPageProps) {
     meta: {
       errorNotification: {
         id: withId("tenant-plan-detail", planId),
-        action: "配额套餐详情加载",
+        action: "配额策略详情加载",
         fallback: "请求失败，请稍后重试",
       },
     },
@@ -65,9 +65,9 @@ export function TenantPlanDetailPage({ planId }: TenantPlanDetailPageProps) {
     meta: {
       feedback: {
         channel: "message",
-        action: "配额套餐更新",
-        successText: "配额套餐已更新",
-        errorFallback: "配额套餐更新失败，请稍后重试",
+        action: "配额策略更新",
+        successText: "配额策略已更新",
+        errorFallback: "配额策略更新失败，请稍后重试",
       },
     },
     mutationFn: (input: { name: string; description: string }) =>
@@ -82,9 +82,9 @@ export function TenantPlanDetailPage({ planId }: TenantPlanDetailPageProps) {
       feedback: {
         channel: "notification",
         id: withId("tenant-plan-status", planId),
-        action: "配额套餐状态更新",
-        successText: "配额套餐状态已更新",
-        errorFallback: "配额套餐状态更新失败，请稍后重试",
+        action: "配额策略状态更新",
+        successText: "配额策略状态已更新",
+        errorFallback: "配额策略状态更新失败，请稍后重试",
       },
     },
     mutationFn: (action: "activate" | "disable") =>
@@ -98,9 +98,9 @@ export function TenantPlanDetailPage({ planId }: TenantPlanDetailPageProps) {
       feedback: {
         channel: "notification",
         id: withId("tenant-plan-delete", planId),
-        action: "配额套餐删除",
-        successText: "配额套餐已删除",
-        errorFallback: "配额套餐删除失败，请稍后重试",
+        action: "配额策略删除",
+        successText: "配额策略已删除",
+        errorFallback: "配额策略删除失败，请稍后重试",
       },
     },
     mutationFn: () => runTenantPlanOperation(() => deleteTenantPlan(planId)),
@@ -133,8 +133,8 @@ export function TenantPlanDetailPage({ planId }: TenantPlanDetailPageProps) {
         cards={[
           {
             key: "empty",
-            title: "套餐详情",
-            content: <div className="py-8 text-center text-gray-500">暂无套餐详情</div>,
+            title: "策略详情",
+            content: <div className="py-8 text-center text-gray-500">暂无策略详情</div>,
           },
         ]}
         onBack={returnToList}
@@ -149,14 +149,14 @@ export function TenantPlanDetailPage({ planId }: TenantPlanDetailPageProps) {
     const action = plan.status === "active" ? "disable" : "activate";
     const label = action === "activate" ? "发布" : "停用";
     Modal.confirm({
-      title: `${label}套餐 ${plan.name}？`,
-      content: action === "disable" ? "停用后不能再用于新租户开通或套餐绑定。" : undefined,
+      title: `${label}配额策略 ${plan.name}？`,
+      content: action === "disable" ? "停用后不能再用于新租户开通或策略绑定。" : undefined,
       onOk: () => statusMutation.mutateAsync(action),
     });
   };
   const confirmDelete = () => {
     Modal.confirm({
-      title: `删除套餐 ${plan.name}？`,
+      title: `删除配额策略 ${plan.name}？`,
       content: "仍有关联租户时后端会拒绝删除。",
       okButtonProps: { status: "danger" },
       onOk: () => deleteMutation.mutateAsync(),
@@ -172,22 +172,24 @@ export function TenantPlanDetailPage({ planId }: TenantPlanDetailPageProps) {
     >
       <Menu.Item key="edit">编辑基本信息</Menu.Item>
       {plan.status !== "disabled" ? (
-        <Menu.Item key="status">{plan.status === "active" ? "停用套餐" : "发布套餐"}</Menu.Item>
+        <Menu.Item key="status">
+          {plan.status === "active" ? "停用配额策略" : "发布配额策略"}
+        </Menu.Item>
       ) : null}
-      {plan.status !== "active" ? <Menu.Item key="delete">删除套餐</Menu.Item> : null}
+      {plan.status !== "active" ? <Menu.Item key="delete">删除配额策略</Menu.Item> : null}
     </Menu>
   );
 
   const infoCards: DetailInfoCard[] = [
     {
       key: "overview",
-      title: "套餐概览",
+      title: "基本信息",
       content: (
         <Descriptions
           column={1}
           data={[
-            { label: "套餐 ID", value: plan.id },
-            { label: "套餐编码", value: plan.code },
+            { label: "策略 ID", value: plan.id },
+            { label: "配额策略", value: plan.code },
             { label: "名称", value: plan.name },
             { label: "说明", value: plan.description || "-" },
             { label: "关联租户", value: plan.tenantCount },
@@ -232,7 +234,7 @@ export function TenantPlanDetailPage({ planId }: TenantPlanDetailPageProps) {
         subtitle={plan.code}
         status={<Tag color={status.color}>{status.label}</Tag>}
         headerItems={[
-          { label: "套餐 ID", value: plan.id },
+          { label: "策略 ID", value: plan.id },
           { label: "关联租户", value: plan.tenantCount },
           { label: "创建时间", value: formatDateTime(plan.createdAt) },
           { label: "更新时间", value: formatDateTime(plan.updatedAt) },

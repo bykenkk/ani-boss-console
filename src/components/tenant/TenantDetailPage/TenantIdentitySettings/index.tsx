@@ -98,7 +98,7 @@ export function TenantIdentitySettings({ tenantId, canManage }: TenantIdentitySe
 
   return (
     <>
-      <div className="space-y-4 py-4">
+      <div className="space-y-4">
         <Descriptions
           column={1}
           data={[

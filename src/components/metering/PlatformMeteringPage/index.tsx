@@ -1,7 +1,7 @@
 import { Button, Tabs } from "@arco-design/web-react";
 import { IconRefresh } from "@arco-design/web-react/icon";
 import { useState } from "react";
-import { ListPageHeader } from "@/components/common";
+import { ResourcePageFrame } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
 import { formatMonthDay } from "@/lib/date";
 import { MeteringTrend } from "../MeteringTrend";
@@ -20,11 +20,11 @@ export function PlatformMeteringPage() {
   const metricValue = (value?: string) => (query.isPending || !query.data ? "-" : value || "-");
 
   return (
-    <div className="space-y-4">
-      <ListPageHeader
-        title="计量总览"
-        subtitle="汇总 ANI 平台计量数据与租户用量分布；当前数据用于资源运营观察，不作为账单依据。"
-        extra={
+    <ResourcePageFrame
+      header={{
+        title: "计量总览",
+        subtitle: "汇总 ANI 平台计量数据与租户用量分布；当前数据用于资源运营观察，不作为账单依据。",
+        extra: (
           <Button
             icon={<IconRefresh />}
             loading={query.isFetching}
@@ -32,16 +32,16 @@ export function PlatformMeteringPage() {
           >
             刷新
           </Button>
-        }
-      />
-
+        ),
+      }}
+    >
       <Tabs
         activeTab={dimension}
         onChange={(key) => {
           setDetailTenantId(undefined);
           setDimension(key as MeteringDimension);
         }}
-        className="rounded-lg border border-gray-200 bg-white px-5 pt-1"
+        className="rounded-lg border border-gray-200 bg-white px-5 pt-1 shrink-0"
       >
         {meteringDimensions.map((item) => (
           <Tabs.TabPane key={item.key} title={item.label} />
@@ -118,6 +118,6 @@ export function PlatformMeteringPage() {
         endTime={ranges.currentEnd}
         onCancel={() => setDetailTenantId(undefined)}
       />
-    </div>
+    </ResourcePageFrame>
   );
 }

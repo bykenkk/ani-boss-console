@@ -6,7 +6,7 @@ import { fetchPlatformComponents, platformQueryKeys, type PlatformComponent } fr
 import {
   DataTableNameCell,
   ListDataTable,
-  ListPageHeader,
+  ResourcePageFrame,
   StatusBadge,
   TableSectionFrame,
   type ListColumn,
@@ -136,19 +136,20 @@ export function PlatformHealthPage() {
   ] as const;
 
   return (
-    <div className="flex min-h-(--app-content-available-height) flex-col gap-4">
-      <ListPageHeader
-        title="平台健康"
-        subtitle="查看 ANI 服务、基础依赖和平台组件的实时运行状态。"
-        extra={
+    <ResourcePageFrame
+      header={{
+        title: "平台健康",
+        subtitle: "查看 ANI 服务、基础依赖和平台组件的实时运行状态。",
+        extra: (
           <Button
             loading={componentsQuery.isFetching}
             onClick={() => void componentsQuery.refetch()}
           >
             刷新
           </Button>
-        }
-      />
+        ),
+      }}
+    >
       <section className="grid grid-cols-4 gap-3.5 max-[1100px]:grid-cols-2">
         <Metric label="整体状态" value={overall} hint={`${total} 个组件`} tone={overallTone} />
         <Metric
@@ -246,6 +247,6 @@ export function PlatformHealthPage() {
           emptyText="暂无组件状态数据"
         />
       </TableSectionFrame>
-    </div>
+    </ResourcePageFrame>
   );
 }

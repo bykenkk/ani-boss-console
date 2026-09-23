@@ -1,6 +1,6 @@
 import { Button, Card, Empty, Tag, Typography } from "@arco-design/web-react";
 import { useNavigate } from "@tanstack/react-router";
-import { ListPageHeader } from "@/components/common";
+import { ResourcePageFrame } from "@/components/common";
 
 interface AuditPlannedPageProps {
   description: string;
@@ -11,8 +11,7 @@ export function AuditPlannedPage({ description, title }: AuditPlannedPageProps) 
   const navigate = useNavigate();
 
   return (
-    <div className="space-y-4">
-      <ListPageHeader title={title} extra={<Tag color="gray">P1 · 规划</Tag>} />
+    <ResourcePageFrame header={{ title, extra: <Tag color="gray">P1 · 规划</Tag> }}>
       <Card className="rounded-md border-transparent">
         <div className="flex min-h-[360px] flex-col items-center justify-center gap-3 text-center">
           <Empty description="本期暂未开放" />
@@ -22,6 +21,6 @@ export function AuditPlannedPage({ description, title }: AuditPlannedPageProps) 
           </Button>
         </div>
       </Card>
-    </div>
+    </ResourcePageFrame>
   );
 }

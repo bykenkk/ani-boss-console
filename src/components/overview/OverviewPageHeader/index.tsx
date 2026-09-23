@@ -12,23 +12,21 @@ interface OverviewPageHeaderProps {
 
 export function OverviewPageHeader({ title, subtitle, extra }: OverviewPageHeaderProps) {
   return (
-    <div className="mb-5">
-      <ListPageHeader
-        title={title}
-        subtitle={subtitle}
-        extra={
-          <div className="flex items-center gap-2">
-            {extra}
-            <Button
-              type="primary"
-              icon={<IconRefresh />}
-              onClick={() => showMessage({ type: "success", content: "数据已刷新" })}
-            >
-              刷新
-            </Button>
-          </div>
-        }
-      />
-    </div>
+    <ListPageHeader
+      title={title}
+      subtitle={subtitle}
+      extra={
+        <div className="flex items-center gap-2">
+          {extra}
+          <Button
+            type="primary"
+            icon={<IconRefresh />}
+            onClick={() => showMessage({ type: "success", content: "数据已刷新" })}
+          >
+            刷新
+          </Button>
+        </div>
+      }
+    />
   );
 }

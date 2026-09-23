@@ -1,6 +1,6 @@
 import { Select } from "@arco-design/web-react";
 import { useState } from "react";
-import { ListPageHeader } from "@/components/common";
+import { ResourcePageFrame } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
 import { traceSamples } from "../model";
 
@@ -9,11 +9,11 @@ export function PlatformTracePage() {
   const trace = traceSamples.find((item) => item.id === traceId) ?? traceSamples[0];
 
   return (
-    <div className="space-y-4">
-      <ListPageHeader
-        title="Trace"
-        subtitle="按 request_id 或 trace_id 查看跨服务调用链和错误 Span。"
-        extra={
+    <ResourcePageFrame
+      header={{
+        title: "Trace",
+        subtitle: "按 request_id 或 trace_id 查看跨服务调用链和错误 Span。",
+        extra: (
           <Select
             value={traceId}
             onChange={setTraceId}
@@ -23,9 +23,9 @@ export function PlatformTracePage() {
               value: item.id,
             }))}
           />
-        }
-      />
-
+        ),
+      }}
+    >
       <section className="grid grid-cols-4 gap-3.5 max-[1100px]:grid-cols-2">
         <Metric
           label="Trace 状态"
@@ -114,6 +114,6 @@ export function PlatformTracePage() {
             ))}
         </div>
       </section>
-    </div>
+    </ResourcePageFrame>
   );
 }

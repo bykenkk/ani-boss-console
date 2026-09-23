@@ -1,6 +1,6 @@
 import { Select } from "@arco-design/web-react";
 import { useState } from "react";
-import { ListPageHeader } from "@/components/common";
+import { ResourcePageFrame } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
 import { MonitoringTrend } from "../MonitoringTrend";
 import { platformComponents } from "../model";
@@ -37,11 +37,11 @@ export function ComponentMetricsPage() {
     platformComponents.find((item) => item.service === service) ?? platformComponents[0];
 
   return (
-    <div className="space-y-4">
-      <ListPageHeader
-        title="组件指标"
-        subtitle="查看组件运行指标和依赖探测结果。"
-        extra={
+    <ResourcePageFrame
+      header={{
+        title: "组件指标",
+        subtitle: "查看组件运行指标和依赖探测结果。",
+        extra: (
           <Select
             value={service}
             onChange={setService}
@@ -51,9 +51,9 @@ export function ComponentMetricsPage() {
               value: item.service,
             }))}
           />
-        }
-      />
-
+        ),
+      }}
+    >
       <section className="grid grid-cols-4 gap-3.5 max-[1100px]:grid-cols-2">
         <Metric
           label="P99 延迟"
@@ -98,6 +98,6 @@ export function ComponentMetricsPage() {
           ))}
         </div>
       </section>
-    </div>
+    </ResourcePageFrame>
   );
 }

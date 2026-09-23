@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ResourcePageFrame } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
 import { OverviewPageHeader } from "@/components/overview/OverviewPageHeader";
 import { PlatformAlertTable } from "@/components/overview/PlatformAlertTable";
@@ -15,9 +16,10 @@ export const Route = createFileRoute("/overview-alerts/")({
     ] as const;
 
     return (
-      <>
-        <OverviewPageHeader title="平台告警与待处理" subtitle="跨租户平台级告警收件箱" />
-        <section className="mb-4 grid grid-cols-4 gap-3.5">
+      <ResourcePageFrame
+        header={<OverviewPageHeader title="平台告警与待处理" subtitle="跨租户平台级告警收件箱" />}
+      >
+        <section className="grid grid-cols-4 gap-3.5">
           {statistics.map(([label, value, hint]) => (
             <Metric
               key={label}
@@ -29,7 +31,7 @@ export const Route = createFileRoute("/overview-alerts/")({
           ))}
         </section>
         <PlatformAlertTable alerts={alerts} onUpdate={updateAlert} />
-      </>
+      </ResourcePageFrame>
     );
   },
 });

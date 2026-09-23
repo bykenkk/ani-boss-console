@@ -164,7 +164,7 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
             { label: "租户标识", value: tenant.name },
             { label: "显示名", value: tenant.displayName },
             { label: "联系邮箱", value: tenant.contactEmail || "-" },
-            { label: "套餐编码", value: tenant.planCode },
+            { label: "配额策略", value: tenant.planCode },
             { label: "用户 / 管理员", value: `${tenant.userCount} / ${tenant.administratorCount}` },
             { label: "创建时间", value: formatDateTime(tenant.createdAt) },
             { label: "更新时间", value: formatDateTime(tenant.updatedAt) },
@@ -183,7 +183,7 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
     */
     {
       key: "quota",
-      title: "配额与申请",
+      title: "配额",
       content: <TenantQuotaManagement tenantId={tenant.id} canManage={canManage} />,
     },
     {
@@ -205,7 +205,7 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
     },
     {
       key: "audit",
-      title: "审计记录",
+      title: "操作日志",
       content: <TenantAuditRecords tenantId={tenant.id} />,
     },
   ];
@@ -224,7 +224,6 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
         subtitle={tenant.name}
         status={<Tag color={status.color}>{status.label}</Tag>}
         headerItems={[
-          { label: "套餐", value: tenant.planCode },
           { label: "用户数", value: tenant.userCount },
           { label: "管理员数", value: tenant.administratorCount },
           { label: "更新时间", value: formatDateTime(tenant.updatedAt) },

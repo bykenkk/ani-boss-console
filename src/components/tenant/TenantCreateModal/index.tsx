@@ -99,7 +99,7 @@ export function TenantCreateModal({ loading, plans, onCancel, onSubmit }: Tenant
             onChange={(value) => update("contactEmail", value)}
           />
         </Form.Item>
-        <Form.Item label="配额套餐" required>
+        <Form.Item label="配额策略" required>
           <Select
             value={draft.planId || plans[0]?.id}
             options={plans.map((plan) => ({

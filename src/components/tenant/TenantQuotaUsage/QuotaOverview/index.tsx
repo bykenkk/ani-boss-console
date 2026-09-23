@@ -12,12 +12,12 @@ export function QuotaOverview({ tenant, onRefresh, onRebindPackage }: QuotaOverv
     <section>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <Typography.Title heading={6} className="!mb-0">
-          当前套餐
+          当前配额策略
         </Typography.Title>
         <Space wrap>
           <Button onClick={onRefresh}>刷新用量</Button>
           <Button type="primary" onClick={onRebindPackage}>
-            改绑套餐
+            改绑配额策略
           </Button>
         </Space>
       </div>
@@ -26,7 +26,7 @@ export function QuotaOverview({ tenant, onRefresh, onRebindPackage }: QuotaOverv
         column={3}
         data={[
           {
-            label: "套餐",
+            label: "配额策略",
             value: `${tenant.quotaPackage} (${tenant.planCode})`,
           },
           {

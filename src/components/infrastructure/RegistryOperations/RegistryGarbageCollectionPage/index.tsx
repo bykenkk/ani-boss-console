@@ -2,7 +2,7 @@ import { Button } from "@arco-design/web-react";
 import {
   DataTableNameCell,
   ListDataTable,
-  ListPageHeader,
+  ResourcePageFrame,
   TableSectionFrame,
   type ListColumn,
 } from "@/components/common";
@@ -71,17 +71,17 @@ export function RegistryGarbageCollectionPage() {
   ];
 
   return (
-    <div className="space-y-4">
-      <ListPageHeader
-        title="垃圾回收"
-        subtitle="评估并跟踪镜像仓库未引用层的回收空间与历史任务。"
-        extra={
+    <ResourcePageFrame
+      header={{
+        title: "垃圾回收",
+        subtitle: "评估并跟踪镜像仓库未引用层的回收空间与历史任务。",
+        extra: (
           <Button type="primary" disabled>
             执行 GC
           </Button>
-        }
-      />
-
+        ),
+      }}
+    >
       <section className="grid grid-cols-3 gap-3.5 max-[980px]:grid-cols-1">
         <Metric
           label="预计可回收"
@@ -137,6 +137,6 @@ export function RegistryGarbageCollectionPage() {
           emptyText="暂无 GC 任务历史"
         />
       </TableSectionFrame>
-    </div>
+    </ResourcePageFrame>
   );
 }

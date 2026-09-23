@@ -24,7 +24,7 @@ export function ConvertTrialModal({
       onOk={onConfirm}
       okText="确认转正式"
     >
-      <div className="mb-2 text-sm text-gray-600">正式套餐</div>
+      <div className="mb-2 text-sm text-gray-600">正式配额策略</div>
       <Select
         value={planCode}
         className="w-full"

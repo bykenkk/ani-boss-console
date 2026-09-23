@@ -1,5 +1,5 @@
 import { Select } from "@arco-design/web-react";
-import { ListPageHeader } from "@/components/common";
+import { ResourcePageFrame } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
 import { MonitoringTrend } from "../MonitoringTrend";
 import { monitoringProfiles } from "../model";
@@ -9,11 +9,11 @@ export type MonitoringDomain = keyof typeof monitoringProfiles;
 export function DomainMonitoringPage({ domain }: { domain: MonitoringDomain }) {
   const profile = monitoringProfiles[domain];
   return (
-    <div className="space-y-4">
-      <ListPageHeader
-        title={profile.title}
-        subtitle={profile.subtitle}
-        extra={
+    <ResourcePageFrame
+      header={{
+        title: profile.title,
+        subtitle: profile.subtitle,
+        extra: (
           <div className="flex items-center gap-2">
             <Select
               defaultValue="1h"
@@ -33,8 +33,9 @@ export function DomainMonitoringPage({ domain }: { domain: MonitoringDomain }) {
               ]}
             />
           </div>
-        }
-      />
+        ),
+      }}
+    >
       <section className="grid grid-cols-4 gap-3.5 max-[1100px]:grid-cols-2">
         {profile.metrics.map((metric) => (
           <Metric key={metric.label} {...metric} />
@@ -65,6 +66,6 @@ export function DomainMonitoringPage({ domain }: { domain: MonitoringDomain }) {
           )}
         </div>
       </section>
-    </div>
+    </ResourcePageFrame>
   );
 }

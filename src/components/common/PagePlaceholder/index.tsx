@@ -1,5 +1,5 @@
 import { Card, Empty, Typography } from "@arco-design/web-react";
-import { ListPageHeader } from "../ListPageFrame";
+import { ResourcePageFrame } from "../ResourcePageFrame";
 
 interface PagePlaceholderProps {
   title: string;
@@ -8,8 +8,7 @@ interface PagePlaceholderProps {
 
 export function PagePlaceholder({ title, priority }: PagePlaceholderProps) {
   return (
-    <div className="space-y-4">
-      <ListPageHeader title={title} />
+    <ResourcePageFrame header={{ title }}>
       <Card className="rounded-md border-transparent">
         <div className="flex min-h-[360px] flex-col items-center justify-center gap-3 text-center">
           <Empty description={`${priority} / 未接入 Store`} />
@@ -19,6 +18,6 @@ export function PagePlaceholder({ title, priority }: PagePlaceholderProps) {
           <Typography.Text type="secondary">该页尚未纳入有状态操作台种子数据。</Typography.Text>
         </div>
       </Card>
-    </div>
+    </ResourcePageFrame>
   );
 }

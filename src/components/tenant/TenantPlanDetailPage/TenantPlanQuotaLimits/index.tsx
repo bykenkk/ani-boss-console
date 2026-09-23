@@ -1,6 +1,3 @@
-import { Button } from "@arco-design/web-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import {
   fetchTenantPlanQuotaLimits,
   getTenantManagementErrorMessage,
@@ -10,6 +7,9 @@ import {
 } from "@/api/tenant";
 import { DataTable } from "@/components/common";
 import { withId } from "@/lib/id";
+import { Button } from "@arco-design/web-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { TenantPlanLimitsModal } from "../../TenantManagementModals";
 
 interface TenantPlanQuotaLimitsProps {
@@ -37,7 +37,7 @@ export function TenantPlanQuotaLimits({
     meta: {
       errorNotification: {
         id: withId("tenant-plan-limits", planId),
-        action: "套餐限额加载",
+        action: "配额上限加载",
         fallback: "请求失败，请稍后重试",
       },
     },
@@ -48,9 +48,9 @@ export function TenantPlanQuotaLimits({
     meta: {
       feedback: {
         channel: "message",
-        action: "套餐限额更新",
-        successText: "套餐限额已更新",
-        errorFallback: "套餐限额更新失败，请稍后重试",
+        action: "配额上限更新",
+        successText: "配额上限已更新",
+        errorFallback: "配额上限更新失败，请稍后重试",
       },
     },
     mutationFn: (items: Array<{ resourceType: string; total: number }>) =>
@@ -75,10 +75,31 @@ export function TenantPlanQuotaLimits({
         <DataTable
           rowKey="resourceType"
           columns={[
-            { title: "资源维度", dataIndex: "displayName", width: 220 },
-            { title: "资源标识", dataIndex: "resourceType", width: 220 },
-            { title: "上限", dataIndex: "total", width: 140, align: "right" },
-            { title: "单位", dataIndex: "unit", width: 120 },
+            {
+              title: "资源维度",
+              dataIndex: "displayName",
+              width: 100,
+              fixed: "left",
+              ellipsis: true,
+            },
+            {
+              title: "资源标识",
+              dataIndex: "resourceType",
+              width: 120,
+              ellipsis: true,
+            },
+            {
+              title: "上限",
+              dataIndex: "total",
+              width: 80,
+              ellipsis: true,
+            },
+            {
+              title: "单位",
+              dataIndex: "unit",
+              width: 80,
+              ellipsis: true,
+            },
           ]}
           data={limitsQuery.data || []}
           loading={limitsQuery.isPending}

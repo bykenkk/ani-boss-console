@@ -68,8 +68,8 @@ export function QuotaPolicyDetail({ planCode }: QuotaPolicyDetailProps) {
     return (
       <Result
         status="404"
-        title="配额套餐不存在"
-        subTitle="该套餐可能已被删除，或当前地址无效。"
+        title="配额策略不存在"
+        subTitle="该策略可能已被删除，或当前地址无效。"
         extra={<Button onClick={returnToList}>返回配额策略</Button>}
       />
     );
@@ -89,24 +89,24 @@ export function QuotaPolicyDetail({ planCode }: QuotaPolicyDetailProps) {
 
   const publish = () => {
     if (!publishQuotaPackage(quotaPackage.planCode)) {
-      showMessage({ type: "error", content: "套餐发布失败" });
+      showMessage({ type: "error", content: "配额策略发布失败" });
       return;
     }
-    showMessage({ type: "success", content: `套餐 ${quotaPackage.name} 已发布` });
+    showMessage({ type: "success", content: `配额策略 ${quotaPackage.name} 已发布` });
   };
 
   const remove = () => {
     if (!unregisterQuotaPackage(quotaPackage.planCode)) {
-      showMessage({ type: "warning", content: "有关联租户时不能删除套餐" });
+      showMessage({ type: "warning", content: "有关联租户时不能删除配额策略" });
       return;
     }
-    showMessage({ type: "success", content: `套餐 ${quotaPackage.name} 已删除` });
+    showMessage({ type: "success", content: `配额策略 ${quotaPackage.name} 已删除` });
     returnToList();
   };
 
   const confirmRemove = () => {
     Modal.confirm({
-      title: `确定删除套餐“${quotaPackage.name}”吗？`,
+      title: `确定删除配额策略“${quotaPackage.name}”吗？`,
       content: "有关联租户时不可删除。",
       okButtonProps: { status: "danger" },
       onOk: remove,
@@ -122,7 +122,7 @@ export function QuotaPolicyDetail({ planCode }: QuotaPolicyDetailProps) {
     >
       {quotaPackage.status === "draft" ? <Menu.Item key="publish">发布</Menu.Item> : null}
       <Menu.Item key="delete" disabled={boundTenants.length > 0}>
-        删除套餐
+        删除配额策略
       </Menu.Item>
     </Menu>
   );
@@ -133,12 +133,12 @@ export function QuotaPolicyDetail({ planCode }: QuotaPolicyDetailProps) {
       return;
     }
     if (!rebindTenantQuotaPackage(targetTenantId, quotaPackage.planCode)) {
-      showMessage({ type: "error", content: "套餐改绑失败，请确认套餐已发布" });
+      showMessage({ type: "error", content: "配额策略改绑失败，请确认策略已发布" });
       return;
     }
     setAssignVisible(false);
     setTargetTenantId("");
-    showMessage({ type: "success", content: "套餐已改绑，租户当前配额上限保持不变" });
+    showMessage({ type: "success", content: "配额策略已改绑，租户当前配额上限保持不变" });
   };
 
   const tenantColumns: ListColumn<Tenant>[] = [
@@ -168,7 +168,7 @@ export function QuotaPolicyDetail({ planCode }: QuotaPolicyDetailProps) {
   const infoCards: DetailInfoCard[] = [
     {
       key: "overview",
-      title: "套餐概览",
+      title: "基本信息",
       content: (
         <Descriptions
           column={1}
@@ -179,8 +179,8 @@ export function QuotaPolicyDetail({ planCode }: QuotaPolicyDetailProps) {
               value: <Tag color={status.color}>{status.label}</Tag>,
             },
             {
-              label: "套餐类型",
-              value: quotaPackage.isTrial ? "试用套餐" : "正式套餐",
+              label: "策略类型",
+              value: quotaPackage.isTrial ? "试用策略" : "正式策略",
             },
             {
               label: "GPU-Hours",
@@ -207,7 +207,7 @@ export function QuotaPolicyDetail({ planCode }: QuotaPolicyDetailProps) {
         <div className="py-4">
           <Alert
             type="info"
-            content="限额为只读配置。如需不同限额，请新建套餐。"
+            content="限额为只读配置。如需不同限额，请新建策略。"
             className="mb-4"
           />
           <Descriptions
@@ -228,7 +228,7 @@ export function QuotaPolicyDetail({ planCode }: QuotaPolicyDetailProps) {
         <div className="py-4">
           <div className="mb-4 flex items-center justify-between gap-4">
             <Typography.Text type="secondary">
-              改绑只更新套餐归属，租户当前配额上限保持不变。
+              改绑只更新策略归属，租户当前配额上限保持不变。
             </Typography.Text>
             <Button
               type="primary"
@@ -276,13 +276,13 @@ export function QuotaPolicyDetail({ planCode }: QuotaPolicyDetailProps) {
                   .filter((operation) => operation.message.includes(quotaPackage.name))
                   .map((operation) => ({
                     ...operation,
-                    operation: "分配/改绑套餐",
+                    operation: "分配/改绑配额策略",
                   })),
               ),
               {
                 id: `quota-${quotaPackage.planCode}-created`,
-                operation: quotaPackage.status === "draft" ? "创建草稿" : "创建套餐",
-                message: `套餐 ${quotaPackage.name}`,
+                operation: quotaPackage.status === "draft" ? "创建草稿" : "创建配额策略",
+                message: `配额策略 ${quotaPackage.name}`,
                 by: "platform-admin",
                 createdAt: quotaPackage.updatedAt ?? "-",
               },
@@ -324,7 +324,7 @@ export function QuotaPolicyDetail({ planCode }: QuotaPolicyDetailProps) {
       />
 
       <Modal
-        title={`分配套餐：${quotaPackage.name}`}
+        title={`分配配额策略：${quotaPackage.name}`}
         visible={assignVisible}
         okText="确认改绑"
         onOk={assign}
@@ -335,7 +335,7 @@ export function QuotaPolicyDetail({ planCode }: QuotaPolicyDetailProps) {
       >
         <Alert
           type="info"
-          content="改绑只更新套餐归属，租户当前已审批或特批的配额上限保持不变。"
+          content="改绑只更新策略归属，租户当前已审批或特批的配额上限保持不变。"
           className="mb-4"
         />
         <Form layout="vertical">

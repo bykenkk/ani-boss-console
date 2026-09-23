@@ -34,11 +34,11 @@ export function TenantQuotaUsage({ tenant }: TenantQuotaUsageProps) {
 
   const confirmPackageChange = () => {
     if (!rebindTenantQuotaPackage(tenant.id, selectedPlanCode)) {
-      showMessage({ type: "error", content: "套餐改绑失败" });
+      showMessage({ type: "error", content: "配额策略改绑失败" });
       return;
     }
     setPackageModalVisible(false);
-    showMessage({ type: "success", content: "套餐已改绑，当前配额上限保持不变" });
+    showMessage({ type: "success", content: "配额策略已改绑，当前配额上限保持不变" });
   };
 
   const confirmQuotaRequest = () => {

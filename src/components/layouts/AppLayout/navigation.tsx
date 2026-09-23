@@ -29,6 +29,7 @@ export type AppRoute =
   | "/tenants-billing"
   | "/ops-pool"
   | "/ops-gpu"
+  | "/ops-gpu-quotas"
   | "/ops-nodes"
   | "/ops-storage"
   | "/ops-storage-quotas"
@@ -110,6 +111,7 @@ export const tenantNavigation: readonly NavigationLeaf[] = [
 export const infrastructureNavigation: readonly NavigationLeaf[] = [
   { label: "平台资源池总览", to: "/ops-pool" },
   { label: "GPU资源池", to: "/ops-gpu", icon: <IconThunderbolt /> },
+  { label: "GPU配额", to: "/ops-gpu-quotas" },
   { label: "节点状态", to: "/ops-nodes" },
   { label: "存储基础设施", to: "/ops-storage" },
   { label: "租户存储配额", to: "/ops-storage-quotas" },
@@ -175,6 +177,7 @@ const visibleAppRoutes = new Set<AppRoute>([
   "/tenants-quotas",
   "/tenants-admins",
   "/ops-gpu",
+  "/ops-gpu-quotas",
   "/health",
   "/health-logs",
   "/metering",

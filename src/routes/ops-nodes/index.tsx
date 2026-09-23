@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import {
   ListDataTable,
   DataTableNameCell,
-  ListPageHeader,
+  ResourcePageFrame,
   TableSectionFrame,
   type ListColumn,
 } from "@/components/common";
@@ -184,17 +184,17 @@ export const Route = createFileRoute("/ops-nodes/")({
     ];
 
     return (
-      <div className="space-y-4">
-        <ListPageHeader
-          title="节点状态"
-          subtitle="查看计算节点健康状态、资源规格、调度能力和最后心跳。"
-          extra={
+      <ResourcePageFrame
+        header={{
+          title: "节点状态",
+          subtitle: "查看计算节点健康状态、资源规格、调度能力和最后心跳。",
+          extra: (
             <Button type="primary" icon={<IconRefresh />} onClick={refreshNodes}>
               刷新状态
             </Button>
-          }
-        />
-
+          ),
+        }}
+      >
         <section className="grid grid-cols-3 gap-3.5 max-[900px]:grid-cols-1">
           <Metric label="全部" value="8" hint="当前节点总数" />
           <Metric label="Ready" value="5" hint="当前健康节点" />
@@ -264,7 +264,7 @@ export const Route = createFileRoute("/ops-nodes/")({
             emptyText="没有符合筛选条件的节点"
           />
         </TableSectionFrame>
-      </div>
+      </ResourcePageFrame>
     );
   },
 });

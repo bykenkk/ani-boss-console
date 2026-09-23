@@ -58,7 +58,7 @@ export function TenantTable({
         return <Tag color={status.color}>{status.label}</Tag>;
       },
     },
-    { title: "套餐", dataIndex: "quotaPackage", width: 110 },
+    { title: "配额策略", dataIndex: "quotaPackage", width: 110 },
     {
       title: "管理员数",
       dataIndex: "adminCount",

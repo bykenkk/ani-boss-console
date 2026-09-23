@@ -1,6 +1,5 @@
 import {
   fetchTenantQuota,
-  fetchTenantQuotaChangeRequests,
   getTenantManagementErrorMessage,
   reviewTenantQuotaChangeRequest,
   submitTenantQuotaChangeRequest,
@@ -8,12 +7,10 @@ import {
   type TenantQuotaItem,
 } from "@/api/tenant";
 import { DataTable, type ListColumn } from "@/components/common";
-import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
-import { Progress, Tag } from "@arco-design/web-react";
+import { Progress } from "@arco-design/web-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { quotaRequestStatusMeta } from "../../apiModel";
 import { TenantQuotaRequestModal } from "../../TenantManagementModals";
 
 interface TenantQuotaManagementProps {
@@ -30,11 +27,37 @@ async function runTenantQuotaOperation<T>(operation: () => Promise<T>): Promise<
 }
 
 const quotaColumns: ListColumn<TenantQuotaItem>[] = [
-  { title: "资源维度", dataIndex: "displayName", width: 180 },
-  { title: "资源标识", dataIndex: "resourceType", width: 180 },
-  { title: "已用", dataIndex: "used", width: 100, align: "right" },
-  { title: "上限", dataIndex: "total", width: 100, align: "right" },
-  { title: "单位", dataIndex: "unit", width: 100 },
+  {
+    title: "资源维度",
+    dataIndex: "displayName",
+    width: 150,
+    ellipsis: true,
+    fixed: "left",
+  },
+  {
+    title: "资源标识",
+    dataIndex: "resourceType",
+    width: 150,
+    ellipsis: true,
+  },
+  {
+    title: "已用",
+    dataIndex: "used",
+    width: 80,
+    ellipsis: true,
+  },
+  {
+    title: "上限",
+    dataIndex: "total",
+    width: 80,
+    ellipsis: true,
+  },
+  {
+    title: "单位",
+    dataIndex: "unit",
+    width: 50,
+    ellipsis: true,
+  },
   {
     title: "使用率",
     width: 180,
@@ -60,53 +83,34 @@ export function TenantQuotaManagement({ tenantId, canManage }: TenantQuotaManage
     queryKey: tenantManagementQueryKeys.tenantQuota(tenantId),
     queryFn: () => fetchTenantQuota(tenantId),
   });
-  const quotaRequestsQuery = useQuery({
-    meta: {
-      errorNotification: {
-        id: withId("tenant-quota-requests", tenantId),
-        action: "配额申请加载",
-        fallback: "请求失败，请稍后重试",
-      },
-    },
-    queryKey: tenantManagementQueryKeys.tenantQuotaRequests(tenantId),
-    queryFn: () => fetchTenantQuotaChangeRequests(tenantId),
-  });
   const invalidateAll = () =>
     queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
-  const quotaRequestMutation = useMutation({
+  const quotaAdjustmentMutation = useMutation({
     meta: {
       feedback: {
         channel: "message",
-        action: "配额调整申请",
-        successText: "配额调整申请已提交",
-        errorFallback: "配额调整申请失败，请稍后重试",
+        action: "配额调整",
+        successText: "配额已调整",
+        errorFallback: "配额调整失败，请稍后重试",
       },
     },
     mutationFn: ({ resourceType, newValue }: { resourceType: string; newValue: number }) =>
-      runTenantQuotaOperation(() =>
-        submitTenantQuotaChangeRequest({ tenantId, items: [{ resourceType, newValue }] }),
-      ),
+      runTenantQuotaOperation(async () => {
+        const request = await submitTenantQuotaChangeRequest({
+          tenantId,
+          items: [{ resourceType, newValue }],
+        });
+        return reviewTenantQuotaChangeRequest({
+          tenantId,
+          requestId: request.id,
+          approved: true,
+        });
+      }),
     onSuccess: async () => {
       await invalidateAll();
       setQuotaTarget(null);
     },
   });
-  const quotaReviewMutation = useMutation({
-    meta: {
-      feedback: {
-        channel: "message",
-        action: "配额申请审批",
-        successText: "配额申请已处理",
-        errorFallback: "配额申请处理失败，请稍后重试",
-      },
-    },
-    mutationFn: ({ requestId, approved }: { requestId: string; approved: boolean }) =>
-      runTenantQuotaOperation(() =>
-        reviewTenantQuotaChangeRequest({ tenantId, requestId, approved }),
-      ),
-    onSuccess: invalidateAll,
-  });
-  const operationPending = quotaRequestMutation.isPending || quotaReviewMutation.isPending;
 
   return (
     <>
@@ -120,9 +124,9 @@ export function TenantQuotaManagement({ tenantId, canManage }: TenantQuotaManage
           pagination={false}
           rowActions={[
             {
-              key: "request",
-              label: "申请调整",
-              disabled: () => !canManage || operationPending,
+              key: "adjust",
+              label: "配额调整",
+              disabled: () => !canManage || quotaAdjustmentMutation.isPending,
               onClick: setQuotaTarget,
             },
           ]}
@@ -130,64 +134,13 @@ export function TenantQuotaManagement({ tenantId, canManage }: TenantQuotaManage
           noDataElement={<div className="py-8 text-center text-gray-500">暂无配额</div>}
         />
       </section>
-      <section>
-        <DataTable
-          header={{ title: "调整申请" }}
-          rowKey={(item) => `${item.requestId}-${item.resourceType}`}
-          columns={[
-            { title: "申请单", dataIndex: "requestId", width: 180 },
-            { title: "资源维度", dataIndex: "resourceType", width: 160 },
-            { title: "原值", dataIndex: "oldValue", width: 90, align: "right" },
-            { title: "新值", dataIndex: "newValue", width: 90, align: "right" },
-            {
-              title: "状态",
-              width: 100,
-              render: (_, item) => {
-                const meta = quotaRequestStatusMeta[item.status];
-                return <Tag color={meta.color}>{meta.label}</Tag>;
-              },
-            },
-            { title: "申请人", dataIndex: "requestedBy", width: 140 },
-            {
-              title: "申请时间",
-              dataIndex: "createdAt",
-              width: 180,
-              render: (value: string) => formatDateTime(value),
-            },
-          ]}
-          data={quotaRequestsQuery.data || []}
-          loading={quotaRequestsQuery.isPending}
-          pagination={false}
-          rowActions={[
-            {
-              key: "approve",
-              label: "通过",
-              visible: (item) => item.status === "pending",
-              disabled: () => !canManage || operationPending,
-              onClick: (item) =>
-                quotaReviewMutation.mutate({ requestId: item.requestId, approved: true }),
-            },
-            {
-              key: "reject",
-              label: "驳回",
-              intent: "danger",
-              visible: (item) => item.status === "pending",
-              disabled: () => !canManage || operationPending,
-              onClick: (item) =>
-                quotaReviewMutation.mutate({ requestId: item.requestId, approved: false }),
-            },
-          ]}
-          scroll={{ x: 1100 }}
-          noDataElement={<div className="py-8 text-center text-gray-500">暂无调整申请</div>}
-        />
-      </section>
       {quotaTarget ? (
         <TenantQuotaRequestModal
           item={quotaTarget}
-          loading={quotaRequestMutation.isPending}
+          loading={quotaAdjustmentMutation.isPending}
           onCancel={() => setQuotaTarget(null)}
           onSubmit={(newValue) =>
-            quotaRequestMutation.mutate({
+            quotaAdjustmentMutation.mutate({
               resourceType: quotaTarget.resourceType,
               newValue,
             })

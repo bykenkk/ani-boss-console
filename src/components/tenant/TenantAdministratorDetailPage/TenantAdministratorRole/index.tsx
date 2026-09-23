@@ -86,12 +86,15 @@ export function TenantAdministratorRole({
         columns={[
           {
             title: "角色",
-            width: 180,
+            width: 150,
+            ellipsis: true,
+            fixed: "left",
             render: (_, role) => tenantAdministratorRoleLabels[role.name],
           },
           {
             title: "权限数量",
-            width: 120,
+            width: 80,
+            ellipsis: true,
             render: (_, role) => role.permissions.length,
           },
           {

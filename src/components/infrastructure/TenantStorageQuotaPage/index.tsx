@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import {
   DataTableNameCell,
   ListDataTable,
-  ListPageHeader,
+  ResourcePageFrame,
   TableSectionFrame,
   type ListColumn,
 } from "@/components/common";
@@ -245,12 +245,12 @@ export function TenantStorageQuotaPage() {
   ];
 
   return (
-    <div className="space-y-4">
-      <ListPageHeader
-        title="租户存储配额"
-        subtitle="统一查看租户在块、对象、文件和向量存储上的容量与性能配额。"
-      />
-
+    <ResourcePageFrame
+      header={{
+        title: "租户存储配额",
+        subtitle: "统一查看租户在块、对象、文件和向量存储上的容量与性能配额。",
+      }}
+    >
       <section className="grid grid-cols-4 gap-3.5 max-[1180px]:grid-cols-2">
         <Metric label="租户" value={String(tenantQuotas.length)} hint="当前配额对象" />
         <Metric label="待扩容" value={String(pendingCount)} hint="等待处理" />
@@ -310,6 +310,6 @@ export function TenantStorageQuotaPage() {
       </TableSectionFrame>
 
       <TenantStorageRecentEvents />
-    </div>
+    </ResourcePageFrame>
   );
 }

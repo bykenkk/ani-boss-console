@@ -10,7 +10,7 @@ import {
 } from "@arco-design/web-react";
 import { IconMoreVertical } from "@arco-design/web-react/icon";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   deleteTenantAdministrator,
@@ -301,11 +301,7 @@ export function TenantAdministratorDetailPage({
         headerItems={[
           {
             label: "租户",
-            value: (
-              <Link to="/tenants/$tenantId" params={{ tenantId }}>
-                {administrator.tenant.displayName || administrator.tenant.name}
-              </Link>
-            ),
+            value: administrator.tenant.displayName || administrator.tenant.name,
           },
           { label: "角色", value: tenantAdministratorRoleLabels[administrator.role] },
           { label: "来源", value: tenantAdministratorSourceLabels[administrator.source] },

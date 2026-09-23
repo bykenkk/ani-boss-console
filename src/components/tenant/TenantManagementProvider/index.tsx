@@ -331,7 +331,7 @@ export function TenantManagementProvider({ children }: { children: ReactNode }) 
                     isTrial: quotaPackage.isTrial,
                   },
                   "rebind_quota",
-                  `改绑套餐 ${quotaPackage.name}（保留现有配额上限）`,
+                  `改绑配额策略 ${quotaPackage.name}（保留现有配额上限）`,
                 )
               : tenant,
           ),
@@ -949,7 +949,7 @@ export function TenantManagementProvider({ children }: { children: ReactNode }) 
               !item.isTrial,
           );
           if (!quotaPackage) {
-            return { ok: false, reason: "请选择已发布的正式套餐" };
+            return { ok: false, reason: "请选择已发布的正式配额策略" };
           }
           setTenants((current) =>
             current.map((item) =>
@@ -964,13 +964,13 @@ export function TenantManagementProvider({ children }: { children: ReactNode }) 
                       lifecycle: [
                         createLifecycleEvent(
                           "trial_converted",
-                          `试用转正式，改绑套餐 ${quotaPackage.name}（保留现有配额上限）`,
+                          `试用转正式，改绑配额策略 ${quotaPackage.name}（保留现有配额上限）`,
                         ),
                         ...item.lifecycle,
                       ],
                     },
                     "convert_trial",
-                    `试用转正式，改绑套餐 ${quotaPackage.name}`,
+                    `试用转正式，改绑配额策略 ${quotaPackage.name}`,
                   )
                 : item,
             ),

@@ -62,9 +62,9 @@ export function TenantPlanBoundTenants({
     meta: {
       feedback: {
         channel: "message",
-        action: "套餐绑定",
-        successText: "租户套餐已更新",
-        errorFallback: "套餐绑定失败，请稍后重试",
+        action: "配额策略绑定",
+        successText: "租户配额策略已更新",
+        errorFallback: "配额策略绑定失败，请稍后重试",
       },
     },
     mutationFn: (tenantId: string) =>

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import {
   DataTableNameCell,
   ListDataTable,
-  ListPageHeader,
+  ResourcePageFrame,
   TableSectionFrame,
   type ListColumn,
 } from "@/components/common";
@@ -267,12 +267,12 @@ export function NetworkInfrastructurePage() {
   ];
 
   return (
-    <div className="space-y-4">
-      <ListPageHeader
-        title="网络基础设施"
-        subtitle="查看平台 SDN、出口网关、IPAM 与地址池的运行状态。"
-      />
-
+    <ResourcePageFrame
+      header={{
+        title: "网络基础设施",
+        subtitle: "查看平台 SDN、出口网关、IPAM 与地址池的运行状态。",
+      }}
+    >
       <section className="grid grid-cols-3 gap-3.5 max-[980px]:grid-cols-1">
         <Metric
           label="SDN 控制器"
@@ -366,6 +366,6 @@ export function NetworkInfrastructurePage() {
           emptyText="暂无 IP 地址池"
         />
       </TableSectionFrame>
-    </div>
+    </ResourcePageFrame>
   );
 }

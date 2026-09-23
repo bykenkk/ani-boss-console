@@ -14,7 +14,7 @@ export function TenantPlanAudit({ planId }: TenantPlanAuditProps) {
     meta: {
       errorNotification: {
         id: withId("tenant-plan-audit", planId),
-        action: "套餐审计记录加载",
+        action: "策略审计记录加载",
         fallback: "请求失败，请稍后重试",
       },
     },

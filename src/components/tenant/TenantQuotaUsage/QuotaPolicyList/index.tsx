@@ -111,31 +111,31 @@ export function QuotaPolicyList() {
 
   const publishPackage = (item: QuotaPackageRow) => {
     if (!publishCatalogPackage(item.planCode)) {
-      showMessage({ type: "error", content: "套餐发布失败" });
+      showMessage({ type: "error", content: "配额策略发布失败" });
       return;
     }
-    showMessage({ type: "success", content: `套餐 ${item.name} 已发布` });
+    showMessage({ type: "success", content: `配额策略 ${item.name} 已发布` });
   };
 
   const deletePackage = (item: QuotaPackageRow) => {
     if (boundCount(item.planCode) > 0) {
-      showMessage({ type: "warning", content: "有关联租户时不能删除套餐" });
+      showMessage({ type: "warning", content: "有关联租户时不能删除配额策略" });
       return;
     }
     if (!unregisterQuotaPackage(item.planCode)) {
-      showMessage({ type: "warning", content: "有关联租户时不能删除套餐" });
+      showMessage({ type: "warning", content: "有关联租户时不能删除配额策略" });
       return;
     }
-    showMessage({ type: "success", content: `套餐 ${item.name} 已删除` });
+    showMessage({ type: "success", content: `配额策略 ${item.name} 已删除` });
   };
 
   const createPackage = () => {
     if (!draft.name.trim() || !draft.planCode.trim()) {
-      showMessage({ type: "warning", content: "请填写套餐名称和编码" });
+      showMessage({ type: "warning", content: "请填写策略名称和编码" });
       return;
     }
     if (packages.some((item) => item.planCode.toLowerCase() === draft.planCode.toLowerCase())) {
-      showMessage({ type: "warning", content: "套餐编码已存在" });
+      showMessage({ type: "warning", content: "策略编码已存在" });
       return;
     }
     const item: QuotaPackageRow = {
@@ -159,12 +159,12 @@ export function QuotaPolicyList() {
         limits: { ...item.limits },
       })
     ) {
-      showMessage({ type: "warning", content: "套餐编码已存在" });
+      showMessage({ type: "warning", content: "策略编码已存在" });
       return;
     }
     setCreateVisible(false);
     setDraft(initialDraft);
-    showMessage({ type: "success", content: `套餐 ${item.name} 已创建并发布` });
+    showMessage({ type: "success", content: `配额策略 ${item.name} 已创建并发布` });
   };
 
   const assignPackage = () => {
@@ -173,17 +173,17 @@ export function QuotaPolicyList() {
       return;
     }
     if (!rebindTenantQuotaPackage(targetTenantId, assigningPackage.planCode)) {
-      showMessage({ type: "error", content: "套餐改绑失败，请确认套餐已发布" });
+      showMessage({ type: "error", content: "配额策略改绑失败，请确认策略已发布" });
       return;
     }
     setAssigningPackage(null);
     setTargetTenantId("");
-    showMessage({ type: "success", content: "套餐已改绑，租户当前配额上限保持不变" });
+    showMessage({ type: "success", content: "配额策略已改绑，租户当前配额上限保持不变" });
   };
 
   const columns: ListColumn<QuotaPackageRow>[] = [
     {
-      title: "套餐 / 编码",
+      title: "配额策略 / 编码",
       dataIndex: "name",
       width: 200,
       render: (_, item) => (
@@ -233,17 +233,17 @@ export function QuotaPolicyList() {
       <ListPageFrame
         header={{
           title: "配额策略",
-          subtitle: "管理租户配额套餐；套餐发布后限额只读，变更请新建套餐。",
+          subtitle: "管理租户配额策略；策略发布后限额只读，变更请新建策略。",
           extra: (
             <Space>
               <Button
                 icon={<IconDownload />}
-                onClick={() => showMessage({ type: "success", content: "配额套餐已导出" })}
+                onClick={() => showMessage({ type: "success", content: "配额策略已导出" })}
               >
                 导出
               </Button>
               <Button type="primary" icon={<IconPlus />} onClick={() => setCreateVisible(true)}>
-                新建套餐
+                新建配额策略
               </Button>
             </Space>
           ),
@@ -275,7 +275,7 @@ export function QuotaPolicyList() {
               disabled: (item) => boundCount(item.planCode) > 0,
               onClick: (item) => {
                 Modal.confirm({
-                  title: `确定删除套餐“${item.name}”吗？`,
+                  title: `确定删除配额策略“${item.name}”吗？`,
                   content: "有关联租户时不可删除。",
                   okButtonProps: { status: "danger" },
                   onOk: () => deletePackage(item),
@@ -294,12 +294,12 @@ export function QuotaPolicyList() {
               setPageSize(nextPageSize);
             },
           }}
-          emptyText="还没有配额套餐"
+          emptyText="还没有配额策略"
         />
       </ListPageFrame>
 
       <Modal
-        title="新建套餐"
+        title="新建配额策略"
         visible={createVisible}
         style={{ width: 720 }}
         okText="创建并发布"
@@ -311,22 +311,22 @@ export function QuotaPolicyList() {
       >
         <Alert
           type="warning"
-          content="套餐创建并发布后，限额不可修改。请在提交前确认配置。"
+          content="配额策略创建并发布后，限额不可修改。请在提交前确认配置。"
           className="mb-4"
         />
         <Form layout="vertical">
           <Grid.Row gutter={16}>
             <Grid.Col span={12}>
-              <Form.Item label="套餐名称" required>
+              <Form.Item label="策略名称" required>
                 <Input
                   value={draft.name}
-                  placeholder="例如：定制套餐"
+                  placeholder="例如：定制策略"
                   onChange={(name) => setDraft((current) => ({ ...current, name }))}
                 />
               </Form.Item>
             </Grid.Col>
             <Grid.Col span={12}>
-              <Form.Item label="套餐编码" required>
+              <Form.Item label="策略编码" required>
                 <Input
                   value={draft.planCode}
                   placeholder="例如：custom-01"
@@ -378,7 +378,7 @@ export function QuotaPolicyList() {
       </Modal>
 
       <Modal
-        title={`分配套餐${assigningPackage ? `：${assigningPackage.name}` : ``}`}
+        title={`分配配额策略${assigningPackage ? `：${assigningPackage.name}` : ``}`}
         visible={Boolean(assigningPackage)}
         okText="确认改绑"
         onOk={assignPackage}
@@ -389,7 +389,7 @@ export function QuotaPolicyList() {
       >
         <Alert
           type="info"
-          content="改绑只更新套餐归属，租户当前已审批或特批的配额上限保持不变。"
+          content="改绑只更新策略归属，租户当前已审批或特批的配额上限保持不变。"
           className="mb-4"
         />
         <Form layout="vertical">
@@ -407,7 +407,7 @@ export function QuotaPolicyList() {
           </Form.Item>
           {targetTenantId ? (
             <Typography.Text type="secondary">
-              当前套餐：
+              当前配额策略：
               {tenants.find((tenant) => tenant.id === targetTenantId)?.quotaPackage ?? "-"}
               ，确认后可前往
               <Link to="/tenants/$tenantId" params={{ tenantId: targetTenantId }} className="ml-1">

@@ -249,7 +249,7 @@ export const tenantRegions = [
 
 export const tenantQuotaPackages: TenantQuotaPackage[] = [
   {
-    name: "标准套餐",
+    name: "标准配额",
     status: "enabled",
     planCode: "std",
     isTrial: false,
@@ -281,7 +281,7 @@ export const tenantQuotaPackages: TenantQuotaPackage[] = [
     },
   },
   {
-    name: "试用套餐",
+    name: "试用配额",
     status: "enabled",
     planCode: "trial",
     isTrial: true,
@@ -471,7 +471,7 @@ export const initialTenants: Tenant[] = [
     displayName: "未来实验室",
     status: "active",
     specification: "-",
-    quotaPackage: "标准套餐",
+    quotaPackage: "标准配额",
     planCode: "std",
     memberCount: 8,
     adminCount: 2,
@@ -565,7 +565,7 @@ export const initialTenants: Tenant[] = [
     displayName: "Trial Lab",
     status: "active",
     specification: "-",
-    quotaPackage: "试用套餐",
+    quotaPackage: "试用配额",
     planCode: "trial",
     memberCount: 3,
     adminCount: 1,
@@ -602,7 +602,7 @@ export const initialTenants: Tenant[] = [
     displayName: "旧版协作团队",
     status: "disabled",
     specification: "-",
-    quotaPackage: "标准套餐",
+    quotaPackage: "标准配额",
     planCode: "std",
     memberCount: 0,
     adminCount: 0,

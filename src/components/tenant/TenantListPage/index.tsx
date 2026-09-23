@@ -71,7 +71,7 @@ export function TenantListPage() {
     meta: {
       errorNotification: {
         id: "tenant-available-plans",
-        action: "可用套餐加载",
+        action: "可用配额策略加载",
         fallback: "请求失败，请稍后重试",
       },
     },
@@ -154,7 +154,7 @@ export function TenantListPage() {
         return <Tag color={meta.color}>{meta.label}</Tag>;
       },
     },
-    { title: "套餐编码", dataIndex: "planCode", width: 150 },
+    { title: "配额策略", dataIndex: "planCode", width: 150 },
     { title: "管理员数", dataIndex: "administratorCount", width: 110, align: "right" },
     {
       title: "开通时间",

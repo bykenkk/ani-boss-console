@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import {
   ListDataTable,
   DataTableNameCell,
-  ListPageHeader,
+  ResourcePageFrame,
   TableSectionFrame,
   type ListColumn,
 } from "@/components/common";
@@ -274,17 +274,17 @@ export const Route = createFileRoute("/ops-pool/")({
     ];
 
     return (
-      <div className="space-y-4">
-        <ListPageHeader
-          title="平台资源池总览"
-          subtitle="维护区域主数据与平台容量，控制租户开通时可选择的区域。"
-          extra={
+      <ResourcePageFrame
+        header={{
+          title: "平台资源池总览",
+          subtitle: "维护区域主数据与平台容量，控制租户开通时可选择的区域。",
+          extra: (
             <Button type="primary" icon={<IconRefresh />} onClick={refreshAll}>
               刷新全部容量
             </Button>
-          }
-        />
-
+          ),
+        }}
+      >
         <section className="grid grid-cols-4 gap-3.5 max-[1180px]:grid-cols-2">
           <Metric
             label="区域"
@@ -334,7 +334,7 @@ export const Route = createFileRoute("/ops-pool/")({
             emptyText="还没有区域容量数据"
           />
         </TableSectionFrame>
-      </div>
+      </ResourcePageFrame>
     );
   },
 });

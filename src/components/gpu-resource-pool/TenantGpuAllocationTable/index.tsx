@@ -1,10 +1,10 @@
-import { Card } from "@arco-design/web-react";
 import { DataTableNameCell, ListDataTable, type ListColumn } from "@/components/common";
 import type { TenantGpuAllocation } from "@/api/gpu-inventory";
 
 interface TenantGpuAllocationTableProps {
   data: TenantGpuAllocation[];
   loading: boolean;
+  emptyText?: string;
   onEditQuota: (tenant: TenantGpuAllocation) => void;
   onEditReservation: (tenant: TenantGpuAllocation) => void;
 }
@@ -12,6 +12,7 @@ interface TenantGpuAllocationTableProps {
 export function TenantGpuAllocationTable({
   data,
   loading,
+  emptyText = "暂无租户 GPU 分配数据",
   onEditQuota,
   onEditReservation,
 }: TenantGpuAllocationTableProps) {
@@ -29,28 +30,26 @@ export function TenantGpuAllocationTable({
   ];
 
   return (
-    <Card title="租户分配台账" className="overflow-hidden rounded-lg [&_.arco-card-body]:p-0">
-      <ListDataTable
-        tableLabel="租户 GPU 分配台账"
-        rowKey="tenantId"
-        columns={columns}
-        rowActions={[
-          {
-            key: "edit-reservation",
-            label: "调整资源预留",
-            onClick: onEditReservation,
-          },
-          {
-            key: "edit-quota",
-            label: "调整配额上限",
-            onClick: onEditQuota,
-          },
-        ]}
-        data={data}
-        loading={loading}
-        pagination={false}
-        emptyText="暂无租户 GPU 分配数据"
-      />
-    </Card>
+    <ListDataTable
+      tableLabel="租户 GPU 分配台账"
+      rowKey="tenantId"
+      columns={columns}
+      rowActions={[
+        {
+          key: "edit-reservation",
+          label: "调整资源预留",
+          onClick: onEditReservation,
+        },
+        {
+          key: "edit-quota",
+          label: "调整配额上限",
+          onClick: onEditQuota,
+        },
+      ]}
+      data={data}
+      loading={loading}
+      pagination={false}
+      emptyText={emptyText}
+    />
   );
 }

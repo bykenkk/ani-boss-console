@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import {
   DataTableNameCell,
   ListDataTable,
-  ListPageHeader,
+  ResourcePageFrame,
   TableSectionFrame,
   type ListColumn,
 } from "@/components/common";
@@ -109,12 +109,13 @@ export function RegistryQuotaPage() {
   ];
 
   return (
-    <div className="space-y-4">
-      <ListPageHeader
-        title="镜像配额"
-        subtitle="按租户查看镜像仓库存储配额、使用水位与待审批扩容申请；镜像 Gi 与算力、租户存储配额相互独立。"
-      />
-
+    <ResourcePageFrame
+      header={{
+        title: "镜像配额",
+        subtitle:
+          "按租户查看镜像仓库存储配额、使用水位与待审批扩容申请；镜像 Gi 与算力、租户存储配额相互独立。",
+      }}
+    >
       <section className="grid grid-cols-4 gap-3.5 max-[1100px]:grid-cols-2">
         <Metric label="租户数" value={String(registryTenantQuotas.length)} hint="全平台" />
         <Metric
@@ -176,6 +177,6 @@ export function RegistryQuotaPage() {
           emptyText="没有符合筛选条件的租户镜像配额"
         />
       </TableSectionFrame>
-    </div>
+    </ResourcePageFrame>
   );
 }

@@ -55,7 +55,7 @@ export function TenantPlanListPage() {
     meta: {
       errorNotification: {
         id: "tenant-plans",
-        action: "配额套餐加载",
+        action: "配额策略加载",
         fallback: "请求失败，请稍后重试",
       },
     },
@@ -80,9 +80,9 @@ export function TenantPlanListPage() {
     meta: {
       feedback: {
         channel: "message",
-        action: "配额套餐创建",
-        successText: "配额套餐草稿已创建",
-        errorFallback: "配额套餐创建失败，请稍后重试",
+        action: "配额策略创建",
+        successText: "配额策略草稿已创建",
+        errorFallback: "配额策略创建失败，请稍后重试",
       },
     },
     mutationFn: (input: CreateTenantPlanInput) =>
@@ -97,9 +97,9 @@ export function TenantPlanListPage() {
       feedback: {
         channel: "notification",
         id: "tenant-plan-status",
-        action: "配额套餐状态更新",
-        successText: "配额套餐状态已更新",
-        errorFallback: "配额套餐状态更新失败，请稍后重试",
+        action: "配额策略状态更新",
+        successText: "配额策略状态已更新",
+        errorFallback: "配额策略状态更新失败，请稍后重试",
       },
     },
     mutationFn: ({ planId, action }: { planId: string; action: "activate" | "disable" }) =>
@@ -113,9 +113,9 @@ export function TenantPlanListPage() {
       feedback: {
         channel: "notification",
         id: "tenant-plan-delete",
-        action: "配额套餐删除",
-        successText: "配额套餐已删除",
-        errorFallback: "配额套餐删除失败，请稍后重试",
+        action: "配额策略删除",
+        successText: "配额策略已删除",
+        errorFallback: "配额策略删除失败，请稍后重试",
       },
     },
     mutationFn: (planId: string) => runTenantPlanOperation(() => deleteTenantPlan(planId)),
@@ -128,14 +128,14 @@ export function TenantPlanListPage() {
     const action = plan.status === "active" ? "disable" : "activate";
     const label = action === "activate" ? "发布" : "停用";
     Modal.confirm({
-      title: `${label}套餐 ${plan.name}？`,
-      content: action === "disable" ? "停用后不能再用于新租户开通或套餐绑定。" : undefined,
+      title: `${label}配额策略 ${plan.name}？`,
+      content: action === "disable" ? "停用后不能再用于新租户开通或策略绑定。" : undefined,
       onOk: () => statusMutation.mutateAsync({ planId: plan.id, action }),
     });
   };
   const confirmDelete = (plan: TenantPlanListItem) => {
     Modal.confirm({
-      title: `删除套餐 ${plan.name}？`,
+      title: `删除配额策略 ${plan.name}？`,
       content: "仍有关联租户时后端会拒绝删除。",
       okButtonProps: { status: "danger" },
       onOk: () => deleteMutation.mutateAsync(plan.id),
@@ -145,7 +145,7 @@ export function TenantPlanListPage() {
   const columns: ListColumn<TenantPlanListItem>[] = [
     {
       key: "name",
-      title: "套餐",
+      title: "策略名称",
       width: 260,
       render: (_, plan) => (
         <DataTableNameCell
@@ -184,7 +184,7 @@ export function TenantPlanListPage() {
       <ListPageFrame
         header={{
           title: "配额策略",
-          subtitle: "维护租户配额套餐、资源限额与套餐绑定关系。",
+          subtitle: "维护租户配额策略、资源限额与策略绑定关系。",
           extra: (
             <Button
               type="primary"
@@ -192,7 +192,7 @@ export function TenantPlanListPage() {
               disabled={!canManage || !quotaMetaQuery.data?.length}
               onClick={() => setCreateVisible(true)}
             >
-              新建套餐
+              新建策略
             </Button>
           ),
         }}
@@ -214,7 +214,7 @@ export function TenantPlanListPage() {
             fields: [{ value: "keyword", label: "关键词" }],
             field: "keyword",
             value: keyword,
-            placeholder: "搜索套餐编码或名称",
+            placeholder: "搜索策略编码或名称",
             onFieldChange: () => undefined,
             onChange: (value) => {
               setKeyword(value);
@@ -225,7 +225,7 @@ export function TenantPlanListPage() {
             spinning: listQuery.isFetching || quotaMetaQuery.isFetching,
             onClick: () => void Promise.all([listQuery.refetch(), quotaMetaQuery.refetch()]),
           },
-          tools: <span className="text-xs text-gray-500">共 {data.length} 个套餐</span>,
+          tools: <span className="text-xs text-gray-500">共 {data.length} 条配额策略</span>,
         }}
       >
         <ListDataTable
@@ -262,7 +262,7 @@ export function TenantPlanListPage() {
             },
           ]}
           scroll={{ x: 1100, y: true }}
-          emptyText="暂无符合条件的配额套餐"
+          emptyText="暂无符合条件的配额策略"
         />
       </ListPageFrame>
 

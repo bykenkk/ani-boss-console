@@ -55,7 +55,7 @@ export function TrialLifecycleSection({
         column={3}
         data={[
           { label: "租户类型", value: tenant.isTrial ? "试用" : "正式" },
-          { label: "当前套餐", value: tenant.quotaPackage },
+          { label: "当前配额策略", value: tenant.quotaPackage },
           { label: "试用到期", value: formatDateTimeMinute(tenant.trialEndsAt) },
         ]}
       />
