@@ -1,6 +1,6 @@
-import { Breadcrumb, Button, Card, Tabs, Tooltip } from "@arco-design/web-react";
-import { IconLeft } from "@arco-design/web-react/icon";
-import { useState, type ReactNode } from "react";
+import { Card, Tabs } from "@arco-design/web-react";
+import { useMemo, useState, type ReactNode } from "react";
+import { useBreadcrumbNavigation } from "@/components/layouts/AppLayout/BreadcrumbNavigation/useBreadcrumbNavigation";
 import styles from "./index.module.less";
 
 export interface DetailBreadcrumbItem {
@@ -55,40 +55,15 @@ export function DetailPageFrame({
   onBack,
 }: DetailPageFrameProps) {
   const [activeTabKey, setActiveTabKey] = useState(defaultTabKey ?? tabs?.[0]?.key ?? "");
+  const breadcrumbNavigation = useMemo(
+    () => ({ items: breadcrumbs, onBack }),
+    [breadcrumbs, onBack],
+  );
+
+  useBreadcrumbNavigation(breadcrumbNavigation);
 
   return (
     <div className={styles.page}>
-      <div className={styles.breadcrumbRow}>
-        <Tooltip content="返回上一级">
-          <Button
-            type="text"
-            shape="circle"
-            className={styles.backButton}
-            icon={<IconLeft />}
-            aria-label="返回上一级"
-            onClick={onBack}
-          />
-        </Tooltip>
-        <Breadcrumb className={styles.breadcrumbs} aria-label="详情面包屑">
-          {breadcrumbs.map((item, index) => {
-            const isLast = index === breadcrumbs.length - 1;
-            return (
-              <Breadcrumb.Item key={index}>
-                {item.onClick && !isLast ? (
-                  <button type="button" className={styles.breadcrumbLink} onClick={item.onClick}>
-                    {item.label}
-                  </button>
-                ) : (
-                  <span className={isLast ? styles.breadcrumbCurrent : styles.breadcrumbText}>
-                    {item.label}
-                  </span>
-                )}
-              </Breadcrumb.Item>
-            );
-          })}
-        </Breadcrumb>
-      </div>
-
       <section className={styles.headerCard}>
         <div className={styles.identity}>
           {icon ? <div className={styles.identityIcon}>{icon}</div> : null}

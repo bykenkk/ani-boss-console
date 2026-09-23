@@ -10,8 +10,8 @@ import {
   type NavigationLeaf,
 } from "../navigation";
 
-export const SIDEBAR_WIDTH = 180;
-export const SIDEBAR_COLLAPSED_WIDTH = 56;
+export const SIDEBAR_WIDTH = 200;
+export const SIDEBAR_COLLAPSED_WIDTH = 64;
 
 interface SidebarProps {
   items: readonly NavigationItem[];
@@ -249,6 +249,10 @@ export function Sidebar({ items, activePathname, collapsed, onCollapsedChange }:
       className={clsx("sidebar", collapsed && "is-collapsed")}
       style={{ width: collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH }}
     >
+      <Link to="/" className="sidebar-brand" aria-label="ANI BOSS">
+        <span className="sidebar-brand-mark">A</span>
+        <span className="sidebar-brand-name">ANI BOSS</span>
+      </Link>
       <div className="sidebar-menu-region">
         <Menu
           id="sidebar-navigation-menu"

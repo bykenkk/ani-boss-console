@@ -76,28 +76,11 @@ export interface NavigationGroup {
 
 export type NavigationItem = NavigationLeaf | NavigationGroup;
 
-export interface TopNavigationItem {
-  label: string;
-  to: AppRoute;
-  icon: ReactNode;
-}
-
 export function isNavigationGroup(item: NavigationItem): item is NavigationGroup {
   return "children" in item;
 }
 
-export const topNavigation: readonly TopNavigationItem[] = [
-  { label: "运营概览", to: "/", icon: <IconDashboard /> },
-  { label: "租户管理", to: "/tenants", icon: <IconUserGroup /> },
-  { label: "资源池管理", to: "/ops-pool", icon: <IconCloud /> },
-  { label: "监控告警", to: "/health", icon: <IconTool /> },
-  { label: "用量计量", to: "/metering", icon: <IconCalendarClock /> },
-  { label: "审计合规", to: "/audit", icon: <IconSafe /> },
-  { label: "系统设置", to: "/settings-platform-admins", icon: <IconSettings /> },
-  { label: "平台集成与通知", to: "/integration-webhook", icon: <IconApps /> },
-];
-
-export const tenantNavigation: readonly NavigationLeaf[] = [
+const tenantNavigation: readonly NavigationLeaf[] = [
   { label: "租户列表", to: "/tenants", icon: <IconUserGroup /> },
   { label: "配额策略", to: "/tenants-quotas", icon: <IconSettings /> },
   { label: "租户管理员", to: "/tenants-admins", icon: <IconUser /> },
@@ -108,7 +91,7 @@ export const tenantNavigation: readonly NavigationLeaf[] = [
   },
 ];
 
-export const infrastructureNavigation: readonly NavigationLeaf[] = [
+const infrastructureNavigation: readonly NavigationLeaf[] = [
   { label: "平台资源池总览", to: "/ops-pool" },
   { label: "GPU资源池", to: "/ops-gpu", icon: <IconThunderbolt /> },
   { label: "GPU配额", to: "/ops-gpu-quotas" },
@@ -121,7 +104,7 @@ export const infrastructureNavigation: readonly NavigationLeaf[] = [
   { label: "垃圾回收", to: "/ops-registry-gc" },
 ];
 
-export const observabilityNavigation: readonly NavigationLeaf[] = [
+const observabilityNavigation: readonly NavigationLeaf[] = [
   { label: "平台健康", to: "/health", icon: <IconDashboard /> },
   { label: "GPU 监控", to: "/health-gpu" },
   { label: "推理监控", to: "/health-inference" },
@@ -135,18 +118,18 @@ export const observabilityNavigation: readonly NavigationLeaf[] = [
   { label: "故障处理", to: "/maint-incidents" },
 ];
 
-export const meteringNavigation: readonly NavigationLeaf[] = [
+const meteringNavigation: readonly NavigationLeaf[] = [
   { label: "计量总览", to: "/metering", icon: <IconCalendarClock /> },
 ];
 
-export const auditNavigation: readonly NavigationLeaf[] = [
+const auditNavigation: readonly NavigationLeaf[] = [
   { label: "集群审计", to: "/audit", icon: <IconSafe /> },
   { label: "API Key 审计", to: "/audit-api-keys", icon: <IconLock /> },
   { label: "推理调用审计", to: "/audit-inference", icon: <IconRobot /> },
   { label: "合规导出与取证", to: "/audit-export", icon: <IconExport /> },
 ];
 
-export const settingsNavigation: readonly NavigationLeaf[] = [
+const settingsNavigation: readonly NavigationLeaf[] = [
   {
     label: "平台管理员",
     to: "/settings-platform-admins",
@@ -165,7 +148,7 @@ export const settingsNavigation: readonly NavigationLeaf[] = [
   },
 ];
 
-export const integrationNavigation: readonly NavigationLeaf[] = [
+const integrationNavigation: readonly NavigationLeaf[] = [
   { label: "运维 Webhook", to: "/integration-webhook", icon: <IconLink /> },
   { label: "企业通知集成", to: "/integration-notify", icon: <IconEmail /> },
   { label: "运营系统对接", to: "/integration-ops-system", icon: <IconApps /> },
@@ -203,47 +186,47 @@ function filterVisibleNavigation(items: readonly NavigationItem[]): NavigationIt
 }
 
 const completeAppNavigation: readonly NavigationItem[] = [
-  { label: "概览", to: "/", icon: <IconDashboard /> },
-  {
-    key: "tenant-management",
-    label: topNavigation[1].label,
-    icon: topNavigation[1].icon,
-    children: tenantNavigation,
-  },
+  { label: "平台概览", to: "/", icon: <IconDashboard /> },
   {
     key: "infrastructure-operations",
-    label: topNavigation[2].label,
-    icon: topNavigation[2].icon,
+    label: "资源池管理",
+    icon: <IconCloud />,
     children: infrastructureNavigation,
   },
   {
+    key: "tenant-management",
+    label: "租户管理",
+    icon: <IconUserGroup />,
+    children: tenantNavigation,
+  },
+  {
     key: "operations-observability",
-    label: topNavigation[3].label,
-    icon: topNavigation[3].icon,
+    label: "监控告警",
+    icon: <IconTool />,
     children: observabilityNavigation,
   },
   {
     key: "platform-metering",
-    label: topNavigation[4].label,
-    icon: topNavigation[4].icon,
+    label: "用量计量",
+    icon: <IconCalendarClock />,
     children: meteringNavigation,
   },
   {
     key: "security-audit",
-    label: topNavigation[5].label,
-    icon: topNavigation[5].icon,
+    label: "审计合规",
+    icon: <IconSafe />,
     children: auditNavigation,
   },
   {
     key: "platform-settings",
-    label: topNavigation[6].label,
-    icon: topNavigation[6].icon,
+    label: "系统设置",
+    icon: <IconSettings />,
     children: settingsNavigation,
   },
   {
     key: "platform-integrations",
-    label: topNavigation[7].label,
-    icon: topNavigation[7].icon,
+    label: "平台集成与通知",
+    icon: <IconApps />,
     children: integrationNavigation,
   },
 ];

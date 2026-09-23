@@ -1,13 +1,26 @@
 import { logoutPlatform } from "@/api/auth";
 import { clearAuthSession, useAuthState } from "@/components/auth/store";
 import { formatDateTime } from "@/lib/date";
-import { Dropdown, Modal } from "@arco-design/web-react";
-import { IconCalendar, IconExport, IconTag, IconUser } from "@arco-design/web-react/icon";
+import { Breadcrumb, Button, Dropdown, Input, Modal, Tooltip } from "@arco-design/web-react";
+import {
+  IconCalendar,
+  IconExport,
+  IconLeft,
+  IconSearch,
+  IconTag,
+  IconUser,
+} from "@arco-design/web-react/icon";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
+import type { AppBreadcrumbItem } from "../BreadcrumbNavigation";
 
-export function TopNav() {
+interface TopNavProps {
+  breadcrumbs: AppBreadcrumbItem[];
+  onBack?: () => void;
+}
+
+export function TopNav({ breadcrumbs, onBack }: TopNavProps) {
   const queryClient = useQueryClient();
   const authState = useAuthState();
   const [userMenuVisible, setUserMenuVisible] = useState(false);
@@ -81,12 +94,55 @@ export function TopNav() {
     <>
       <header className="top-nav">
         <div className="topnav-left">
-          <Link to="/" className="topnav-brand" aria-label="ANI BOSS">
-            <span className="topnav-brand-mark">A</span>
-            <span className="topnav-brand-name">ANI BOSS</span>
-          </Link>
+          {onBack ? (
+            <Tooltip content="返回上一级">
+              <Button
+                type="text"
+                shape="circle"
+                className="topnav-back"
+                icon={<IconLeft />}
+                aria-label="返回上一级"
+                onClick={onBack}
+              />
+            </Tooltip>
+          ) : null}
+          <Breadcrumb className="topnav-breadcrumbs" aria-label="页面面包屑">
+            {breadcrumbs.map((item, index) => {
+              const isLast = index === breadcrumbs.length - 1;
+              return (
+                <Breadcrumb.Item key={index}>
+                  {item.to && !isLast ? (
+                    <Link to={item.to} className="topnav-breadcrumb-link">
+                      {item.label}
+                    </Link>
+                  ) : item.onClick && !isLast ? (
+                    <button type="button" className="topnav-breadcrumb-link" onClick={item.onClick}>
+                      {item.label}
+                    </button>
+                  ) : (
+                    <span className={isLast ? "topnav-breadcrumb-current" : undefined}>
+                      {item.label}
+                    </span>
+                  )}
+                </Breadcrumb.Item>
+              );
+            })}
+          </Breadcrumb>
         </div>
         <div className="topnav-right">
+          <Input
+            className="topnav-search"
+            prefix={<IconSearch />}
+            placeholder="请输入内容"
+            aria-label="全局搜索"
+          />
+          <button type="button" className="topnav-kaiwu" aria-label="进入开物">
+            <span className="topnav-kaiwu-switch" aria-hidden="true">
+              <span className="topnav-kaiwu-knob" />
+            </span>
+            <span>开物</span>
+          </button>
+          <span className="topnav-user-divider" aria-hidden="true" />
           <Dropdown
             droplist={userMenu}
             trigger="hover"
