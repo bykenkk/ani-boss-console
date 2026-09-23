@@ -1,13 +1,4 @@
-import {
-  Button,
-  Descriptions,
-  Dropdown,
-  Menu,
-  Modal,
-  Spin,
-  Tag,
-  Tooltip,
-} from "@arco-design/web-react";
+import { Button, Descriptions, Dropdown, Menu, Modal, Spin, Tooltip } from "@arco-design/web-react";
 import { IconMoreVertical } from "@arco-design/web-react/icon";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -20,12 +11,17 @@ import {
   updateTenantStatus,
   type UpdateTenantInput,
 } from "@/api/tenant";
-import { DetailPageFrame, type DetailInfoCard, type DetailTab } from "@/components/common";
+import {
+  DetailPageFrame,
+  type DetailInfoCard,
+  type DetailTab,
+  StatusBadge,
+} from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
 import { tenantStatusMeta } from "../apiModel";
-import { TenantProfileModal } from "../TenantManagementModals";
-import { useTenantManagementAccess } from "../useTenantManagementAccess";
+import { TenantProfileModal } from "@/components/tenant/TenantProfileModal";
+import { useTenantManagementAccess } from "@/hooks/useTenantManagementAccess";
 import { TenantAuditRecords } from "./TenantAuditRecords";
 // import { TenantIdentitySettings } from "./TenantIdentitySettings";
 import { TenantLifecycleRecords } from "./TenantLifecycleRecords";
@@ -222,7 +218,7 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
         ]}
         title={tenant.displayName}
         subtitle={tenant.name}
-        status={<Tag color={status.color}>{status.label}</Tag>}
+        status={<StatusBadge tone={status.tone} value={status.label} />}
         headerItems={[
           { label: "用户数", value: tenant.userCount },
           { label: "管理员数", value: tenant.administratorCount },

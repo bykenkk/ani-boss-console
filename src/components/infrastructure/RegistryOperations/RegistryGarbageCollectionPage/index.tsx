@@ -1,6 +1,6 @@
 import { Button } from "@arco-design/web-react";
 import {
-  DataTableNameCell,
+  ResourceNameId,
   ListDataTable,
   ResourcePageFrame,
   TableSectionFrame,
@@ -28,7 +28,7 @@ export function RegistryGarbageCollectionPage() {
       dataIndex: "digest",
       width: 220,
       fixed: "left",
-      render: (_, layer) => <DataTableNameCell name={layer.digest} id={layer.id} />,
+      render: (_, layer) => <ResourceNameId name={layer.digest} id={layer.id} />,
     },
     { title: "所属仓库", dataIndex: "repository", width: 240 },
     {
@@ -51,7 +51,7 @@ export function RegistryGarbageCollectionPage() {
       title: "任务",
       dataIndex: "id",
       width: 170,
-      render: (_, run) => <DataTableNameCell name={run.id} id="镜像仓库 GC" />,
+      render: (_, run) => <ResourceNameId name={run.id} id="镜像仓库 GC" />,
     },
     { title: "状态", dataIndex: "status", width: 110 },
     {
@@ -100,17 +100,12 @@ export function RegistryGarbageCollectionPage() {
         />
       </section>
 
-      <TableSectionFrame
-        header={
-          <div className="px-5 pt-5">
-            <div className="text-base font-semibold text-gray-900">待回收层</div>
-            <div className="mt-1 text-xs text-gray-500">
-              当前仅展示预估结果；执行操作待仓库任务接口接入后开放。
-            </div>
-          </div>
-        }
-      >
+      <TableSectionFrame>
         <ListDataTable
+          header={{
+            title: "待回收层",
+            description: "当前仅展示预估结果；执行操作待仓库任务接口接入后开放。",
+          }}
           rowKey="id"
           columns={candidateColumns}
           data={registryGcCandidates}
@@ -119,17 +114,12 @@ export function RegistryGarbageCollectionPage() {
         />
       </TableSectionFrame>
 
-      <TableSectionFrame
-        header={
-          <div className="px-5 pt-5">
-            <div className="text-base font-semibold text-gray-900">GC 历史</div>
-            <div className="mt-1 text-xs text-gray-500">
-              用于核对每次回收释放的容量、删除层数和执行结果。
-            </div>
-          </div>
-        }
-      >
+      <TableSectionFrame>
         <ListDataTable
+          header={{
+            title: "GC 历史",
+            description: "用于核对每次回收释放的容量、删除层数和执行结果。",
+          }}
           rowKey="id"
           columns={runColumns}
           data={registryGcRuns}

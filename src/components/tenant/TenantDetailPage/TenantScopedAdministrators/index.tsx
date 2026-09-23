@@ -1,4 +1,4 @@
-import { Button, Tag } from "@arco-design/web-react";
+import { Button } from "@arco-design/web-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -8,11 +8,11 @@ import {
   inviteTenantAdministrator,
   tenantManagementQueryKeys,
 } from "@/api/tenant";
-import { DataTable } from "@/components/common";
+import { DataTable, StatusBadge } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
 import { tenantAdministratorRoleLabels, tenantAdministratorStatusMeta } from "../../apiModel";
-import { TenantAdministratorInviteModal } from "../../TenantManagementModals";
+import { TenantAdministratorInviteModal } from "@/components/tenant/TenantAdministratorInviteModal";
 
 interface TenantScopedAdministratorsProps {
   tenantId: string;
@@ -82,31 +82,36 @@ export function TenantScopedAdministrators({
           columns={[
             {
               title: "管理员",
-              width: 220,
-              render: (_, item) => (
-                <Link to="/tenants-admins/$adminId" params={{ adminId: item.id }}>
-                  {item.displayName || item.username}
-                </Link>
-              ),
+              width: 200,
+              ellipsis: true,
+              fixed: "left",
+              render: (_, item) => item.displayName || item.username,
             },
-            { title: "邮箱", dataIndex: "email", width: 220 },
+            {
+              title: "邮箱",
+              dataIndex: "email",
+              width: 200,
+              ellipsis: true,
+            },
             {
               title: "角色",
               width: 120,
+              ellipsis: true,
               render: (_, item) => tenantAdministratorRoleLabels[item.role],
             },
             {
               title: "状态",
-              width: 100,
+              width: 120,
               render: (_, item) => {
                 const meta = tenantAdministratorStatusMeta[item.status];
-                return <Tag color={meta.color}>{meta.label}</Tag>;
+                return <StatusBadge tone={meta.tone} value={meta.label} />;
               },
             },
             {
               title: "最近登录",
               dataIndex: "lastLoginAt",
-              width: 180,
+              width: 150,
+              ellipsis: true,
               render: (value: string | null) => formatDateTime(value),
             },
           ]}

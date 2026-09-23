@@ -25,7 +25,7 @@ export function MeteringTrend({ labels, values, label, unit }: MeteringTrendProp
     yAxis: {
       type: "value",
       name: unit,
-      splitLine: { lineStyle: { color: "#f2f3f5" } },
+      splitLine: { lineStyle: { color: "#f2f3f5", type: "dashed" } },
     },
     series: [
       {
@@ -34,10 +34,22 @@ export function MeteringTrend({ labels, values, label, unit }: MeteringTrendProp
         smooth: true,
         symbolSize: 7,
         data: values,
-        areaStyle: { color: "rgba(22, 93, 255, 0.1)" },
+        areaStyle: {
+          color: {
+            type: "linear",
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              { offset: 0, color: "rgba(22, 93, 255, 0.2)" },
+              { offset: 1, color: "rgba(22, 93, 255, 0)" },
+            ],
+          },
+        },
       },
     ],
   };
 
-  return <ReactECharts option={option} notMerge lazyUpdate className="h-[280px] w-full" />;
+  return <ReactECharts option={option} notMerge lazyUpdate className="h-70 w-full" />;
 }

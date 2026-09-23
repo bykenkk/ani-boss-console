@@ -23,21 +23,21 @@ export function PlatformAlertTable({ alerts, onUpdate }: PlatformAlertTableProps
   });
 
   return (
-    <Card
-      title="平台告警"
-      extra={
-        <AlertFilters
-          keyword={keyword}
-          level={level}
-          status={status}
-          onKeywordChange={setKeyword}
-          onLevelChange={setLevel}
-          onStatusChange={setStatus}
-        />
-      }
-      className="overflow-hidden rounded-lg [&_.arco-card-body]:p-0"
-    >
-      <AlertTable rows={rows} onUpdate={onUpdate} />
+    <Card className="overflow-hidden rounded-lg">
+      <AlertTable
+        rows={rows}
+        onUpdate={onUpdate}
+        extra={
+          <AlertFilters
+            keyword={keyword}
+            level={level}
+            status={status}
+            onKeywordChange={setKeyword}
+            onLevelChange={setLevel}
+            onStatusChange={setStatus}
+          />
+        }
+      />
     </Card>
   );
 }

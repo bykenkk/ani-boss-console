@@ -1,12 +1,12 @@
 import { Progress, Select, Space } from "@arco-design/web-react";
-import clsx from "clsx";
 import { useMemo, useState } from "react";
 import {
-  DataTableNameCell,
+  ResourceNameId,
   ListDataTable,
   ResourcePageFrame,
   TableSectionFrame,
   type ListColumn,
+  StatusBadge,
 } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
 import { TenantStorageRecentEvents } from "./TenantStorageRecentEvents";
@@ -168,26 +168,18 @@ export function TenantStorageQuotaPage() {
       dataIndex: "displayName",
       width: 190,
       fixed: "left",
-      render: (_, tenant) => <DataTableNameCell name={tenant.displayName} id={tenant.name} />,
+      render: (_, tenant) => <ResourceNameId name={tenant.displayName} id={tenant.name} />,
     },
     {
       title: "风险",
-      width: 90,
+      width: 120,
       render: (_, tenant) => {
         const hot = highestUsage(tenant);
         return (
-          <span
-            className={clsx(
-              "inline-flex rounded px-2 py-0.5 text-xs font-medium",
-              hot >= 90
-                ? "bg-red-50 text-red-700"
-                : hot >= 85
-                  ? "bg-orange-50 text-orange-700"
-                  : "bg-green-50 text-green-700",
-            )}
-          >
-            {hot >= 90 ? "高" : hot >= 85 ? "关注" : "正常"}
-          </span>
+          <StatusBadge
+            value={hot >= 90 ? "高" : hot >= 85 ? "关注" : "正常"}
+            tone={hot >= 90 ? "danger" : hot >= 85 ? "warning" : "success"}
+          />
         );
       },
     },
@@ -261,19 +253,6 @@ export function TenantStorageQuotaPage() {
       <TenantStorageTopN />
 
       <TableSectionFrame
-        header={
-          <div className="flex items-center justify-between px-5 pt-5">
-            <div>
-              <div className="text-base font-semibold text-gray-900">租户配额明细</div>
-              <div className="mt-1 text-xs text-gray-500">
-                当前为前端展示数据，尚未接入 ANI 存储配额接口。
-              </div>
-            </div>
-            <span className="text-xs text-gray-500">
-              显示 {filteredQuotas.length} / {tenantQuotas.length} 个租户
-            </span>
-          </div>
-        }
         toolbar={{
           search: {
             fields: [{ value: "keyword", label: "关键词" }],
@@ -300,6 +279,15 @@ export function TenantStorageQuotaPage() {
         }}
       >
         <ListDataTable
+          header={{
+            title: "租户配额明细",
+            description: "当前为前端展示数据，尚未接入 ANI 存储配额接口。",
+            extra: (
+              <span className="text-xs text-gray-500">
+                显示 {filteredQuotas.length} / {tenantQuotas.length} 个租户
+              </span>
+            ),
+          }}
           rowKey="id"
           columns={columns}
           data={filteredQuotas}

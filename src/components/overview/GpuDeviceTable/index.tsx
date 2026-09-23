@@ -1,16 +1,20 @@
-import { Tag } from "@arco-design/web-react";
 import type { GpuInventoryDevice, GpuInventoryStatus } from "@/api/gpu-inventory";
-import { ListDataTable, type ListColumn } from "@/components/common";
+import {
+  ListDataTable,
+  type ListColumn,
+  StatusBadge,
+  type StatusBadgeTone,
+} from "@/components/common";
 
 const TABLE_SCROLL_X = 1780;
 const TABLE_SCROLL_Y = 300;
 
-const statusMeta: Record<GpuInventoryStatus, { label: string; color: string }> = {
-  available: { label: "空闲未分配", color: "green" },
-  in_use: { label: "已占用", color: "arcoblue" },
-  fault: { label: "故障", color: "red" },
-  maintenance: { label: "维护中", color: "orange" },
-  unavailable: { label: "不可用", color: "gray" },
+const statusMeta: Record<GpuInventoryStatus, { label: string; tone: StatusBadgeTone }> = {
+  available: { label: "空闲未分配", tone: "success" },
+  in_use: { label: "已占用", tone: "info" },
+  fault: { label: "故障", tone: "danger" },
+  maintenance: { label: "维护中", tone: "warning" },
+  unavailable: { label: "不可用", tone: "default" },
 };
 
 function formatMemory(memoryTotalMb?: number) {
@@ -51,7 +55,7 @@ const columns: ListColumn<GpuInventoryDevice>[] = [
     width: 120,
     render: (status: GpuInventoryStatus) => {
       const meta = statusMeta[status];
-      return <Tag color={meta.color}>{meta.label}</Tag>;
+      return <StatusBadge tone={meta.tone} value={meta.label} />;
     },
   },
   {

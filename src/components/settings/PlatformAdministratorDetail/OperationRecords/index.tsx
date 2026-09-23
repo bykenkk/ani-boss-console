@@ -1,6 +1,6 @@
-import { Empty, Spin, Tag } from "@arco-design/web-react";
+import { Empty, Spin } from "@arco-design/web-react";
 import type { PlatformAdministratorAuditLog } from "@/api/platform-admins";
-import { DataTable, type ListColumn } from "@/components/common";
+import { DataTable, type ListColumn, StatusBadge } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 
 const actionLabels: Record<string, string> = {
@@ -23,11 +23,12 @@ const columns: ListColumn<PlatformAdministratorAuditLog>[] = [
   {
     title: "结果",
     dataIndex: "result",
-    width: 100,
+    width: 120,
     render: (value) => (
-      <Tag color={value === "success" ? "green" : "red"}>
-        {value === "success" ? "成功" : "失败"}
-      </Tag>
+      <StatusBadge
+        tone={value === "success" ? "success" : "danger"}
+        value={value === "success" ? "成功" : "失败"}
+      />
     ),
   },
   {

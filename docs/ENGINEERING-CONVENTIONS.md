@@ -10,7 +10,9 @@
 ## 目录职责
 
 - `src/routes/`：TanStack Router 文件路由。路由文件负责路由参数、路由级上下文、页面级状态与数据编排，以及领域组件组合。
-- `src/components/<scope>/`：按页面范围组织的业务组件、领域模型、Provider、状态容器与业务逻辑。
+- `src/components/<scope>/`：按页面范围组织的业务组件、领域模型、Provider 与组件业务逻辑；Provider 负责提供 store 实例和管理其生命周期。
+- `src/hooks/`：集中放置自定义 React Hook 及其直接依赖的 Context；Provider 组件仍按页面范围放在 `src/components/<scope>/`，并从 Hook 模块引用对应 Context。
+- `src/stores/`：按业务领域组织的 Zustand 客户端共享状态、操作及所属类型。简单领域使用独立文件，复杂领域使用目录按业务职责拆分；需要实例隔离的状态导出 store 工厂，由 Provider 创建实例。独立事件发布订阅使用 mitt，随所属领域组织；不另建自制事件总线。
 - `src/api/`：按业务资源组织的 API 请求函数、静态类型与 Axios 公共请求基础设施。
 - `src/components/common/`：跨页面、跨领域复用的公共组件；目录统一从 `@/components/common` 导入。
 - `src/components/layouts/`：应用布局、认证中心、顶部导航、侧边栏和页面出口。

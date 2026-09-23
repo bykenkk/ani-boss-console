@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { Tabs } from "@arco-design/web-react";
 import styles from "./index.module.less";
 
 export type ListStatusTab<T extends string> = {
@@ -20,22 +20,12 @@ export function StatusTabs<T extends string>({
   ariaLabel = "状态筛选",
 }: StatusTabsProps<T>) {
   return (
-    <div className={styles.statusTabs} role="tablist" aria-label={ariaLabel}>
-      {items.map((item) => {
-        const active = item.value === value;
-        return (
-          <button
-            key={item.value}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            className={clsx(styles.statusTab, active && styles.statusTabActive)}
-            onClick={() => onChange(item.value)}
-          >
-            <span>{item.label}</span>
-          </button>
-        );
-      })}
+    <div className={styles.statusTabs} aria-label={ariaLabel}>
+      <Tabs activeTab={value} onChange={(key) => onChange(key as T)} type="line">
+        {items.map((item) => (
+          <Tabs.TabPane key={item.value} title={item.label} />
+        ))}
+      </Tabs>
     </div>
   );
 }

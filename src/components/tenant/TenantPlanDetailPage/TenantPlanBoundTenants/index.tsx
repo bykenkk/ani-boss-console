@@ -1,4 +1,4 @@
-import { Button, Tag } from "@arco-design/web-react";
+import { Button } from "@arco-design/web-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -10,10 +10,10 @@ import {
   tenantManagementQueryKeys,
   type TenantPlanStatus,
 } from "@/api/tenant";
-import { DataTable } from "@/components/common";
+import { DataTable, StatusBadge } from "@/components/common";
 import { withId } from "@/lib/id";
 import { tenantStatusMeta } from "../../apiModel";
-import { TenantPlanBindModal } from "../../TenantManagementModals";
+import { TenantPlanBindModal } from "@/components/tenant/TenantPlanBindModal";
 
 interface TenantPlanBoundTenantsProps {
   planId: string;
@@ -107,10 +107,10 @@ export function TenantPlanBoundTenants({
             { title: "租户标识", dataIndex: "name", width: 220 },
             {
               title: "状态",
-              width: 110,
+              width: 120,
               render: (_, tenant) => {
                 const meta = tenantStatusMeta[tenant.status];
-                return <Tag color={meta.color}>{meta.label}</Tag>;
+                return <StatusBadge tone={meta.tone} value={meta.label} />;
               },
             },
           ]}

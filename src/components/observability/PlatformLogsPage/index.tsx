@@ -7,13 +7,18 @@ import {
   type PlatformComponentLog,
 } from "@/api/platform";
 import {
-  DataTableNameCell,
+  ResourceNameId,
   ListDataTable,
   ListPageFrame,
   type ListColumn,
+  StatusBadge,
+  type StatusBadgeTone,
 } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
-import { usePlatformComponentLogs, type LogConnectionState } from "./usePlatformComponentLogs";
+import {
+  usePlatformComponentLogs,
+  type LogConnectionState,
+} from "@/hooks/usePlatformComponentLogs";
 
 interface PlatformLogsPageProps {
   initialComponent?: string;
@@ -33,12 +38,12 @@ const levelMeta: Record<string, { label: string; className: string }> = {
   debug: { label: "debug", className: "bg-gray-100 text-gray-600" },
 };
 
-const connectionMeta: Record<LogConnectionState, { label: string; className: string }> = {
-  idle: { label: "等待选择组件", className: "bg-gray-100 text-gray-600" },
-  connecting: { label: "正在连接", className: "bg-blue-50 text-blue-700" },
-  connected: { label: "实时", className: "bg-green-50 text-green-700" },
-  reconnecting: { label: "正在重连", className: "bg-orange-50 text-orange-700" },
-  failed: { label: "连接失败", className: "bg-red-50 text-red-700" },
+const connectionMeta: Record<LogConnectionState, { label: string; tone: StatusBadgeTone }> = {
+  idle: { label: "等待选择组件", tone: "default" },
+  connecting: { label: "正在连接", tone: "info" },
+  connected: { label: "实时", tone: "success" },
+  reconnecting: { label: "正在重连", tone: "warning" },
+  failed: { label: "连接失败", tone: "danger" },
 };
 
 const groupNames: Record<string, string> = {
@@ -147,7 +152,7 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
     {
       title: "Pod / 容器",
       width: 240,
-      render: (_, log) => <DataTableNameCell name={log.pod || "-"} id={log.container || "-"} />,
+      render: (_, log) => <ResourceNameId name={log.pod || "-"} id={log.container || "-"} />,
     },
     {
       title: "输出流",
@@ -173,9 +178,7 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
         subtitle: "按组件查看平台工作负载实时日志；流结束后页面会自动重连。",
         extra: (
           <div className="flex items-center gap-2">
-            <span className={`rounded px-2 py-1 text-xs ${connection.className}`}>
-              {connection.label}
-            </span>
+            <StatusBadge value={connection.label} tone={connection.tone} />
             <Button disabled={!component} onClick={stream.restart}>
               重新连接
             </Button>

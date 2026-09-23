@@ -1,6 +1,6 @@
 import { Card, Tabs } from "@arco-design/web-react";
 import { useMemo, useState, type ReactNode } from "react";
-import { useBreadcrumbNavigation } from "@/components/layouts/AppLayout/BreadcrumbNavigation/useBreadcrumbNavigation";
+import { useBreadcrumbNavigation } from "@/hooks/useBreadcrumbNavigation";
 import styles from "./index.module.less";
 
 export interface DetailBreadcrumbItem {
@@ -109,8 +109,6 @@ export function DetailPageFrame({
               onChange={setActiveTabKey}
               className={styles.tabs}
               type="line"
-              headerPadding={false}
-              inkBarSize={{ width: 16 }}
             >
               {tabs.map((tab) => (
                 <Tabs.TabPane key={tab.key} title={tab.title}>

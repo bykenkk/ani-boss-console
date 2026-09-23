@@ -84,7 +84,7 @@ export function ResourceUsageSummary({
   ];
 
   return (
-    <Card title="资源使用情况" className="h-full rounded-lg">
+    <Card className="h-full rounded-lg">
       <div className="grid grid-cols-3 gap-3 max-[1280px]:grid-cols-2">
         {metrics.map((metric) => (
           <div

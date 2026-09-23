@@ -1,8 +1,8 @@
 import { fetchTenantAuditLogs, tenantManagementQueryKeys } from "@/api/tenant";
-import { DataTable } from "@/components/common";
+import { DataTable, StatusBadge } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
-import { Tag } from "@arco-design/web-react";
+
 import { useQuery } from "@tanstack/react-query";
 import { tenantAuditActionLabels } from "../../apiModel";
 
@@ -43,11 +43,12 @@ export function TenantAuditRecords({ tenantId }: TenantAuditRecordsProps) {
         },
         {
           title: "结果",
-          width: 50,
+          width: 80,
           render: (_, item) => (
-            <Tag color={item.result === "success" ? "green" : "red"}>
-              {item.result === "success" ? "成功" : "失败"}
-            </Tag>
+            <StatusBadge
+              tone={item.result === "success" ? "success" : "danger"}
+              value={item.result === "success" ? "成功" : "失败"}
+            />
           ),
         },
         {

@@ -1,4 +1,4 @@
-import { cloneElement, type ReactElement, type ReactNode } from "react";
+import { cloneElement, type ReactElement } from "react";
 import type { ListDataTableProps } from "../ListDataTable";
 import { ListToolbar, ToolbarIconButton, ToolbarSearch } from "../ListPageFrame/ListToolbar";
 import { StatusTabs } from "../ListPageFrame/StatusTabs";
@@ -10,7 +10,6 @@ interface TableSectionFrameProps<
   TStatus extends string = string,
   TSearchField extends string = string,
 > {
-  header?: ReactNode;
   tabs?: ListPageTabsConfig<TStatus>;
   toolbar?: ListPageToolbarConfig<TSearchField>;
   children: ReactElement<ListDataTableProps<T>>;
@@ -20,7 +19,7 @@ export function TableSectionFrame<
   T,
   TStatus extends string = string,
   TSearchField extends string = string,
->({ header, tabs, toolbar, children }: TableSectionFrameProps<T, TStatus, TSearchField>) {
+>({ tabs, toolbar, children }: TableSectionFrameProps<T, TStatus, TSearchField>) {
   const tableScroll = children.props.scroll;
   const contentHeightTable = cloneElement(children, {
     scroll: {
@@ -53,7 +52,6 @@ export function TableSectionFrame<
 
   return (
     <section className={styles.frame}>
-      {header}
       <div className={styles.content}>
         {tabs ? <StatusTabs {...tabs} /> : null}
         {toolbar ? (

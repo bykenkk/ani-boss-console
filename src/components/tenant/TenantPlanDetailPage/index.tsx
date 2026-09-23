@@ -1,13 +1,4 @@
-import {
-  Button,
-  Descriptions,
-  Dropdown,
-  Menu,
-  Modal,
-  Spin,
-  Tag,
-  Tooltip,
-} from "@arco-design/web-react";
+import { Button, Descriptions, Dropdown, Menu, Modal, Spin, Tooltip } from "@arco-design/web-react";
 import { IconMoreVertical } from "@arco-design/web-react/icon";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -20,12 +11,17 @@ import {
   updateTenantPlan,
   updateTenantPlanStatus,
 } from "@/api/tenant";
-import { DetailPageFrame, type DetailInfoCard, type DetailTab } from "@/components/common";
+import {
+  DetailPageFrame,
+  type DetailInfoCard,
+  type DetailTab,
+  StatusBadge,
+} from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
 import { tenantPlanStatusMeta } from "../apiModel";
-import { TenantPlanModal } from "../TenantManagementModals";
-import { useTenantManagementAccess } from "../useTenantManagementAccess";
+import { TenantPlanModal } from "@/components/tenant/TenantPlanModal";
+import { useTenantManagementAccess } from "@/hooks/useTenantManagementAccess";
 import { TenantPlanAudit } from "./TenantPlanAudit";
 import { TenantPlanBoundTenants } from "./TenantPlanBoundTenants";
 import { TenantPlanQuotaLimits } from "./TenantPlanQuotaLimits";
@@ -232,7 +228,7 @@ export function TenantPlanDetailPage({ planId }: TenantPlanDetailPageProps) {
         ]}
         title={plan.name}
         subtitle={plan.code}
-        status={<Tag color={status.color}>{status.label}</Tag>}
+        status={<StatusBadge tone={status.tone} value={status.label} />}
         headerItems={[
           { label: "策略 ID", value: plan.id },
           { label: "关联租户", value: plan.tenantCount },

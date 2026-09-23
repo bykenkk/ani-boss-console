@@ -1,6 +1,6 @@
-import { Select } from "@arco-design/web-react";
+import { Card, Select } from "@arco-design/web-react";
 import { useState } from "react";
-import { ResourcePageFrame } from "@/components/common";
+import { ResourcePageFrame, StatusBadge } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
 import { MonitoringTrend } from "../MonitoringTrend";
 import { platformComponents } from "../model";
@@ -76,7 +76,7 @@ export function ComponentMetricsPage() {
         ))}
       </section>
 
-      <section className="rounded-lg border border-gray-200 bg-white p-5">
+      <Card className="[&_.arco-card-body]:p-5">
         <div className="text-base font-semibold text-gray-900">依赖检查</div>
         <div className="mt-3 space-y-2">
           {component.dependencies.map((dependency) => (
@@ -90,14 +90,17 @@ export function ComponentMetricsPage() {
                   {dependency.error ?? "依赖探测正常"}
                 </div>
               </div>
-              <span className={dependency.status === "ok" ? "text-green-600" : "text-red-600"}>
-                {dependency.status}
-                {dependency.latencyMs === undefined ? "" : ` · ${dependency.latencyMs} ms`}
-              </span>
+              <div className="flex items-center gap-2">
+                <StatusBadge
+                  value={dependency.status}
+                  tone={dependency.status === "ok" ? "success" : "danger"}
+                />
+                {dependency.latencyMs === undefined ? null : <span>{dependency.latencyMs} ms</span>}
+              </div>
             </div>
           ))}
         </div>
-      </section>
+      </Card>
     </ResourcePageFrame>
   );
 }

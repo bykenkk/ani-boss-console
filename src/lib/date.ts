@@ -177,6 +177,39 @@ export function getUtcMonthToDateRanges(reference: DateValue = new Date(), trail
   };
 }
 
+export type MeteringPeriod = "month" | "recent-seven-days" | "previous-month";
+
+export function getUtcMeteringRanges(period: MeteringPeriod, reference: DateValue = new Date()) {
+  const base = getUtcMonthToDateRanges(reference);
+  const ranges = { ...base, trendEnd: base.currentEnd };
+  if (period === "month") return ranges;
+
+  const candidate = toDate(reference);
+  const current = isValid(candidate) ? candidate : new Date();
+
+  if (period === "recent-seven-days") {
+    const currentStart = new Date(ranges.trendStart);
+    return {
+      ...ranges,
+      currentStart: currentStart.toISOString(),
+      previousStart: addUtcDays(currentStart, -7).toISOString(),
+      previousEnd: addMilliseconds(currentStart, -1).toISOString(),
+    };
+  }
+
+  const monthStart = startOfUtcMonth(current);
+  const previousMonthStart = startOfUtcMonth(current, -1);
+  return {
+    ...ranges,
+    currentStart: previousMonthStart.toISOString(),
+    currentEnd: addMilliseconds(monthStart, -1).toISOString(),
+    previousStart: startOfUtcMonth(current, -2).toISOString(),
+    previousEnd: addMilliseconds(previousMonthStart, -1).toISOString(),
+  };
+}
+
+export type MeteringRanges = ReturnType<typeof getUtcMeteringRanges>;
+
 export function listUtcDateKeys(start: DateValue, count: number) {
   const date = toDate(start);
   if (!isValid(date) || count <= 0) return [];

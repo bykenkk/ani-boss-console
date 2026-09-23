@@ -1,4 +1,4 @@
-import { Select } from "@arco-design/web-react";
+import { Card, Select } from "@arco-design/web-react";
 import { ResourcePageFrame } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
 import { MonitoringTrend } from "../MonitoringTrend";
@@ -46,7 +46,7 @@ export function DomainMonitoringPage({ domain }: { domain: MonitoringDomain }) {
           <MonitoringTrend key={panel.title} panel={panel} />
         ))}
       </section>
-      <section className="rounded-lg border border-gray-200 bg-white p-5">
+      <Card className="[&_.arco-card-body]:p-5">
         <div className="text-base font-semibold text-gray-900">当前关注项</div>
         <div className="mt-3 space-y-2">
           {profile.notices.length ? (
@@ -65,7 +65,7 @@ export function DomainMonitoringPage({ domain }: { domain: MonitoringDomain }) {
             <div className="text-sm text-gray-500">暂无关注项</div>
           )}
         </div>
-      </section>
+      </Card>
     </ResourcePageFrame>
   );
 }

@@ -1,0 +1,25 @@
+.name {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  color: rgb(var(--primary-6));
+  font-size: 14px;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  :global(a) {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  :global(a:hover) {
+    color: rgb(var(--primary-5));
+    text-decoration: none;
+  }
+}

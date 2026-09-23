@@ -8,7 +8,7 @@ import { loginPlatform } from "@/api/auth";
 import { ApiError } from "@/api/request";
 import { BorderBeamPanel } from "@/components/common/BorderBeamPanel";
 import { showMessage } from "@/lib/feedback";
-import { isAuthenticated, setAuthSession, setDevelopmentAuthBypass } from "../store";
+import { isAuthenticated, setAuthSession, setDevelopmentAuthBypass } from "@/stores/auth";
 import styles from "./index.module.less";
 
 interface PlatformLoginValues {

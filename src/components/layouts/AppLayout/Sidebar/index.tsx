@@ -3,6 +3,7 @@ import { IconMenuFold, IconMenuUnfold, IconRight } from "@arco-design/web-react/
 import { Link } from "@tanstack/react-router";
 import clsx from "clsx";
 import { useMemo, useState } from "react";
+import wordmarkUrl from "@/assets/brand/wordmark.png";
 import {
   isNavigationGroup,
   type NavigationGroup,
@@ -128,6 +129,7 @@ function SidebarFlyoutItem({
       className={clsx("sidebar-menu-flyout-row", active && "is-active", visible && "is-open")}
     >
       <Trigger
+        className="sidebar-menu-flyout-trigger"
         trigger="hover"
         position="rt"
         popupAlign={{ right: 26 }}
@@ -227,7 +229,9 @@ export function Sidebar({ items, activePathname, collapsed, onCollapsedChange }:
   );
   const [menuState, setMenuState] = useState(() => ({
     pathname: activePathname,
-    openKeys: activeAncestors,
+    openKeys: Array.from(
+      new Set([...items.filter(isNavigationGroup).map((item) => item.key), ...activeAncestors]),
+    ),
   }));
   const [flyoutState, setFlyoutState] = useState<{
     key: string;
@@ -249,9 +253,9 @@ export function Sidebar({ items, activePathname, collapsed, onCollapsedChange }:
       className={clsx("sidebar", collapsed && "is-collapsed")}
       style={{ width: collapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH }}
     >
-      <Link to="/" className="sidebar-brand" aria-label="ANI BOSS">
-        <span className="sidebar-brand-mark">A</span>
-        <span className="sidebar-brand-name">ANI BOSS</span>
+      <Link to="/" className="sidebar-brand" aria-label="常青云">
+        <img className="sidebar-brand-logo" src={wordmarkUrl} alt="" />
+        <img className="sidebar-brand-icon" src="/favicon.png" alt="" />
       </Link>
       <div className="sidebar-menu-region">
         <Menu

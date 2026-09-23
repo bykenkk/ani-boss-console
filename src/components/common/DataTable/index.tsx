@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import type { ReactNode } from "react";
 import { Table, type TableColumnProps, type TableProps } from "@arco-design/web-react";
 import { DataTableSectionHeader, type DataTableSectionHeaderProps } from "./DataTableSectionHeader";
@@ -9,7 +8,6 @@ import {
 } from "./layout";
 import { ConfiguredDataTableRowActions } from "./RowActions";
 import type { RowAction } from "./types";
-import styles from "./index.module.less";
 
 export { DataTableRowActionButton, DataTableRowActions } from "./RowActions";
 export type { RowAction, RowActionIntent } from "./types";
@@ -106,7 +104,7 @@ export function DataTable<T>({
     <>
       {header ? <DataTableSectionHeader {...header} /> : null}
       <Table<T>
-        className={clsx(styles.dataTable, className)}
+        className={className}
         aria-label={tableLabel}
         rowKey={rowKey}
         columns={resolvedColumns}
@@ -135,14 +133,5 @@ export function DataTable<T>({
         rowSelection={rowSelection}
       />
     </>
-  );
-}
-
-export function DataTableNameCell({ name, id }: { name: ReactNode; id: ReactNode }) {
-  return (
-    <div className={styles.nameCell}>
-      <span className={styles.name}>{name}</span>
-      <span className={styles.nameId}>{id}</span>
-    </div>
   );
 }

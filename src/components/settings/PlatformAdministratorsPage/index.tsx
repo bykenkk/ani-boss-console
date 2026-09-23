@@ -19,13 +19,9 @@ import {
   type PlatformAdministratorListItem,
   type PlatformAdministratorStatus,
 } from "@/api/platform-admins";
-import {
-  DataTableNameCell,
-  ListDataTable,
-  ListPageFrame,
-  type ListColumn,
-} from "@/components/common";
-import { getAccessTokenRoles, useAuthState } from "@/components/auth/store";
+import { ResourceNameId, ListDataTable, ListPageFrame, type ListColumn } from "@/components/common";
+import { getAccessTokenRoles } from "@/stores/auth";
+import { useAuthState } from "@/hooks/useAuthState";
 import { formatDateTime } from "@/lib/date";
 import { PlatformAdministratorStatusBadge } from "../PlatformAdministratorStatusBadge";
 import { platformAdministratorRoleLabels, platformAdministratorSourceLabels } from "../model";
@@ -216,9 +212,9 @@ export function PlatformAdministratorsPage() {
       title: "账号",
       width: 240,
       render: (_, administrator) => (
-        <DataTableNameCell
+        <ResourceNameId
           name={
-            <Link to="/settings-platform-admins/$userId" params={{ userId: administrator.id }}>
+            <Link to="/platform-admins/$userId" params={{ userId: administrator.id }}>
               {administrator.displayName}
             </Link>
           }

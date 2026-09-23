@@ -75,20 +75,13 @@ const columns: ListColumn<TenantStorageEvent>[] = [
 
 export function TenantStorageRecentEvents() {
   return (
-    <TableSectionFrame
-      header={
-        <div className="flex items-center justify-between px-5 pt-5">
-          <div>
-            <div className="text-base font-semibold text-gray-900">最近事件</div>
-            <div className="mt-1 text-xs text-gray-500">
-              记录租户存储配额、水位与扩容申请的近期变化。
-            </div>
-          </div>
-          <span className="text-xs text-gray-500">最近 {recentEvents.length} 条</span>
-        </div>
-      }
-    >
+    <TableSectionFrame>
       <ListDataTable
+        header={{
+          title: "最近事件",
+          description: "记录租户存储配额、水位与扩容申请的近期变化。",
+          extra: <span className="text-xs text-gray-500">最近 {recentEvents.length} 条</span>,
+        }}
         rowKey="id"
         columns={columns}
         data={recentEvents}

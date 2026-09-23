@@ -31,9 +31,8 @@ export type ResourcePageHeaderConfig = ResourcePageHeaderBaseConfig &
       }
   );
 
-export type ListPageHeaderProps = ResourcePageHeaderConfig;
-
 export type ResourcePageFrameProps = {
-  header: ResourcePageHeaderConfig | ReactNode;
+  header: ResourcePageHeaderConfig;
+  className?: string;
   children: ReactNode;
 };

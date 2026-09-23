@@ -1,9 +1,4 @@
-export {
-  DataTable,
-  DataTableNameCell,
-  DataTableRowActionButton,
-  DataTableRowActions,
-} from "./DataTable";
+export { DataTable, DataTableRowActionButton, DataTableRowActions } from "./DataTable";
 export type {
   DataTableProps,
   DataTableSectionHeaderProps,
@@ -21,10 +16,9 @@ export type {
 } from "./DetailPageFrame";
 export { ListDataTable } from "./ListDataTable";
 export type { ListDataTableProps } from "./ListDataTable";
-export { ListPageFrame, ListPageHeader } from "./ListPageFrame";
+export { ListPageFrame } from "./ListPageFrame";
 export type {
   ListPageFrameProps,
-  ListPageHeaderProps,
   ListPageRefreshConfig,
   ListPageSearchConfig,
   ListPageTabsConfig,
@@ -32,6 +26,8 @@ export type {
 } from "./ListPageFrame";
 export { PagePlaceholder } from "./PagePlaceholder";
 export { ResourcePageFrame } from "./ResourcePageFrame";
+export { ResourceNameId } from "./ResourceNameId";
+export type { ResourceNameIdProps } from "./ResourceNameId";
 export type {
   ResourcePageFrameProps,
   ResourcePageHeaderAction,

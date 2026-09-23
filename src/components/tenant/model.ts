@@ -208,9 +208,9 @@ export interface TenantDraft {
 }
 
 export const tenantStatusMeta = {
-  active: { label: "活跃", color: "green" },
-  suspended: { label: "冻结", color: "orange" },
-  disabled: { label: "禁用", color: "gray" },
+  active: { label: "活跃", tone: "success" },
+  suspended: { label: "冻结", tone: "warning" },
+  disabled: { label: "禁用", tone: "default" },
 } as const;
 
 export const tenantAdminRoles: TenantAdminRole[] = ["租户所有者", "租户管理员", "只读审计"];
@@ -222,10 +222,10 @@ export const tenantAdminStatusMeta = {
 } as const;
 
 export const tenantBillingStatusMeta = {
-  current: { label: "账期内", color: "blue" },
-  overdue: { label: "已欠费", color: "red" },
-  settled: { label: "已结清", color: "green" },
-  credited: { label: "已调账", color: "purple" },
+  current: { label: "账期内", tone: "info" },
+  overdue: { label: "已欠费", tone: "danger" },
+  settled: { label: "已结清", tone: "success" },
+  credited: { label: "已调账", tone: "info" },
 } as const;
 
 export const tenantLifecycleEventMeta = {

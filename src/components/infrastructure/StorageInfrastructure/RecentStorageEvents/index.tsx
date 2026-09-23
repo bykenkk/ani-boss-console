@@ -69,20 +69,15 @@ const columns: ListColumn<StoragePlatformEvent>[] = [
 
 export function RecentStorageEvents() {
   return (
-    <TableSectionFrame
-      header={
-        <div className="flex items-center justify-between px-5 pt-5">
-          <div>
-            <div className="text-base font-semibold text-gray-900">最近平台事件</div>
-            <div className="mt-1 text-xs text-gray-500">
-              汇总存储后端近期健康、容量和基础设施变化。
-            </div>
-          </div>
-          <span className="text-xs text-gray-500">最近 {recentPlatformEvents.length} 条</span>
-        </div>
-      }
-    >
+    <TableSectionFrame>
       <ListDataTable
+        header={{
+          title: "最近平台事件",
+          description: "汇总存储后端近期健康、容量和基础设施变化。",
+          extra: (
+            <span className="text-xs text-gray-500">最近 {recentPlatformEvents.length} 条</span>
+          ),
+        }}
         rowKey="id"
         columns={columns}
         data={recentPlatformEvents}

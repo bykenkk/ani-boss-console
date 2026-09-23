@@ -2,11 +2,12 @@ import { Progress, Select, Space } from "@arco-design/web-react";
 import clsx from "clsx";
 import { useMemo, useState } from "react";
 import {
-  DataTableNameCell,
+  ResourceNameId,
   ListDataTable,
   ResourcePageFrame,
   TableSectionFrame,
   type ListColumn,
+  StatusBadge,
 } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
 import { formatDateTimeMinute } from "@/lib/date";
@@ -126,19 +127,6 @@ function usagePercent(pool: IpPool) {
   return Math.round((pool.used / Math.max(1, pool.total)) * 100);
 }
 
-function StatusBadge({ status }: { status: ComponentStatus }) {
-  return (
-    <span
-      className={clsx(
-        "inline-flex rounded px-2 py-0.5 text-xs font-medium",
-        status === "healthy" ? "bg-green-50 text-green-700" : "bg-orange-50 text-orange-700",
-      )}
-    >
-      {status === "healthy" ? "健康" : "降级"}
-    </span>
-  );
-}
-
 export function NetworkInfrastructurePage() {
   const [region, setRegion] = useState("all");
   const [status, setStatus] = useState("all");
@@ -168,13 +156,18 @@ export function NetworkInfrastructurePage() {
       dataIndex: "name",
       width: 220,
       fixed: "left",
-      render: (_, component) => <DataTableNameCell name={component.name} id={component.type} />,
+      render: (_, component) => <ResourceNameId name={component.name} id={component.type} />,
     },
     {
       title: "状态",
       dataIndex: "status",
-      width: 90,
-      render: (value) => <StatusBadge status={value as ComponentStatus} />,
+      width: 120,
+      render: (value) => (
+        <StatusBadge
+          value={value === "healthy" ? "健康" : "降级"}
+          tone={value === "healthy" ? "success" : "warning"}
+        />
+      ),
     },
     { title: "区域", dataIndex: "region", width: 120 },
     { title: "集群", dataIndex: "cluster", width: 120 },
@@ -221,7 +214,7 @@ export function NetworkInfrastructurePage() {
       title: "地址池",
       dataIndex: "name",
       width: 190,
-      render: (_, pool) => <DataTableNameCell name={pool.name} id={pool.id} />,
+      render: (_, pool) => <ResourceNameId name={pool.name} id={pool.id} />,
     },
     { title: "CIDR", dataIndex: "cidr", width: 160 },
     { title: "区域", dataIndex: "region", width: 130 },
@@ -292,19 +285,6 @@ export function NetworkInfrastructurePage() {
       </section>
 
       <TableSectionFrame
-        header={
-          <div className="flex items-center justify-between px-5 pt-5">
-            <div>
-              <div className="text-base font-semibold text-gray-900">网络组件</div>
-              <div className="mt-1 text-xs text-gray-500">
-                当前为前端展示数据，尚未接入 ANI 网络基础设施接口。
-              </div>
-            </div>
-            <span className="text-xs text-gray-500">
-              显示 {filteredComponents.length} / {networkComponents.length} 个组件
-            </span>
-          </div>
-        }
         toolbar={{
           search: {
             fields: [{ value: "keyword", label: "关键词" }],
@@ -339,6 +319,15 @@ export function NetworkInfrastructurePage() {
         }}
       >
         <ListDataTable
+          header={{
+            title: "网络组件",
+            description: "当前为前端展示数据，尚未接入 ANI 网络基础设施接口。",
+            extra: (
+              <span className="text-xs text-gray-500">
+                显示 {filteredComponents.length} / {networkComponents.length} 个组件
+              </span>
+            ),
+          }}
           rowKey="id"
           columns={componentColumns}
           data={filteredComponents}
@@ -348,17 +337,12 @@ export function NetworkInfrastructurePage() {
         />
       </TableSectionFrame>
 
-      <TableSectionFrame
-        header={
-          <div className="px-5 pt-5">
-            <div className="text-base font-semibold text-gray-900">IP 地址池</div>
-            <div className="mt-1 text-xs text-gray-500">
-              展示地址使用量与水位，便于提前识别容量风险。
-            </div>
-          </div>
-        }
-      >
+      <TableSectionFrame>
         <ListDataTable
+          header={{
+            title: "IP 地址池",
+            description: "展示地址使用量与水位，便于提前识别容量风险。",
+          }}
           rowKey="id"
           columns={poolColumns}
           data={ipPools}

@@ -1,6 +1,6 @@
 import { runIdempotentRequest } from "@/api/idempotency";
 import { coreRequest } from "@/api/request";
-import { getAccessTokenJti } from "@/components/auth/store";
+import { getAccessTokenJti } from "@/stores/auth";
 import { createIdempotencyScope } from "@/lib/idempotency";
 import type { AuthTokens, LogoutResponse, PlatformLoginInput } from "./types";
 

@@ -15,7 +15,8 @@ import {
   resetPlatformAdministratorPassword,
   updatePlatformAdministratorRole,
 } from "@/api/platform-admins";
-import { getAccessTokenRoles, useAuthState } from "@/components/auth/store";
+import { getAccessTokenRoles } from "@/stores/auth";
+import { useAuthState } from "@/hooks/useAuthState";
 import { DetailPageFrame, type DetailInfoCard, type DetailTab } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
@@ -151,12 +152,12 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
     mutationFn: () => runAdministratorOperation(() => deletePlatformAdministrator(userId)),
     onSuccess: async () => {
       await invalidateAll();
-      void navigate({ to: "/settings-platform-admins" });
+      void navigate({ to: "/platform-admins" });
     },
   });
 
   const returnToList = () => {
-    void navigate({ to: "/settings-platform-admins" });
+    void navigate({ to: "/platform-admins" });
   };
 
   if (detailQuery.isPending) {

@@ -19,9 +19,13 @@
 ## 组件与样式边界
 
 - 基础 UI 使用 `@arco-design/web-react`，图标使用 `@arco-design/web-react/icon`；不引入与 Arco 平行的组件库。
+- 所有 Arco `Card` 统一无外边框、圆角 `8px`，由根级 `ConfigProvider.componentConfig.Card` 配置；业务侧不得覆盖为其他边框或圆角。此规则仅适用于 `Card` 组件。
 - 不自行仿造 Arco 已提供的 Button、Form、Modal 等基础组件。
 - 业务代码不得直接使用 Arco `Table`：普通组件、详情页和嵌入式表格使用 `DataTable`，标准列表页使用 `ListDataTable`。
+- 需要展示的表格区块标题统一通过 `DataTable` / `ListDataTable` 的 `header` 配置，由内部 `DataTableSectionHeader` 子组件渲染标题、说明和右侧操作；不得使用 `Card.title` 或另写标题栏充当表格标题。`TableSectionFrame` 只负责表格区域布局、筛选和工具栏；是否保留区块标题仍遵循下文的页面标题去重规则。
 - 颜色和状态语义优先使用 Arco Token；Tailwind CSS 主要负责布局、尺寸和间距。
+- 状态和操作结果展示统一复用公共 `StatusBadge`，业务侧只维护文案与 `StatusBadgeTone` 的映射，不再用彩色 `span`、`Tag` 或另写同名组件重复实现；领域状态组件可以保留，但内部必须复用公共组件。日志级别、漏洞风险等级、事件类型和角色等分类标签不按状态机械替换。
+- 全局范围谨慎使用 `Typography.Title`，不得仅为放大或加粗文字而使用。页面标题优先复用既有页面头部，普通强调文本使用 `Typography.Text`。确需标题语义时，必须通过局部 `className` 或 `style` 显式清除默认上边距，并明确设置下边距（如 `m-0!` 或 `mt-0! mb-4!`）；区块间距由父容器统一控制，避免默认 `1em` 上边距叠加或外边距折叠造成意外留白。此规则适用于所有页面、弹窗、Tab 内容和公共组件。
 - 局部样式覆写限制在组件作用域内，不复制 Arco 源码，不污染其他页面。
 - 页面壳层遵循顶部一级导航、左侧二级菜单与三级分组结构；侧边栏不重复展示当前一级菜单名称。
 - 产品信息架构中的二级菜单对应侧边栏第一层，仅该层显示图标；侧边栏内部展开的第二层菜单不显示图标。
@@ -30,7 +34,7 @@
 ## 页面与组件组织
 
 - 新页面先参考同类型已有页面，列表、详情和表单沿用已有公共骨架，不创建平行模板。
-- 列表页、运营总览和其他常规页面统一使用租户列表同款 `ListPageHeader`；页面标题只展示一次，页面只有一个主列表时，内容卡片不再重复“某某列表”等同义标题。仅当同页存在多个可独立描述的表格或区域时，才保留区块标题。详情页继续使用 `DetailPageFrame` 的详情头部。
+- 列表页、运营总览和其他常规页面统一通过 `ResourcePageFrame` 或 `ListPageFrame` 的 `header` 配置使用租户列表同款头部；`ResourcePageHeader` 作为 `ResourcePageFrame` 的内部子组件，不对外导出。页面标题只展示一次，页面只有一个主列表时，内容卡片不再重复“某某列表”等同义标题。仅当同页存在多个可独立描述的表格或区域时，才保留区块标题。详情页继续使用 `DetailPageFrame` 的详情头部。
 - `ListToolbar` 中的搜索框和筛选项统一使用 Arco `Space` 组合，不为其中的 Arco 表单控件设置固定宽度。
 - 页面级查询、状态、导航和组件组合放在对应页面组件中，可独立识别的复杂展示或交互区域继续拆为领域组件；路由入口职责与适配规则遵循 [工程约定](./ENGINEERING-CONVENTIONS.md)。
 - 服务端状态使用 TanStack Query，跨组件客户端状态使用所属领域的 Store 或 Provider，组件局部 UI 状态使用 React 状态。

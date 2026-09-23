@@ -50,45 +50,4 @@
   :global(.arco-table-pagination) {
     flex: 0 0 auto;
   }
-
-  :global(.arco-table-td) {
-    box-sizing: border-box;
-    height: 56px;
-    max-width: 300px;
-    overflow: hidden;
-    padding: 8px 16px;
-    border-bottom: 1px solid var(--list-table-divider);
-    color: var(--list-text);
-    font-size: 14px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  :global(.arco-table-td.arco-table-checkbox) {
-    padding: 0;
-  }
-
-  :global(.arco-table-tbody .arco-table-tr:last-child .arco-table-td) {
-    border-bottom: 0;
-  }
-
-  :global(.arco-table-tbody .arco-table-tr:hover) {
-    background: rgba(0, 121, 211, 0.04);
-  }
-}
-
-.tableState {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  min-height: 220px;
-  color: var(--list-text-secondary);
-}
-
-.emptyIcon {
-  color: var(--list-text-tertiary);
-  font-size: 48px !important;
 }

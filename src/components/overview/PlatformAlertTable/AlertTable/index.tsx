@@ -1,17 +1,20 @@
-import { Tag, Typography } from "@arco-design/web-react";
-import { DataTable } from "@/components/common";
+import type { ReactNode } from "react";
+import { Typography } from "@arco-design/web-react";
+import { DataTable, StatusBadge } from "@/components/common";
 import type { AlertItem } from "@/components/overview/model";
 import { formatMonthDayTime } from "@/lib/date";
 import { LevelTag } from "../../LevelTag";
 
 interface AlertTableProps {
   rows: AlertItem[];
+  extra?: ReactNode;
   onUpdate: (id: number, status: AlertItem["status"]) => void;
 }
 
-export function AlertTable({ rows, onUpdate }: AlertTableProps) {
+export function AlertTable({ rows, onUpdate, extra }: AlertTableProps) {
   return (
     <DataTable
+      header={{ title: "平台告警", extra }}
       rowKey="id"
       data={rows}
       pagination={false}
@@ -73,9 +76,12 @@ export function AlertTable({ rows, onUpdate }: AlertTableProps) {
         {
           title: "状态",
           dataIndex: "status",
-          width: 100,
+          width: 120,
           render: (_: unknown, item: AlertItem) => (
-            <Tag color={item.status === "待处理" ? "orange" : "green"}>{item.status}</Tag>
+            <StatusBadge
+              tone={item.status === "待处理" ? "warning" : "success"}
+              value={item.status}
+            />
           ),
         },
       ]}

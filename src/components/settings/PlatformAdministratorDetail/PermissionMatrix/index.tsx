@@ -1,4 +1,4 @@
-import { Alert, Button } from "@arco-design/web-react";
+import { Alert, Button, Card } from "@arco-design/web-react";
 import type { PlatformAdministratorRole } from "@/api/platform-admins";
 import { platformAdministratorRoleLabels } from "../../model";
 
@@ -90,7 +90,7 @@ export function PermissionMatrix({
       </div>
       <div className="space-y-2">
         {permissionRows.map((row) => (
-          <div key={row.scope} className="rounded-md border border-gray-200 bg-white px-4 py-3">
+          <Card key={row.scope} className="[&_.arco-card-body]:px-4 [&_.arco-card-body]:py-3">
             <div className="text-base font-semibold text-gray-900">{row.scope}</div>
             <div className="mt-1 grid grid-cols-1 gap-2 text-sm text-gray-600 sm:grid-cols-3">
               {matrixRoles.map(({ label, role }) => {
@@ -103,7 +103,7 @@ export function PermissionMatrix({
                 );
               })}
             </div>
-          </div>
+          </Card>
         ))}
       </div>
     </div>

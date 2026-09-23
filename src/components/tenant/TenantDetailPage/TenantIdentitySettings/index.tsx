@@ -12,7 +12,7 @@ import {
 import { formatDateTime } from "@/lib/date";
 import { showMessage } from "@/lib/feedback";
 import { withId } from "@/lib/id";
-import { TenantSsoModal } from "../../TenantManagementModals";
+import { TenantSsoModal } from "@/components/tenant/TenantSsoModal";
 
 interface TenantIdentitySettingsProps {
   tenantId: string;

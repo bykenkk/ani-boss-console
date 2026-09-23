@@ -11,7 +11,7 @@ import {
 import { DataTable } from "@/components/common";
 import { withId } from "@/lib/id";
 import { tenantAdministratorRoleLabels } from "../../apiModel";
-import { TenantAdministratorRoleModal } from "../../TenantManagementModals";
+import { TenantAdministratorRoleModal } from "@/components/tenant/TenantAdministratorRoleModal";
 
 interface TenantAdministratorRoleProps {
   tenantId: string;

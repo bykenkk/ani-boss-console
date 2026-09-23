@@ -9,7 +9,7 @@ import {
   getAuthState,
   isDevelopmentAuthBypassActive,
   updateAccessToken,
-} from "@/components/auth/store";
+} from "@/stores/auth";
 import { createIdempotencyScope } from "@/lib/idempotency";
 
 export const CORE_API_BASE = "/api/v1";

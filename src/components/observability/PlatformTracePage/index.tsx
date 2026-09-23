@@ -1,4 +1,4 @@
-import { Select } from "@arco-design/web-react";
+import { Card, Select } from "@arco-design/web-react";
 import { useState } from "react";
 import { ResourcePageFrame } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
@@ -43,7 +43,7 @@ export function PlatformTracePage() {
         <Metric label="入口服务" value={trace.entryService} hint={trace.startedAt} />
       </section>
 
-      <section className="rounded-lg border border-gray-200 bg-white p-5">
+      <Card className="[&_.arco-card-body]:p-5">
         <div className="flex items-center justify-between">
           <div>
             <div className="text-base font-semibold text-gray-900">调用链瀑布图</div>
@@ -92,9 +92,9 @@ export function PlatformTracePage() {
             );
           })}
         </div>
-      </section>
+      </Card>
 
-      <section className="rounded-lg border border-gray-200 bg-white p-5">
+      <Card className="[&_.arco-card-body]:p-5">
         <div className="text-base font-semibold text-gray-900">耗时排行</div>
         <div className="mt-3 space-y-2">
           {[...trace.spans]
@@ -113,7 +113,7 @@ export function PlatformTracePage() {
               </div>
             ))}
         </div>
-      </section>
+      </Card>
     </ResourcePageFrame>
   );
 }

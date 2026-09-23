@@ -1,6 +1,6 @@
 import { Progress } from "@arco-design/web-react";
 import {
-  DataTableNameCell,
+  ResourceNameId,
   ListDataTable,
   TableSectionFrame,
   type ListColumn,
@@ -56,7 +56,7 @@ const columns: ListColumn<TenantHotItem>[] = [
     title: "租户 / ID",
     dataIndex: "name",
     width: 220,
-    render: (_, item) => <DataTableNameCell name={item.name} id={item.id} />,
+    render: (_, item) => <ResourceNameId name={item.name} id={item.id} />,
   },
   {
     title: "最高水位",
@@ -97,20 +97,13 @@ const columns: ListColumn<TenantHotItem>[] = [
 
 export function TenantStorageTopN() {
   return (
-    <TableSectionFrame
-      header={
-        <div className="flex items-center justify-between px-5 pt-5">
-          <div>
-            <div className="text-base font-semibold text-gray-900">租户热度 TopN</div>
-            <div className="mt-1 text-xs text-gray-500">
-              按租户所有存储与性能配额维度中的最高水位排序。
-            </div>
-          </div>
-          <span className="text-xs text-gray-500">Top {tenantTopN.length}</span>
-        </div>
-      }
-    >
+    <TableSectionFrame>
       <ListDataTable
+        header={{
+          title: "租户热度 TopN",
+          description: "按租户所有存储与性能配额维度中的最高水位排序。",
+          extra: <span className="text-xs text-gray-500">Top {tenantTopN.length}</span>,
+        }}
         rowKey="id"
         columns={columns}
         data={tenantTopN}

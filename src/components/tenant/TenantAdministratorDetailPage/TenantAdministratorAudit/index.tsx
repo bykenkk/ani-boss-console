@@ -1,7 +1,6 @@
-import { Tag } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTenantAdministratorAuditLogs, tenantManagementQueryKeys } from "@/api/tenant";
-import { DataTable } from "@/components/common";
+import { DataTable, StatusBadge } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
 
@@ -35,11 +34,12 @@ export function TenantAdministratorAudit({
           { title: "资源", dataIndex: "resource", width: 220 },
           {
             title: "结果",
-            width: 100,
+            width: 120,
             render: (_, item) => (
-              <Tag color={item.result === "success" ? "green" : "red"}>
-                {item.result === "success" ? "成功" : "失败"}
-              </Tag>
+              <StatusBadge
+                tone={item.result === "success" ? "success" : "danger"}
+                value={item.result === "success" ? "成功" : "失败"}
+              />
             ),
           },
           { title: "操作人", dataIndex: "userId", width: 180 },

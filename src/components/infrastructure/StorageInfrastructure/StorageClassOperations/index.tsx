@@ -1,9 +1,9 @@
-import clsx from "clsx";
 import {
   ListDataTable,
-  DataTableNameCell,
+  ResourceNameId,
   TableSectionFrame,
   type ListColumn,
+  StatusBadge,
 } from "@/components/common";
 
 interface StorageClassItem {
@@ -81,7 +81,7 @@ const columns: ListColumn<StorageClassItem>[] = [
     title: "StorageClass / ID",
     dataIndex: "name",
     width: 210,
-    render: (_, item) => <DataTableNameCell name={item.name} id={item.id} />,
+    render: (_, item) => <ResourceNameId name={item.name} id={item.id} />,
   },
   { title: "类型", dataIndex: "type", width: 80 },
   { title: "存储后端", dataIndex: "backend", width: 190 },
@@ -96,16 +96,9 @@ const columns: ListColumn<StorageClassItem>[] = [
   {
     title: "状态",
     dataIndex: "enabled",
-    width: 90,
+    width: 120,
     render: (value: boolean) => (
-      <span
-        className={clsx(
-          "inline-flex rounded px-2 py-0.5 text-xs font-medium",
-          value ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-600",
-        )}
-      >
-        {value ? "已启用" : "已停用"}
-      </span>
+      <StatusBadge value={value ? "已启用" : "已停用"} tone={value ? "success" : "default"} />
     ),
   },
   { title: "说明", dataIndex: "note", width: 220, ellipsis: true },
@@ -113,20 +106,17 @@ const columns: ListColumn<StorageClassItem>[] = [
 
 export function StorageClassOperations() {
   return (
-    <TableSectionFrame
-      header={
-        <div className="flex items-center justify-between px-5 pt-5">
-          <div>
-            <div className="text-base font-semibold text-gray-900">StorageClass 运营</div>
-            <div className="mt-1 text-xs text-gray-500">
-              查看平台存储类与后端、介质和回收策略的映射关系。
-            </div>
-          </div>
-          <span className="text-xs text-gray-500">共 {storageClasses.length} 个 StorageClass</span>
-        </div>
-      }
-    >
+    <TableSectionFrame>
       <ListDataTable
+        header={{
+          title: "StorageClass 运营",
+          description: "查看平台存储类与后端、介质和回收策略的映射关系。",
+          extra: (
+            <span className="text-xs text-gray-500">
+              共 {storageClasses.length} 个 StorageClass
+            </span>
+          ),
+        }}
         rowKey="id"
         columns={columns}
         data={storageClasses}

@@ -5,7 +5,7 @@ import {
   redirect,
   useRouterState,
 } from "@tanstack/react-router";
-import { isAuthenticated } from "@/components/auth/store";
+import { isAuthenticated } from "@/stores/auth";
 import { AppLayout } from "@/components/layouts/AppLayout";
 
 export interface RouterContext {

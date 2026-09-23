@@ -1,3 +1,4 @@
+import type { StatusBadgeTone } from "@/components/common";
 import type {
   QuotaChangeRequestStatus,
   TenantAdministratorRole,
@@ -7,24 +8,27 @@ import type {
   TenantStatus,
 } from "@/api/tenant";
 
-export const tenantStatusMeta: Record<TenantStatus, { label: string; color: string }> = {
-  active: { label: "活跃", color: "green" },
-  frozen: { label: "冻结", color: "orange" },
-  disabled: { label: "禁用", color: "gray" },
+export const tenantStatusMeta: Record<TenantStatus, { label: string; tone: StatusBadgeTone }> = {
+  active: { label: "活跃", tone: "success" },
+  frozen: { label: "冻结", tone: "warning" },
+  disabled: { label: "禁用", tone: "default" },
 };
 
-export const tenantPlanStatusMeta: Record<TenantPlanStatus, { label: string; color: string }> = {
-  draft: { label: "草稿", color: "orange" },
-  active: { label: "已发布", color: "green" },
-  disabled: { label: "已停用", color: "gray" },
+export const tenantPlanStatusMeta: Record<
+  TenantPlanStatus,
+  { label: string; tone: StatusBadgeTone }
+> = {
+  draft: { label: "草稿", tone: "warning" },
+  active: { label: "已发布", tone: "success" },
+  disabled: { label: "已停用", tone: "default" },
 };
 
 export const tenantAdministratorStatusMeta: Record<
   TenantAdministratorStatus,
-  { label: string; color: string }
+  { label: string; tone: StatusBadgeTone }
 > = {
-  active: { label: "活跃", color: "green" },
-  disabled: { label: "已禁用", color: "gray" },
+  active: { label: "活跃", tone: "success" },
+  disabled: { label: "已禁用", tone: "default" },
 };
 
 export const tenantAdministratorRoleLabels: Record<TenantAdministratorRole, string> = {
@@ -40,11 +44,11 @@ export const tenantAdministratorSourceLabels: Record<TenantAdministratorSource, 
 
 export const quotaRequestStatusMeta: Record<
   QuotaChangeRequestStatus,
-  { label: string; color: string }
+  { label: string; tone: StatusBadgeTone }
 > = {
-  pending: { label: "待审批", color: "orange" },
-  approved: { label: "已通过", color: "green" },
-  rejected: { label: "已驳回", color: "red" },
+  pending: { label: "待审批", tone: "warning" },
+  approved: { label: "已通过", tone: "success" },
+  rejected: { label: "已驳回", tone: "danger" },
 };
 
 export const tenantLifecycleActionLabels = {

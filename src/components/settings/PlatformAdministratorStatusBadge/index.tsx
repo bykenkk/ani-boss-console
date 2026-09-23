@@ -1,8 +1,9 @@
+import { StatusBadge, type StatusBadgeTone } from "@/components/common";
 import type { PlatformAdministratorStatus } from "@/api/platform-admins";
 
-const statusMeta: Record<PlatformAdministratorStatus, { label: string; className: string }> = {
-  active: { label: "活跃", className: "bg-green-50 text-green-700" },
-  disabled: { label: "已禁用", className: "bg-gray-100 text-gray-500" },
+const statusMeta: Record<PlatformAdministratorStatus, { label: string; tone: StatusBadgeTone }> = {
+  active: { label: "活跃", tone: "success" },
+  disabled: { label: "已禁用", tone: "default" },
 };
 
 export function PlatformAdministratorStatusBadge({
@@ -11,9 +12,5 @@ export function PlatformAdministratorStatusBadge({
   status: PlatformAdministratorStatus;
 }) {
   const meta = statusMeta[status];
-  return (
-    <span className={`inline-flex rounded px-2 py-0.5 text-xs font-medium ${meta.className}`}>
-      {meta.label}
-    </span>
-  );
+  return <StatusBadge value={meta.label} tone={meta.tone} />;
 }

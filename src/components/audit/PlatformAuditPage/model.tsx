@@ -1,6 +1,5 @@
-import { Tag } from "@arco-design/web-react";
 import type { PlatformAuditLogItem, PlatformAuditVerb } from "@/api/audit";
-import type { ListColumn } from "@/components/common";
+import { type ListColumn, StatusBadge } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 
 export const auditVerbOptions: Array<{ label: string; value: PlatformAuditVerb | "all" }> = [
@@ -58,13 +57,14 @@ export function getPlatformAuditColumns(): ListColumn<PlatformAuditLogItem>[] {
     {
       title: "结果",
       key: "result",
-      width: 120,
+      width: 160,
       render: (_, item) => {
         const success = isSuccessfulAudit(item);
         return (
-          <Tag color={success ? "green" : "red"}>
-            {success ? "成功" : "失败"} · {item.responseCode || "-"}
-          </Tag>
+          <StatusBadge
+            tone={success ? "success" : "danger"}
+            value={`${success ? "成功" : "失败"} · ${item.responseCode || "-"}`}
+          />
         );
       },
     },

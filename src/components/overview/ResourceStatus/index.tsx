@@ -1,6 +1,6 @@
 import { ResourcePageFrame } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
-import { OverviewPageHeader } from "@/components/overview/OverviewPageHeader";
+import { OverviewRefreshButton } from "@/components/overview/OverviewRefreshButton";
 import { Panel } from "@/components/overview/Panel";
 import { StatusDonutChart } from "@/components/overview/StatusDonutChart";
 import { TrendChart } from "@/components/overview/TrendChart";
@@ -12,7 +12,9 @@ export function ResourceStatusPage({ kind }: { kind: ResourceStatusKind }) {
   const data = statusData[kind];
 
   return (
-    <ResourcePageFrame header={<OverviewPageHeader title={data.title} subtitle={data.subtitle} />}>
+    <ResourcePageFrame
+      header={{ title: data.title, subtitle: data.subtitle, extra: <OverviewRefreshButton /> }}
+    >
       <section className="grid grid-cols-4 gap-3.5">
         {data.metrics.map((item, index) => (
           <Metric

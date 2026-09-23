@@ -388,12 +388,12 @@ export async function fetchGpuPartitionTask(taskId: string): Promise<GpuPartitio
   return mapGpuPartitionTask(response);
 }
 
-export async function fetchLatestGpuPartitionTask(): Promise<GpuPartitionTask | undefined> {
+export async function fetchLatestGpuPartitionTask(): Promise<GpuPartitionTask | null> {
   const response = await coreRequest<GpuPartitionTaskListResponse>("/tasks", {
     params: { task_type: "gpu_partition", limit: 1 },
   });
   const latest = response.items?.[0];
-  return latest ? mapGpuPartitionTask(latest) : undefined;
+  return latest ? mapGpuPartitionTask(latest) : null;
 }
 
 export function getGpuPartitionErrorMessage(error: unknown): string {

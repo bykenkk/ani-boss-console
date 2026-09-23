@@ -1,4 +1,4 @@
-import { Button, Descriptions, Modal, Result, Tag } from "@arco-design/web-react";
+import { Button, Descriptions, Modal, Result } from "@arco-design/web-react";
 import { useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import {
@@ -7,13 +7,14 @@ import {
   type DetailInfoCard,
   type DetailTab,
   type ListColumn,
+  StatusBadge,
 } from "@/components/common";
 import { useState } from "react";
 import { showMessage } from "@/lib/feedback";
 import { CreditAdjustmentModal } from "@/components/tenant/TenantBillingSummary/CreditAdjustmentModal";
 import { formatAmount, formatUsd } from "@/components/tenant/TenantBillingSummary/formatters";
-import type { TenantBillingAction } from "@/components/tenant/TenantManagementProvider";
-import { useTenantManagement } from "@/components/tenant/TenantManagementProvider/useTenantManagement";
+import type { TenantBillingAction } from "@/stores/tenant-management";
+import { useTenantManagement } from "@/hooks/useTenantManagement";
 import {
   tenantBillingStatusMeta,
   type TenantBillingAdjustment,
@@ -159,8 +160,8 @@ export function TenantBillingDetail({ tenantId }: TenantBillingDetailProps) {
     },
     {
       title: "状态",
-      width: 110,
-      render: () => <Tag color="blue">已出账</Tag>,
+      width: 120,
+      render: () => <StatusBadge tone="info" value="已出账" />,
     },
     {
       title: "出账日期",
@@ -194,7 +195,7 @@ export function TenantBillingDetail({ tenantId }: TenantBillingDetailProps) {
             { label: "租户显示名", value: tenant.displayName },
             {
               label: "状态",
-              value: <Tag color={status.color}>{status.label}</Tag>,
+              value: <StatusBadge tone={status.tone} value={status.label} />,
             },
             { label: "账期", value: formatMonth(billing.period) },
             { label: "本期用量费用", value: formatUsd(billing.usageCostUsd) },
@@ -321,7 +322,7 @@ export function TenantBillingDetail({ tenantId }: TenantBillingDetailProps) {
         ]}
         title={tenant.displayName}
         subtitle={tenant.name}
-        status={<Tag color={status.color}>{status.label}</Tag>}
+        status={<StatusBadge tone={status.tone} value={status.label} />}
         headerItems={[
           { label: "账期", value: formatMonth(billing.period) },
           { label: "本期用量费用", value: formatUsd(billing.usageCostUsd) },

@@ -1,11 +1,13 @@
 import { Progress, Select, Space } from "@arco-design/web-react";
 import { useMemo, useState } from "react";
 import {
-  DataTableNameCell,
+  ResourceNameId,
   ListDataTable,
   ResourcePageFrame,
   TableSectionFrame,
   type ListColumn,
+  StatusBadge,
+  type StatusBadgeTone,
 } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
 import { percentOf, registryTenantQuotas, type RegistryTenantQuota } from "../model";
@@ -20,11 +22,11 @@ function quotaStatus(quota: RegistryTenantQuota): QuotaStatus {
   return "normal";
 }
 
-const statusMeta: Record<QuotaStatus, { label: string; className: string }> = {
-  normal: { label: "正常", className: "bg-green-50 text-green-700" },
-  attention: { label: "关注", className: "bg-orange-50 text-orange-700" },
-  full: { label: "已满", className: "bg-red-50 text-red-700" },
-  pending: { label: "待审批", className: "bg-blue-50 text-blue-700" },
+const statusMeta: Record<QuotaStatus, { label: string; tone: StatusBadgeTone }> = {
+  normal: { label: "正常", tone: "success" },
+  attention: { label: "关注", tone: "warning" },
+  full: { label: "已满", tone: "danger" },
+  pending: { label: "待审批", tone: "info" },
 };
 
 export function RegistryQuotaPage() {
@@ -53,18 +55,14 @@ export function RegistryQuotaPage() {
       dataIndex: "name",
       width: 220,
       fixed: "left",
-      render: (_, quota) => <DataTableNameCell name={quota.name} id={quota.code} />,
+      render: (_, quota) => <ResourceNameId name={quota.name} id={quota.code} />,
     },
     {
       title: "状态",
-      width: 100,
+      width: 120,
       render: (_, quota) => {
         const meta = statusMeta[quotaStatus(quota)];
-        return (
-          <span className={`inline-flex rounded px-2 py-0.5 text-xs ${meta.className}`}>
-            {meta.label}
-          </span>
-        );
+        return <StatusBadge value={meta.label} tone={meta.tone} />;
       },
     },
     {

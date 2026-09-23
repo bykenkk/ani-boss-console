@@ -1,10 +1,10 @@
+import { Empty } from "@arco-design/web-react";
 import clsx from "clsx";
 import { DataTable, type DataTableProps } from "../DataTable";
 import styles from "./index.module.less";
 
 export type ListDataTableProps<T> = Omit<DataTableProps<T>, "className" | "noDataElement"> & {
   className?: string;
-  emptyIconClassName?: string;
   emptyText?: string;
   preserveTableOnEmpty?: boolean;
 };
@@ -13,8 +13,7 @@ const DEFAULT_NAME_COLUMN_WIDTH = 200;
 
 export function ListDataTable<T>({
   className,
-  emptyIconClassName = "icon-yunzhuji",
-  emptyText = "暂无数据",
+  emptyText,
   preserveTableOnEmpty: _preserveTableOnEmpty,
   scroll,
   ...tableProps
@@ -30,12 +29,6 @@ export function ListDataTable<T>({
         : column;
     return fixedColumn;
   });
-  const noDataElement = (
-    <div className={styles.tableState}>
-      <i className={clsx("iconfont", emptyIconClassName, styles.emptyIcon)} aria-hidden="true" />
-      <span>{emptyText}</span>
-    </div>
-  );
 
   return (
     <DataTable
@@ -43,7 +36,7 @@ export function ListDataTable<T>({
       columns={columns}
       className={clsx(styles.listDataTable, className)}
       scroll={{ ...scroll, y: scroll?.y ?? true }}
-      noDataElement={noDataElement}
+      noDataElement={emptyText === undefined ? undefined : <Empty description={emptyText} />}
     />
   );
 }

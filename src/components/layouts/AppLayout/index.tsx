@@ -3,12 +3,9 @@ import { useRouterState } from "@tanstack/react-router";
 import { useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { PlatformOverviewProvider } from "@/components/overview/PlatformOverviewProvider";
 import { TenantManagementProvider } from "@/components/tenant/TenantManagementProvider";
+import type { AppBreadcrumbItem, AppBreadcrumbNavigation } from "@/lib/navigation";
 import "./index.css";
-import {
-  BreadcrumbNavigationProvider,
-  type AppBreadcrumbItem,
-  type AppBreadcrumbNavigation,
-} from "./BreadcrumbNavigation";
+import { BreadcrumbNavigationProvider } from "./BreadcrumbNavigation";
 import { Sidebar, SIDEBAR_COLLAPSED_WIDTH, SIDEBAR_WIDTH } from "./Sidebar";
 import { TopNav } from "./TopNav";
 import { appNavigation, isNavigationGroup, type NavigationItem } from "./navigation";
@@ -58,7 +55,7 @@ function findNavigationTrail(
 
 function routeBreadcrumbs(pathname: string): AppBreadcrumbItem[] {
   const trail = findNavigationTrail(appNavigation, pathname) ?? [];
-  return [{ label: "控制台", to: "/" }, ...trail];
+  return trail;
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
@@ -66,13 +63,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const [detailNavigation, setDetailNavigation] = useState<AppBreadcrumbNavigation | null>(null);
   const pathname = useRouterState({ select: (state) => state.location.pathname });
   const breadcrumbs = useMemo(() => routeBreadcrumbs(pathname), [pathname]);
-  const topNavBreadcrumbs = useMemo(
-    () =>
-      detailNavigation
-        ? [{ label: "控制台", to: "/" as const }, ...detailNavigation.items]
-        : breadcrumbs,
-    [breadcrumbs, detailNavigation],
-  );
+  const topNavBreadcrumbs = detailNavigation?.items ?? breadcrumbs;
 
   return (
     <PlatformOverviewProvider>

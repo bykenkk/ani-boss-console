@@ -65,6 +65,10 @@ const queryClient = new QueryClient({
 });
 
 const COMPONENT_CONFIG = {
+  Card: {
+    bordered: false,
+    style: { borderRadius: 8 },
+  },
   Form: {
     onSubmitFailed: () => showMessage({ type: "error", content: "请检查并修正表单中的错误项" }),
   },
@@ -80,7 +84,7 @@ declare module "@tanstack/react-router" {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ConfigProvider theme={{ primaryColor: "#0079D3" }} componentConfig={COMPONENT_CONFIG}>
+    <ConfigProvider componentConfig={COMPONENT_CONFIG}>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
       </QueryClientProvider>

@@ -10,7 +10,7 @@ import { withId } from "@/lib/id";
 import { Button } from "@arco-design/web-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { TenantPlanLimitsModal } from "../../TenantManagementModals";
+import { TenantPlanLimitsModal } from "@/components/tenant/TenantPlanLimitsModal";
 
 interface TenantPlanQuotaLimitsProps {
   planId: string;

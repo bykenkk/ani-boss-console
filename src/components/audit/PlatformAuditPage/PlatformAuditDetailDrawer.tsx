@@ -1,4 +1,5 @@
-import { Descriptions, Drawer, Tag } from "@arco-design/web-react";
+import { StatusBadge } from "@/components/common";
+import { Descriptions, Drawer } from "@arco-design/web-react";
 import type { PlatformAuditLogItem } from "@/api/audit";
 import { formatDateTime } from "@/lib/date";
 import { auditVerbLabels, formatAuditResource, isSuccessfulAudit } from "./model";
@@ -28,9 +29,10 @@ export function PlatformAuditDetailDrawer({
             {
               label: "结果",
               value: (
-                <Tag color={success ? "green" : "red"}>
-                  {success ? "成功" : "失败"} · {item.responseCode || "-"}
-                </Tag>
+                <StatusBadge
+                  tone={success ? "success" : "danger"}
+                  value={`${success ? "成功" : "失败"} · ${item.responseCode || "-"}`}
+                />
               ),
             },
             {

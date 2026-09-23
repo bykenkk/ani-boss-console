@@ -1,10 +1,11 @@
 import clsx from "clsx";
 import * as React from "react";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
+import { useVisibilityPause } from "@/hooks/useVisibilityPause";
 import styles from "./index.module.css";
 
 /* Border beam motion adapted from Motiq's MIT-licensed Border Beam Panel. */
 const PARKED_ANGLE = 40;
-const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
 type BorderBeamElement = "article" | "div" | "section";
 
@@ -19,50 +20,6 @@ export interface BorderBeamPanelProps extends React.HTMLAttributes<HTMLElement> 
   seed?: number;
   speed?: number;
   thickness?: number;
-}
-
-function subscribeToReducedMotion(onStoreChange: () => void): () => void {
-  const mediaQuery = window.matchMedia(REDUCED_MOTION_QUERY);
-  mediaQuery.addEventListener("change", onStoreChange);
-  return () => mediaQuery.removeEventListener("change", onStoreChange);
-}
-
-function getReducedMotionSnapshot(): boolean {
-  return window.matchMedia(REDUCED_MOTION_QUERY).matches;
-}
-
-function useReducedMotion(): boolean {
-  return React.useSyncExternalStore(
-    subscribeToReducedMotion,
-    getReducedMotionSnapshot,
-    () => false,
-  );
-}
-
-function useVisibilityPause(ref: React.RefObject<HTMLElement | null>): boolean {
-  const [onScreen, setOnScreen] = React.useState(true);
-  const [tabVisible, setTabVisible] = React.useState(true);
-
-  React.useEffect(() => {
-    const element = ref.current;
-    if (!element || typeof IntersectionObserver === "undefined") return;
-
-    const observer = new IntersectionObserver(
-      (entries) => setOnScreen(entries.some((entry) => entry.isIntersecting)),
-      { threshold: 0.05 },
-    );
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [ref]);
-
-  React.useEffect(() => {
-    const handleVisibilityChange = () => setTabVisible(document.visibilityState !== "hidden");
-    handleVisibilityChange();
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-  }, []);
-
-  return onScreen && tabVisible;
 }
 
 function comet(color: string, highlight: string, opacity: number, start: number): string {

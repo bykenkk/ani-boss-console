@@ -47,7 +47,7 @@ export type PlatformMeteringGroupBy = "tenant_id" | "day" | "hour";
 export interface PlatformMeteringUsageParams {
   startTime: string;
   endTime: string;
-  resourceType: PlatformMeteringResourceType;
+  resourceType?: PlatformMeteringResourceType;
   groupBy: PlatformMeteringGroupBy;
   tenantId?: string;
 }

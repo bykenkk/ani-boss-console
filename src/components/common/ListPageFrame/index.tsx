@@ -1,4 +1,4 @@
-import { ListPageHeader, ResourcePageFrame } from "../ResourcePageFrame";
+import { ResourcePageFrame } from "../ResourcePageFrame";
 import { ListToolbar, ToolbarIconButton, ToolbarSearch } from "./ListToolbar";
 import { StatusTabs } from "./StatusTabs";
 import type { ListPageFrameProps } from "./types";
@@ -44,12 +44,7 @@ export function ListPageFrame<
   );
 }
 
-export { ListPageHeader };
-export type {
-  ListPageHeaderProps,
-  ResourcePageHeaderAction,
-  ResourcePageHeaderConfig,
-} from "../ResourcePageFrame";
+export type { ResourcePageHeaderAction, ResourcePageHeaderConfig } from "../ResourcePageFrame";
 export type {
   ListPageFrameProps,
   ListPageRefreshConfig,

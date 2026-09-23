@@ -1,6 +1,8 @@
 import { logoutPlatform } from "@/api/auth";
-import { clearAuthSession, useAuthState } from "@/components/auth/store";
+import { clearAuthSession } from "@/stores/auth";
+import { useAuthState } from "@/hooks/useAuthState";
 import { formatDateTime } from "@/lib/date";
+import type { AppBreadcrumbItem } from "@/lib/navigation";
 import { Breadcrumb, Button, Dropdown, Input, Modal, Tooltip } from "@arco-design/web-react";
 import {
   IconCalendar,
@@ -13,7 +15,6 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import type { AppBreadcrumbItem } from "../BreadcrumbNavigation";
 
 interface TopNavProps {
   breadcrumbs: AppBreadcrumbItem[];

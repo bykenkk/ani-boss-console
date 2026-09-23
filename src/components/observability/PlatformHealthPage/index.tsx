@@ -1,14 +1,13 @@
-import { Button, Tooltip } from "@arco-design/web-react";
+import { Button, Card, Tooltip } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import { fetchPlatformComponents, platformQueryKeys, type PlatformComponent } from "@/api/platform";
 import {
-  DataTableNameCell,
-  ListDataTable,
+  ResourceNameId,
+  DataTable,
   ResourcePageFrame,
   StatusBadge,
-  TableSectionFrame,
   type ListColumn,
   type StatusBadgeTone,
 } from "@/components/common";
@@ -97,7 +96,7 @@ export function PlatformHealthPage() {
       width: 240,
       fixed: "left",
       render: (_, component) => (
-        <DataTableNameCell name={component.name} id={component.namespace || "-"} />
+        <ResourceNameId name={component.name} id={component.namespace || "-"} />
       ),
     },
     {
@@ -137,6 +136,7 @@ export function PlatformHealthPage() {
 
   return (
     <ResourcePageFrame
+      className="h-auto! min-h-(--app-content-available-height)!"
       header={{
         title: "平台健康",
         subtitle: "查看 ANI 服务、基础依赖和平台组件的实时运行状态。",
@@ -172,7 +172,7 @@ export function PlatformHealthPage() {
       </section>
 
       <section className="grid grid-cols-2 gap-3.5 max-[980px]:grid-cols-1">
-        <div className="rounded-lg border border-gray-200 bg-white p-5">
+        <Card className="[&_.arco-card-body]:p-5">
           <div className="text-base font-semibold text-gray-900">组件状态分布</div>
           <div className="mt-5 space-y-4">
             {distribution.map(([label, count, color]) => (
@@ -191,9 +191,9 @@ export function PlatformHealthPage() {
               </div>
             ))}
           </div>
-        </div>
+        </Card>
 
-        <div className="rounded-lg border border-gray-200 bg-white p-5">
+        <Card className="[&_.arco-card-body]:p-5">
           <div className="text-base font-semibold text-gray-900">组件范围</div>
           <dl className="mt-4 grid grid-cols-[96px_1fr] gap-x-4 gap-y-3 text-sm">
             {groups.map((group) => (
@@ -207,22 +207,15 @@ export function PlatformHealthPage() {
               {formatObservedAt(componentsQuery.data?.observedAt)}
             </dd>
           </dl>
-        </div>
+        </Card>
       </section>
 
-      <TableSectionFrame>
-        <ListDataTable
+      <Card>
+        <DataTable
           header={{
-            title: (
-              <span className="flex flex-col gap-1">
-                <span className="text-base font-semibold text-gray-900">组件健康明细</span>
-                <span className="text-xs font-normal text-gray-500">
-                  故障和降级组件优先展示；本页只读，不提供重启或扩缩容操作。
-                </span>
-              </span>
-            ),
+            title: "组件健康明细",
+            description: "故障和降级组件优先展示；本页只读，不提供重启或扩缩容操作。",
             extra: <span className="text-xs text-gray-500">共 {total} 个组件</span>,
-            className: "mb-3 pt-5",
           }}
           rowKey={(component) => `${component.group}:${component.namespace}:${component.name}`}
           columns={columns}
@@ -232,7 +225,7 @@ export function PlatformHealthPage() {
               label: "查看日志",
               onClick: (component) =>
                 void navigate({
-                  to: "/health-logs",
+                  to: "/logs",
                   search: { component: component.name },
                 }),
             },
@@ -244,9 +237,9 @@ export function PlatformHealthPage() {
           loading={componentsQuery.isPending}
           pagination={false}
           scroll={{ x: 1190 }}
-          emptyText="暂无组件状态数据"
+          noDataElement="暂无组件状态数据"
         />
-      </TableSectionFrame>
+      </Card>
     </ResourcePageFrame>
   );
 }

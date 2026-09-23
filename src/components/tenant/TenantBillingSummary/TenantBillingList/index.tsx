@@ -1,18 +1,19 @@
-import { Button, Modal, Tag, Typography } from "@arco-design/web-react";
+import { Button, Modal, Typography } from "@arco-design/web-react";
 import { IconDownload } from "@arco-design/web-react/icon";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { showMessage } from "@/lib/feedback";
 import {
   ListDataTable,
-  DataTableNameCell,
+  ResourceNameId,
   ListPageFrame,
   type ListColumn,
+  StatusBadge,
 } from "@/components/common";
 import { CreditAdjustmentModal } from "@/components/tenant/TenantBillingSummary/CreditAdjustmentModal";
 import { formatUsd } from "@/components/tenant/TenantBillingSummary/formatters";
-import type { TenantBillingAction } from "@/components/tenant/TenantManagementProvider";
-import { useTenantManagement } from "@/components/tenant/TenantManagementProvider/useTenantManagement";
+import type { TenantBillingAction } from "@/stores/tenant-management";
+import { useTenantManagement } from "@/hooks/useTenantManagement";
 import {
   tenantBillingStatusMeta,
   type TenantBilling,
@@ -114,7 +115,7 @@ export function TenantBillingList() {
       width: 190,
       fixed: "left",
       render: (_, item) => (
-        <DataTableNameCell
+        <ResourceNameId
           name={
             <Link to="/tenants-billing/$tenantId" params={{ tenantId: item.tenantId }}>
               {item.tenantName}
@@ -129,9 +130,10 @@ export function TenantBillingList() {
       dataIndex: "status",
       width: 110,
       render: (status: TenantBillingStatus) => (
-        <Tag color={tenantBillingStatusMeta[status].color}>
-          {tenantBillingStatusMeta[status].label}
-        </Tag>
+        <StatusBadge
+          tone={tenantBillingStatusMeta[status].tone}
+          value={tenantBillingStatusMeta[status].label}
+        />
       ),
     },
     {

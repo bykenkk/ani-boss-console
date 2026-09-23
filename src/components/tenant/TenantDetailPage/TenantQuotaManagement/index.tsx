@@ -11,7 +11,7 @@ import { withId } from "@/lib/id";
 import { Progress } from "@arco-design/web-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { TenantQuotaRequestModal } from "../../TenantManagementModals";
+import { TenantQuotaRequestModal } from "@/components/tenant/TenantQuotaRequestModal";
 
 interface TenantQuotaManagementProps {
   tenantId: string;

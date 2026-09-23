@@ -1,17 +1,6 @@
 import type { ReactNode } from "react";
-import type { AppRoute } from "../navigation";
-import { BreadcrumbNavigationContext } from "./context";
-
-export interface AppBreadcrumbItem {
-  label: ReactNode;
-  to?: AppRoute;
-  onClick?: () => void;
-}
-
-export interface AppBreadcrumbNavigation {
-  items: AppBreadcrumbItem[];
-  onBack?: () => void;
-}
+import { BreadcrumbNavigationContext } from "@/hooks/useBreadcrumbNavigation";
+import type { AppBreadcrumbNavigation } from "@/lib/navigation";
 
 interface BreadcrumbNavigationProviderProps {
   children: ReactNode;
