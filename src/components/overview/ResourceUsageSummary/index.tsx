@@ -1,4 +1,4 @@
-import { Card } from "@arco-design/web-react";
+import { MetricCard } from "@/components/common";
 import {
   IconApps,
   IconArchive,
@@ -7,7 +7,6 @@ import {
   IconThunderbolt,
   IconUserGroup,
 } from "@arco-design/web-react/icon";
-import clsx from "clsx";
 import type { ReactNode } from "react";
 import type { GpuOccupancy } from "@/api/gpu-inventory";
 
@@ -20,10 +19,9 @@ interface ResourceUsageSummaryProps {
 
 interface ResourceMetric {
   label: string;
-  value: string;
+  value: ReactNode;
   hint: string;
   icon: ReactNode;
-  danger?: boolean;
 }
 
 function formatValue(value: number | undefined, loading: boolean) {
@@ -41,16 +39,22 @@ export function ResourceUsageSummary({
     : undefined;
   const metrics: ResourceMetric[] = [
     {
-      label: "GPU 总量",
+      label: "GPU 库存总量",
       value: formatValue(gpuTotal ?? occupancy?.total, loading),
       hint: "全部设备合计",
       icon: <IconThunderbolt />,
     },
     {
       label: "物理卡 / 逻辑卡",
-      value: loading
-        ? "- / -"
-        : `${occupancy?.physicalCardCount ?? 0} / ${occupancy?.logicalCardCount ?? 0}`,
+      value:
+        loading || !occupancy ? (
+          "- / -"
+        ) : (
+          <>
+            {occupancy.physicalCardCount ?? 0}
+            <small>/ {occupancy.logicalCardCount ?? 0}</small>
+          </>
+        ),
       hint: "含 vGPU 切分",
       icon: <IconStorage />,
     },
@@ -73,7 +77,6 @@ export function ResourceUsageSummary({
         ? `维护 ${occupancy.maintenanceCount} · 不可用 ${occupancy.unavailableCount} · 故障 ${occupancy.fault}`
         : "维护 0 · 不可用 0 · 故障 0",
       icon: <IconExclamationCircle />,
-      danger: Boolean(abnormalCount),
     },
     {
       label: "租户数",
@@ -84,44 +87,34 @@ export function ResourceUsageSummary({
   ];
 
   return (
-    <Card className="h-full rounded-lg">
-      <div className="grid grid-cols-3 gap-3 max-[1280px]:grid-cols-2">
-        {metrics.map((metric) => (
-          <div
-            key={metric.label}
-            className="group relative flex min-h-31 items-center gap-4 overflow-hidden rounded-lg border border-white bg-white px-4 py-5 shadow transition duration-200 ease-out hover:-translate-y-px hover:bg-[linear-gradient(135deg,#f0f6ff_0%,#fff_66%)] hover:shadow-[0_4px_14px_rgba(42,89,161,0.1)] motion-reduce:transform-none motion-reduce:transition-none"
-          >
-            <span
-              className="relative z-10 flex h-11 w-11 flex-none items-center justify-center rounded-md bg-(--color-fill-1) text-lg text-(--color-text-3)"
-              aria-hidden="true"
-            >
-              {metric.icon}
-            </span>
-            <div className="relative z-10 flex min-w-0 flex-1 flex-col">
-              <span className="text-sm text-(--color-text-2) transition-colors group-hover:text-[rgb(var(--primary-6))]">
-                {metric.label}
-              </span>
-              <strong
-                className={clsx(
-                  "mt-1 text-[30px] leading-9 font-medium",
-                  metric.danger ? "text-[rgb(var(--danger-6))]" : "text-(--color-text-1)",
-                )}
-              >
-                {metric.value}
-              </strong>
-              <span className="mt-2 truncate text-xs text-(--color-text-2)" title={metric.hint}>
-                {metric.hint}
-              </span>
-            </div>
-            <span
-              className="pointer-events-none absolute -right-6 -bottom-10 text-[100px] leading-none text-[#eef3fa] opacity-[0.55] transition duration-200 ease-out group-hover:text-[#e4eefb] group-hover:opacity-70 motion-reduce:transition-none"
-              aria-hidden="true"
-            >
-              {metric.icon}
-            </span>
-          </div>
-        ))}
-      </div>
-    </Card>
+    <div className="grid grid-cols-3 gap-4 max-[1100px]:grid-cols-2">
+      {metrics.map((metric, index) => (
+        <MetricCard
+          key={metric.label}
+          label={metric.label}
+          value={metric.value}
+          icon={metric.icon}
+          unit={index === 1 ? undefined : index === 5 ? "个" : "卡"}
+          subtitle={index === 4 ? "不参与调度" : metric.hint}
+          tone={(["blue", "blue", "green", "amber", "red", "purple"] as const)[index]}
+          percent={
+            !loading && occupancy && (index === 2 || index === 3)
+              ? occupancy.total > 0
+                ? ((index === 2 ? occupancy.available : occupancy.inUse) / occupancy.total) * 100
+                : 0
+              : undefined
+          }
+          foot={
+            index === 2
+              ? "物理卡口径 · 未分配"
+              : index === 3
+                ? "节点级占用映射"
+                : index === 4
+                  ? metric.hint
+                  : undefined
+          }
+        />
+      ))}
+    </div>
   );
 }

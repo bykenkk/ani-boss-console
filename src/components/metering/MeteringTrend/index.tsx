@@ -11,7 +11,7 @@ interface MeteringTrendProps {
 export function MeteringTrend({ labels, values, label, unit }: MeteringTrendProps) {
   const option: EChartsOption = {
     animationDuration: 400,
-    color: ["#165dff"],
+    color: ["#2b5ce6"],
     grid: { top: 24, right: 24, bottom: 28, left: 58 },
     tooltip: {
       trigger: "axis",
@@ -21,18 +21,26 @@ export function MeteringTrend({ labels, values, label, unit }: MeteringTrendProp
       type: "category",
       boundaryGap: false,
       data: labels,
+      axisLine: { lineStyle: { color: "#dde2ec" } },
+      axisTick: { show: false },
+      axisLabel: { color: "#9aa3b5", fontSize: 11 },
     },
     yAxis: {
       type: "value",
       name: unit,
-      splitLine: { lineStyle: { color: "#f2f3f5", type: "dashed" } },
+      axisLabel: { color: "#9aa3b5", fontSize: 11 },
+      nameTextStyle: { color: "#9aa3b5" },
+      splitLine: { lineStyle: { color: "#edf0f6" } },
     },
     series: [
       {
         name: label,
         type: "line",
-        smooth: true,
-        symbolSize: 7,
+        smooth: false,
+        symbol: "circle",
+        symbolSize: 8,
+        itemStyle: { color: "#fff", borderColor: "#2b5ce6", borderWidth: 2 },
+        lineStyle: { width: 2.5, color: "#2b5ce6" },
         data: values,
         areaStyle: {
           color: {
@@ -42,8 +50,8 @@ export function MeteringTrend({ labels, values, label, unit }: MeteringTrendProp
             x2: 0,
             y2: 1,
             colorStops: [
-              { offset: 0, color: "rgba(22, 93, 255, 0.2)" },
-              { offset: 1, color: "rgba(22, 93, 255, 0)" },
+              { offset: 0, color: "rgba(43, 92, 230, 0.22)" },
+              { offset: 1, color: "rgba(43, 92, 230, 0.02)" },
             ],
           },
         },

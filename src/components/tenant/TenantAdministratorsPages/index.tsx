@@ -1,3 +1,4 @@
+import { SummaryStrip } from "@/components/common";
 import { Button, Modal, Select } from "@arco-design/web-react";
 import { IconPlus } from "@arco-design/web-react/icon";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -48,7 +49,7 @@ export function TenantAdministratorsPages() {
   const [tenantId, setTenantId] = useState("all");
   const [status, setStatus] = useState<"all" | TenantAdministratorStatus>("all");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const [inviteVisible, setInviteVisible] = useState(false);
   const deferredKeyword = useDeferredValue(keyword.trim());
   const filters = useMemo<TenantAdministratorListFilters>(() => {
@@ -182,6 +183,7 @@ export function TenantAdministratorsPages() {
       width: 200,
       render: (_, administrator) => (
         <ResourceNameId
+          avatarText={administrator.displayName || administrator.username}
           name={
             <Link to="/tenants-admins/$adminId" params={{ adminId: administrator.id }}>
               {administrator.displayName || administrator.username}
@@ -242,6 +244,29 @@ export function TenantAdministratorsPages() {
   return (
     <>
       <ListPageFrame
+        summary={
+          <SummaryStrip
+            pending={listQuery.isPending}
+            items={[
+              { label: "管理员数", value: data.length, unit: "个", note: "当前筛选范围" },
+              {
+                label: "活跃",
+                value: data.filter((t) => t.status === "active").length,
+                unit: "个",
+              },
+              {
+                label: "已禁用",
+                value: data.filter((t) => t.status === "disabled").length,
+                unit: "个",
+              },
+              {
+                label: "本地账号",
+                value: data.filter((t) => t.source === "local").length,
+                unit: "个",
+              },
+            ]}
+          />
+        }
         header={{
           title: "租户管理员",
           subtitle: "集中维护租户管理员邀请、角色、密码和账号状态。",
@@ -342,7 +367,6 @@ export function TenantAdministratorsPages() {
               onClick: confirmDelete,
             },
           ]}
-          scroll={{ x: 1250, y: true }}
           emptyText="暂无符合条件的租户管理员"
         />
       </ListPageFrame>

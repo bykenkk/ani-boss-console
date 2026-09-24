@@ -83,6 +83,7 @@ const columns: ListColumn<GpuInventoryDevice>[] = [
   {
     title: "归属",
     width: 200,
+    ellipsis: true,
     render: (_, device) => formatOwnership(device),
   },
 ];
@@ -95,15 +96,15 @@ interface GpuInventoryTableProps {
 
 export function GpuInventoryTable({ data, loading, extra }: GpuInventoryTableProps) {
   return (
-    <Card className="overflow-hidden rounded-lg">
+    <Card className="overflow-hidden rounded-lg [&_.arco-card-body]:p-0">
       <ListDataTable
-        header={{ title: "设备列表 · 分配", extra }}
+        header={{ title: "设备列表 · 分配", extra, className: "px-5.5 py-4.5" }}
         tableLabel="GPU 设备列表"
         rowKey="id"
         columns={columns}
         data={data}
         loading={loading}
-        pagination={false}
+        pagination="client"
         emptyText="暂无 GPU 设备"
       />
     </Card>

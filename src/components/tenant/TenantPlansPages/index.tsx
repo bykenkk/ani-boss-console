@@ -1,3 +1,4 @@
+import { SummaryStrip } from "@/components/common";
 import { Button, Modal } from "@arco-design/web-react";
 import { IconPlus } from "@arco-design/web-react/icon";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -42,7 +43,7 @@ export function TenantPlansPages() {
   const [keyword, setKeyword] = useState("");
   const [status, setStatus] = useState<"all" | TenantPlanStatus>("all");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const [createVisible, setCreateVisible] = useState(false);
   const deferredKeyword = useDeferredValue(keyword.trim());
   const filters = useMemo<TenantPlanListFilters>(() => {
@@ -150,6 +151,7 @@ export function TenantPlansPages() {
       width: 200,
       render: (_, plan) => (
         <ResourceNameId
+          avatarText={plan.name}
           name={
             <Link to="/tenants-quotas/$planCode" params={{ planCode: plan.id }}>
               {plan.name}
@@ -193,6 +195,21 @@ export function TenantPlansPages() {
   return (
     <>
       <ListPageFrame
+        summary={
+          <SummaryStrip
+            pending={listQuery.isPending}
+            items={[
+              { label: "策略总数", value: data.length, unit: "条", note: "当前筛选范围" },
+              {
+                label: "已发布",
+                value: data.filter((t) => t.status === "active").length,
+                unit: "条",
+              },
+              { label: "草稿", value: data.filter((t) => t.status === "draft").length, unit: "条" },
+              { label: "绑定租户", value: data.reduce((n, t) => n + t.tenantCount, 0), unit: "个" },
+            ]}
+          />
+        }
         header={{
           title: "配额策略",
           subtitle: "维护租户配额策略、资源限额与策略绑定关系。",
@@ -272,7 +289,6 @@ export function TenantPlansPages() {
               onClick: confirmDelete,
             },
           ]}
-          scroll={{ x: 1100, y: true }}
           emptyText="暂无符合条件的配额策略"
         />
       </ListPageFrame>

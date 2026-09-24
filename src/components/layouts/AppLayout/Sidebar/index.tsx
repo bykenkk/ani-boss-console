@@ -11,7 +11,7 @@ import {
   type NavigationLeaf,
 } from "../navigation";
 
-export const SIDEBAR_WIDTH = 200;
+export const SIDEBAR_WIDTH = 216;
 export const SIDEBAR_COLLAPSED_WIDTH = 64;
 
 interface SidebarProps {

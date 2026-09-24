@@ -7,7 +7,7 @@ import styles from "./index.module.less";
 export function ListPageFrame<
   TStatus extends string = string,
   TSearchField extends string = string,
->({ header, tabs, toolbar, children }: ListPageFrameProps<TStatus, TSearchField>) {
+>({ header, summary, tabs, toolbar, children }: ListPageFrameProps<TStatus, TSearchField>) {
   const toolbarFilters =
     toolbar?.search || toolbar?.filters ? (
       <>
@@ -33,10 +33,13 @@ export function ListPageFrame<
 
   return (
     <ResourcePageFrame header={header}>
+      {summary}
       <section className={styles.contentPanel}>
         {tabs ? <StatusTabs {...tabs} /> : null}
         {toolbar ? (
-          <ListToolbar actions={toolbar.actions} filters={toolbarFilters} tools={toolbarTools} />
+          <div className={styles.toolbarRegion}>
+            <ListToolbar actions={toolbar.actions} filters={toolbarFilters} tools={toolbarTools} />
+          </div>
         ) : null}
         <div className={styles.tableSlot}>{children}</div>
       </section>

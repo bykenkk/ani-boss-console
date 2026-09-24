@@ -1,3 +1,4 @@
+import { SummaryStrip } from "@/components/common";
 import { Button, Modal, Select } from "@arco-design/web-react";
 import { IconPlus } from "@arco-design/web-react/icon";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -51,7 +52,7 @@ export function PlatformAdministratorsPage() {
   const [roleId, setRoleId] = useState("all");
   const [status, setStatus] = useState<"all" | PlatformAdministratorStatus>("all");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const [createVisible, setCreateVisible] = useState(false);
   const [roleTarget, setRoleTarget] = useState<PlatformAdministratorListItem | null>(null);
   const [passwordTarget, setPasswordTarget] = useState<PlatformAdministratorListItem | null>(null);
@@ -210,9 +211,10 @@ export function PlatformAdministratorsPage() {
     {
       key: "name",
       title: "账号",
-      width: 240,
+      width: 220,
       render: (_, administrator) => (
         <ResourceNameId
+          avatarText={administrator.displayName}
           name={
             <Link to="/platform-admins/$userId" params={{ userId: administrator.id }}>
               {administrator.displayName}
@@ -222,7 +224,7 @@ export function PlatformAdministratorsPage() {
         />
       ),
     },
-    { title: "邮箱", width: 190, render: () => "-" },
+    { title: "邮箱", width: 140, render: () => "-" },
     {
       title: "角色",
       width: 170,
@@ -253,6 +255,34 @@ export function PlatformAdministratorsPage() {
   return (
     <>
       <ListPageFrame
+        summary={
+          <SummaryStrip
+            pending={listQuery.isPending}
+            items={[
+              {
+                label: "平台账号",
+                value: (listQuery.data || []).length,
+                unit: "个",
+                note: "当前筛选范围",
+              },
+              {
+                label: "超级管理员",
+                value: (listQuery.data || []).filter((t) => t.role === "platform-admin").length,
+                unit: "个",
+              },
+              {
+                label: "运维",
+                value: (listQuery.data || []).filter((t) => t.role === "platform-ops").length,
+                unit: "个",
+              },
+              {
+                label: "只读",
+                value: (listQuery.data || []).filter((t) => t.role === "platform-readonly").length,
+                unit: "个",
+              },
+            ]}
+          />
+        }
         header={{
           title: "平台管理员",
           subtitle: "管理平台本地登录账号；这些账号不属于租户，也不会同步为租户成员。",
@@ -362,7 +392,6 @@ export function PlatformAdministratorsPage() {
               setPageSize(nextPageSize);
             },
           }}
-          scroll={{ x: 1300, y: true }}
           emptyText="暂无符合条件的平台运营账号"
         />
       </ListPageFrame>

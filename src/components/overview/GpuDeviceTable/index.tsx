@@ -6,8 +6,7 @@ import {
   type StatusBadgeTone,
 } from "@/components/common";
 
-const TABLE_SCROLL_X = 1780;
-const TABLE_SCROLL_Y = 300;
+const TABLE_SCROLL_X = 1260;
 
 const statusMeta: Record<GpuInventoryStatus, { label: string; tone: StatusBadgeTone }> = {
   available: { label: "空闲未分配", tone: "success" },
@@ -33,26 +32,30 @@ function formatProfile(device: GpuInventoryDevice) {
 }
 
 const columns: ListColumn<GpuInventoryDevice>[] = [
-  { title: "设备 ID", dataIndex: "id", width: 320 },
   {
     title: "节点 / 设备",
-    width: 200,
+    width: 180,
+    ellipsis: true,
     render: (_, device) => `${device.nodeName} / GPU-${device.gpuIndex}`,
   },
+  { title: "设备 ID", dataIndex: "id", width: 200, ellipsis: true },
   {
     title: "型号 / 显存",
-    width: 300,
+    width: 220,
+    ellipsis: true,
     render: (_, device) => `${device.gpuType || "-"} · ${formatMemory(device.memoryTotalMb)}`,
   },
   {
     title: "切分形态",
-    width: 320,
+    width: 160,
+    ellipsis: true,
     render: (_, device) => formatProfile(device),
   },
   {
     title: "状态",
     dataIndex: "status",
     width: 120,
+    fixed: "right",
     render: (status: GpuInventoryStatus) => {
       const meta = statusMeta[status];
       return <StatusBadge tone={meta.tone} value={meta.label} />;
@@ -61,12 +64,14 @@ const columns: ListColumn<GpuInventoryDevice>[] = [
   {
     title: "租户",
     dataIndex: "tenantId",
-    width: 240,
+    width: 180,
+    ellipsis: true,
     render: (tenantId?: string) => tenantId || "-",
   },
   {
     title: "占用对象 / 原因",
-    width: 280,
+    width: 200,
+    ellipsis: true,
     render: (_, device) => device.instanceId || device.reason || "-",
   },
 ];
@@ -83,9 +88,9 @@ export function GpuDeviceTable({ data, loading }: GpuDeviceTableProps) {
       tableLabel="GPU 设备列表"
       data={data}
       loading={loading}
-      pagination={false}
+      pagination="client"
       columns={columns}
-      scroll={{ x: TABLE_SCROLL_X, y: TABLE_SCROLL_Y }}
+      scroll={{ x: TABLE_SCROLL_X }}
       emptyText="暂无 GPU 设备"
     />
   );

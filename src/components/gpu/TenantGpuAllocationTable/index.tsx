@@ -1,3 +1,4 @@
+import { Progress, Tooltip } from "@arco-design/web-react";
 import { ResourceNameId, ListDataTable, type ListColumn } from "@/components/common";
 import type { TenantGpuAllocation } from "@/api/gpu-inventory";
 
@@ -20,7 +21,13 @@ export function TenantGpuAllocationTable({
     {
       title: "租户",
       width: 200,
-      render: (_, tenant) => <ResourceNameId name={tenant.tenantName} id={tenant.tenantId} />,
+      render: (_, tenant) => (
+        <ResourceNameId
+          avatarText={tenant.tenantName}
+          name={tenant.tenantName}
+          id={tenant.tenantId}
+        />
+      ),
     },
     {
       title: "配额上限",
@@ -52,6 +59,29 @@ export function TenantGpuAllocationTable({
       width: 80,
       ellipsis: true,
     },
+    {
+      title: "使用率",
+      width: 180,
+      render: (_, tenant) => {
+        if (tenant.quotaTotal <= 0) return "-";
+        const percent = ((tenant.used + tenant.reserved) / tenant.quotaTotal) * 100;
+        return (
+          <Tooltip content="（已用 + 处理中）/ 配额上限；资源预留单独展示">
+            <div className="flex items-center gap-2">
+              <Progress
+                percent={Math.max(0, Math.min(100, percent))}
+                showText={false}
+                strokeWidth={6}
+                color="#2b5ce6"
+              />
+              <strong className="shrink-0 whitespace-nowrap text-xs tabular-nums">
+                {percent.toFixed(1)}%
+              </strong>
+            </div>
+          </Tooltip>
+        );
+      },
+    },
   ];
 
   return (
@@ -73,7 +103,7 @@ export function TenantGpuAllocationTable({
       ]}
       data={data}
       loading={loading}
-      pagination={false}
+      pagination="client"
       emptyText={emptyText}
     />
   );

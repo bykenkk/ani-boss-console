@@ -1,12 +1,13 @@
+import { Empty, Spin } from "@arco-design/web-react";
+import styles from "./index.module.less";
 import { IconSafe } from "@arco-design/web-react/icon";
 import { useQuery } from "@tanstack/react-query";
 import {
   fetchPlatformAdministratorRoles,
   platformAdministratorQueryKeys,
   type PlatformAdministratorRole,
-  type PlatformAdministratorRoleDefinition,
 } from "@/api/platform-admins";
-import { ListDataTable, ListPageFrame, type ListColumn } from "@/components/common";
+import { ResourcePageFrame } from "@/components/common";
 import { platformAdministratorRoleLabels } from "../model";
 
 const platformRoleDescriptions: Record<PlatformAdministratorRole, string> = {
@@ -17,33 +18,6 @@ const platformRoleDescriptions: Record<PlatformAdministratorRole, string> = {
   "platform-readonly":
     "以只读方式查看租户、资源池与计量数据，不可修改配置或管理账号；可导出审计，便于核查与留档。",
 };
-
-const columns: ListColumn<PlatformAdministratorRoleDefinition>[] = [
-  {
-    key: "name",
-    title: "名称",
-    width: 280,
-    render: (_, role) => (
-      <div className="flex items-center gap-3">
-        <span className="flex size-9 items-center justify-center rounded-lg bg-blue-50 text-lg text-blue-600">
-          <IconSafe />
-        </span>
-        <span className="font-medium text-gray-900">
-          {platformAdministratorRoleLabels[role.name]}
-        </span>
-      </div>
-    ),
-  },
-  {
-    title: "描述",
-    render: (_, role) => platformRoleDescriptions[role.name],
-  },
-  {
-    title: "创建时间",
-    width: 180,
-    render: () => "-",
-  },
-];
 
 export function PlatformRolesPage() {
   const rolesQuery = useQuery({
@@ -59,19 +33,56 @@ export function PlatformRolesPage() {
   });
 
   return (
-    <ListPageFrame
-      header={{ title: "平台角色", subtitle: "内置超管、运维、只读三类角色，分配给平台管理员使用" }}
+    <ResourcePageFrame
+      header={{
+        title: "平台角色",
+        subtitle: "内置超级管理、运维、只读三类角色，分配给平台管理员使用。",
+      }}
     >
-      <ListDataTable
-        rowKey="id"
-        columns={columns}
-        data={rolesQuery.data || []}
-        loading={rolesQuery.isPending}
-        pagination={false}
-        tableLabel="平台角色列表"
-        emptyText="暂无平台角色"
-        scroll={{ x: 960, y: true }}
-      />
-    </ListPageFrame>
+      <Spin loading={rolesQuery.isPending}>
+        <div className={styles.grid}>
+          {(rolesQuery.data || []).map((role) => (
+            <article className={styles.card} key={role.id}>
+              <div className={styles.head}>
+                <span className={styles.icon}>
+                  <IconSafe />
+                </span>
+                <div>
+                  <h3>{platformAdministratorRoleLabels[role.name]}</h3>
+                  <span className={styles.subtitle}>{role.name}</span>
+                </div>
+              </div>
+              <p>{platformRoleDescriptions[role.name]}</p>
+              <div className={styles.chips}>
+                {(role.name === "platform-admin"
+                  ? ["租户管理", "资源池", "平台账号", "计量", "审计"]
+                  : role.name === "platform-ops"
+                    ? ["租户开通/冻结", "资源池运维", "计量（只读）"]
+                    : ["全部数据（只读）", "审计导出"]
+                ).map((label) => (
+                  <span key={label}>{label}</span>
+                ))}
+              </div>
+              <details className={styles.details}>
+                <summary>查看权限说明</summary>
+                <dl className={styles.permissions}>
+                  <dt>租户开通 / 冻结</dt>
+                  <dd>{role.name === "platform-readonly" ? "只读" : "允许"}</dd>
+                  <dt>平台资源池</dt>
+                  <dd>{role.name === "platform-readonly" ? "只读" : "允许"}</dd>
+                  <dt>平台账号</dt>
+                  <dd>{role.name === "platform-admin" ? "允许" : "不可管理"}</dd>
+                  <dt>计量结算</dt>
+                  <dd>{role.name === "platform-admin" ? "允许" : "只读"}</dd>
+                  <dt>审计导出</dt>
+                  <dd>{role.name === "platform-ops" ? "不可导出" : "允许"}</dd>
+                </dl>
+              </details>
+            </article>
+          ))}
+        </div>
+        {!rolesQuery.isPending && !rolesQuery.data?.length && <Empty description="暂无平台角色" />}
+      </Spin>
+    </ResourcePageFrame>
   );
 }

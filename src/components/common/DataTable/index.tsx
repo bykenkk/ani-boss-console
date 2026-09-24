@@ -31,7 +31,7 @@ export type DataTableProps<T> = {
   rowKey?: string | ((row: T) => string);
   columns: Array<TableColumnProps<T>>;
   rowSelection?: TableProps<T>["rowSelection"];
-  pagination: ListPagination | false;
+  pagination: ListPagination | "client" | false;
   loading?: boolean;
   noDataElement?: ReactNode;
   tableLabel?: string;
@@ -88,17 +88,28 @@ export function DataTable<T>({
   const tablePagination =
     pagination === false
       ? false
-      : {
-          current: pagination.page,
-          pageSize: pagination.pageSize,
-          total: Math.max(pagination.total, 1),
-          sizeCanChange: true,
-          sizeOptions: pagination.pageSizeOptions ?? [10, 20, 50],
-          pageSizeChangeResetCurrent: true,
-          hideOnSinglePage: false,
-          showTotal: () => `共 ${pagination.total} 条记录`,
-          showJumper: true,
-        };
+      : pagination === "client"
+        ? {
+            defaultPageSize: 10,
+            total: data.length,
+            sizeCanChange: true,
+            sizeOptions: [10, 20, 50],
+            pageSizeChangeResetCurrent: true,
+            hideOnSinglePage: false,
+            showTotal: () => `共 ${data.length} 条记录`,
+            showJumper: true,
+          }
+        : {
+            current: pagination.page,
+            pageSize: pagination.pageSize,
+            total: Math.max(pagination.total, 1),
+            sizeCanChange: true,
+            sizeOptions: pagination.pageSizeOptions ?? [10, 20, 50],
+            pageSizeChangeResetCurrent: true,
+            hideOnSinglePage: false,
+            showTotal: () => `共 ${pagination.total} 条记录`,
+            showJumper: true,
+          };
 
   return (
     <>
@@ -114,7 +125,7 @@ export function DataTable<T>({
         pagination={tablePagination}
         tableLayoutFixed
         onChange={
-          pagination === false
+          pagination === false || pagination === "client"
             ? undefined
             : (nextPagination, _sorter, _filters, extra) => {
                 if (extra.action !== "paginate") return;

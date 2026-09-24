@@ -1,3 +1,4 @@
+import { SummaryStrip } from "@/components/common";
 import { Button, Input, Select, Space } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -173,6 +174,29 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
 
   return (
     <ListPageFrame
+      summary={
+        <SummaryStrip
+          pending={componentsQuery.isPending}
+          items={[
+            { label: "已接收日志", value: displayLogs.length, unit: "条", note: "当前组件缓冲区" },
+            {
+              label: "Info",
+              value: displayLogs.filter((t) => t.displayLevel === "info").length,
+              unit: "条",
+            },
+            {
+              label: "Warn",
+              value: displayLogs.filter((t) => t.displayLevel === "warn").length,
+              unit: "条",
+            },
+            {
+              label: "Error",
+              value: displayLogs.filter((t) => t.displayLevel === "error").length,
+              unit: "条",
+            },
+          ]}
+        />
+      }
       header={{
         title: "运行日志",
         subtitle: "按组件查看平台工作负载实时日志；流结束后页面会自动重连。",
@@ -226,8 +250,8 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
         rowKey="id"
         columns={columns}
         data={filteredLogs}
-        pagination={false}
-        scroll={{ x: 1310, y: true }}
+        pagination="client"
+        scroll={{ x: 1310 }}
         emptyText={component ? "暂无组件日志" : "请选择组件查看实时日志"}
       />
     </ListPageFrame>

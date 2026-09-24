@@ -1,4 +1,4 @@
-import { Empty } from "@arco-design/web-react";
+import { Empty, Progress } from "@arco-design/web-react";
 import {
   IconApps,
   IconDown,
@@ -8,7 +8,7 @@ import {
   IconUserGroup,
 } from "@arco-design/web-react/icon";
 import clsx from "clsx";
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import type { PlatformCapacityRegion } from "@/api/platform";
 import styles from "./index.module.less";
 
@@ -57,14 +57,11 @@ export function PlatformCapacitySummary({ region, loading }: PlatformCapacitySum
   const gpuTotal = region?.capacity.gpuTotal ?? 0;
   const gpuFree = region?.capacity.gpuFree ?? 0;
   const gpuProgress = gpuTotal > 0 ? (gpuFree / gpuTotal) * 100 : 0;
-  const progressStyle = {
-    "--gpu-progress": `${gpuProgress > 0 ? Math.max(gpuProgress, 3) : 3}%`,
-  } as CSSProperties;
 
   return (
     <div className={styles.card}>
       <div className={styles.header}>
-        <span className={styles.title}>区域</span>
+        <span className={styles.title}>资源容量</span>
         <span className={styles.regionName} aria-label={`当前区域：${regionTitle(region)}`}>
           <span>{regionTitle(region)}</span>
           <IconDown aria-hidden="true" />
@@ -92,17 +89,12 @@ export function PlatformCapacitySummary({ region, loading }: PlatformCapacitySum
                   </div>
                 </div>
               </div>
-              <div
-                className={styles.gpuProgress}
-                style={progressStyle}
-                role="progressbar"
-                aria-label="GPU 空闲比例"
-                aria-valuemin={0}
-                aria-valuemax={Math.max(gpuTotal, 1)}
-                aria-valuenow={gpuFree}
-              >
-                <span />
-              </div>
+              <Progress
+                percent={Math.max(0, Math.min(100, gpuProgress))}
+                showText={false}
+                strokeWidth={5}
+                color="#2b5ce6"
+              />
               <span className={styles.gpuHint}>
                 当前空闲 {formatValue(gpuFree)} 卡，
                 {gpuFree > 0 ? "可供租户分配" : "全部已被租户占用"}

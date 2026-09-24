@@ -13,14 +13,14 @@ import { appNavigation, isNavigationGroup, type NavigationItem } from "./navigat
 const { Content } = Layout;
 
 const CONTENT_STYLE = {
-  background: "linear-gradient(135deg, #f2f5fb 0%, #f7f9fc 100%)",
+  background: "#f5f7fb",
   boxSizing: "border-box",
   minWidth: 0,
   paddingInline: "var(--app-content-padding-inline)",
   paddingTop: "var(--app-content-padding-top)",
   paddingBottom: "var(--app-content-padding-bottom)",
-  "--app-content-padding-inline": "24px",
-  "--app-content-padding-top": "16px",
+  "--app-content-padding-inline": "28px",
+  "--app-content-padding-top": "24px",
   "--app-content-padding-bottom": "24px",
   "--app-content-available-height":
     "calc(100vh - var(--topnav-height) - var(--app-content-padding-top) - var(--app-content-padding-bottom))",

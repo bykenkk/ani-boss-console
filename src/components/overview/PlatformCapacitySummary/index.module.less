@@ -1,247 +1,137 @@
 .card {
-  box-sizing: border-box;
-  overflow: hidden;
-  border-radius: 8px;
-  background: linear-gradient(180deg, #eef4ff 0%, #f7f9fd 34%, #ffffff 100%);
+  padding: 20px 22px;
+  border: 1px solid #e8ecf3;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(31, 37, 51, 0.04);
 }
-
 .header {
   display: flex;
-  min-height: 48px;
-  align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 0 20px;
-  color: var(--color-text-1);
-}
-
-.title {
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.body {
-  box-sizing: border-box;
-  padding: 0 16px 16px;
-}
-
-.regionName {
-  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  font-weight: 700;
-  white-space: nowrap;
-
-  :global(.arco-icon) {
-    color: var(--color-text-3);
-    font-size: 12px;
-  }
-}
-
-.state {
-  display: flex;
-  height: 100%;
-  min-height: 280px;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text-3);
-  font-size: 14px;
-}
-
-.capacityGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  grid-template-rows: 120px repeat(2, 88px);
-  gap: 10px;
-}
-
-.gpuMetric,
-.metric {
-  box-sizing: border-box;
-  border: 1px solid rgba(255, 255, 255, 0.88);
-  border-radius: 8px;
-}
-
-.gpuMetric {
-  display: flex;
-  grid-column: 1 / -1;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-  padding: 8px 16px;
-  background: #eaf2ff;
-}
-
-.gpuSummary {
-  display: flex;
-  align-items: center;
-  min-width: 0;
+  margin-bottom: 14px;
   gap: 12px;
 }
-
-.gpuIcon,
-.metricIcon {
-  display: inline-flex;
-  flex: 0 0 auto;
+.title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2533;
+}
+.regionName {
+  display: flex;
+  gap: 8px;
+  color: #9aa3b5;
+  font-size: 12px;
+}
+.body,
+.capacityGrid {
+  min-width: 0;
+}
+.state {
+  min-height: 280px;
+  display: grid;
+  place-items: center;
+  color: #9aa3b5;
+}
+.metric {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px dashed #edf0f6;
+  &:last-child {
+    border: 0;
+  }
+}
+.metricIcon,
+.gpuIcon {
+  display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.9);
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: #e8f0ff;
+  color: #2b5ce6;
+  font-size: 15px;
 }
-
-.gpuIcon {
-  width: 44px;
-  height: 44px;
-  color: #2e6eb6;
-  font-size: 20px;
-}
-
-.gpuContent,
 .metricContent {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  flex: 1;
+  gap: 2px 8px;
   min-width: 0;
-  flex-direction: column;
 }
-
-.gpuLabel,
-.metricLabel {
-  overflow: hidden;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 20px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
+.metricLabel,
 .gpuLabel {
-  color: #24578f;
+  font-size: 12.5px;
+  color: #5a6478;
 }
-
-.gpuValueRow,
 .metricValueRow {
   display: flex;
   align-items: baseline;
-  min-width: 0;
+  gap: 4px;
+  grid-column: 2;
+  grid-row: 1 / 3;
 }
-
-.gpuValueRow {
-  gap: 8px;
-
-  strong {
-    color: var(--color-text-1);
-    font-size: 24px;
-    font-weight: 500;
-    line-height: 34px;
-  }
-
-  span {
-    color: var(--color-text-3);
-    font-size: 12px;
-    line-height: 22px;
-  }
+.metricValue {
+  font-size: 15px;
+  color: #1f2533;
+  font-variant-numeric: tabular-nums;
 }
-
-.gpuProgress {
-  position: relative;
-  height: 8px;
-  margin-top: 12px;
-  overflow: hidden;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
-
-  span {
-    display: block;
-    width: var(--gpu-progress);
-    min-width: 12px;
-    height: 100%;
-    border-radius: inherit;
-    background: #2f6fb7;
-  }
-}
-
+.metricUnit,
+.metricHint,
 .gpuHint {
-  margin-top: 8px;
-  overflow: hidden;
-  color: var(--color-text-2);
   font-size: 11px;
-  line-height: 18px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  color: #9aa3b5;
 }
-
-.metric {
+.gpuMetric {
+  padding: 11px 0;
+  border-bottom: 1px dashed #edf0f6;
+}
+.gpuSummary {
   display: flex;
   align-items: center;
-  min-width: 0;
   gap: 12px;
-  padding: 8px 12px;
+  margin-bottom: 8px;
 }
-
-.metricIcon {
-  width: 38px;
-  height: 38px;
-  font-size: 17px;
+.gpuContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+  gap: 10px;
 }
-
-.metricLabel {
-  color: currentcolor;
-}
-
-.metricValueRow {
-  gap: 7px;
-}
-
-.metricValue {
-  overflow: hidden;
-  color: var(--color-text-1);
-  font-size: 22px;
-  font-weight: 500;
-  line-height: 30px;
-  text-overflow: ellipsis;
+.gpuValueRow {
   white-space: nowrap;
-}
-
-.metricUnit,
-.metricHint {
-  color: var(--color-text-3);
-  font-size: 11px;
-  line-height: 18px;
-}
-
-.metricHint {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.cpu {
-  color: #477428;
-  background: #eef6df;
-}
-
-.memory {
-  color: #31765f;
-  background: #e3f5ee;
-}
-
-.nodes {
-  color: #926426;
-  background: #fff1dc;
-}
-
-.tenants {
-  color: #675bb2;
-  background: #eeebff;
-}
-
-@media (max-width: 420px) {
-  .capacityGrid {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto;
+  strong {
+    font-size: 15px;
   }
-
-  .gpuMetric {
-    grid-column: 1;
+  span {
+    color: #9aa3b5;
+    font-size: 11px;
+    margin-left: 4px;
   }
+}
+.gpuHint {
+  display: block;
+  margin-top: 6px;
+}
+.cpu .metricIcon {
+  background: #e8f7f0;
+  color: #22a06b;
+}
+.memory .metricIcon {
+  background: #f3edff;
+  color: #7c5ce6;
+}
+.nodes .metricIcon {
+  background: #fdf3e7;
+  color: #e6862b;
+}
+.tenants .metricIcon {
+  background: #e8f0ff;
+  color: #2b5ce6;
 }

@@ -36,3 +36,7 @@ export type {
 export { StatusBadge } from "./StatusBadge";
 export type { StatusBadgeTone } from "./StatusBadge";
 export { TableSectionFrame } from "./TableSectionFrame";
+
+export { MetricCard } from "./MetricCard";
+export { SummaryStrip } from "./SummaryStrip";
+export type { SummaryItem } from "./SummaryStrip";

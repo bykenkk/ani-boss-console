@@ -1,53 +1,10 @@
 .listDataTable {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-
-  > :global(.arco-spin),
-  > :global(.arco-spin) > :global(.arco-spin-children) {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    width: 100%;
-    min-width: 0;
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  :global(.arco-table-container),
-  :global(.arco-table-content-scroll),
-  :global(.arco-table-content-inner) {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    min-width: 0;
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  :global(.arco-table-container) {
-    width: 100%;
-  }
-
-  :global(.arco-table-header) {
-    flex: 0 0 auto;
-    min-width: 0;
-    overflow: hidden;
-  }
-
-  :global(.arco-table-body) {
-    flex: 1 1 0;
-    min-width: 0;
-    min-height: 0;
-    overflow: auto;
-  }
 
   :global(.arco-table-pagination) {
-    flex: 0 0 auto;
+    margin: 0;
+    padding: 14px 22px;
   }
 }

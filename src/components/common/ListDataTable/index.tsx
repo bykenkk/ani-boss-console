@@ -35,7 +35,7 @@ export function ListDataTable<T>({
       {...tableProps}
       columns={columns}
       className={clsx(styles.listDataTable, className)}
-      scroll={{ ...scroll, y: scroll?.y ?? true }}
+      scroll={scroll}
       noDataElement={emptyText === undefined ? undefined : <Empty description={emptyText} />}
     />
   );

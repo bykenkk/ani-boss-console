@@ -1,6 +1,6 @@
 :root {
   --topnav-height: 64px;
-  --sidebar-width: 200px;
+  --sidebar-width: 216px;
   --sidebar-collapsed-width: 64px;
   --sidebar-active-bg: rgba(255, 255, 255, 0.72);
 }
@@ -1607,4 +1607,95 @@
   .topnav-right {
     gap: 12px;
   }
+}
+
+/* Product design: shared console surfaces. */
+.app-layout {
+  --topnav-height: 56px;
+  --primary-6: 43, 92, 230;
+  --color-text-1: #1f2533;
+  --color-text-2: #5a6478;
+  --color-text-3: #9aa3b5;
+  --color-border-2: #e8ecf3;
+  --color-fill-1: #f5f7fb;
+  --color-fill-2: #f5f7fb;
+}
+.app-layout .top-nav {
+  background: #fff;
+  border-bottom: 1px solid #e8ecf3;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.app-layout .sidebar,
+.app-layout .sidebar-bottom {
+  background: linear-gradient(180deg, #16233e, #1b2a4a);
+}
+.app-layout .sidebar-menu.arco-menu .sidebar-menu-leaf.arco-menu-selected,
+.app-layout .sidebar-menu.arco-menu .sidebar-menu-flyout-row.is-active {
+  background: linear-gradient(90deg, #2b5ce6, #3d6bff);
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(43, 92, 230, 0.35);
+}
+.app-layout .topnav-user-avatar {
+  background: linear-gradient(135deg, #3d6bff, #7b9bff);
+  color: #fff;
+}
+.app-layout .arco-card {
+  border: 1px solid #e8ecf3;
+  border-radius: 14px !important;
+  box-shadow: 0 1px 3px rgba(31, 37, 51, 0.04);
+}
+.app-layout .arco-table-th {
+  background: #fafbfd;
+  color: #9aa3b5;
+  font-size: 12.5px;
+  font-weight: 500;
+  border-bottom-color: #e8ecf3;
+}
+.app-layout .arco-table-td {
+  border-bottom-color: #f1f4f9;
+  color: #5a6478;
+  font-size: 13.5px;
+}
+.app-layout .arco-table-th {
+  padding: 0;
+}
+.app-layout .arco-table-th-item {
+  padding: 12px 18px;
+  white-space: nowrap;
+}
+.app-layout .arco-table-td {
+  padding: 14px 18px;
+}
+.app-layout .arco-table-tr:hover .arco-table-td {
+  background: #f8faff;
+}
+.app-layout .arco-pagination-item {
+  border-radius: 8px;
+}
+.app-layout .arco-pagination-item-active {
+  color: #fff;
+  background: #2b5ce6;
+}
+.app-layout .arco-btn {
+  border-radius: 10px;
+}
+.app-layout .arco-btn-primary:not(.arco-btn-disabled) {
+  background: #2b5ce6;
+  box-shadow: 0 2px 8px rgba(43, 92, 230, 0.18);
+}
+.app-layout .arco-input-wrapper,
+.app-layout .arco-select-view {
+  border-radius: 10px;
+  background: #fff;
+  border-color: #e8ecf3;
+}
+.app-layout .arco-tag {
+  border-radius: 6px;
+}
+.app-layout .arco-tabs-header-nav-line {
+  padding-inline: 22px;
+}
+.app-layout .arco-tabs-header-title-text {
+  font-size: 13px;
 }

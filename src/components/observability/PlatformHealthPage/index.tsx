@@ -1,7 +1,7 @@
-import { Button, Card, Tooltip } from "@arco-design/web-react";
+import { Button, Card, Space, Tag } from "@arco-design/web-react";
+import { IconClockCircle, IconRefresh } from "@arco-design/web-react/icon";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import clsx from "clsx";
 import { fetchPlatformComponents, platformQueryKeys, type PlatformComponent } from "@/api/platform";
 import {
   ResourceNameId,
@@ -11,40 +11,16 @@ import {
   type ListColumn,
   type StatusBadgeTone,
 } from "@/components/common";
-import { Metric } from "@/components/overview/Metric";
 import { formatDateTime } from "@/lib/date";
-
-const groupNames: Record<string, string> = {
-  service: "核心服务",
-  dependency: "基础依赖",
-  platform: "平台组件",
-};
+import { ComponentScope } from "./ComponentScope";
+import { HealthDistribution } from "./HealthDistribution";
+import { HealthSummary } from "./HealthSummary";
+import { groupColors, groupNames, summarizeComponentHealth } from "./model";
 
 function componentStatusTone(status: string): StatusBadgeTone {
   if (status === "running") return "info";
   if (status === "degraded") return "warning";
   return "default";
-}
-
-function ScrapeBadge({ component }: { component: PlatformComponent }) {
-  const { reason, scrapeStatus } = component;
-  const tone: StatusBadgeTone =
-    scrapeStatus === "reachable"
-      ? "success"
-      : scrapeStatus === "unknown"
-        ? "warning"
-        : scrapeStatus === "unreachable"
-          ? "danger"
-          : "default";
-  const badge = <StatusBadge value={scrapeStatus} tone={tone} />;
-
-  return reason ? (
-    <Tooltip content={reason}>
-      <span>{badge}</span>
-    </Tooltip>
-  ) : (
-    badge
-  );
 }
 
 function formatObservedAt(value?: string) {
@@ -67,33 +43,14 @@ export function PlatformHealthPage() {
 
   const groups = componentsQuery.data?.groups || [];
   const components = groups.flatMap((group) => group.components);
-  const runningCount = components.filter((item) => item.status === "running").length;
-  const degradedCount = components.filter((item) => item.status === "degraded").length;
-  const stoppedCount = components.filter((item) => item.status === "stopped").length;
-  const otherCount = components.length - runningCount - degradedCount - stoppedCount;
   const total = components.length;
-  const overall =
-    componentsQuery.isPending || !componentsQuery.data
-      ? "加载中"
-      : total === 0
-        ? "-"
-        : stoppedCount > 0
-          ? "存在停止"
-          : degradedCount > 0 || otherCount > 0
-            ? "部分降级"
-            : "正常";
-  const overallTone =
-    stoppedCount > 0 ? "danger" : degradedCount > 0 || otherCount > 0 ? "warning" : undefined;
+  const summary = summarizeComponentHealth(components);
+  const hasData = Boolean(componentsQuery.data);
 
   const columns: ListColumn<PlatformComponent>[] = [
     {
-      title: "分组",
-      width: 110,
-      render: (_, component) => groupNames[component.group] || component.group || "-",
-    },
-    {
       title: "组件",
-      width: 240,
+      width: 200,
       fixed: "left",
       render: (_, component) => (
         <ResourceNameId name={component.name} id={component.namespace || "-"} />
@@ -103,36 +60,44 @@ export function PlatformHealthPage() {
       title: "状态",
       width: 90,
       render: (_, component) => (
-        <StatusBadge value={component.status} tone={componentStatusTone(component.status)} />
+        <StatusBadge
+          value={component.status}
+          tone={componentStatusTone(component.status)}
+          processing={component.status === "running"}
+        />
       ),
+    },
+    {
+      title: "分组",
+      width: 110,
+      render: (_, component) =>
+        component.group ? (
+          <Tag color="gray" style={groupColors[component.group]}>
+            {groupNames[component.group] || component.group}
+          </Tag>
+        ) : (
+          "-"
+        ),
     },
     {
       title: "版本",
       width: 160,
+      ellipsis: true,
       render: (_, component) => component.version || "-",
     },
     {
       title: "就绪副本",
-      width: 110,
+      width: 80,
+      ellipsis: true,
       render: (_, component) => `${component.readyReplicas} / ${component.desiredReplicas}`,
     },
     {
       title: "资源类型",
       width: 130,
+      ellipsis: true,
       render: (_, component) => component.kind || "-",
     },
-    {
-      title: "观测状态",
-      width: 110,
-      render: (_, component) => <ScrapeBadge component={component} />,
-    },
   ];
-
-  const distribution = [
-    ["运行中", runningCount, "bg-green-500"],
-    ["降级", degradedCount, "bg-orange-500"],
-    ["已停止", stoppedCount, "bg-gray-500"],
-  ] as const;
 
   return (
     <ResourcePageFrame
@@ -141,73 +106,31 @@ export function PlatformHealthPage() {
         title: "平台健康",
         subtitle: "查看 ANI 服务、基础依赖和平台组件的实时运行状态。",
         extra: (
-          <Button
-            loading={componentsQuery.isFetching}
-            onClick={() => void componentsQuery.refetch()}
-          >
-            刷新
-          </Button>
+          <Space wrap size={12}>
+            <span className="inline-flex items-center gap-1.5 text-xs text-(--color-text-3)">
+              <IconClockCircle />
+              观测时间 {formatObservedAt(componentsQuery.data?.observedAt)}
+            </span>
+            <Button
+              icon={<IconRefresh />}
+              loading={componentsQuery.isFetching}
+              onClick={() => void componentsQuery.refetch()}
+            >
+              刷新
+            </Button>
+          </Space>
         ),
       }}
     >
-      <section className="grid grid-cols-4 gap-3.5 max-[1100px]:grid-cols-2">
-        <Metric label="整体状态" value={overall} hint={`${total} 个组件`} tone={overallTone} />
-        <Metric
-          label="运行中"
-          value={componentsQuery.data ? String(runningCount) : "-"}
-          hint="副本已全部就绪"
-        />
-        <Metric
-          label="降级"
-          value={componentsQuery.data ? String(degradedCount) : "-"}
-          hint="部分副本未就绪"
-          tone="warning"
-        />
-        <Metric
-          label="已停止"
-          value={componentsQuery.data ? String(stoppedCount) : "-"}
-          hint="期望副本为 0"
-          tone="danger"
-        />
-      </section>
+      <HealthSummary summary={summary} hasData={hasData} pending={componentsQuery.isPending} />
 
-      <section className="grid grid-cols-2 gap-3.5 max-[980px]:grid-cols-1">
-        <Card className="[&_.arco-card-body]:p-5">
-          <div className="text-base font-semibold text-gray-900">组件状态分布</div>
-          <div className="mt-5 space-y-4">
-            {distribution.map(([label, count, color]) => (
-              <div
-                key={label}
-                className="grid grid-cols-[56px_1fr_32px] items-center gap-3 text-sm"
-              >
-                <span>{label}</span>
-                <div className="h-2 rounded bg-gray-100">
-                  <div
-                    className={clsx("h-2 rounded", color)}
-                    style={{ width: `${total === 0 ? 0 : (count / total) * 100}%` }}
-                  />
-                </div>
-                <span className="text-right text-gray-500">{count}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        <Card className="[&_.arco-card-body]:p-5">
-          <div className="text-base font-semibold text-gray-900">组件范围</div>
-          <dl className="mt-4 grid grid-cols-[96px_1fr] gap-x-4 gap-y-3 text-sm">
-            {groups.map((group) => (
-              <div key={group.name} className="contents">
-                <dt className="text-gray-500">{groupNames[group.name] || group.name}</dt>
-                <dd className="m-0 text-gray-900">{group.components.length} 个</dd>
-              </div>
-            ))}
-            <dt className="text-gray-500">观测时间</dt>
-            <dd className="m-0 text-gray-900">
-              {formatObservedAt(componentsQuery.data?.observedAt)}
-            </dd>
-          </dl>
-        </Card>
+      <section className="grid grid-cols-[1.5fr_1fr] gap-4 max-[980px]:grid-cols-1">
+        <HealthDistribution
+          summary={summary}
+          hasData={hasData}
+          pending={componentsQuery.isPending}
+        />
+        <ComponentScope groups={groups} pending={componentsQuery.isPending} />
       </section>
 
       <Card>
@@ -235,7 +158,7 @@ export function PlatformHealthPage() {
             return (rank[left.status] ?? 2) - (rank[right.status] ?? 2);
           })}
           loading={componentsQuery.isPending}
-          pagination={false}
+          pagination="client"
           scroll={{ x: 1190 }}
           noDataElement="暂无组件状态数据"
         />

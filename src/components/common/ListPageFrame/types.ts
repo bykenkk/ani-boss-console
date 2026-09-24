@@ -39,6 +39,7 @@ export type ListPageFrameProps<
   TSearchField extends string = string,
 > = {
   header: ResourcePageHeaderConfig;
+  summary?: ReactNode;
   tabs?: ListPageTabsConfig<TStatus>;
   toolbar?: ListPageToolbarConfig<TSearchField>;
   children: ReactNode;

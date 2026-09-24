@@ -1,3 +1,4 @@
+import { SummaryStrip } from "@/components/common";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
@@ -37,6 +38,31 @@ export function GpuQuotaPage() {
   return (
     <>
       <ListPageFrame
+        summary={
+          <SummaryStrip
+            pending={tenantsQuery.isPending}
+            items={[
+              {
+                label: "已配置配额租户",
+                value: tenants.filter((t) => t.quotaTotal > 0).length,
+                unit: "个",
+                note: "当前租户台账",
+              },
+              {
+                label: "配额上限合计",
+                value: tenants.reduce((n, t) => n + t.quotaTotal, 0),
+                unit: "卡",
+              },
+              {
+                label: "资源预留",
+                value: tenants.reduce((n, t) => n + t.allocatedGpuCount, 0),
+                unit: "卡",
+                note: "预留占坑不产生用量",
+              },
+              { label: "已用", value: tenants.reduce((n, t) => n + t.used, 0), unit: "卡" },
+            ]}
+          />
+        }
         header={{
           title: "GPU 配额",
           subtitle: "按租户查看 GPU 资源配额上限、预留与可用量。",

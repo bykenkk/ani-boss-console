@@ -1,4 +1,4 @@
-import { Button } from "@arco-design/web-react";
+import { Button, Radio } from "@arco-design/web-react";
 import { IconRefresh } from "@arco-design/web-react/icon";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -8,12 +8,15 @@ import {
   type PlatformMeteringUsageItem,
 } from "@/api/platform";
 import { ResourcePageFrame } from "@/components/common";
-import { getUtcMeteringRanges } from "@/lib/date";
+import { getUtcMeteringRanges, type MeteringPeriod } from "@/lib/date";
 import { toGpuHours, type MeteringTenantRow } from "@/lib/metering";
 import { MeteringDimensionCards } from "../MeteringDimensionCards";
 import { meteringDimensions, type MeteringDimension } from "../model";
 import { MeteringTenantTable } from "./MeteringTenantTable";
 import { TenantMeteringDrawer } from "./TenantMeteringDrawer";
+
+import { useMeteringTenants } from "@/hooks/useMeteringTenants";
+import styles from "../MeteringPresentation/index.module.less";
 
 function sumTenantItems(items: PlatformMeteringUsageItem[]) {
   const result = new Map<string, number>();
@@ -25,9 +28,15 @@ function sumTenantItems(items: PlatformMeteringUsageItem[]) {
 }
 
 export function TenantUsageRankingPage() {
+  const tenantsQuery = useMeteringTenants();
+  const [period, setPeriod] = useState<MeteringPeriod>("month");
+  const periodLabel =
+    period === "month" ? "本月" : period === "recent-seven-days" ? "近7日" : "上月";
+  const previousLabel =
+    period === "month" ? "上月同期" : period === "recent-seven-days" ? "前7日" : "上上月";
   const [dimension, setDimension] = useState<MeteringDimension>("gpu");
   const [detailTenantId, setDetailTenantId] = useState<string>();
-  const ranges = useMemo(() => getUtcMeteringRanges("month"), []);
+  const ranges = useMemo(() => getUtcMeteringRanges(period), [period]);
   const current =
     meteringDimensions.find((item) => item.key === dimension) ?? meteringDimensions[0];
   const currentParams = {
@@ -66,6 +75,13 @@ export function TenantUsageRankingPage() {
   });
   const totals = meteringDimensions.map((item) => ({
     resourceType: item.resourceType,
+    previous: previousQuery.data
+      ? toGpuHours(
+          previousQuery.data.items
+            .filter((usage) => usage.resourceType === item.resourceType)
+            .reduce((sum, usage) => sum + usage.totalQuantity, 0),
+        )
+      : undefined,
     value: currentQuery.data
       ? toGpuHours(
           currentQuery.data.items
@@ -103,23 +119,47 @@ export function TenantUsageRankingPage() {
 
   return (
     <ResourcePageFrame
+      className={styles.page}
       header={{
         title: "租户用量排行",
-        subtitle: "按本月累计用量降序排列，切换维度查看各租户计量数据。",
+        subtitle: "按所选周期累计用量排序，切换维度查看各租户计量数据。",
         extra: (
-          <Button
-            icon={<IconRefresh />}
-            loading={currentQuery.isFetching || previousQuery.isFetching}
-            onClick={() => void Promise.all([currentQuery.refetch(), previousQuery.refetch()])}
-          >
-            刷新
-          </Button>
+          <div className={styles.periods}>
+            <Radio.Group
+              aria-label="统计周期"
+              type="button"
+              value={period}
+              onChange={(value) => {
+                setPeriod(value as MeteringPeriod);
+                setDetailTenantId(undefined);
+              }}
+              options={[
+                { value: "month", label: "本月" },
+                { value: "recent-seven-days", label: "近7日" },
+                { value: "previous-month", label: "上月" },
+              ]}
+            />
+            <Button
+              icon={<IconRefresh />}
+              loading={currentQuery.isFetching || previousQuery.isFetching}
+              onClick={() =>
+                void Promise.all([
+                  currentQuery.refetch(),
+                  previousQuery.refetch(),
+                  tenantsQuery.refetch(),
+                ])
+              }
+            >
+              刷新
+            </Button>
+          </div>
         ),
       }}
     >
       <MeteringDimensionCards
         dimension={dimension}
         totals={totals}
+        previousLabel={previousLabel}
         onChange={(key) => {
           setDetailTenantId(undefined);
           setDimension(key);
@@ -127,9 +167,13 @@ export function TenantUsageRankingPage() {
       />
 
       <MeteringTenantTable
+        key={dimension + period}
+        tenants={tenantsQuery.data || []}
+        periodLabel={periodLabel}
+        previousLabel={previousLabel}
         rows={rows}
-        metricLabel={current.label}
-        unit={current.unit}
+        metricLabel={current.cardLabel}
+        unit={current.cardUnit}
         loading={currentQuery.isPending || previousQuery.isPending}
         onViewDetail={setDetailTenantId}
       />

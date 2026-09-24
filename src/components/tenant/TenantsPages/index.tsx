@@ -1,3 +1,4 @@
+import { SummaryStrip } from "@/components/common";
 import { Button, Modal } from "@arco-design/web-react";
 import { IconPlus } from "@arco-design/web-react/icon";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -46,7 +47,7 @@ export function TenantsPages() {
   const [keyword, setKeyword] = useState("");
   const [status, setStatus] = useState<"all" | TenantStatus>("all");
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
+  const [pageSize, setPageSize] = useState(10);
   const [createVisible, setCreateVisible] = useState(false);
   const deferredKeyword = useDeferredValue(keyword.trim());
 
@@ -138,6 +139,7 @@ export function TenantsPages() {
       width: 200,
       render: (_, tenant) => (
         <ResourceNameId
+          avatarText={tenant.displayName}
           name={
             <Link to="/tenants/$tenantId" params={{ tenantId: tenant.id }}>
               {tenant.displayName}
@@ -181,6 +183,29 @@ export function TenantsPages() {
   return (
     <>
       <ListPageFrame
+        summary={
+          <SummaryStrip
+            pending={listQuery.isPending}
+            items={[
+              { label: "租户数", value: data.length, unit: "个", note: "当前筛选范围" },
+              {
+                label: "活跃",
+                value: data.filter((t) => t.status === "active").length,
+                unit: "个",
+              },
+              {
+                label: "冻结",
+                value: data.filter((t) => t.status === "frozen").length,
+                unit: "个",
+              },
+              {
+                label: "禁用",
+                value: data.filter((t) => t.status === "disabled").length,
+                unit: "个",
+              },
+            ]}
+          />
+        }
         header={{
           title: "租户列表",
           subtitle: "管理租户开通、基本信息、认证、配额与生命周期。",
@@ -261,7 +286,6 @@ export function TenantsPages() {
               setPageSize(nextPageSize);
             },
           }}
-          scroll={{ x: 1000, y: true }}
           emptyText="暂无符合条件的租户"
         />
       </ListPageFrame>

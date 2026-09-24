@@ -1,4 +1,10 @@
-import { Metric } from "@/components/overview/Metric";
+import { MetricCard } from "@/components/common";
+import {
+  IconThunderbolt,
+  IconArchive,
+  IconApps,
+  IconExclamationCircle,
+} from "@arco-design/web-react/icon";
 import type { GpuOccupancy } from "@/api/gpu-inventory";
 
 interface GpuSummaryProps {
@@ -13,26 +19,50 @@ function metricValue(value: number | undefined, pending: boolean) {
 export function GpuSummary({ occupancy, occupancyPending }: GpuSummaryProps) {
   return (
     <section className="grid grid-cols-4 gap-3.5 max-[1280px]:grid-cols-2">
-      <Metric
+      <MetricCard
         label="物理卡"
+        icon={<IconThunderbolt />}
+        unit="卡"
         value={metricValue(occupancy?.total, occupancyPending)}
-        hint="ANI 库存总量"
+        subtitle="ANI 库存总量"
       />
-      <Metric
+      <MetricCard
         label="空闲"
+        icon={<IconArchive />}
+        unit="卡"
+        tone="green"
+        percent={
+          !occupancyPending && occupancy
+            ? occupancy.total > 0
+              ? (occupancy.available / occupancy.total) * 100
+              : 0
+            : undefined
+        }
         value={metricValue(occupancy?.available, occupancyPending)}
-        hint="可参与调度"
+        subtitle="可参与调度"
       />
-      <Metric
+      <MetricCard
         label="已占用"
+        icon={<IconApps />}
+        unit="卡"
+        tone="amber"
+        percent={
+          !occupancyPending && occupancy
+            ? occupancy.total > 0
+              ? (occupancy.inUse / occupancy.total) * 100
+              : 0
+            : undefined
+        }
         value={metricValue(occupancy?.inUse, occupancyPending)}
-        hint="节点级占用映射"
+        subtitle="节点级占用映射"
       />
-      <Metric
+      <MetricCard
         label="故障"
+        icon={<IconExclamationCircle />}
+        unit="卡"
         value={metricValue(occupancy?.fault, occupancyPending)}
-        hint="不参与调度"
-        tone={occupancy?.fault ? "danger" : ""}
+        subtitle="不参与调度"
+        tone="red"
       />
     </section>
   );

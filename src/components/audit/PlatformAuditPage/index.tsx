@@ -1,3 +1,4 @@
+import { SummaryStrip } from "@/components/common";
 import { Button, DatePicker, Input, Select, Space } from "@arco-design/web-react";
 import { IconDownload } from "@arco-design/web-react/icon";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -98,6 +99,21 @@ export function PlatformAuditPage() {
 
   return (
     <ListPageFrame
+      summary={
+        <SummaryStrip
+          pending={auditQuery.isPending}
+          items={[
+            { label: "写操作", value: items.length, unit: "条", note: "当前页 · 当前时间范围" },
+            { label: "创建", value: items.filter((t) => t.verb === "create").length, unit: "条" },
+            {
+              label: "更新",
+              value: items.filter((t) => t.verb === "update" || t.verb === "patch").length,
+              unit: "条",
+            },
+            { label: "删除", value: items.filter((t) => t.verb === "delete").length, unit: "条" },
+          ]}
+        />
+      }
       header={{
         title: "集群审计",
         subtitle: "查询 Kubernetes 控制面写操作；数据按时间倒序展示。",
