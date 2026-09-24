@@ -7,6 +7,7 @@ export type StatusBadgeTone = "default" | "info" | "success" | "warning" | "dang
 interface StatusBadgeProps {
   value?: string | null;
   tone?: StatusBadgeTone;
+  processing?: boolean;
   className?: string;
 }
 
@@ -21,13 +22,18 @@ const badgeStatus: Record<
   danger: "error",
 };
 
-export function StatusBadge({ value, tone = "default", className }: StatusBadgeProps) {
+export function StatusBadge({
+  value,
+  tone = "default",
+  processing = false,
+  className,
+}: StatusBadgeProps) {
   if (value === null || value === undefined || value === "") {
     return <span className={styles.empty}>-</span>;
   }
 
   return (
-    <span className={clsx(styles.badge, styles[tone], className)}>
+    <span className={clsx(styles.badge, styles[tone], processing && styles.processing, className)}>
       <Badge status={badgeStatus[tone]} text={value} />
     </span>
   );

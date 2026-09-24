@@ -48,3 +48,36 @@
 .empty {
   color: var(--color-text-4);
 }
+
+.processing :global(.arco-badge-status-dot) {
+  position: relative;
+
+  &::after {
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    animation: processing 1.2s ease-in-out infinite;
+    content: "";
+  }
+}
+
+@keyframes processing {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .processing :global(.arco-badge-status-dot)::after {
+    display: none;
+    animation: none;
+  }
+}

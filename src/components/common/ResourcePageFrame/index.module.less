@@ -1,19 +1,8 @@
-.page,
-.pageHeader {
-  --list-primary: #0079d3;
-  --list-primary-hover: #006cbd;
-  --list-primary-active: #0060ac;
-  --list-primary-soft: rgba(0, 121, 211, 0.08);
-  --list-primary-header: #f2f8fd;
-  --list-text: rgba(0, 0, 0, 0.9);
-  --list-text-secondary: rgba(0, 0, 0, 0.6);
-  --list-text-tertiary: rgba(0, 0, 0, 0.4);
-  --list-text-disabled: rgba(0, 0, 0, 0.26);
-  --list-border: #dcdcdc;
-  --list-divider: #e7e7e7;
-}
+@import "./theme.less";
 
 .page {
+  .list-theme();
+
   display: flex;
   flex-direction: column;
   gap: 12px;
