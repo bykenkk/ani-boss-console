@@ -1,6 +1,5 @@
 import { Button } from "@arco-design/web-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   fetchTenantScopedAdministrators,
