@@ -20,7 +20,7 @@ export function AccountOverview({ detail }: { detail: PlatformAdministratorDetai
             value: <PlatformAdministratorStatusBadge status={detail.status} />,
           },
           { label: "账号来源", value: platformAdministratorSourceLabels[detail.source] },
-          { label: "MFA", value: "-" },
+          // { label: "MFA", value: "-" },
           { label: "最近登录", value: formatDateTime(detail.lastLoginAt) },
           { label: "创建时间", value: formatDateTime(detail.createdAt) },
           { label: "最近重置密码", value: "-" },

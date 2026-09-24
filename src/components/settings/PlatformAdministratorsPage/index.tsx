@@ -240,7 +240,7 @@ export function PlatformAdministratorsPage() {
       width: 120,
       render: (_, administrator) => platformAdministratorSourceLabels[administrator.source],
     },
-    { title: "MFA", width: 90, render: () => "-" },
+    // { title: "MFA", width: 90, render: () => "-" },
     {
       title: "最近登录",
       width: 180,
