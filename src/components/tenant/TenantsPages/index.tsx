@@ -5,13 +5,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useDeferredValue, useMemo, useState } from "react";
 import {
-  createTenant,
-  fetchAvailableTenantPlans,
   fetchTenants,
   getTenantManagementErrorMessage,
   tenantManagementQueryKeys,
   updateTenantStatus,
-  type CreateTenantInput,
   type TenantListFilters,
   type TenantListItem,
   type TenantStatus,
@@ -69,35 +66,8 @@ export function TenantsPages() {
     queryKey: tenantManagementQueryKeys.tenantList(filters),
     queryFn: () => fetchTenants(filters),
   });
-  const plansQuery = useQuery({
-    meta: {
-      errorNotification: {
-        id: "tenant-available-plans",
-        action: "可用配额策略加载",
-        fallback: "请求失败，请稍后重试",
-      },
-    },
-    queryKey: tenantManagementQueryKeys.availablePlans,
-    queryFn: fetchAvailableTenantPlans,
-  });
-
   const invalidateAll = () =>
     queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
-  const createMutation = useMutation({
-    meta: {
-      feedback: {
-        channel: "message",
-        action: "租户开通",
-        successText: "租户已开通",
-        errorFallback: "租户开通失败，请稍后重试",
-      },
-    },
-    mutationFn: (input: CreateTenantInput) => runTenantOperation(() => createTenant(input)),
-    onSuccess: async () => {
-      await invalidateAll();
-      setCreateVisible(false);
-    },
-  });
   const statusMutation = useMutation({
     meta: {
       feedback: {
@@ -178,7 +148,7 @@ export function TenantsPages() {
   ];
 
   const data = listQuery.data || [];
-  const operationPending = createMutation.isPending || statusMutation.isPending;
+  const operationPending = statusMutation.isPending;
 
   return (
     <>
@@ -213,7 +183,7 @@ export function TenantsPages() {
             <Button
               type="primary"
               icon={<IconPlus />}
-              disabled={!canManage || !plansQuery.data?.length}
+              disabled={!canManage}
               title={canManage ? undefined : "当前账号只有只读权限"}
               onClick={() => setCreateVisible(true)}
             >
@@ -247,8 +217,8 @@ export function TenantsPages() {
             },
           },
           refresh: {
-            spinning: listQuery.isFetching || plansQuery.isFetching,
-            onClick: () => void Promise.all([listQuery.refetch(), plansQuery.refetch()]),
+            spinning: listQuery.isFetching,
+            onClick: () => void listQuery.refetch(),
           },
           tools: <span className="text-xs text-gray-500">共 {data.length} 个租户</span>,
         }}
@@ -292,10 +262,8 @@ export function TenantsPages() {
 
       {createVisible ? (
         <TenantCreateModal
-          loading={createMutation.isPending}
-          plans={plansQuery.data || []}
           onCancel={() => setCreateVisible(false)}
-          onSubmit={(input) => createMutation.mutate(input)}
+          onSuccess={() => setCreateVisible(false)}
         />
       ) : null}
     </>

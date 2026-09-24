@@ -1,137 +1,162 @@
-import { Form, Input, Modal, Select } from "@arco-design/web-react";
-import { useState } from "react";
-import type { AvailableTenantPlan, CreateTenantInput } from "@/api/tenant";
-import { showMessage } from "@/lib/feedback";
+import { Button, Descriptions, Form, Modal, Space, Steps } from "@arco-design/web-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useRef, useState } from "react";
+import {
+  createTenant,
+  fetchAvailableTenantPlans,
+  getTenantManagementErrorMessage,
+  tenantManagementQueryKeys,
+  type CreateTenantInput,
+} from "@/api/tenant";
+import { validateForm } from "@/lib/form";
+import { TenantCreateFields } from "./TenantCreateFields";
 
 interface TenantCreateModalProps {
-  loading: boolean;
-  plans: AvailableTenantPlan[];
   onCancel: () => void;
-  onSubmit: (input: CreateTenantInput) => void;
+  onSuccess: () => void;
 }
+const stepFields: Array<Array<keyof CreateTenantInput>> = [
+  ["name", "displayName", "contactEmail"],
+  ["planId"],
+  ["administratorName", "administratorEmail", "administratorPassword"],
+];
 
-const initialDraft: CreateTenantInput = {
-  name: "",
-  displayName: "",
-  contactEmail: "",
-  planId: "",
-  administratorEmail: "",
-  administratorName: "",
-  administratorPassword: "",
-};
-
-export function TenantCreateModal({ loading, plans, onCancel, onSubmit }: TenantCreateModalProps) {
-  const [draft, setDraft] = useState<CreateTenantInput>(() => ({
-    ...initialDraft,
-    planId: plans[0]?.id ?? "",
-  }));
-
-  const update = <Key extends keyof CreateTenantInput>(field: Key, value: CreateTenantInput[Key]) =>
-    setDraft((current) => ({ ...current, [field]: value }));
-
-  const submit = () => {
-    const required = [
-      draft.name,
-      draft.displayName,
-      draft.contactEmail,
-      draft.planId,
-      draft.administratorEmail,
-      draft.administratorName,
-      draft.administratorPassword,
-    ];
-    if (required.some((value) => !value.trim())) {
-      showMessage({ type: "warning", content: "请完整填写租户与初始管理员信息" });
-      return;
+export function TenantCreateModal({ onCancel, onSuccess }: TenantCreateModalProps) {
+  const [form] = Form.useForm<CreateTenantInput>();
+  const [step, setStep] = useState(1);
+  const [summary, setSummary] = useState<CreateTenantInput>();
+  const [validating, setValidating] = useState(false);
+  const busy = useRef(false);
+  const queryClient = useQueryClient();
+  const plansQuery = useQuery({
+    queryKey: tenantManagementQueryKeys.availablePlans,
+    queryFn: fetchAvailableTenantPlans,
+    meta: {
+      errorNotification: {
+        id: "tenant-available-plans",
+        action: "可用配额策略加载",
+        fallback: "请求失败，请稍后重试",
+      },
+    },
+  });
+  const plans = plansQuery.data || [];
+  const mutation = useMutation({
+    mutationFn: async (input: CreateTenantInput) => {
+      try {
+        return await createTenant(input);
+      } catch (error) {
+        throw new Error(getTenantManagementErrorMessage(error));
+      }
+    },
+    meta: {
+      feedback: {
+        channel: "message",
+        action: "租户开通",
+        successText: "租户已开通",
+        errorFallback: "租户开通失败，请稍后重试",
+      },
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
+      onSuccess();
+    },
+  });
+  const pending = validating || mutation.isPending;
+  const advance = async () => {
+    if (busy.current) return;
+    busy.current = true;
+    setValidating(true);
+    try {
+      if (step < 3) {
+        await validateForm({ validate: () => form.validate(stepFields[step - 1]) });
+        setStep(step + 1);
+        return;
+      }
+      const values = await validateForm({ validate: () => form.validate() });
+      if (step === 3) {
+        setSummary(values);
+        setStep(4);
+      } else {
+        await mutation.mutateAsync({
+          ...values,
+          name: values.name.trim(),
+          displayName: values.displayName.trim(),
+          contactEmail: values.contactEmail.trim(),
+          administratorName: values.administratorName.trim(),
+          administratorEmail: values.administratorEmail.trim(),
+        });
+      }
+    } catch {
+      // 统一反馈已呈现错误；保留输入，返回有校验错误的步骤。
+      const errors = form.getFieldsError();
+      const invalidStep = stepFields.findIndex((fields) => fields.some((field) => errors[field]));
+      if (invalidStep >= 0) setStep(invalidStep + 1);
+    } finally {
+      busy.current = false;
+      setValidating(false);
     }
-    if (!draft.contactEmail.includes("@") || !draft.administratorEmail.includes("@")) {
-      showMessage({ type: "warning", content: "请输入有效的联系邮箱和管理员邮箱" });
-      return;
-    }
-    if (!/^[a-zA-Z0-9-]{3,40}$/.test(draft.name)) {
-      showMessage({ type: "warning", content: "租户标识需为 3–40 位字母、数字或连字符" });
-      return;
-    }
-    if (draft.administratorPassword.length < 8) {
-      showMessage({ type: "warning", content: "管理员密码至少需要 8 位" });
-      return;
-    }
-    onSubmit({
-      ...draft,
-      name: draft.name.trim(),
-      displayName: draft.displayName.trim(),
-      contactEmail: draft.contactEmail.trim(),
-      administratorEmail: draft.administratorEmail.trim(),
-      administratorName: draft.administratorName.trim(),
-    });
   };
-
   return (
     <Modal
       title="开通租户"
       visible
       style={{ width: 720 }}
-      okText="确认开通"
-      confirmLoading={loading}
-      onOk={submit}
-      onCancel={onCancel}
+      closable={!pending}
+      maskClosable={!pending}
+      escToExit={!pending}
+      onCancel={() => {
+        if (!pending) onCancel();
+      }}
+      footer={
+        <Space>
+          <Button disabled={pending} onClick={onCancel}>
+            取消
+          </Button>
+          {step > 1 && (
+            <Button disabled={pending} onClick={() => setStep(step - 1)}>
+              上一步
+            </Button>
+          )}
+          <Button
+            type="primary"
+            loading={pending}
+            disabled={step >= 2 && (plansQuery.isFetching || !plans.length)}
+            onClick={() => void advance()}
+          >
+            {step === 4 ? "确认开通" : "下一步"}
+          </Button>
+        </Space>
+      }
     >
-      <Form layout="vertical">
-        <div className="grid grid-cols-2 gap-x-4">
-          <Form.Item label="租户标识" required>
-            <Input
-              value={draft.name}
-              placeholder="例如 acme-ai"
-              onChange={(value) => update("name", value)}
-            />
-          </Form.Item>
-          <Form.Item label="显示名" required>
-            <Input
-              value={draft.displayName}
-              placeholder="企业或组织名称"
-              onChange={(value) => update("displayName", value)}
-            />
-          </Form.Item>
-        </div>
-        <Form.Item label="联系邮箱" required>
-          <Input
-            value={draft.contactEmail}
-            placeholder="contact@example.com"
-            onChange={(value) => update("contactEmail", value)}
-          />
-        </Form.Item>
-        <Form.Item label="配额策略" required>
-          <Select
-            value={draft.planId || plans[0]?.id}
-            options={plans.map((plan) => ({
-              label: `${plan.name} · ${plan.code}`,
-              value: plan.id,
-            }))}
-            onChange={(value) => update("planId", value)}
-          />
-        </Form.Item>
-        <div className="grid grid-cols-2 gap-x-4">
-          <Form.Item label="管理员姓名" required>
-            <Input
-              value={draft.administratorName}
-              onChange={(value) => update("administratorName", value)}
-            />
-          </Form.Item>
-          <Form.Item label="管理员邮箱" required>
-            <Input
-              value={draft.administratorEmail}
-              placeholder="admin@example.com"
-              onChange={(value) => update("administratorEmail", value)}
-            />
-          </Form.Item>
-        </div>
-        <Form.Item label="管理员初始密码" required>
-          <Input.Password
-            value={draft.administratorPassword}
-            placeholder="8–64 位，至少包含三类字符"
-            onChange={(value) => update("administratorPassword", value)}
-          />
-        </Form.Item>
+      <Steps current={step} size="small" className="mb-6">
+        {["基础信息", "绑定套餐", "首位管理员", "确认开通"].map((title) => (
+          <Steps.Step key={title} title={title} />
+        ))}
+      </Steps>
+      <Form form={form} layout="vertical" disabled={pending}>
+        <TenantCreateFields
+          step={step}
+          plans={plans}
+          plansPending={plansQuery.isFetching}
+          plansReady={plansQuery.isSuccess}
+          onRefresh={() => void plansQuery.refetch()}
+        />
       </Form>
+      {step === 4 && summary && (
+        <Descriptions
+          column={1}
+          data={[
+            { label: "租户标识", value: summary.name.trim() },
+            { label: "显示名", value: summary.displayName.trim() },
+            { label: "联系邮箱", value: summary.contactEmail.trim() },
+            { label: "配额策略", value: plans.find((plan) => plan.id === summary.planId)?.name },
+            { label: "策略编码", value: plans.find((plan) => plan.id === summary.planId)?.code },
+            { label: "管理员登录用户名", value: summary.administratorName.trim() },
+            { label: "管理员邮箱", value: summary.administratorEmail.trim() },
+            { label: "管理员初始密码", value: "已设置，不回显" },
+          ]}
+        />
+      )}
     </Modal>
   );
 }

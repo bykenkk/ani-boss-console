@@ -5,14 +5,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useDeferredValue, useMemo, useState } from "react";
 import {
-  createTenantPlan,
   deleteTenantPlan,
   fetchTenantPlans,
-  fetchTenantQuotaMeta,
   getTenantManagementErrorMessage,
   tenantManagementQueryKeys,
   updateTenantPlanStatus,
-  type CreateTenantPlanInput,
   type TenantPlanListFilters,
   type TenantPlanListItem,
   type TenantPlanStatus,
@@ -26,7 +23,7 @@ import {
 } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { tenantPlanStatusMeta } from "../apiModel";
-import { TenantPlanModal } from "@/components/tenant/TenantPlanModal";
+import { TenantPlanCreateModal } from "@/components/tenant/TenantPlanCreateModal";
 import { useTenantManagementAccess } from "@/hooks/useTenantManagementAccess";
 
 async function runTenantPlanOperation<T>(operation: () => Promise<T>): Promise<T> {
@@ -64,36 +61,8 @@ export function TenantPlansPages() {
     queryKey: tenantManagementQueryKeys.planList(filters),
     queryFn: () => fetchTenantPlans(filters),
   });
-  const quotaMetaQuery = useQuery({
-    meta: {
-      errorNotification: {
-        id: "tenant-quota-meta",
-        action: "配额维度加载",
-        fallback: "请求失败，请稍后重试",
-      },
-    },
-    queryKey: tenantManagementQueryKeys.quotaMeta,
-    queryFn: fetchTenantQuotaMeta,
-  });
-
   const invalidateAll = () =>
     queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
-  const createMutation = useMutation({
-    meta: {
-      feedback: {
-        channel: "message",
-        action: "配额策略创建",
-        successText: "配额策略草稿已创建",
-        errorFallback: "配额策略创建失败，请稍后重试",
-      },
-    },
-    mutationFn: (input: CreateTenantPlanInput) =>
-      runTenantPlanOperation(() => createTenantPlan(input)),
-    onSuccess: async () => {
-      await invalidateAll();
-      setCreateVisible(false);
-    },
-  });
   const statusMutation = useMutation({
     meta: {
       feedback: {
@@ -189,8 +158,7 @@ export function TenantPlansPages() {
     },
   ];
   const data = listQuery.data || [];
-  const operationPending =
-    createMutation.isPending || statusMutation.isPending || deleteMutation.isPending;
+  const operationPending = statusMutation.isPending || deleteMutation.isPending;
 
   return (
     <>
@@ -217,7 +185,7 @@ export function TenantPlansPages() {
             <Button
               type="primary"
               icon={<IconPlus />}
-              disabled={!canManage || !quotaMetaQuery.data?.length}
+              disabled={!canManage}
               onClick={() => setCreateVisible(true)}
             >
               新建策略
@@ -250,8 +218,8 @@ export function TenantPlansPages() {
             },
           },
           refresh: {
-            spinning: listQuery.isFetching || quotaMetaQuery.isFetching,
-            onClick: () => void Promise.all([listQuery.refetch(), quotaMetaQuery.refetch()]),
+            spinning: listQuery.isFetching,
+            onClick: () => void listQuery.refetch(),
           },
           tools: <span className="text-xs text-gray-500">共 {data.length} 条配额策略</span>,
         }}
@@ -294,13 +262,9 @@ export function TenantPlansPages() {
       </ListPageFrame>
 
       {createVisible ? (
-        <TenantPlanModal
-          quotaMeta={quotaMetaQuery.data || []}
-          loading={createMutation.isPending}
+        <TenantPlanCreateModal
           onCancel={() => setCreateVisible(false)}
-          onSubmit={(input) => {
-            if ("code" in input) createMutation.mutate(input);
-          }}
+          onSuccess={() => setCreateVisible(false)}
         />
       ) : null}
     </>
