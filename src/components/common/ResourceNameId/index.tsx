@@ -1,9 +1,7 @@
-import { Tooltip } from "@arco-design/web-react";
-import type { ReactNode } from "react";
 import styles from "./index.module.less";
 
 export type ResourceNameIdProps = {
-  name: ReactNode;
+  name: string;
   avatarText?: string;
   id?: string | null;
 };
@@ -17,14 +15,14 @@ export function ResourceNameId({ name, id, avatarText }: ResourceNameIdProps) {
         </span>
       )}
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className={styles.name} title={typeof name === "string" ? name : undefined}>
+        <span className={styles.name} title={name}>
           {name}
         </span>
-        <span className="min-w-0 text-xs leading-4 text-[var(--color-text-2)]">
+        <span className="min-w-0 text-xs leading-4 text-(--color-text-2)">
           {id && id !== "-" ? (
-            <Tooltip content={id}>
-              <span className="block truncate font-mono">{id}</span>
-            </Tooltip>
+            <span className="block truncate font-mono" title={id}>
+              {id}
+            </span>
           ) : (
             "-"
           )}
