@@ -20,7 +20,8 @@ pnpm dev
 pnpm typecheck
 pnpm build
 pnpm preview
-pnpm verify
+pnpm lint
+pnpm fmt:check
 ```
 
 日常修改默认不由 Agent 启动应用或执行构建；页面与交互由项目负责人手动验证。具体规则以 `AGENTS.md` 为准。
