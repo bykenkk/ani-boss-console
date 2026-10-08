@@ -1,3 +1,4 @@
+import { KaiwuEntryButton } from "@/components/kaiwu/KaiwuEntryButton";
 import { logoutPlatform } from "@/api/auth";
 import { clearAuthSession } from "@/stores/auth";
 import { useAuthState } from "@/hooks/useAuthState";
@@ -137,12 +138,7 @@ export function TopNav({ breadcrumbs, onBack }: TopNavProps) {
             placeholder="请输入内容"
             aria-label="全局搜索"
           />
-          <button type="button" className="topnav-kaiwu" aria-label="进入开物">
-            <span className="topnav-kaiwu-switch" aria-hidden="true">
-              <span className="topnav-kaiwu-knob" />
-            </span>
-            <span>开物</span>
-          </button>
+          <KaiwuEntryButton />
           <span className="topnav-user-divider" aria-hidden="true" />
           <Dropdown
             droplist={userMenu}
