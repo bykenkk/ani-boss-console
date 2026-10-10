@@ -7,10 +7,14 @@ import axios, {
 import {
   clearAuthSession,
   getAuthState,
+  getAuthSessionRevision,
   isDevelopmentAuthBypassActive,
   updateAccessToken,
 } from "@/stores/auth";
 import { createIdempotencyScope } from "@/lib/idempotency";
+
+import type { AuthTokenResponse, AuthTokens } from "@/api/auth/types";
+import { normalizeAuthTokens } from "@/api/auth/tokens";
 
 export const CORE_API_BASE = "/api/v1";
 export const SERVICES_API_BASE = "/api/v1/svc";
@@ -31,16 +35,14 @@ export interface ApiRequestOptions<TBody = unknown> extends Omit<
 type AniRequestConfig<TBody = unknown> = InternalAxiosRequestConfig<TBody> & {
   aniAuth?: ApiAuthMode;
   aniRetried?: boolean;
-};
-
-type RefreshAccessTokenResponse = {
-  access_token: string;
-  expires_in?: number;
+  aniSessionRevision?: number;
 };
 
 type ApiErrorPayload = {
   error?: unknown;
   code?: unknown;
+  reason?: unknown;
+  metadata?: unknown;
   message?: unknown;
   request_id?: unknown;
   details?: unknown;
@@ -104,9 +106,7 @@ const servicesAxios = createApiInstance(SERVICES_API_BASE);
 const refreshAxios = createApiInstance(CORE_API_BASE);
 
 const refreshScope = createIdempotencyScope("auth-refresh", ["POST"]);
-let refreshRequest:
-  | { refreshToken: string; promise: Promise<RefreshAccessTokenResponse> }
-  | undefined;
+let refreshRequest: { revision: number; promise: Promise<AuthTokens> } | undefined;
 
 function redirectToLogin(): void {
   if (typeof window === "undefined") return;
@@ -137,8 +137,11 @@ export function toApiError(error: unknown): ApiError {
     (typeof payload?.detail === "string" && payload.detail) ||
     error.message ||
     (error.response ? `HTTP ${error.response.status}` : "网络请求失败");
+  const metadata = payloadRecord(payload?.metadata);
   const requestId =
-    typeof payload?.request_id === "string" && payload.request_id ? payload.request_id : undefined;
+    (typeof payload?.request_id === "string" && payload.request_id) ||
+    (typeof metadata?.request_id === "string" && metadata.request_id) ||
+    undefined;
   const details =
     payload?.details && typeof payload.details === "object"
       ? (payload.details as Record<string, unknown>)
@@ -146,7 +149,12 @@ export function toApiError(error: unknown): ApiError {
 
   return new ApiError(message, {
     status: error.response?.status,
-    code: typeof payload?.code === "string" ? payload.code : error.code,
+    code:
+      typeof payload?.code === "string"
+        ? payload.code
+        : typeof payload?.reason === "string"
+          ? payload.reason
+          : error.code,
     requestId,
     details,
     config: error.config,
@@ -155,27 +163,36 @@ export function toApiError(error: unknown): ApiError {
   });
 }
 
-async function requestTokenRefresh(refreshToken: string): Promise<RefreshAccessTokenResponse> {
-  const runtimeDependencies = [refreshToken] as const;
-  const body = refreshScope.withKey({ refresh_token: refreshToken }, runtimeDependencies);
+async function requestTokenRefresh(tokens: AuthTokens): Promise<AuthTokens> {
+  // 旧 ANI 会话仍使用 body；新登录不保存 refresh token，使用浏览器 Cookie。
+  const runtimeDependencies = [tokens.refresh_token] as const;
+  const body = tokens.refresh_token
+    ? refreshScope.withKey({ refresh_token: tokens.refresh_token }, runtimeDependencies)
+    : {};
   try {
-    const response = await refreshAxios.post<RefreshAccessTokenResponse>("/auth/refresh", body);
-    if (!response.data?.access_token) {
-      throw new ApiError("刷新令牌响应缺少 access_token", { response });
-    }
-    refreshScope.reset(runtimeDependencies);
-    return response.data;
+    const response = await refreshAxios.post<AuthTokenResponse>("/auth/refresh", body);
+    const refreshed = normalizeAuthTokens(response.data);
+    if (tokens.refresh_token) refreshScope.reset(runtimeDependencies);
+    return refreshed;
   } catch (error) {
     throw toApiError(error);
   }
 }
 
-function refreshAccessToken(refreshToken: string): Promise<RefreshAccessTokenResponse> {
-  if (refreshRequest?.refreshToken === refreshToken) return refreshRequest.promise;
-  const promise = requestTokenRefresh(refreshToken).finally(() => {
-    if (refreshRequest?.promise === promise) refreshRequest = undefined;
-  });
-  refreshRequest = { refreshToken, promise };
+function refreshAccessToken(tokens: AuthTokens, revision: number): Promise<AuthTokens> {
+  if (refreshRequest?.revision === revision) return refreshRequest.promise;
+  const promise = requestTokenRefresh(tokens)
+    .then((refreshed) => {
+      if (getAuthSessionRevision() !== revision) {
+        throw new axios.CanceledError("登录会话已变更");
+      }
+      updateAccessToken(refreshed.access_token, refreshed.expires_in);
+      return refreshed;
+    })
+    .finally(() => {
+      if (refreshRequest?.promise === promise) refreshRequest = undefined;
+    });
+  refreshRequest = { revision, promise };
   return promise;
 }
 
@@ -183,6 +200,14 @@ function installAuthInterceptors(instance: AxiosInstance): void {
   instance.interceptors.request.use((config) => {
     const requestConfig = config as AniRequestConfig;
     if (requestConfig.aniAuth === "public") return config;
+    const revision = getAuthSessionRevision();
+    if (
+      requestConfig.aniSessionRevision !== undefined &&
+      requestConfig.aniSessionRevision !== revision
+    ) {
+      throw new axios.CanceledError("登录会话已变更");
+    }
+    requestConfig.aniSessionRevision = revision;
     const token = getAuthState().tokens?.access_token;
     if (token) config.headers.set("Authorization", `Bearer ${token}`);
     return config;
@@ -191,33 +216,47 @@ function installAuthInterceptors(instance: AxiosInstance): void {
   instance.interceptors.response.use(
     (response) => response,
     async (error: unknown) => {
-      if (!axios.isAxiosError(error)) throw toApiError(error);
       if (axios.isCancel(error)) throw error;
-
+      if (!axios.isAxiosError(error)) throw toApiError(error);
       const config = error.config as AniRequestConfig | undefined;
-      const canRefresh =
-        error.response?.status === 401 &&
-        config?.aniAuth !== "public" &&
-        !config?.aniRetried &&
-        !isDevelopmentAuthBypassActive();
-      if (!canRefresh || !config) throw toApiError(error);
-
-      const refreshToken = getAuthState().tokens?.refresh_token;
-      if (!refreshToken) {
+      if (
+        error.response?.status !== 401 ||
+        !config ||
+        config.aniAuth === "public" ||
+        isDevelopmentAuthBypassActive()
+      ) {
+        throw toApiError(error);
+      }
+      const revision = getAuthSessionRevision();
+      if (config.aniSessionRevision !== revision) throw toApiError(error);
+      const tokens = getAuthState().tokens;
+      if (!tokens || config.aniRetried) {
         expireAuthSession();
         throw toApiError(error);
       }
 
       config.aniRetried = true;
-      try {
-        const refreshed = await refreshAccessToken(refreshToken);
-        updateAccessToken(refreshed.access_token, refreshed.expires_in);
-        config.headers.set("Authorization", `Bearer ${refreshed.access_token}`);
-        return await instance.request(config);
-      } catch {
-        expireAuthSession();
-        throw toApiError(error);
+      // 同批请求的迟到 401 直接使用已经刷新的令牌，避免再次轮换 Cookie。
+      if (config.headers.get("Authorization") === `Bearer ${tokens.access_token}`) {
+        try {
+          await refreshAccessToken(tokens, revision);
+        } catch (refreshError) {
+          if (axios.isCancel(refreshError)) throw refreshError;
+          const normalized = toApiError(refreshError);
+          if (
+            getAuthSessionRevision() === revision &&
+            [400, 401, 403].includes(normalized.status ?? 0)
+          ) {
+            expireAuthSession();
+          }
+          throw normalized;
+        }
       }
+      if (getAuthSessionRevision() !== revision) {
+        throw new axios.CanceledError("登录会话已变更");
+      }
+      // 重试请求自身的业务/网络错误不能被当成刷新失败而清空登录态。
+      return instance.request(config);
     },
   );
 }

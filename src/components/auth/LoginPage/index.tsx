@@ -99,7 +99,6 @@ export function LoginPage({ redirect }: { redirect?: string }) {
           className={styles.form}
           layout="vertical"
           requiredSymbol={false}
-          initialValues={{ username: "root", password: "Correct@123" }}
           disabled={login.isPending}
           onSubmit={(values) => login.mutate(values)}
         >

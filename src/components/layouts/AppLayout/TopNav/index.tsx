@@ -50,7 +50,7 @@ export function TopNav({ breadcrumbs, onBack }: TopNavProps) {
     setUserMenuVisible(false);
     Modal.confirm({
       title: "确认退出登录",
-      content: "退出后需重新登录。",
+      content: "退出将结束此账号的全部登录会话，之后需重新登录。",
       maskClosable: false,
       okButtonProps: { status: "danger" },
       onOk: () => logout.mutateAsync(),

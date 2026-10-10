@@ -24,7 +24,7 @@ function readStoredState(): AuthState {
     const tokens = stored.tokens;
     return {
       tokens:
-        tokens?.access_token && tokens.refresh_token
+        typeof tokens?.access_token === "string" && tokens.access_token
           ? {
               access_token: tokens.access_token,
               refresh_token: tokens.refresh_token,
@@ -48,11 +48,18 @@ authStore.subscribe((state) => {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 });
 
+let sessionRevision = 0;
+
+export function getAuthSessionRevision() {
+  return sessionRevision;
+}
+
 export function getAuthState() {
   return authStore.getState();
 }
 
 export function setAuthSession(tokens: AuthTokens, username: string) {
+  sessionRevision += 1;
   authStore.setState({
     tokens,
     username: username.trim(),
@@ -79,6 +86,7 @@ export function setDevelopmentAuthBypass(enabled: boolean) {
 }
 
 export function clearAuthSession() {
+  sessionRevision += 1;
   if (typeof window !== "undefined") {
     window.localStorage.removeItem(STORAGE_KEY);
   }

@@ -1,47 +1,31 @@
-import { runIdempotentRequest } from "@/api/idempotency";
 import { coreRequest } from "@/api/request";
-import { getAccessTokenJti } from "@/stores/auth";
-import { createIdempotencyScope } from "@/lib/idempotency";
-import type { AuthTokens, LogoutResponse, PlatformLoginInput } from "./types";
+import { getAccessTokenJti, getAuthState } from "@/stores/auth";
+import { normalizeAuthTokens } from "./tokens";
+import type { AuthTokenResponse, AuthTokens, LogoutResponse, PlatformLoginInput } from "./types";
 
-type PlatformLoginRequest = PlatformLoginInput & { idempotency_key: string };
-type LogoutRequest = { jti: string; idempotency_key: string };
-
-const loginScope = createIdempotencyScope("platform-login", ["POST"]);
-const logoutScope = createIdempotencyScope("platform-logout", ["POST"]);
+type LogoutRequest = { jti?: string };
 
 export async function loginPlatform(input: PlatformLoginInput): Promise<AuthTokens> {
-  const submitData = {
-    username: input.username.trim(),
-    password: input.password,
-  };
-  const tokens = await runIdempotentRequest(loginScope, submitData, (data: PlatformLoginRequest) =>
-    coreRequest<AuthTokens, PlatformLoginRequest>("/auth/platform/password/login", {
+  // 新后端认证接口不接收幂等 key；刷新凭证仅通过 HttpOnly Cookie 下发。
+  const response = await coreRequest<AuthTokenResponse, PlatformLoginInput>(
+    "/auth/platform/password/login",
+    {
       method: "POST",
       auth: "public",
-      data,
-    }),
+      data: { username: input.username.trim(), password: input.password },
+    },
   );
-  if (!tokens?.access_token || !tokens.refresh_token) {
-    throw new Error("登录响应缺少令牌");
-  }
-  return tokens;
+  return normalizeAuthTokens(response);
 }
 
 export function logoutPlatform(): Promise<LogoutResponse> {
+  if (!getAuthState().tokens?.access_token) return Promise.resolve({ status: "local-only" });
   const jti = getAccessTokenJti();
-  if (!jti) return Promise.resolve({ status: "local-only" });
-
-  return runIdempotentRequest(
-    logoutScope,
-    { jti },
-    (data: LogoutRequest) =>
-      coreRequest<LogoutResponse, LogoutRequest>("/auth/logout", {
-        method: "POST",
-        data,
-      }),
-    [jti],
-  );
+  // jti 仅用于审计；缺失时仍需吊销服务端会话并清除 Cookie。
+  return coreRequest<LogoutResponse, LogoutRequest>("/auth/logout", {
+    method: "POST",
+    data: jti ? { jti } : {},
+  });
 }
 
 export type { AuthTokens, LogoutResponse, PlatformLoginInput } from "./types";
