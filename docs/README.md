@@ -1,6 +1,6 @@
 # ANI BOSS Console 文档
 
-本目录集中维护 ANI BOSS Console 的工程、UI 与 API 对接文档。仓库仅包含前端；文档不能替代 GitNexus 权威索引，也不作为接口契约或产品原型的副本。
+本目录集中维护 ANI BOSS Console 的工程、UI 与 API 对接文档。仓库仅包含前端；后端迁移期以 `ani-governance` 为目标后端、`ANI` 为存量后端，具体接口的契约归属遵循 [API 对接流程](./API-INTEGRATION.md#迁移期后端归属)。文档不能替代 GitNexus 权威索引，也不作为接口契约或产品原型的副本。
 
 ## 文档职责
 
@@ -17,7 +17,7 @@
 | 内容 | 权威来源 |
 |------|----------|
 | 页面信息架构、菜单、路由和交互规格 | GitNexus 索引 `产品原型-9.11` |
-| 后端接口、字段和执行行为 | GitNexus 索引 `ANI` |
+| 后端接口、字段和执行行为 | 按 [迁移期后端归属](./API-INTEGRATION.md#迁移期后端归属) 查询 GitNexus 索引 `ani-governance` 或 `ANI` |
 | Agent 工作方式与强制项目规则 | [AGENTS.md](../AGENTS.md) |
 | 前端当前实现 | 本仓库源码与 GitNexus 索引 `ani-boss-console` |
 
