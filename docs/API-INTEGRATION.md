@@ -44,9 +44,10 @@
 |------|----------|
 | Core API | `coreRequest`，基础路径为 `/api/v1` |
 | Services API | `servicesRequest`，基础路径为 `/api/v1/svc` |
+| 管理 API | `adminRequest`，基础路径为 `/api/v1/admin`，集中由 `ADMIN_API_BASE` 定义 |
 | 外部预签名地址 | `externalAxios`，不安装平台认证拦截器 |
 
-- `coreRequest` 与 `servicesRequest` 默认要求登录并注入平台访问令牌；只有登录、令牌刷新等公开端点显式传入 `auth: "public"`。
+- `coreRequest`、`servicesRequest` 与 `adminRequest` 默认要求登录并注入平台访问令牌；只有登录、令牌刷新等公开端点显式传入 `auth: "public"`。
 - 受保护请求返回 401 时由公共层执行单飞令牌刷新并重试一次；业务 API 和页面不得自行刷新令牌或重复实现 401 重试。
 - 迁移期刷新凭证按权威契约传递：`ani-governance` 使用 `HttpOnly Cookie` 时必须启用凭证请求且不得把 Cookie 中的 refresh token 复制到前端状态或请求体；仍由 `ANI` 承载的旧链路可以继续使用其已声明的 body 字段。公共层必须兼容两种已确认契约，不得让业务页面判断后端来源。
 - 普通响应直接返回 `response.data`，204 或空响应按 `undefined` 处理。

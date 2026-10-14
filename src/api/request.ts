@@ -18,6 +18,7 @@ import { normalizeAuthTokens } from "@/api/auth/tokens";
 
 export const CORE_API_BASE = "/api/v1";
 export const SERVICES_API_BASE = "/api/v1/svc";
+export const ADMIN_API_BASE = "/api/v1/admin";
 
 export type ApiAuthMode = "required" | "public";
 export type ApiQueryValue = string | number | boolean | null | undefined;
@@ -103,6 +104,7 @@ function createApiInstance(baseURL: string): AxiosInstance {
 
 const coreAxios = createApiInstance(CORE_API_BASE);
 const servicesAxios = createApiInstance(SERVICES_API_BASE);
+const adminAxios = createApiInstance(ADMIN_API_BASE);
 const refreshAxios = createApiInstance(CORE_API_BASE);
 
 const refreshScope = createIdempotencyScope("auth-refresh", ["POST"]);
@@ -263,6 +265,7 @@ function installAuthInterceptors(instance: AxiosInstance): void {
 
 installAuthInterceptors(coreAxios);
 installAuthInterceptors(servicesAxios);
+installAuthInterceptors(adminAxios);
 
 async function request<TResponse, TBody>(
   instance: AxiosInstance,
@@ -299,3 +302,10 @@ export function servicesRequest<TResponse, TBody = never>(
 }
 
 export const externalAxios = axios.create();
+
+export function adminRequest<TResponse, TBody = never>(
+  url: string,
+  options: ApiRequestOptions<TBody> = {},
+): Promise<TResponse> {
+  return request<TResponse, TBody>(adminAxios, url, options);
+}
