@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TenantsRouteImport } from './routes/tenants'
 import { Route as AlertRulesIndexRouteImport } from './routes/alert-rules/index'
+import { Route as ApisIndexRouteImport } from './routes/apis/index'
 import { Route as AuditApiKeysIndexRouteImport } from './routes/audit-api-keys/index'
 import { Route as AuditExportIndexRouteImport } from './routes/audit-export/index'
 import { Route as AuditInferenceIndexRouteImport } from './routes/audit-inference/index'
@@ -36,6 +37,8 @@ import { Route as OpsSystemIndexRouteImport } from './routes/ops-system/index'
 import { Route as OverviewAlertsIndexRouteImport } from './routes/overview-alerts/index'
 import { Route as OverviewInferenceIndexRouteImport } from './routes/overview-inference/index'
 import { Route as OverviewKbIndexRouteImport } from './routes/overview-kb/index'
+import { Route as PermissionGroupsIndexRouteImport } from './routes/permission-groups/index'
+import { Route as PermissionsIndexRouteImport } from './routes/permissions/index'
 import { Route as PlatformAdminsIndexRouteImport } from './routes/platform-admins/index'
 import { Route as PlatformAdminsUserIdRouteImport } from './routes/platform-admins/$userId'
 import { Route as PlatformRolesIndexRouteImport } from './routes/platform-roles/index'
@@ -47,6 +50,7 @@ import { Route as SessionIndexRouteImport } from './routes/session/index'
 import { Route as SkillsIndexRouteImport } from './routes/skills/index'
 import { Route as StorageQuotasIndexRouteImport } from './routes/storage-quotas/index'
 import { Route as StorageIndexRouteImport } from './routes/storage/index'
+import { Route as TenantPlansIndexRouteImport } from './routes/tenant-plans/index'
 import { Route as TenantUsageRankingIndexRouteImport } from './routes/tenant-usage-ranking/index'
 import { Route as TenantsAdminsIndexRouteImport } from './routes/tenants-admins/index'
 import { Route as TenantsAdminsAdminIdRouteImport } from './routes/tenants-admins/$adminId'
@@ -72,6 +76,11 @@ const TenantsRoute = TenantsRouteImport.update({
 const AlertRulesIndexRoute = AlertRulesIndexRouteImport.update({
   id: '/alert-rules/',
   path: '/alert-rules/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApisIndexRoute = ApisIndexRouteImport.update({
+  id: '/apis/',
+  path: '/apis/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuditApiKeysIndexRoute = AuditApiKeysIndexRouteImport.update({
@@ -194,6 +203,16 @@ const OverviewKbIndexRoute = OverviewKbIndexRouteImport.update({
   path: '/overview-kb/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PermissionGroupsIndexRoute = PermissionGroupsIndexRouteImport.update({
+  id: '/permission-groups/',
+  path: '/permission-groups/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PermissionsIndexRoute = PermissionsIndexRouteImport.update({
+  id: '/permissions/',
+  path: '/permissions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PlatformAdminsIndexRoute = PlatformAdminsIndexRouteImport.update({
   id: '/platform-admins/',
   path: '/platform-admins/',
@@ -248,6 +267,11 @@ const StorageQuotasIndexRoute = StorageQuotasIndexRouteImport.update({
 const StorageIndexRoute = StorageIndexRouteImport.update({
   id: '/storage/',
   path: '/storage/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TenantPlansIndexRoute = TenantPlansIndexRouteImport.update({
+  id: '/tenant-plans/',
+  path: '/tenant-plans/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TenantUsageRankingIndexRoute = TenantUsageRankingIndexRouteImport.update({
@@ -315,6 +339,7 @@ export interface FileRoutesByFullPath {
   '/tenants-quotas/$planCode': typeof TenantsQuotasPlanCodeRoute
   '/tenants/$tenantId': typeof TenantsTenantIdRoute
   '/alert-rules/': typeof AlertRulesIndexRoute
+  '/apis/': typeof ApisIndexRoute
   '/audit-api-keys/': typeof AuditApiKeysIndexRoute
   '/audit-export/': typeof AuditExportIndexRoute
   '/audit-inference/': typeof AuditInferenceIndexRoute
@@ -339,6 +364,8 @@ export interface FileRoutesByFullPath {
   '/overview-alerts/': typeof OverviewAlertsIndexRoute
   '/overview-inference/': typeof OverviewInferenceIndexRoute
   '/overview-kb/': typeof OverviewKbIndexRoute
+  '/permission-groups/': typeof PermissionGroupsIndexRoute
+  '/permissions/': typeof PermissionsIndexRoute
   '/platform-admins/': typeof PlatformAdminsIndexRoute
   '/platform-roles/': typeof PlatformRolesIndexRoute
   '/pool/': typeof PoolIndexRoute
@@ -349,6 +376,7 @@ export interface FileRoutesByFullPath {
   '/skills/': typeof SkillsIndexRoute
   '/storage-quotas/': typeof StorageQuotasIndexRoute
   '/storage/': typeof StorageIndexRoute
+  '/tenant-plans/': typeof TenantPlansIndexRoute
   '/tenant-usage-ranking/': typeof TenantUsageRankingIndexRoute
   '/tenants-admins/': typeof TenantsAdminsIndexRoute
   '/tenants-billing/': typeof TenantsBillingIndexRoute
@@ -365,6 +393,7 @@ export interface FileRoutesByTo {
   '/tenants-quotas/$planCode': typeof TenantsQuotasPlanCodeRoute
   '/tenants/$tenantId': typeof TenantsTenantIdRoute
   '/alert-rules': typeof AlertRulesIndexRoute
+  '/apis': typeof ApisIndexRoute
   '/audit-api-keys': typeof AuditApiKeysIndexRoute
   '/audit-export': typeof AuditExportIndexRoute
   '/audit-inference': typeof AuditInferenceIndexRoute
@@ -389,6 +418,8 @@ export interface FileRoutesByTo {
   '/overview-alerts': typeof OverviewAlertsIndexRoute
   '/overview-inference': typeof OverviewInferenceIndexRoute
   '/overview-kb': typeof OverviewKbIndexRoute
+  '/permission-groups': typeof PermissionGroupsIndexRoute
+  '/permissions': typeof PermissionsIndexRoute
   '/platform-admins': typeof PlatformAdminsIndexRoute
   '/platform-roles': typeof PlatformRolesIndexRoute
   '/pool': typeof PoolIndexRoute
@@ -399,6 +430,7 @@ export interface FileRoutesByTo {
   '/skills': typeof SkillsIndexRoute
   '/storage-quotas': typeof StorageQuotasIndexRoute
   '/storage': typeof StorageIndexRoute
+  '/tenant-plans': typeof TenantPlansIndexRoute
   '/tenant-usage-ranking': typeof TenantUsageRankingIndexRoute
   '/tenants-admins': typeof TenantsAdminsIndexRoute
   '/tenants-billing': typeof TenantsBillingIndexRoute
@@ -417,6 +449,7 @@ export interface FileRoutesById {
   '/tenants-quotas/$planCode': typeof TenantsQuotasPlanCodeRoute
   '/tenants/$tenantId': typeof TenantsTenantIdRoute
   '/alert-rules/': typeof AlertRulesIndexRoute
+  '/apis/': typeof ApisIndexRoute
   '/audit-api-keys/': typeof AuditApiKeysIndexRoute
   '/audit-export/': typeof AuditExportIndexRoute
   '/audit-inference/': typeof AuditInferenceIndexRoute
@@ -441,6 +474,8 @@ export interface FileRoutesById {
   '/overview-alerts/': typeof OverviewAlertsIndexRoute
   '/overview-inference/': typeof OverviewInferenceIndexRoute
   '/overview-kb/': typeof OverviewKbIndexRoute
+  '/permission-groups/': typeof PermissionGroupsIndexRoute
+  '/permissions/': typeof PermissionsIndexRoute
   '/platform-admins/': typeof PlatformAdminsIndexRoute
   '/platform-roles/': typeof PlatformRolesIndexRoute
   '/pool/': typeof PoolIndexRoute
@@ -451,6 +486,7 @@ export interface FileRoutesById {
   '/skills/': typeof SkillsIndexRoute
   '/storage-quotas/': typeof StorageQuotasIndexRoute
   '/storage/': typeof StorageIndexRoute
+  '/tenant-plans/': typeof TenantPlansIndexRoute
   '/tenant-usage-ranking/': typeof TenantUsageRankingIndexRoute
   '/tenants-admins/': typeof TenantsAdminsIndexRoute
   '/tenants-billing/': typeof TenantsBillingIndexRoute
@@ -470,6 +506,7 @@ export interface FileRouteTypes {
     | '/tenants-quotas/$planCode'
     | '/tenants/$tenantId'
     | '/alert-rules/'
+    | '/apis/'
     | '/audit-api-keys/'
     | '/audit-export/'
     | '/audit-inference/'
@@ -494,6 +531,8 @@ export interface FileRouteTypes {
     | '/overview-alerts/'
     | '/overview-inference/'
     | '/overview-kb/'
+    | '/permission-groups/'
+    | '/permissions/'
     | '/platform-admins/'
     | '/platform-roles/'
     | '/pool/'
@@ -504,6 +543,7 @@ export interface FileRouteTypes {
     | '/skills/'
     | '/storage-quotas/'
     | '/storage/'
+    | '/tenant-plans/'
     | '/tenant-usage-ranking/'
     | '/tenants-admins/'
     | '/tenants-billing/'
@@ -520,6 +560,7 @@ export interface FileRouteTypes {
     | '/tenants-quotas/$planCode'
     | '/tenants/$tenantId'
     | '/alert-rules'
+    | '/apis'
     | '/audit-api-keys'
     | '/audit-export'
     | '/audit-inference'
@@ -544,6 +585,8 @@ export interface FileRouteTypes {
     | '/overview-alerts'
     | '/overview-inference'
     | '/overview-kb'
+    | '/permission-groups'
+    | '/permissions'
     | '/platform-admins'
     | '/platform-roles'
     | '/pool'
@@ -554,6 +597,7 @@ export interface FileRouteTypes {
     | '/skills'
     | '/storage-quotas'
     | '/storage'
+    | '/tenant-plans'
     | '/tenant-usage-ranking'
     | '/tenants-admins'
     | '/tenants-billing'
@@ -571,6 +615,7 @@ export interface FileRouteTypes {
     | '/tenants-quotas/$planCode'
     | '/tenants/$tenantId'
     | '/alert-rules/'
+    | '/apis/'
     | '/audit-api-keys/'
     | '/audit-export/'
     | '/audit-inference/'
@@ -595,6 +640,8 @@ export interface FileRouteTypes {
     | '/overview-alerts/'
     | '/overview-inference/'
     | '/overview-kb/'
+    | '/permission-groups/'
+    | '/permissions/'
     | '/platform-admins/'
     | '/platform-roles/'
     | '/pool/'
@@ -605,6 +652,7 @@ export interface FileRouteTypes {
     | '/skills/'
     | '/storage-quotas/'
     | '/storage/'
+    | '/tenant-plans/'
     | '/tenant-usage-ranking/'
     | '/tenants-admins/'
     | '/tenants-billing/'
@@ -622,6 +670,7 @@ export interface RootRouteChildren {
   TenantsBillingTenantIdRoute: typeof TenantsBillingTenantIdRoute
   TenantsQuotasPlanCodeRoute: typeof TenantsQuotasPlanCodeRoute
   AlertRulesIndexRoute: typeof AlertRulesIndexRoute
+  ApisIndexRoute: typeof ApisIndexRoute
   AuditApiKeysIndexRoute: typeof AuditApiKeysIndexRoute
   AuditExportIndexRoute: typeof AuditExportIndexRoute
   AuditInferenceIndexRoute: typeof AuditInferenceIndexRoute
@@ -646,6 +695,8 @@ export interface RootRouteChildren {
   OverviewAlertsIndexRoute: typeof OverviewAlertsIndexRoute
   OverviewInferenceIndexRoute: typeof OverviewInferenceIndexRoute
   OverviewKbIndexRoute: typeof OverviewKbIndexRoute
+  PermissionGroupsIndexRoute: typeof PermissionGroupsIndexRoute
+  PermissionsIndexRoute: typeof PermissionsIndexRoute
   PlatformAdminsIndexRoute: typeof PlatformAdminsIndexRoute
   PlatformRolesIndexRoute: typeof PlatformRolesIndexRoute
   PoolIndexRoute: typeof PoolIndexRoute
@@ -656,6 +707,7 @@ export interface RootRouteChildren {
   SkillsIndexRoute: typeof SkillsIndexRoute
   StorageQuotasIndexRoute: typeof StorageQuotasIndexRoute
   StorageIndexRoute: typeof StorageIndexRoute
+  TenantPlansIndexRoute: typeof TenantPlansIndexRoute
   TenantUsageRankingIndexRoute: typeof TenantUsageRankingIndexRoute
   TenantsAdminsIndexRoute: typeof TenantsAdminsIndexRoute
   TenantsBillingIndexRoute: typeof TenantsBillingIndexRoute
@@ -685,6 +737,13 @@ declare module '@tanstack/react-router' {
       path: '/alert-rules'
       fullPath: '/alert-rules/'
       preLoaderRoute: typeof AlertRulesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/apis/': {
+      id: '/apis/'
+      path: '/apis'
+      fullPath: '/apis/'
+      preLoaderRoute: typeof ApisIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/audit-api-keys/': {
@@ -855,6 +914,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OverviewKbIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/permission-groups/': {
+      id: '/permission-groups/'
+      path: '/permission-groups'
+      fullPath: '/permission-groups/'
+      preLoaderRoute: typeof PermissionGroupsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/permissions/': {
+      id: '/permissions/'
+      path: '/permissions'
+      fullPath: '/permissions/'
+      preLoaderRoute: typeof PermissionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/platform-admins/': {
       id: '/platform-admins/'
       path: '/platform-admins'
@@ -930,6 +1003,13 @@ declare module '@tanstack/react-router' {
       path: '/storage'
       fullPath: '/storage/'
       preLoaderRoute: typeof StorageIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tenant-plans/': {
+      id: '/tenant-plans/'
+      path: '/tenant-plans'
+      fullPath: '/tenant-plans/'
+      preLoaderRoute: typeof TenantPlansIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tenant-usage-ranking/': {
@@ -1033,6 +1113,7 @@ const rootRouteChildren: RootRouteChildren = {
   TenantsBillingTenantIdRoute: TenantsBillingTenantIdRoute,
   TenantsQuotasPlanCodeRoute: TenantsQuotasPlanCodeRoute,
   AlertRulesIndexRoute: AlertRulesIndexRoute,
+  ApisIndexRoute: ApisIndexRoute,
   AuditApiKeysIndexRoute: AuditApiKeysIndexRoute,
   AuditExportIndexRoute: AuditExportIndexRoute,
   AuditInferenceIndexRoute: AuditInferenceIndexRoute,
@@ -1057,6 +1138,8 @@ const rootRouteChildren: RootRouteChildren = {
   OverviewAlertsIndexRoute: OverviewAlertsIndexRoute,
   OverviewInferenceIndexRoute: OverviewInferenceIndexRoute,
   OverviewKbIndexRoute: OverviewKbIndexRoute,
+  PermissionGroupsIndexRoute: PermissionGroupsIndexRoute,
+  PermissionsIndexRoute: PermissionsIndexRoute,
   PlatformAdminsIndexRoute: PlatformAdminsIndexRoute,
   PlatformRolesIndexRoute: PlatformRolesIndexRoute,
   PoolIndexRoute: PoolIndexRoute,
@@ -1067,6 +1150,7 @@ const rootRouteChildren: RootRouteChildren = {
   SkillsIndexRoute: SkillsIndexRoute,
   StorageQuotasIndexRoute: StorageQuotasIndexRoute,
   StorageIndexRoute: StorageIndexRoute,
+  TenantPlansIndexRoute: TenantPlansIndexRoute,
   TenantUsageRankingIndexRoute: TenantUsageRankingIndexRoute,
   TenantsAdminsIndexRoute: TenantsAdminsIndexRoute,
   TenantsBillingIndexRoute: TenantsBillingIndexRoute,

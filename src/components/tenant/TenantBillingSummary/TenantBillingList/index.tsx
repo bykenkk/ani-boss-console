@@ -115,14 +115,9 @@ export function TenantBillingList() {
       width: 190,
       fixed: "left",
       render: (_, item) => (
-        <ResourceNameId
-          name={
-            <Link to="/tenants-billing/$tenantId" params={{ tenantId: item.tenantId }}>
-              {item.tenantName}
-            </Link>
-          }
-          id={item.tenantId}
-        />
+        <Link to="/tenants-billing/$tenantId" params={{ tenantId: item.tenantId }}>
+          <ResourceNameId name={item.tenantName} id={item.tenantId} />
+        </Link>
       ),
     },
     {

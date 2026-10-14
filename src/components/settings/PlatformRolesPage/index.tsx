@@ -1,88 +1,236 @@
-import { Empty, Spin } from "@arco-design/web-react";
-import styles from "./index.module.less";
-import { IconSafe } from "@arco-design/web-react/icon";
-import { useQuery } from "@tanstack/react-query";
+import { Button, Input, Modal, Select, Space } from "@arco-design/web-react";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  fetchPlatformAdministratorRoles,
-  platformAdministratorQueryKeys,
-  type PlatformAdministratorRole,
-} from "@/api/platform-admins";
-import { ResourcePageFrame } from "@/components/common";
-import { platformAdministratorRoleLabels } from "../model";
+  deleteManagement,
+  listManagement,
+  managementKeys,
+  type ManagedRole,
+} from "@/api/management";
+import {
+  ListDataTable,
+  ListPageFrame,
+  StatusBadge,
+  type ListColumn,
+  type RowAction,
+} from "@/components/common";
+import { formatDateTime } from "@/lib/date";
+import { withId } from "@/lib/id";
+import { RoleEditModal } from "@/components/management/RoleEditModal";
+import { ManagementRelationSelect } from "@/components/management/ManagementRelationSelect";
 
-const platformRoleDescriptions: Record<PlatformAdministratorRole, string> = {
-  "platform-admin":
-    "拥有 BOSS 全部管理权限，可开通租户、配置资源池、管理平台账号，并处理计量与审计相关操作。",
-  "platform-ops":
-    "负责日常租户开通、冻结与资源池运维；不可管理平台账号，计量仅可查看，不能导出审计。",
-  "platform-readonly":
-    "以只读方式查看租户、资源池与计量数据，不可修改配置或管理账号；可导出审计，便于核查与留档。",
-};
+const columns: ListColumn<ManagedRole>[] = [
+  {
+    key: "name",
+    dataIndex: "name",
+    title: "名称",
+    width: 200,
+    ellipsis: true,
+    render: (value) => String(value ?? "-"),
+  },
+  {
+    key: "code",
+    dataIndex: "code",
+    title: "编码",
+    width: 160,
+    ellipsis: true,
+    render: (value) => String(value ?? "-"),
+  },
+  {
+    key: "tenantName",
+    dataIndex: "tenantName",
+    title: "所属租户",
+    width: 160,
+    ellipsis: true,
+    render: (value) => String(value ?? "-"),
+  },
+  {
+    key: "type",
+    dataIndex: "type",
+    title: "角色类型",
+    width: 160,
+    ellipsis: true,
+    render: (value: string | undefined) =>
+      (
+        ({ SYSTEM: "系统角色", TEMPLATE: "角色模板", TENANT: "租户角色" }) as Record<string, string>
+      )[value ?? ""] ??
+      value ??
+      "-",
+  },
+  {
+    key: "isProtected",
+    dataIndex: "isProtected",
+    title: "受保护",
+    width: 160,
+    ellipsis: true,
+    render: (value: boolean | undefined) => (value ? "是" : "否"),
+  },
+  {
+    key: "status",
+    dataIndex: "status",
+    title: "状态",
+    width: 160,
+    ellipsis: true,
+    render: (value: string | undefined) => (
+      <StatusBadge
+        value={({ ON: "启用", OFF: "禁用" } as Record<string, string>)[value ?? ""] ?? value ?? "-"}
+        tone={
+          value === "ON" || value === "NORMAL"
+            ? "success"
+            : value === "OFF" || value === "DISABLED"
+              ? "default"
+              : "warning"
+        }
+      />
+    ),
+  },
+  {
+    key: "createdAt",
+    title: "创建时间",
+    width: 180,
+    render: (_, row) => formatDateTime(row.createdAt),
+  },
+];
 
 export function PlatformRolesPage() {
-  const rolesQuery = useQuery({
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<string>();
+  const [tenantId, setTenantId] = useState<number>();
+
+  const [editing, setEditing] = useState<ManagedRole | "create">();
+  const client = useQueryClient();
+  const input = {
+    page,
+    pageSize,
+    filters: {
+      ...(search ? { name__contains: search } : {}),
+      ...(status ? { status } : {}),
+      ...(tenantId !== undefined ? { tenant_id: tenantId } : {}),
+    },
+  };
+  const query = useQuery({
+    queryKey: managementKeys.list("roles", input),
+    queryFn: ({ signal }) => listManagement("roles", input, signal),
+    meta: { errorNotification: { id: withId("management-list", "roles"), action: "角色管理加载" } },
+  });
+  const refresh = () => client.invalidateQueries({ queryKey: managementKeys.all });
+  const removal = useMutation({
+    mutationFn: (id: number) => deleteManagement("roles", id),
     meta: {
-      errorNotification: {
-        id: "platform-administrator-roles",
-        action: "平台角色加载",
-        fallback: "请求失败，请稍后重试",
+      feedback: {
+        channel: "notification",
+        id: withId("management-delete", "roles"),
+        action: "删除角色",
       },
     },
-    queryKey: platformAdministratorQueryKeys.roles,
-    queryFn: fetchPlatformAdministratorRoles,
+    onSuccess: async () => {
+      if (query.data?.items.length === 1 && page > 1) setPage(page - 1);
+      await refresh();
+    },
   });
 
+  // FIXME: 确认受保护角色允许的编辑、权限分配和删除范围后，按后端规则限制操作入口。
+  const rowActions: RowAction<ManagedRole>[] = [
+    { key: "edit", label: "编辑", onClick: setEditing },
+
+    {
+      key: "delete",
+      label: "删除",
+      intent: "danger",
+      loading: (row) => removal.isPending && removal.variables === row.id,
+      onClick: (row) => {
+        Modal.confirm({
+          title: "删除角色",
+          content: `确认删除“${row.name ?? row.id}”？关联配置可能受影响，此操作无法在页面撤销。`,
+          onOk: () => removal.mutateAsync(row.id),
+        });
+      },
+    },
+  ];
   return (
-    <ResourcePageFrame
-      header={{
-        title: "平台角色",
-        subtitle: "内置超级管理、运维、只读三类角色，分配给平台管理员使用。",
-      }}
-    >
-      <Spin loading={rolesQuery.isPending}>
-        <div className={styles.grid}>
-          {(rolesQuery.data || []).map((role) => (
-            <article className={styles.card} key={role.id}>
-              <div className={styles.head}>
-                <span className={styles.icon}>
-                  <IconSafe />
-                </span>
-                <div>
-                  <h3>{platformAdministratorRoleLabels[role.name]}</h3>
-                  <span className={styles.subtitle}>{role.name}</span>
-                </div>
-              </div>
-              <p>{platformRoleDescriptions[role.name]}</p>
-              <div className={styles.chips}>
-                {(role.name === "platform-admin"
-                  ? ["租户管理", "资源池", "平台账号", "计量", "审计"]
-                  : role.name === "platform-ops"
-                    ? ["租户开通/冻结", "资源池运维", "计量（只读）"]
-                    : ["全部数据（只读）", "审计导出"]
-                ).map((label) => (
-                  <span key={label}>{label}</span>
-                ))}
-              </div>
-              <details className={styles.details}>
-                <summary>查看权限说明</summary>
-                <dl className={styles.permissions}>
-                  <dt>租户开通 / 冻结</dt>
-                  <dd>{role.name === "platform-readonly" ? "只读" : "允许"}</dd>
-                  <dt>平台资源池</dt>
-                  <dd>{role.name === "platform-readonly" ? "只读" : "允许"}</dd>
-                  <dt>平台账号</dt>
-                  <dd>{role.name === "platform-admin" ? "允许" : "不可管理"}</dd>
-                  <dt>计量结算</dt>
-                  <dd>{role.name === "platform-admin" ? "允许" : "只读"}</dd>
-                  <dt>审计导出</dt>
-                  <dd>{role.name === "platform-ops" ? "不可导出" : "允许"}</dd>
-                </dl>
-              </details>
-            </article>
-          ))}
-        </div>
-        {!rolesQuery.isPending && !rolesQuery.data?.length && <Empty description="暂无平台角色" />}
-      </Spin>
-    </ResourcePageFrame>
+    <>
+      <ListPageFrame
+        header={{
+          title: "角色管理",
+          subtitle: "管理角色类型、租户归属和权限点分配，查看角色状态与保护标识。",
+        }}
+        toolbar={{
+          actions: (
+            <Button type="primary" onClick={() => setEditing("create")}>
+              新建角色
+            </Button>
+          ),
+          filters: (
+            <Space wrap>
+              <Input.Search
+                aria-label="搜索"
+                placeholder="搜索名称"
+                onSearch={(value) => {
+                  setSearch(value.trim());
+                  setPage(1);
+                }}
+                allowClear
+                onClear={() => {
+                  setSearch("");
+                  setPage(1);
+                }}
+              />
+              <Select
+                aria-label="状态筛选"
+                placeholder="全部状态"
+                allowClear
+                options={Object.entries({ ON: "启用", OFF: "禁用" }).map(([value, label]) => ({
+                  value,
+                  label,
+                }))}
+                value={status}
+                onChange={(value) => {
+                  setStatus(value);
+                  setPage(1);
+                }}
+              />
+              <ManagementRelationSelect
+                resource="tenants"
+                includePlatform
+                value={tenantId}
+                onChange={(value) => {
+                  setTenantId(value as number | undefined);
+                  setPage(1);
+                }}
+              />
+            </Space>
+          ),
+
+          refresh: { onClick: () => void query.refetch(), spinning: query.isFetching },
+        }}
+      >
+        <ListDataTable
+          data={query.data?.items ?? []}
+          columns={columns}
+          rowActions={rowActions}
+          loading={query.isPending}
+          pagination={{
+            page,
+            pageSize,
+            total: query.data?.total ?? 0,
+            onPageChange: setPage,
+            onPageSizeChange: (size) => {
+              setPageSize(size);
+              setPage(1);
+            },
+          }}
+        />
+      </ListPageFrame>
+      {editing && (
+        <RoleEditModal
+          record={editing === "create" ? undefined : editing}
+          defaults={editing === "create" && tenantId !== undefined ? { tenantId } : undefined}
+          onCancel={() => setEditing(undefined)}
+          onSuccess={() => setEditing(undefined)}
+        />
+      )}
+    </>
   );
 }

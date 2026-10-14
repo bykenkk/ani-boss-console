@@ -1,6 +1,10 @@
 import type { ReactNode } from "react";
 
 export type AppRoute =
+  | "/tenant-plans"
+  | "/permissions"
+  | "/permission-groups"
+  | "/apis"
   | "/"
   | "/overview-inference"
   | "/overview-kb"

@@ -34,7 +34,7 @@ async function runTenantPlanOperation<T>(operation: () => Promise<T>): Promise<T
   }
 }
 
-export function TenantPlansPages() {
+export function TenantPlansPage() {
   const queryClient = useQueryClient();
   const { canManage } = useTenantManagementAccess();
   const [keyword, setKeyword] = useState("");
@@ -119,15 +119,9 @@ export function TenantPlansPages() {
       title: "策略名称",
       width: 200,
       render: (_, plan) => (
-        <ResourceNameId
-          avatarText={plan.name}
-          name={
-            <Link to="/tenants-quotas/$planCode" params={{ planCode: plan.id }}>
-              {plan.name}
-            </Link>
-          }
-          id={plan.code}
-        />
+        <Link to="/tenants-quotas/$planCode" params={{ planCode: plan.id }}>
+          <ResourceNameId avatarText={plan.name} name={plan.name} id={plan.code} />
+        </Link>
       ),
     },
     {

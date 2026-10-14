@@ -39,6 +39,7 @@ export function isNavigationGroup(item: NavigationItem): item is NavigationGroup
 }
 
 const tenantNavigation: readonly NavigationLeaf[] = [
+  { label: "套餐管理", to: "/tenant-plans", icon: <IconSettings /> },
   { label: "租户列表", to: "/tenants", icon: <IconUserGroup /> },
   { label: "配额策略", to: "/tenants-quotas", icon: <IconSettings /> },
   { label: "租户管理员", to: "/tenants-admins", icon: <IconUser /> },
@@ -89,6 +90,9 @@ const auditNavigation: readonly NavigationLeaf[] = [
 ];
 
 const settingsNavigation: readonly NavigationLeaf[] = [
+  { label: "权限点管理", to: "/permissions", icon: <IconLock /> },
+  { label: "权限分组管理", to: "/permission-groups", icon: <IconApps /> },
+  { label: "API 管理", to: "/apis", icon: <IconLink /> },
   {
     label: "平台管理员",
     to: "/platform-admins",
@@ -114,6 +118,10 @@ const integrationNavigation: readonly NavigationLeaf[] = [
 ];
 
 const visibleAppRoutes = new Set<AppRoute>([
+  "/tenant-plans",
+  "/permissions",
+  "/permission-groups",
+  "/apis",
   "/",
   "/tenants",
   "/tenants-quotas",

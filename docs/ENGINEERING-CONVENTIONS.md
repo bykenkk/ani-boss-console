@@ -34,6 +34,8 @@
 
 ## 组件组织
 
+- 页面组件以 `Page` 结尾；业务名称的单复数按页面语义确定：列表页使用复数资源名（如 `TenantsPage`、`UsersPage`），详情页等使用对应业务语义（如 `TenantDetailPage`）。页面名称不额外添加 `Management`，目录名与导出名保持一致。
+
 - 组件使用 `src/components/<scope>/<ComponentName>/index.tsx`，不得在 scope 根目录平铺组件实现。
 - 子组件使用 `<ComponentName>/<SubComponentName>/index.tsx`。
 - 组件私有样式使用同目录的 `index.css`、`index.less`、`index.module.css` 或 `index.module.less`。
