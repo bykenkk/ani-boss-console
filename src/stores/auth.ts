@@ -4,14 +4,14 @@ import type { AuthTokens } from "@/api/auth/types";
 interface AuthState {
   tokens: AuthTokens | null;
   username: string;
-  developmentBypass: boolean;
+  accessTokenExpiresAt: number | null;
 }
 
 const STORAGE_KEY = "ani-platform-console-auth";
 const EMPTY_STATE: AuthState = {
   tokens: null,
   username: "",
-  developmentBypass: false,
+  accessTokenExpiresAt: null,
 };
 
 function readStoredState(): AuthState {
@@ -20,20 +20,10 @@ function readStoredState(): AuthState {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return EMPTY_STATE;
-    const stored = JSON.parse(raw) as Partial<AuthState>;
-    const tokens = stored.tokens;
+    const stored = JSON.parse(raw) as { username?: unknown };
     return {
-      tokens:
-        typeof tokens?.access_token === "string" && tokens.access_token
-          ? {
-              access_token: tokens.access_token,
-              refresh_token: tokens.refresh_token,
-              expires_in: tokens.expires_in,
-              issued_at: tokens.issued_at,
-            }
-          : null,
-      username: typeof stored.username === "string" ? stored.username : "",
-      developmentBypass: import.meta.env.DEV && stored.developmentBypass === true,
+      ...EMPTY_STATE,
+      username: typeof stored?.username === "string" ? stored.username.trim() : "",
     };
   } catch {
     return EMPTY_STATE;
@@ -42,11 +32,18 @@ function readStoredState(): AuthState {
 
 export const authStore = createStore<AuthState>()(readStoredState);
 
-authStore.subscribe((state) => {
-  // 清空会话由 clearAuthSession 删除缓存，不再写回空状态。
-  if (typeof window === "undefined" || state === EMPTY_STATE) return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-});
+function persistAuthMetadata(state: AuthState): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (state === EMPTY_STATE) window.localStorage.removeItem(STORAGE_KEY);
+    else window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ username: state.username }));
+  } catch {
+    // 浏览器禁止存储时，当前页面的内存会话仍可正常登录、刷新和退出。
+  }
+}
+
+authStore.subscribe(persistAuthMetadata);
+persistAuthMetadata(authStore.getState());
 
 let sessionRevision = 0;
 
@@ -63,42 +60,30 @@ export function setAuthSession(tokens: AuthTokens, username: string) {
   authStore.setState({
     tokens,
     username: username.trim(),
-    developmentBypass: false,
+    accessTokenExpiresAt: getAccessTokenExpiry(tokens.expires_in),
   });
 }
 
-export function updateAccessToken(accessToken: string, expiresIn?: number) {
-  const state = authStore.getState();
-  if (!state.tokens) return;
+export function updateAccessToken(tokens: AuthTokens) {
   authStore.setState({
-    tokens: {
-      ...state.tokens,
-      access_token: accessToken,
-      expires_in: expiresIn,
-    },
+    tokens,
+    accessTokenExpiresAt: getAccessTokenExpiry(tokens.expires_in),
   });
 }
 
-export function setDevelopmentAuthBypass(enabled: boolean) {
-  authStore.setState({
-    developmentBypass: import.meta.env.DEV && enabled,
-  });
+function getAccessTokenExpiry(expiresIn?: number): number | null {
+  return typeof expiresIn === "number" && Number.isFinite(expiresIn) && expiresIn > 0
+    ? Date.now() + expiresIn * 1000
+    : null;
 }
 
 export function clearAuthSession() {
   sessionRevision += 1;
-  if (typeof window !== "undefined") {
-    window.localStorage.removeItem(STORAGE_KEY);
-  }
   authStore.setState(EMPTY_STATE, true);
 }
 
-export function isDevelopmentAuthBypassActive() {
-  return import.meta.env.DEV && authStore.getState().developmentBypass;
-}
-
 export function isAuthenticated() {
-  return Boolean(authStore.getState().tokens?.access_token) || isDevelopmentAuthBypassActive();
+  return Boolean(authStore.getState().tokens?.access_token);
 }
 
 function decodeJwtPayload(token: string): Record<string, unknown> | null {

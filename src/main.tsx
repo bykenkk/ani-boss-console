@@ -7,6 +7,7 @@ import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@ta
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { startAuthSession } from "@/api/request";
 import { routeTree } from "./routeTree.gen";
 import { closeNotification, showMessage, showNotification } from "@/lib/feedback";
 
@@ -82,12 +83,14 @@ declare module "@tanstack/react-router" {
   }
 }
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <ConfigProvider componentConfig={COMPONENT_CONFIG}>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
-    </ConfigProvider>
-  </StrictMode>,
-);
+void startAuthSession().then(() => {
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <ConfigProvider componentConfig={COMPONENT_CONFIG}>
+        <QueryClientProvider client={queryClient}>
+          <RouterProvider router={router} />
+        </QueryClientProvider>
+      </ConfigProvider>
+    </StrictMode>,
+  );
+});

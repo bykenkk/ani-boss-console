@@ -48,9 +48,7 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
   const authState = useAuthState();
   const [roleVisible, setRoleVisible] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const canManage =
-    authState.developmentBypass ||
-    getAccessTokenRoles(authState.tokens?.access_token).includes("platform-admin");
+  const canManage = getAccessTokenRoles(authState.tokens?.access_token).includes("platform-admin");
 
   const detailQuery = useQuery({
     meta: {

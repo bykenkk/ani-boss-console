@@ -11,7 +11,10 @@ export function normalizeAuthTokens(response: AuthTokenResponse): AuthTokens {
   const expiresIn = response.expires_in === undefined ? undefined : Number(response.expires_in);
   return {
     access_token: response.access_token,
-    expires_in: Number.isFinite(expiresIn) ? expiresIn : undefined,
+    expires_in:
+      expiresIn !== undefined && Number.isFinite(expiresIn) && expiresIn > 0
+        ? expiresIn
+        : undefined,
     issued_at: response.issued_at,
   };
 }

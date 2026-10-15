@@ -7,8 +7,7 @@ import logoUrl from "@/assets/brand/logo.png";
 import { loginPlatform } from "@/api/auth";
 import { ApiError } from "@/api/request";
 import { BorderBeamPanel } from "@/components/common/BorderBeamPanel";
-import { showMessage } from "@/lib/feedback";
-import { isAuthenticated, setAuthSession, setDevelopmentAuthBypass } from "@/stores/auth";
+import { isAuthenticated } from "@/stores/auth";
 import styles from "./index.module.less";
 
 interface PlatformLoginValues {
@@ -58,17 +57,10 @@ export function LoginPage({ redirect }: { redirect?: string }) {
         throw new Error(getLoginErrorMessage(error));
       }
     },
-    onSuccess: (tokens, values) => {
-      setAuthSession(tokens, values.username);
+    onSuccess: () => {
       window.location.replace(target);
     },
   });
-
-  const skipLogin = () => {
-    setDevelopmentAuthBypass(true);
-    showMessage({ type: "info", content: "已进入开发预览模式" });
-    window.location.replace(target);
-  };
 
   return (
     <main className={styles.page}>
@@ -160,12 +152,6 @@ export function LoginPage({ redirect }: { redirect?: string }) {
             </span>
           </div>
         </div>
-
-        {import.meta.env.DEV ? (
-          <Button className={styles.developmentButton} type="text" size="mini" onClick={skipLogin}>
-            跳过登录（开发预览）
-          </Button>
-        ) : null}
       </BorderBeamPanel>
 
       <footer className={styles.footer}>Copyright © 2021-2025 广州常青云科技有限公司</footer>

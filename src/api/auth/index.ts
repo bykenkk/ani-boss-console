@@ -1,31 +1,57 @@
-import { coreRequest } from "@/api/request";
-import { getAccessTokenJti, getAuthState } from "@/stores/auth";
+import {
+  AUTH_APPLICATION,
+  coreRequest,
+  initializeCsrfToken,
+  pauseSessionRefresh,
+  resumeSessionRefresh,
+} from "@/api/request";
+import { clearAuthSession, getAccessTokenJti, setAuthSession } from "@/stores/auth";
 import { normalizeAuthTokens } from "./tokens";
 import type { AuthTokenResponse, AuthTokens, LogoutResponse, PlatformLoginInput } from "./types";
 
-type LogoutRequest = { jti?: string };
+type LogoutRequest = { application: "boss"; jti?: string };
 
 export async function loginPlatform(input: PlatformLoginInput): Promise<AuthTokens> {
-  // 新后端认证接口不接收幂等 key；刷新凭证仅通过 HttpOnly Cookie 下发。
-  const response = await coreRequest<AuthTokenResponse, PlatformLoginInput>(
-    "/auth/platform/password/login",
-    {
-      method: "POST",
-      auth: "public",
-      data: { username: input.username.trim(), password: input.password },
-    },
-  );
-  return normalizeAuthTokens(response);
+  await pauseSessionRefresh();
+  let sessionCreated = false;
+  try {
+    const response = await coreRequest<AuthTokenResponse, PlatformLoginInput>(
+      "/auth/platform/password/login",
+      {
+        method: "POST",
+        auth: "public",
+        timeout: 15_000,
+        data: { username: input.username.trim(), password: input.password },
+      },
+    );
+    const tokens = normalizeAuthTokens(response);
+    setAuthSession(tokens, input.username);
+    sessionCreated = true;
+    await initializeCsrfToken();
+    return tokens;
+  } catch (error) {
+    if (sessionCreated) clearAuthSession();
+    else resumeSessionRefresh();
+    throw error;
+  }
 }
 
-export function logoutPlatform(): Promise<LogoutResponse> {
-  if (!getAuthState().tokens?.access_token) return Promise.resolve({ status: "local-only" });
+export async function logoutPlatform(): Promise<LogoutResponse> {
   const jti = getAccessTokenJti();
-  // jti 仅用于审计；缺失时仍需吊销服务端会话并清除 Cookie。
-  return coreRequest<LogoutResponse, LogoutRequest>("/auth/logout", {
-    method: "POST",
-    data: jti ? { jti } : {},
-  });
+  await pauseSessionRefresh();
+  try {
+    const response = await coreRequest<LogoutResponse, LogoutRequest>("/auth/logout", {
+      method: "POST",
+      auth: "public",
+      timeout: 15_000,
+      data: { application: AUTH_APPLICATION, ...(jti ? { jti } : {}) },
+    });
+    clearAuthSession();
+    return response;
+  } catch (error) {
+    resumeSessionRefresh();
+    throw error;
+  }
 }
 
 export type { AuthTokens, LogoutResponse, PlatformLoginInput } from "./types";

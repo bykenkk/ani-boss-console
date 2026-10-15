@@ -1,6 +1,5 @@
 import { KaiwuEntryButton } from "@/components/kaiwu/KaiwuEntryButton";
 import { logoutPlatform } from "@/api/auth";
-import { clearAuthSession } from "@/stores/auth";
 import { useAuthState } from "@/hooks/useAuthState";
 import { formatDateTime } from "@/lib/date";
 import type { AppBreadcrumbItem } from "@/lib/navigation";
@@ -26,7 +25,7 @@ export function TopNav({ breadcrumbs, onBack }: TopNavProps) {
   const queryClient = useQueryClient();
   const authState = useAuthState();
   const [userMenuVisible, setUserMenuVisible] = useState(false);
-  const username = authState.username || (authState.developmentBypass ? "admin" : "平台管理员");
+  const username = authState.username || "平台管理员";
   const sessionIssuedAt = authState.tokens?.issued_at;
 
   const logout = useMutation({
@@ -35,12 +34,11 @@ export function TopNav({ breadcrumbs, onBack }: TopNavProps) {
         channel: "notification",
         id: "logout",
         action: "退出登录",
-        errorFallback: "服务端退出失败，本地登录状态已清除",
+        errorFallback: "退出失败，请稍后重试",
       },
     },
     mutationFn: logoutPlatform,
-    onSettled: () => {
-      clearAuthSession();
+    onSuccess: () => {
       queryClient.clear();
       window.location.assign("/login");
     },
@@ -50,7 +48,7 @@ export function TopNav({ breadcrumbs, onBack }: TopNavProps) {
     setUserMenuVisible(false);
     Modal.confirm({
       title: "确认退出登录",
-      content: "退出将结束此账号的全部登录会话，之后需重新登录。",
+      content: "退出将结束当前登录会话，之后需重新登录。",
       maskClosable: false,
       okButtonProps: { status: "danger" },
       onOk: () => logout.mutateAsync(),

@@ -1,7 +1,5 @@
 export interface AuthTokens {
   access_token: string;
-  /** 仅存量 ANI 会话使用；新后端通过 HttpOnly Cookie 刷新。 */
-  refresh_token?: string;
   expires_in?: number;
   issued_at?: string;
 }
@@ -21,4 +19,5 @@ export interface PlatformLoginInput {
 
 export interface LogoutResponse {
   status: string;
+  session_revoked: boolean;
 }
