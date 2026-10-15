@@ -20,9 +20,7 @@ export function KaiwuEntryButton() {
   );
 
   const entry = useMutation({
-    retry: false,
     networkMode: "always",
-    gcTime: 0,
     meta: {
       feedback: {
         channel: "notification",

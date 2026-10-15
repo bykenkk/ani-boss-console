@@ -1,13 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { currentUserQueryKey, fetchCurrentUser } from "@/api/auth";
-import { getAuthSessionRevision } from "@/stores/auth";
 import { useAuthState } from "./useAuthState";
 
 export function useCurrentUser() {
   const { tokens } = useAuthState();
 
   return useQuery({
-    queryKey: [...currentUserQueryKey, getAuthSessionRevision()],
+    queryKey: currentUserQueryKey,
     queryFn: ({ signal }) => fetchCurrentUser(signal),
     enabled: Boolean(tokens?.access_token),
     meta: {

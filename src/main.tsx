@@ -7,7 +7,6 @@ import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@ta
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { startAuthSession } from "@/api/request";
 import { routeTree } from "./routeTree.gen";
 import { closeNotification, showMessage, showNotification } from "@/lib/feedback";
 
@@ -62,7 +61,17 @@ const queryClient = new QueryClient({
       showNotification({ id: feedback.id, state: "error", action: feedback.action, content });
     },
   }),
-  defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
+  defaultOptions: {
+    queries: {
+      gcTime: 0,
+      retry: false,
+      retryOnMount: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
+    },
+    mutations: { gcTime: 0 },
+  },
 });
 
 const COMPONENT_CONFIG = {
@@ -83,14 +92,12 @@ declare module "@tanstack/react-router" {
   }
 }
 
-void startAuthSession().then(() => {
-  createRoot(document.getElementById("root")!).render(
-    <StrictMode>
-      <ConfigProvider componentConfig={COMPONENT_CONFIG}>
-        <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
-        </QueryClientProvider>
-      </ConfigProvider>
-    </StrictMode>,
-  );
-});
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <ConfigProvider componentConfig={COMPONENT_CONFIG}>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </ConfigProvider>
+  </StrictMode>,
+);

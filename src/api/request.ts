@@ -4,13 +4,7 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
-import {
-  authStore,
-  clearAuthSession,
-  getAuthState,
-  getAuthSessionRevision,
-  updateAccessToken,
-} from "@/stores/auth";
+import { authStore, clearAuthSession, getAuthState, updateAccessToken } from "@/stores/auth";
 
 import type { AuthTokenResponse, AuthTokens } from "@/api/auth/types";
 import { normalizeAuthTokens } from "@/api/auth/tokens";
@@ -35,7 +29,7 @@ export interface ApiRequestOptions<TBody = unknown> extends Omit<
 type AniRequestConfig<TBody = unknown> = InternalAxiosRequestConfig<TBody> & {
   aniAuth?: ApiAuthMode;
   aniRetried?: boolean;
-  aniSessionRevision?: number;
+  aniSessionSignal?: AbortSignal;
 };
 
 type ApiErrorPayload = {
@@ -109,13 +103,11 @@ refreshAxios.defaults.timeout = 15_000;
 
 export const AUTH_APPLICATION = "boss" as const;
 
-let refreshRequest: { revision: number; promise: Promise<AuthTokens> } | undefined;
-let csrfRequest: { revision: number; promise: Promise<string> } | undefined;
+let refreshRequest: Promise<AuthTokens> | undefined;
+let csrfRequest: Promise<string> | undefined;
 let refreshTimer: ReturnType<typeof setTimeout> | undefined;
 let sessionController = new AbortController();
-let activeRevision = getAuthSessionRevision();
 let authPaused = false;
-let authStartup: Promise<void> | undefined;
 
 function redirectToLogin(): void {
   if (typeof window === "undefined") return;
@@ -172,51 +164,45 @@ export function toApiError(error: unknown): ApiError {
   });
 }
 
-function assertSessionRevision(revision: number): void {
-  if (getAuthSessionRevision() !== revision) {
-    throw new axios.CanceledError("登录会话已变更");
-  }
+function assertActiveSession(signal: AbortSignal): void {
+  if (signal.aborted) throw new axios.CanceledError("登录会话已变更");
 }
 
-function getCsrfToken(revision: number): Promise<string> {
-  assertSessionRevision(revision);
-  if (csrfRequest?.revision === revision) return csrfRequest.promise;
+function getCsrfToken(signal: AbortSignal): Promise<string> {
+  assertActiveSession(signal);
+  if (csrfRequest) return csrfRequest;
   const promise = refreshAxios
-    .post<{ csrf_token: string }>(
-      "/auth/csrf",
-      { application: AUTH_APPLICATION },
-      { signal: sessionController.signal },
-    )
+    .post<{ csrf_token: string }>("/auth/csrf", { application: AUTH_APPLICATION }, { signal })
     .then(({ data }) => {
-      assertSessionRevision(revision);
+      assertActiveSession(signal);
       if (typeof data?.csrf_token !== "string" || !data.csrf_token.trim()) {
         throw new Error("认证响应缺少 csrf_token");
       }
       return data.csrf_token;
     })
     .catch((error: unknown) => {
-      if (csrfRequest?.promise === promise) csrfRequest = undefined;
+      if (csrfRequest === promise) csrfRequest = undefined;
       throw error;
     });
-  csrfRequest = { revision, promise };
+  csrfRequest = promise;
   return promise;
 }
 
-async function requestTokenRefresh(revision: number): Promise<AuthTokens> {
+async function requestTokenRefresh(signal: AbortSignal): Promise<AuthTokens> {
   try {
     for (let attempt = 0; attempt < 2; attempt += 1) {
-      const csrfToken = await getCsrfToken(revision);
-      assertSessionRevision(revision);
+      const csrfToken = await getCsrfToken(signal);
+      assertActiveSession(signal);
       if (authPaused) throw new axios.CanceledError("认证会话续期已暂停");
       try {
         const response = await refreshAxios.post<AuthTokenResponse>(
           "/auth/refresh",
           { application: AUTH_APPLICATION },
-          { headers: { "X-CSRF-Token": csrfToken }, signal: sessionController.signal },
+          { headers: { "X-CSRF-Token": csrfToken }, signal },
         );
         return normalizeAuthTokens(response.data);
       } catch (error) {
-        assertSessionRevision(revision);
+        assertActiveSession(signal);
         if (attempt === 0 && axios.isAxiosError(error) && error.response?.status === 403) {
           csrfRequest = undefined;
           continue;
@@ -231,18 +217,19 @@ async function requestTokenRefresh(revision: number): Promise<AuthTokens> {
   }
 }
 
-function refreshAccessToken(revision: number): Promise<AuthTokens> {
+function refreshAccessToken(signal = sessionController.signal): Promise<AuthTokens> {
   if (authPaused) return Promise.reject(new axios.CanceledError("认证会话续期已暂停"));
-  if (refreshRequest?.revision === revision) return refreshRequest.promise;
-  const promise = requestTokenRefresh(revision)
+  assertActiveSession(signal);
+  if (refreshRequest) return refreshRequest;
+  const promise = requestTokenRefresh(signal)
     .then((refreshed) => {
-      assertSessionRevision(revision);
+      assertActiveSession(signal);
       if (authPaused) throw new axios.CanceledError("认证会话续期已暂停");
       updateAccessToken(refreshed);
       return refreshed;
     })
     .catch((error: unknown) => {
-      assertSessionRevision(revision);
+      assertActiveSession(signal);
       if (
         !authPaused &&
         getAuthState().tokens &&
@@ -254,9 +241,9 @@ function refreshAccessToken(revision: number): Promise<AuthTokens> {
       throw error;
     })
     .finally(() => {
-      if (refreshRequest?.promise === promise) refreshRequest = undefined;
+      if (refreshRequest === promise) refreshRequest = undefined;
     });
-  refreshRequest = { revision, promise };
+  refreshRequest = promise;
   return promise;
 }
 
@@ -264,14 +251,8 @@ function installAuthInterceptors(instance: AxiosInstance): void {
   instance.interceptors.request.use((config) => {
     const requestConfig = config as AniRequestConfig;
     if (requestConfig.aniAuth === "public") return config;
-    const revision = getAuthSessionRevision();
-    if (
-      requestConfig.aniSessionRevision !== undefined &&
-      requestConfig.aniSessionRevision !== revision
-    ) {
-      throw new axios.CanceledError("登录会话已变更");
-    }
-    requestConfig.aniSessionRevision = revision;
+    if (requestConfig.aniSessionSignal) assertActiveSession(requestConfig.aniSessionSignal);
+    requestConfig.aniSessionSignal ??= sessionController.signal;
     const token = getAuthState().tokens?.access_token;
     if (token) config.headers.set("Authorization", `Bearer ${token}`);
     return config;
@@ -287,8 +268,8 @@ function installAuthInterceptors(instance: AxiosInstance): void {
         throw toApiError(error);
       }
       if (authPaused) throw new axios.CanceledError("认证会话续期已暂停");
-      const revision = getAuthSessionRevision();
-      if (config.aniSessionRevision !== revision) throw toApiError(error);
+      const signal = config.aniSessionSignal ?? sessionController.signal;
+      assertActiveSession(signal);
       const tokens = getAuthState().tokens;
       if (!tokens || config.aniRetried) {
         expireAuthSession();
@@ -298,11 +279,9 @@ function installAuthInterceptors(instance: AxiosInstance): void {
       config.aniRetried = true;
       // 同批请求的迟到 401 直接使用已经刷新的令牌，避免再次轮换 Cookie。
       if (config.headers.get("Authorization") === `Bearer ${tokens.access_token}`) {
-        await refreshAccessToken(revision);
+        await refreshAccessToken(signal);
       }
-      if (getAuthSessionRevision() !== revision) {
-        throw new axios.CanceledError("登录会话已变更");
-      }
+      assertActiveSession(signal);
       // 重试请求自身的业务/网络错误不能被当成刷新失败而清空登录态。
       return instance.request(config);
     },
@@ -312,25 +291,17 @@ function installAuthInterceptors(instance: AxiosInstance): void {
 function scheduleAuthRefresh(retryDelay?: number): void {
   if (typeof window === "undefined") return;
   clearTimeout(refreshTimer);
-  const revision = getAuthSessionRevision();
-  if (revision !== activeRevision) {
-    sessionController.abort();
-    sessionController = new AbortController();
-    activeRevision = revision;
-    csrfRequest = undefined;
-  }
+  const signal = sessionController.signal;
   const state = getAuthState();
   if (!state.tokens || authPaused) return;
-  if (state.accessTokenExpiresAt === null) return;
-
-  const lifetime = (state.tokens.expires_in ?? 0) * 1000;
-  const margin = Math.min(60_000, Math.max(0, lifetime * 0.1));
-  const delay = retryDelay ?? Math.max(0, state.accessTokenExpiresAt - Date.now() - margin);
+  const lifetime = state.tokens.expires_in;
+  if (!lifetime || !Number.isFinite(lifetime) || lifetime <= 0) return;
+  const delay = retryDelay ?? Math.max(1000, lifetime * 1000 - Math.min(60_000, lifetime * 100));
   refreshTimer = setTimeout(
     () => {
-      void refreshAccessToken(revision).catch(() => {
+      void refreshAccessToken(signal).catch(() => {
         // 短暂断网/5xx 保留会话，延后重试，避免过期定时器形成忙循环。
-        if (!authPaused && getAuthSessionRevision() === revision && getAuthState().tokens) {
+        if (!authPaused && !signal.aborted && getAuthState().tokens) {
           scheduleAuthRefresh(30_000);
         }
       });
@@ -341,7 +312,7 @@ function scheduleAuthRefresh(retryDelay?: number): void {
 
 export async function initializeCsrfToken(): Promise<string> {
   try {
-    return await getCsrfToken(getAuthSessionRevision());
+    return await getCsrfToken(sessionController.signal);
   } catch (error) {
     if (axios.isCancel(error)) throw error;
     throw toApiError(error);
@@ -352,21 +323,17 @@ export async function initializeCsrfToken(): Promise<string> {
 export async function pauseSessionRefresh(): Promise<void> {
   authPaused = true;
   clearTimeout(refreshTimer);
-  await refreshRequest?.promise.catch(() => undefined);
-  await csrfRequest?.promise.catch(() => undefined);
+  await refreshRequest?.catch(() => undefined);
+  await csrfRequest?.catch(() => undefined);
+  sessionController.abort();
+  sessionController = new AbortController();
+  refreshRequest = undefined;
   csrfRequest = undefined;
 }
 
 export function resumeSessionRefresh(): void {
   authPaused = false;
   scheduleAuthRefresh();
-}
-
-export function startAuthSession(): Promise<void> {
-  authStartup ??= refreshAccessToken(getAuthSessionRevision())
-    .then(() => undefined)
-    .catch(() => clearAuthSession());
-  return authStartup;
 }
 
 installAuthInterceptors(coreAxios);
@@ -419,6 +386,12 @@ export function adminRequest<TResponse, TBody = never>(
 const unsubscribeAuthRefresh = authStore.subscribe((state, previous) => {
   if (state.tokens === previous.tokens) return;
   if (state.tokens) authPaused = false;
+  else {
+    sessionController.abort();
+    sessionController = new AbortController();
+    csrfRequest = undefined;
+    refreshRequest = undefined;
+  }
   scheduleAuthRefresh();
 });
 if (import.meta.hot) {
@@ -426,5 +399,16 @@ if (import.meta.hot) {
     unsubscribeAuthRefresh();
     clearTimeout(refreshTimer);
     sessionController.abort();
+  });
+}
+
+// 同步恢复登录态后，按 Console 相同的 expires_in 规则安排续期。
+scheduleAuthRefresh();
+if (getAuthState().tokens) {
+  const signal = sessionController.signal;
+  void initializeCsrfToken().catch((error: unknown) => {
+    if (!signal.aborted && !authPaused && [401, 403].includes(toApiError(error).status ?? 0))
+      expireAuthSession();
+    // 网络故障保留持久化登录态，下次刷新时重新获取证明。
   });
 }
