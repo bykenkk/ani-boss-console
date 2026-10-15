@@ -25,7 +25,7 @@ export async function loginPlatform(input: PlatformLoginInput): Promise<AuthToke
       },
     );
     const tokens = normalizeAuthTokens(response);
-    setAuthSession(tokens, input.username);
+    setAuthSession(tokens);
     sessionCreated = true;
     await initializeCsrfToken();
     return tokens;
@@ -55,3 +55,6 @@ export async function logoutPlatform(): Promise<LogoutResponse> {
 }
 
 export type { AuthTokens, LogoutResponse, PlatformLoginInput } from "./types";
+
+export { currentUserQueryKey, fetchCurrentUser } from "./profile";
+export type { CurrentUser } from "./types";

@@ -1,6 +1,6 @@
 import { KaiwuEntryButton } from "@/components/kaiwu/KaiwuEntryButton";
 import { logoutPlatform } from "@/api/auth";
-import { useAuthState } from "@/hooks/useAuthState";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { formatDateTime } from "@/lib/date";
 import type { AppBreadcrumbItem } from "@/lib/navigation";
 import { Breadcrumb, Button, Dropdown, Input, Modal, Tooltip } from "@arco-design/web-react";
@@ -23,10 +23,15 @@ interface TopNavProps {
 
 export function TopNav({ breadcrumbs, onBack }: TopNavProps) {
   const queryClient = useQueryClient();
-  const authState = useAuthState();
   const [userMenuVisible, setUserMenuVisible] = useState(false);
-  const username = authState.username || "平台管理员";
-  const sessionIssuedAt = authState.tokens?.issued_at;
+  const { data: user } = useCurrentUser();
+  const username = user?.username || "-";
+  const roles = (user?.roleNames?.length ? user.roleNames : user?.roles)?.join("、") || "-";
+  const avatar = user?.avatar ? (
+    <img src={user.avatar} alt="" className="h-full w-full rounded-full object-cover" />
+  ) : (
+    <IconUser />
+  );
 
   const logout = useMutation({
     meta: {
@@ -59,17 +64,17 @@ export function TopNav({ breadcrumbs, onBack }: TopNavProps) {
     <div className="topnav-user-card" role="menu" aria-label="个人中心">
       <div className="topnav-user-card-header">
         <span className="topnav-user-card-avatar" aria-hidden="true">
-          <IconUser />
+          {avatar}
         </span>
         <div className="topnav-user-card-profile">
           <strong>{username}</strong>
           <span className="topnav-user-card-meta">
             <IconTag />
-            <span>boss</span>
+            <span>{roles}</span>
           </span>
           <span className="topnav-user-card-meta">
             <IconCalendar />
-            <span>{formatDateTime(sessionIssuedAt)}</span>
+            <span>{formatDateTime(user?.lastLoginAt)}</span>
           </span>
         </div>
       </div>
@@ -153,9 +158,7 @@ export function TopNav({ breadcrumbs, onBack }: TopNavProps) {
               aria-haspopup="menu"
               aria-expanded={userMenuVisible}
             >
-              <span className="topnav-user-avatar">
-                <IconUser />
-              </span>
+              <span className="topnav-user-avatar">{avatar}</span>
               <span className="topnav-user-name">{username}</span>
             </button>
           </Dropdown>

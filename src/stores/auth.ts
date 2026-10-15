@@ -3,47 +3,15 @@ import type { AuthTokens } from "@/api/auth/types";
 
 interface AuthState {
   tokens: AuthTokens | null;
-  username: string;
   accessTokenExpiresAt: number | null;
 }
 
-const STORAGE_KEY = "ani-platform-console-auth";
 const EMPTY_STATE: AuthState = {
   tokens: null,
-  username: "",
   accessTokenExpiresAt: null,
 };
 
-function readStoredState(): AuthState {
-  if (typeof window === "undefined") return EMPTY_STATE;
-
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return EMPTY_STATE;
-    const stored = JSON.parse(raw) as { username?: unknown };
-    return {
-      ...EMPTY_STATE,
-      username: typeof stored?.username === "string" ? stored.username.trim() : "",
-    };
-  } catch {
-    return EMPTY_STATE;
-  }
-}
-
-export const authStore = createStore<AuthState>()(readStoredState);
-
-function persistAuthMetadata(state: AuthState): void {
-  if (typeof window === "undefined") return;
-  try {
-    if (state === EMPTY_STATE) window.localStorage.removeItem(STORAGE_KEY);
-    else window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ username: state.username }));
-  } catch {
-    // 浏览器禁止存储时，当前页面的内存会话仍可正常登录、刷新和退出。
-  }
-}
-
-authStore.subscribe(persistAuthMetadata);
-persistAuthMetadata(authStore.getState());
+export const authStore = createStore<AuthState>()(() => EMPTY_STATE);
 
 let sessionRevision = 0;
 
@@ -55,11 +23,10 @@ export function getAuthState() {
   return authStore.getState();
 }
 
-export function setAuthSession(tokens: AuthTokens, username: string) {
+export function setAuthSession(tokens: AuthTokens) {
   sessionRevision += 1;
   authStore.setState({
     tokens,
-    username: username.trim(),
     accessTokenExpiresAt: getAccessTokenExpiry(tokens.expires_in),
   });
 }

@@ -21,3 +21,14 @@ export interface LogoutResponse {
   status: string;
   session_revoked: boolean;
 }
+
+export interface CurrentUser {
+  id?: number;
+  username?: string;
+  nickname?: string;
+  realname?: string;
+  avatar?: string;
+  roles?: string[];
+  roleNames?: string[];
+  lastLoginAt?: string;
+}
