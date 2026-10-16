@@ -1,4 +1,4 @@
-import { KaiwuEntryButton } from "@/components/kaiwu/KaiwuEntryButton";
+import { KaiwuEntryButton } from "./KaiwuEntryButton";
 import { logoutPlatform } from "@/api/auth";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { formatDateTime } from "@/lib/date";

@@ -1,3 +1,4 @@
+import "./index.css";
 import { useEffect, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { getKaiwuBossEntry } from "@/api/kaiwu";
