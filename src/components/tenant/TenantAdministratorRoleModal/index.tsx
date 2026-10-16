@@ -28,6 +28,7 @@ export function TenantAdministratorRoleModal({
       visible
       okText="保存角色"
       confirmLoading={loading}
+      cancelButtonProps={{ disabled: loading }}
       okButtonProps={{ disabled: !roleId }}
       onOk={() => {
         if (roleId) onSubmit(roleId);

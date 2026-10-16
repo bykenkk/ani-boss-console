@@ -54,6 +54,7 @@ export function EditGpuQuotaModal({ tenant, onCancel, onSuccess }: EditGpuQuotaM
       title={`调整 GPU 配额上限：${tenant.tenantName}`}
       visible
       confirmLoading={mutation.isPending}
+      cancelButtonProps={{ disabled: mutation.isPending }}
       onOk={submit}
       onCancel={onCancel}
     >

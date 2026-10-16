@@ -50,6 +50,7 @@ export function EditGpuReservationModal({
       title={`调整 GPU 资源预留：${tenant.tenantName}`}
       visible
       confirmLoading={mutation.isPending}
+      cancelButtonProps={{ disabled: mutation.isPending }}
       onOk={submit}
       onCancel={onCancel}
     >

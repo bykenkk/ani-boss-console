@@ -43,6 +43,7 @@ export function TenantAdministratorInviteModal({
       visible
       okText="发送邀请"
       confirmLoading={loading}
+      cancelButtonProps={{ disabled: loading }}
       onOk={submit}
       onCancel={onCancel}
     >

@@ -45,6 +45,7 @@ export function TenantProfileModal({
       visible
       okText="保存"
       confirmLoading={loading}
+      cancelButtonProps={{ disabled: loading }}
       onOk={submit}
       onCancel={onCancel}
     >

@@ -83,6 +83,7 @@ export function PlatformAdministratorCreateModal({
       title="新建平台运营账号"
       visible={visible}
       confirmLoading={loading}
+      cancelButtonProps={{ disabled: loading }}
       onOk={submit}
       onCancel={onCancel}
       afterClose={() => form.resetFields()}
@@ -176,6 +177,7 @@ export function PlatformAdministratorRoleModal({
       title={`修改角色${target ? `：${target.displayName}` : ""}`}
       visible={Boolean(target)}
       confirmLoading={loading}
+      cancelButtonProps={{ disabled: loading }}
       mountOnEnter={false}
       afterClose={() => form.resetFields()}
       onCancel={onCancel}
@@ -215,6 +217,7 @@ export function PlatformAdministratorPasswordModal({
       title={`重置密码${target ? `：${target.displayName}` : ""}`}
       visible={Boolean(target)}
       confirmLoading={loading}
+      cancelButtonProps={{ disabled: loading }}
       afterClose={() => form.resetFields()}
       onCancel={onCancel}
       onOk={async () => {

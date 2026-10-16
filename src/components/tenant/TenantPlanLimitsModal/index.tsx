@@ -27,6 +27,7 @@ export function TenantPlanLimitsModal({
       style={{ width: 680 }}
       okText="保存限额"
       confirmLoading={loading}
+      cancelButtonProps={{ disabled: loading }}
       onOk={() =>
         onSubmit(
           limits.map((item) => ({

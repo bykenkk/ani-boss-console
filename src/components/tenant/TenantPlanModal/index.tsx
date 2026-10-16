@@ -53,6 +53,7 @@ export function TenantPlanModal({
       style={{ width: 720 }}
       okText={plan ? "保存" : "创建草稿"}
       confirmLoading={loading}
+      cancelButtonProps={{ disabled: loading }}
       onOk={submit}
       onCancel={onCancel}
     >

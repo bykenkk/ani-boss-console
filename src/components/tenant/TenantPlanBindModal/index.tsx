@@ -24,6 +24,7 @@ export function TenantPlanBindModal({
       visible
       okText="确认绑定"
       confirmLoading={loading}
+      cancelButtonProps={{ disabled: loading }}
       okButtonProps={{ disabled: !tenantId }}
       onOk={() => {
         if (tenantId) onSubmit(tenantId);

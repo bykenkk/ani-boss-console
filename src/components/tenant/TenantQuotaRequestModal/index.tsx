@@ -36,6 +36,7 @@ export function TenantQuotaRequestModal({
       visible
       okText="确认调整"
       confirmLoading={loading}
+      cancelButtonProps={{ disabled: loading }}
       onOk={submit}
       onCancel={onCancel}
     >

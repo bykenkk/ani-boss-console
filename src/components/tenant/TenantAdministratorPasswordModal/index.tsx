@@ -29,6 +29,7 @@ export function TenantAdministratorPasswordModal({
       visible
       okText="确认重置"
       confirmLoading={loading}
+      cancelButtonProps={{ disabled: loading }}
       onOk={submit}
       onCancel={onCancel}
     >

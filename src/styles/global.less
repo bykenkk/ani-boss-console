@@ -55,6 +55,13 @@ body {
   background: #cfd8e5;
 }
 
+/* 弹窗统一滚动内容区，为标题、底部操作和视口边距预留空间。 */
+.arco-modal-content {
+  max-height: calc(100vh - 192px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
 /* 全局反馈：业务代码只声明语义，位置与视觉在此统一。 */
 .arco-message-wrapper-top {
   top: 60px;

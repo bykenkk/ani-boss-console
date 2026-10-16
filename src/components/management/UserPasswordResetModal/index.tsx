@@ -31,6 +31,7 @@ export function UserPasswordResetModal({
       onCancel={onCancel}
       onOk={submit}
       confirmLoading={mutation.isPending}
+      cancelButtonProps={{ disabled: mutation.isPending }}
       maskClosable={false}
     >
       <p>保存后该用户需要重新登录。</p>

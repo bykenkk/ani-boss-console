@@ -37,6 +37,7 @@ export function TenantSsoModal({
       visible
       okText="保存配置"
       confirmLoading={loading}
+      cancelButtonProps={{ disabled: loading }}
       onOk={submit}
       onCancel={onCancel}
     >

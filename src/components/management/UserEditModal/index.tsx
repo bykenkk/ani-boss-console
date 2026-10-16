@@ -1,4 +1,4 @@
-import { Button, Form, Modal, Spin, Input, Select } from "@arco-design/web-react";
+import { Form, Modal, Spin, Input, Select } from "@arco-design/web-react";
 import { useRef, useState } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import {
@@ -32,21 +32,23 @@ export function UserEditModal(props: Props) {
       },
     },
   });
+  if (!record || detail.isSuccess) {
+    return <UserEditForm {...props} record={detail.data ?? record} />;
+  }
   return (
     <Modal
       visible
       title={record ? "编辑用户" : "新建用户"}
-      footer={null}
+      okText="保存"
+      okButtonProps={{ disabled: true }}
       onCancel={onCancel}
       maskClosable={false}
       style={{ width: 680 }}
     >
-      {!record || detail.isSuccess ? (
-        <UserEditForm {...props} record={detail.data ?? record} />
-      ) : (
-        <Spin loading={detail.isPending}>
-          <div className="py-8">详情尚未加载，暂不能编辑。</div>
-        </Spin>
+      {detail.isPending && (
+        <div className="flex justify-center py-8">
+          <Spin />
+        </div>
       )}
     </Modal>
   );
@@ -97,97 +99,108 @@ function UserEditForm({ record, defaults, userScope, onCancel, onSuccess }: Prop
     }
   };
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      initialValues={initial}
-      onValuesChange={(changed) => {
-        Object.keys(changed).forEach((key) => changedFields.current.add(key));
-        if ("tenantId" in changed) {
-          setTenantId(Number(changed.tenantId ?? 0));
-          form.setFieldValue("roleIds", []);
-        }
-      }}
+    <Modal
+      visible
+      title={record ? "编辑用户" : "新建用户"}
+      onCancel={onCancel}
+      onOk={submit}
+      okText="保存"
+      confirmLoading={mutation.isPending}
+      cancelButtonProps={{ disabled: mutation.isPending }}
+      closable={!mutation.isPending}
+      escToExit={!mutation.isPending}
+      maskClosable={false}
+      style={{ width: 680 }}
     >
-      <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
-        <Form.Item
-          field="tenantId"
-          label="所属租户"
-          rules={[{ required: true, message: "请填写所属租户" }]}
-        >
-          <ManagementRelationSelect
-            resource="tenants"
-            includePlatform={userScope !== "tenant"}
-            disabled={!!record || userScope === "platform"}
-          />
-        </Form.Item>
-        <Form.Item
-          field="username"
-          label="用户名"
-          rules={[{ required: true, message: "请填写用户名" }]}
-        >
-          <Input disabled={!!record} />
-        </Form.Item>
-        <Form.Item field="realname" label="姓名">
-          <Input />
-        </Form.Item>
-        <Form.Item field="nickname" label="昵称">
-          <Input />
-        </Form.Item>
-        <Form.Item
-          field="email"
-          label="邮箱"
-          rules={[{ type: "email", message: "请输入有效邮箱" }]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item field="mobile" label="手机号">
-          <Input />
-        </Form.Item>
-        <Form.Item
-          field="roleIds"
-          label="角色"
-          className="md:col-span-2"
-          rules={[{ required: true, message: "请填写角色" }]}
-        >
-          <ManagementRelationSelect
-            resource="roles"
-            multiple
-            userRoles
-            tenantId={tenantId}
-            disabled={userScope === "tenant" && !tenantId}
-          />
-        </Form.Item>
-        <Form.Item field="status" label="状态" rules={[{ required: true, message: "请填写状态" }]}>
-          <Select
-            options={[
-              { value: "NORMAL", label: "正常" },
-              { value: "DISABLED", label: "禁用" },
-              { value: "PENDING", label: "待激活" },
-              { value: "LOCKED", label: "锁定" },
-              { value: "EXPIRED", label: "过期" },
-              { value: "CLOSED", label: "注销" },
-            ]}
-          />
-        </Form.Item>
-        {!record && (
+      <Form
+        form={form}
+        disabled={mutation.isPending}
+        layout="vertical"
+        initialValues={initial}
+        onValuesChange={(changed) => {
+          Object.keys(changed).forEach((key) => changedFields.current.add(key));
+          if ("tenantId" in changed) {
+            setTenantId(Number(changed.tenantId ?? 0));
+            form.setFieldValue("roleIds", []);
+          }
+        }}
+      >
+        <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
           <Form.Item
-            field="password"
-            label="初始密码"
-            rules={[{ required: true, message: "请填写初始密码" }]}
+            field="tenantId"
+            label="所属租户"
+            rules={[{ required: true, message: "请填写所属租户" }]}
           >
-            <Input.Password autoComplete="new-password" />
+            <ManagementRelationSelect
+              resource="tenants"
+              includePlatform={userScope !== "tenant"}
+              disabled={mutation.isPending || !!record || userScope === "platform"}
+            />
           </Form.Item>
-        )}
-      </div>
-      <div className="flex justify-end gap-3">
-        <Button onClick={onCancel} disabled={mutation.isPending}>
-          取消
-        </Button>
-        <Button type="primary" loading={mutation.isPending} onClick={submit}>
-          保存
-        </Button>
-      </div>
-    </Form>
+          <Form.Item
+            field="username"
+            label="用户名"
+            rules={[{ required: true, message: "请填写用户名" }]}
+          >
+            <Input disabled={mutation.isPending || !!record} />
+          </Form.Item>
+          <Form.Item field="realname" label="姓名">
+            <Input />
+          </Form.Item>
+          <Form.Item field="nickname" label="昵称">
+            <Input />
+          </Form.Item>
+          <Form.Item
+            field="email"
+            label="邮箱"
+            rules={[{ type: "email", message: "请输入有效邮箱" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item field="mobile" label="手机号">
+            <Input />
+          </Form.Item>
+          <Form.Item
+            field="roleIds"
+            label="角色"
+            className="md:col-span-2"
+            rules={[{ required: true, message: "请填写角色" }]}
+          >
+            <ManagementRelationSelect
+              resource="roles"
+              multiple
+              userRoles
+              tenantId={tenantId}
+              disabled={mutation.isPending || (userScope === "tenant" && !tenantId)}
+            />
+          </Form.Item>
+          <Form.Item
+            field="status"
+            label="状态"
+            rules={[{ required: true, message: "请填写状态" }]}
+          >
+            <Select
+              options={[
+                { value: "NORMAL", label: "正常" },
+                { value: "DISABLED", label: "禁用" },
+                { value: "PENDING", label: "待激活" },
+                { value: "LOCKED", label: "锁定" },
+                { value: "EXPIRED", label: "过期" },
+                { value: "CLOSED", label: "注销" },
+              ]}
+            />
+          </Form.Item>
+          {!record && (
+            <Form.Item
+              field="password"
+              label="初始密码"
+              rules={[{ required: true, message: "请填写初始密码" }]}
+            >
+              <Input.Password autoComplete="new-password" />
+            </Form.Item>
+          )}
+        </div>
+      </Form>
+    </Modal>
   );
 }
