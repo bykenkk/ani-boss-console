@@ -15,7 +15,7 @@
 - `src/stores/`：按业务领域组织的 Zustand 客户端共享状态、操作及所属类型。简单领域使用独立文件，复杂领域使用目录按业务职责拆分；需要实例隔离的状态导出 store 工厂，由 Provider 创建实例。独立事件发布订阅使用 mitt，随所属领域组织；不另建自制事件总线。
 - `src/api/`：按业务资源组织的 API 请求函数、静态类型与 Axios 公共请求基础设施。
 - `src/components/common/`：跨页面、跨领域复用的公共组件；目录统一从 `@/components/common` 导入。
-- `src/components/layouts/`：应用布局、认证中心、顶部导航、侧边栏和页面出口。
+- `src/layouts/`：应用级布局、认证中心、顶部导航、侧边栏和页面出口，使用 `src/layouts/<LayoutName>/index.tsx`；布局专用组件与私有样式随所属布局维护。
 - `src/styles/`：全局样式；组件私有样式应与组件同目录，不进入全局样式目录。
 - `src/routeTree.gen.ts`：TanStack Router 自动生成文件，不进行手工修改。
 - `docs/`：工程、UI 与 API 对接规范，不保存接口契约或产品原型副本。
