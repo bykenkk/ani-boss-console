@@ -11,7 +11,8 @@ import {
 import { validateForm } from "@/lib/form";
 import { withId } from "@/lib/id";
 
-import { ManagementRelationSelect } from "../ManagementRelationSelect";
+import { TenantSelect } from "@/components/tenant/TenantSelect";
+import { RoleSelect } from "@/components/management/RoleSelect";
 interface Props {
   record?: ResourceRecords["users"];
   defaults?: EditValues;
@@ -131,8 +132,7 @@ function UserEditForm({ record, defaults, userScope, onCancel, onSuccess }: Prop
             label="所属租户"
             rules={[{ required: true, message: "请填写所属租户" }]}
           >
-            <ManagementRelationSelect
-              resource="tenants"
+            <TenantSelect
               includePlatform={userScope !== "tenant"}
               disabled={mutation.isPending || !!record || userScope === "platform"}
             />
@@ -166,10 +166,8 @@ function UserEditForm({ record, defaults, userScope, onCancel, onSuccess }: Prop
             className="md:col-span-2"
             rules={[{ required: true, message: "请填写角色" }]}
           >
-            <ManagementRelationSelect
-              resource="roles"
+            <RoleSelect
               multiple
-              userRoles
               tenantId={tenantId}
               disabled={mutation.isPending || (userScope === "tenant" && !tenantId)}
             />

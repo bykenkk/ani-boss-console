@@ -11,7 +11,7 @@ import {
 import { validateForm } from "@/lib/form";
 import { withId } from "@/lib/id";
 
-import { ManagementRelationSelect } from "../ManagementRelationSelect";
+import { PermissionGroupSelect } from "@/components/management/PermissionGroupSelect";
 interface Props {
   record?: ResourceRecords["permission-groups"];
   defaults?: EditValues;
@@ -128,11 +128,7 @@ function PermissionGroupEditForm({ record, defaults, onCancel, onSuccess }: Prop
           </Form.Item>
 
           <Form.Item field="parentId" label="上级分组">
-            <ManagementRelationSelect
-              resource="permission-groups"
-              includeRoot
-              excludeId={record?.id}
-            />
+            <PermissionGroupSelect includeRoot excludeSubtreeId={record?.id} />
           </Form.Item>
           <Form.Item field="sortOrder" label="排序">
             <InputNumber min={0} precision={0} />

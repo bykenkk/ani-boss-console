@@ -17,7 +17,7 @@ import {
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
 import { RoleEditModal } from "@/components/management/RoleEditModal";
-import { ManagementRelationSelect } from "@/components/management/ManagementRelationSelect";
+import { TenantSelect } from "@/components/tenant/TenantSelect";
 
 const columns: ListColumn<ManagedRole>[] = [
   {
@@ -191,8 +191,7 @@ export function PlatformRolesPage() {
                   setPage(1);
                 }}
               />
-              <ManagementRelationSelect
-                resource="tenants"
+              <TenantSelect
                 includePlatform
                 value={tenantId}
                 onChange={(value) => {

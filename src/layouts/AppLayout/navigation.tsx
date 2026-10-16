@@ -90,8 +90,8 @@ const auditNavigation: readonly NavigationLeaf[] = [
 ];
 
 const settingsNavigation: readonly NavigationLeaf[] = [
-  { label: "权限点管理", to: "/permissions", icon: <IconLock /> },
   { label: "权限分组管理", to: "/permission-groups", icon: <IconApps /> },
+  { label: "权限点管理", to: "/permissions", icon: <IconLock /> },
   { label: "API 管理", to: "/apis", icon: <IconLink /> },
   {
     label: "平台管理员",

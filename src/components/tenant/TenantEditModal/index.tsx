@@ -12,7 +12,7 @@ import {
 import { validateForm } from "@/lib/form";
 import { withId } from "@/lib/id";
 import { formatDateTime, toRfc3339DateTime } from "@/lib/date";
-import { ManagementRelationSelect } from "@/components/management/ManagementRelationSelect";
+import { PlanSelect } from "@/components/tenant/PlanSelect";
 interface Props {
   record?: ResourceRecords["tenants"];
   defaults?: EditValues;
@@ -167,7 +167,7 @@ function TenantEditForm({ record, defaults, onCancel, onSuccess }: Props) {
             />
           </Form.Item>
           <Form.Item field="planId" label="套餐">
-            <ManagementRelationSelect resource="plans" />
+            <PlanSelect />
           </Form.Item>
           <Form.Item field="domain" label="专属域名">
             <Input />

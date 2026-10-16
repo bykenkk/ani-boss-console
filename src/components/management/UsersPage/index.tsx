@@ -17,7 +17,8 @@ import {
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
 import { UserEditModal } from "@/components/management/UserEditModal";
-import { ManagementRelationSelect } from "@/components/management/ManagementRelationSelect";
+import { TenantSelect } from "@/components/tenant/TenantSelect";
+import { RoleSelect } from "@/components/management/RoleSelect";
 import { UserPasswordResetModal } from "@/components/management/UserPasswordResetModal";
 
 const columns: ListColumn<ManagedUser>[] = [
@@ -228,8 +229,7 @@ export function UsersPage({ scope = "all" }: { scope?: "all" | "platform" | "ten
                 }}
               />
               {scope !== "platform" && (
-                <ManagementRelationSelect
-                  resource="tenants"
+                <TenantSelect
                   includePlatform={scope !== "tenant"}
                   value={tenantId}
                   onChange={(value) => {
@@ -240,9 +240,7 @@ export function UsersPage({ scope = "all" }: { scope?: "all" | "platform" | "ten
                 />
               )}
               {scope === "all" && (
-                <ManagementRelationSelect
-                  resource="roles"
-                  userRoles={tenantId !== undefined}
+                <RoleSelect
                   tenantId={tenantId}
                   value={roleId}
                   onChange={(value) => {

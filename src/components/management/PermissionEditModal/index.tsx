@@ -11,7 +11,8 @@ import {
 import { validateForm } from "@/lib/form";
 import { withId } from "@/lib/id";
 
-import { ManagementRelationSelect } from "../ManagementRelationSelect";
+import { PermissionGroupSelect } from "@/components/management/PermissionGroupSelect";
+import { ApiTreeSelect } from "../ApiTreeSelect";
 interface Props {
   record?: ResourceRecords["permissions"];
   defaults?: EditValues;
@@ -120,7 +121,7 @@ function PermissionEditForm({ record, defaults, onCancel, onSuccess }: Props) {
             <Input />
           </Form.Item>
           <Form.Item field="groupId" label="权限分组">
-            <ManagementRelationSelect resource="permission-groups" />
+            <PermissionGroupSelect />
           </Form.Item>
           <Form.Item
             field="status"
@@ -138,7 +139,7 @@ function PermissionEditForm({ record, defaults, onCancel, onSuccess }: Props) {
             <Input.TextArea />
           </Form.Item>
           <Form.Item field="apiIds" label="关联 API" className="md:col-span-2">
-            <ManagementRelationSelect resource="apis" multiple />
+            <ApiTreeSelect />
           </Form.Item>
         </div>
       </Form>

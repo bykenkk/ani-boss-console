@@ -11,7 +11,8 @@ import {
 import { validateForm } from "@/lib/form";
 import { withId } from "@/lib/id";
 
-import { ManagementRelationSelect } from "../ManagementRelationSelect";
+import { TenantSelect } from "@/components/tenant/TenantSelect";
+import { PermissionTreeSelect } from "../PermissionTreeSelect";
 interface Props {
   record?: ResourceRecords["roles"];
   defaults?: EditValues;
@@ -158,8 +159,7 @@ function RoleEditForm({ record, defaults, onCancel, onSuccess }: Props) {
               },
             ]}
           >
-            <ManagementRelationSelect
-              resource="tenants"
+            <TenantSelect
               includePlatform={roleType !== "TENANT"}
               disabled={!!record || roleType !== "TENANT"}
             />
@@ -183,7 +183,7 @@ function RoleEditForm({ record, defaults, onCancel, onSuccess }: Props) {
             <Input.TextArea />
           </Form.Item>
           <Form.Item field="permissions" label="权限点" className="md:col-span-2">
-            <ManagementRelationSelect resource="permissions" multiple />
+            <PermissionTreeSelect />
           </Form.Item>
         </div>
       </Form>
