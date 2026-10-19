@@ -22,6 +22,23 @@
 
 项目不使用 `src/pages/` 或 `src/features/` 承载新代码；已有遗留目录应在相关功能调整时迁移，不新增依赖。确需新增顶层目录时应先重构现有功能归属并更新本文档，不在多处重复记录。
 
+### 废弃接口组织
+
+新增或调整迁移领域时，新旧接口按以下格式组织；旧接口在迁移完成前保留：
+
+```text
+src/api/<domain>/
+  index.ts               # 新接口公开入口
+  types.ts               # 新接口类型
+  legacy.ts              # 旧接口统一公开入口
+  types-legacy.ts        # 保留的旧接口类型
+  <resource>-legacy.ts   # 旧资源请求模块，按需拆分，由 legacy.ts 汇总导出
+```
+
+- 少量旧请求可以直接实现在 `legacy.ts`；旧资源较多时拆入 `<resource>-legacy.ts`，不增加 `index-legacy.ts`、`legacy/index.ts` 或额外的 `index/legacy` 层级。
+- 新调用从 `@/api/<domain>` 导入，旧调用及旧类型从 `@/api/<domain>/legacy` 导入；调用方不得绕过该入口直接依赖资源级 `-legacy` 文件，新 `index.ts` 不转导出旧接口或旧接口命名空间。
+- 旧功能保留边界和迁移标记遵循 [API 对接流程](./API-INTEGRATION.md#迁移标记与保留边界)。
+
 ## 路由组织
 
 - 业务 URL 均落位于 `src/routes/`，业务页面使用 `<page-name>/index.tsx`。
