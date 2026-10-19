@@ -131,7 +131,7 @@ export function PlanQuotaList({ planId }: { planId: number }) {
           pagination={{
             page,
             pageSize,
-            total: query.data?.total ?? 0,
+            total: query.data ? Number(query.data.total) : 0,
             onPageChange: setPage,
             onPageSizeChange: (size) => {
               setPageSize(size);

@@ -54,13 +54,13 @@ export function KaiwuEntryButton() {
         pendingWindow.current?.close();
         pendingWindow.current = null;
         if (error instanceof ApiError) {
-          if (error.code === "KAIWU_BOSS_ROLE_REQUIRED") {
+          if ((error.reason ?? error.code) === "KAIWU_BOSS_ROLE_REQUIRED") {
             throw new Error("当前账号无开物访问权限，请使用 root 平台管理员账号");
           }
-          if (error.code === "KAIWU_PLATFORM_USER_NOT_ACTIVE") {
+          if ((error.reason ?? error.code) === "KAIWU_PLATFORM_USER_NOT_ACTIVE") {
             throw new Error("当前平台账号已停用，无法访问开物");
           }
-          if (error.code === "KAIWU_USER_CREDENTIAL_REQUIRED") {
+          if ((error.reason ?? error.code) === "KAIWU_USER_CREDENTIAL_REQUIRED") {
             throw new Error("请使用用户账号登录后访问开物");
           }
           if (error.status === 503) throw new Error("开物服务暂不可用，请稍后重试");

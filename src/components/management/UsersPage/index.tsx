@@ -263,7 +263,7 @@ export function UsersPage({ scope = "all" }: { scope?: "all" | "platform" | "ten
           pagination={{
             page,
             pageSize,
-            total: query.data?.total ?? 0,
+            total: query.data ? Number(query.data.total) : 0,
             onPageChange: setPage,
             onPageSizeChange: (size) => {
               setPageSize(size);

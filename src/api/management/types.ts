@@ -108,7 +108,7 @@ export interface ManagementListInput {
 }
 export interface ManagementList<T> {
   items: T[];
-  total: number;
+  total: string;
 }
 export type EditValues = Record<string, unknown>;
 export interface SaveManagementInput {

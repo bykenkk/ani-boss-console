@@ -13,7 +13,6 @@ import type {
   TenantAdministratorSource,
   TenantAdministratorStatus,
   TenantInvitationResult,
-  TenantMutationResult,
   TenantReference,
   TenantRoleDefinition,
   UpdateTenantAdministratorRoleInput,
@@ -199,14 +198,14 @@ export function resendTenantAdministratorInvitation(
   );
 }
 
-export function updateTenantAdministratorRole(
+export async function updateTenantAdministratorRole(
   input: UpdateTenantAdministratorRoleInput,
-): Promise<TenantMutationResult> {
-  return runIdempotentRequest(
+): Promise<void> {
+  await runIdempotentRequest(
     updateAdministratorRoleScope,
     { role_id: input.roleId },
     (body) =>
-      servicesRequest<TenantMutationResult, typeof body>(
+      servicesRequest<unknown, typeof body>(
         tenantAdministratorPath(input.tenantId, input.userId, "/role"),
         { method: "PUT", data: body },
       ),
@@ -214,14 +213,14 @@ export function updateTenantAdministratorRole(
   );
 }
 
-export function resetTenantAdministratorPassword(
+export async function resetTenantAdministratorPassword(
   input: ResetTenantAdministratorPasswordInput,
-): Promise<TenantMutationResult> {
-  return runIdempotentRequest(
+): Promise<void> {
+  await runIdempotentRequest(
     resetAdministratorPasswordScope,
     { new_password: input.newPassword },
     (body) =>
-      servicesRequest<TenantMutationResult, typeof body>(
+      servicesRequest<unknown, typeof body>(
         tenantAdministratorPath(input.tenantId, input.userId, "/reset-password"),
         { method: "POST", data: body },
       ),
@@ -229,16 +228,16 @@ export function resetTenantAdministratorPassword(
   );
 }
 
-export function updateTenantAdministratorStatus(
+export async function updateTenantAdministratorStatus(
   tenantId: string,
   userId: string,
   action: "disable" | "enable",
-): Promise<TenantMutationResult> {
-  return runIdempotentRequest(
+): Promise<void> {
+  await runIdempotentRequest(
     administratorStatusScope,
     {},
     (body) =>
-      servicesRequest<TenantMutationResult, typeof body>(
+      servicesRequest<unknown, typeof body>(
         tenantAdministratorPath(tenantId, userId, `/${action}`),
         { method: "POST", data: body },
       ),
@@ -246,11 +245,8 @@ export function updateTenantAdministratorStatus(
   );
 }
 
-export function deleteTenantAdministrator(
-  tenantId: string,
-  userId: string,
-): Promise<TenantMutationResult> {
-  return servicesRequest<TenantMutationResult>(tenantAdministratorPath(tenantId, userId), {
+export async function deleteTenantAdministrator(tenantId: string, userId: string): Promise<void> {
+  await servicesRequest<unknown>(tenantAdministratorPath(tenantId, userId), {
     method: "DELETE",
   });
 }

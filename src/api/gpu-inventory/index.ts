@@ -334,26 +334,27 @@ export async function fetchTenantGpuAllocations(): Promise<TenantGpuAllocation[]
   }));
 }
 
-export function updateTenantGpuQuota({
+export async function updateTenantGpuQuota({
   tenantId,
   total,
-}: UpdateTenantGpuQuotaInput): Promise<unknown> {
-  return coreRequest(`/admin/tenants/${encodeURIComponent(tenantId)}/quota`, {
+}: UpdateTenantGpuQuotaInput): Promise<void> {
+  const data = { items: [{ resource_type: GPU_RESOURCE_TYPE, total }] };
+  await coreRequest<unknown, typeof data>(`/admin/tenants/${encodeURIComponent(tenantId)}/quota`, {
     method: "PUT",
-    data: { items: [{ resource_type: GPU_RESOURCE_TYPE, total }] },
+    data,
   });
 }
 
-export function updateTenantGpuReservation({
+export async function updateTenantGpuReservation({
   tenantId,
   allocatedGpuCount,
-}: UpdateTenantGpuReservationInput): Promise<GpuReservationResponse> {
+}: UpdateTenantGpuReservationInput): Promise<void> {
   const submitData = { allocated_gpu_count: allocatedGpuCount };
-  return runIdempotentOperation(
+  await runIdempotentOperation(
     reservationScope,
     submitData,
     (idempotencyKey) =>
-      coreRequest<GpuReservationResponse, typeof submitData>(
+      coreRequest<unknown, typeof submitData>(
         `/admin/tenants/${encodeURIComponent(tenantId)}/reservations`,
         {
           method: "PUT",
@@ -401,8 +402,12 @@ export function getGpuPartitionErrorMessage(error: unknown): string {
     return error instanceof Error && error.message.trim() ? error.message : "请求失败，请稍后重试";
   }
   if (error.status === 403) return "需要平台管理员身份才能配置集群 GPU 切分";
-  if (error.code === "NO_IDLE_WHOLECARD_GPUS") return "集群内没有可切分的空闲整卡节点";
-  if (error.code === "UNAVAILABLE" || error.code === "NOT_CONFIGURED") {
+  if ((error.reason ?? error.code) === "NO_IDLE_WHOLECARD_GPUS")
+    return "集群内没有可切分的空闲整卡节点";
+  if (
+    (error.reason ?? error.code) === "UNAVAILABLE" ||
+    (error.reason ?? error.code) === "NOT_CONFIGURED"
+  ) {
     return "GPU 切分服务暂不可用，请稍后重试";
   }
   return error.message.trim() || "请求失败，请稍后重试";

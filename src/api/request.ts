@@ -1,4 +1,5 @@
 import axios, {
+  AxiosHeaders,
   type AxiosInstance,
   type AxiosRequestConfig,
   type AxiosResponse,
@@ -45,7 +46,8 @@ type ApiErrorPayload = {
 
 export class ApiError extends Error {
   readonly status?: number;
-  readonly code?: string;
+  readonly code?: string | number;
+  readonly reason?: string;
   readonly requestId?: string;
   readonly request_id?: string;
   readonly details?: Record<string, unknown>;
@@ -56,7 +58,8 @@ export class ApiError extends Error {
     message: string,
     options: {
       status?: number;
-      code?: string;
+      code?: string | number;
+      reason?: string;
       requestId?: string;
       details?: Record<string, unknown>;
       config?: AxiosRequestConfig;
@@ -68,6 +71,7 @@ export class ApiError extends Error {
     this.name = "ApiError";
     this.status = options.status;
     this.code = options.code;
+    this.reason = options.reason;
     this.requestId = options.requestId;
     this.request_id = options.requestId;
     this.details = options.details;
@@ -139,9 +143,17 @@ export function toApiError(error: unknown): ApiError {
     error.message ||
     (error.response ? `HTTP ${error.response.status}` : "网络请求失败");
   const metadata = payloadRecord(payload?.metadata);
+  const responseHeaders = error.response?.headers;
+  const headerRequestId =
+    responseHeaders instanceof AxiosHeaders
+      ? responseHeaders.get("X-Request-ID")
+      : Object.entries(responseHeaders ?? {}).find(
+          ([name]) => name.toLowerCase() === "x-request-id",
+        )?.[1];
   const requestId =
     (typeof payload?.request_id === "string" && payload.request_id) ||
     (typeof metadata?.request_id === "string" && metadata.request_id) ||
+    (typeof headerRequestId === "string" && headerRequestId) ||
     undefined;
   const details =
     payload?.details && typeof payload.details === "object"
@@ -151,11 +163,10 @@ export function toApiError(error: unknown): ApiError {
   return new ApiError(message, {
     status: error.response?.status,
     code:
-      typeof payload?.code === "string"
+      typeof payload?.code === "string" || typeof payload?.code === "number"
         ? payload.code
-        : typeof payload?.reason === "string"
-          ? payload.reason
-          : error.code,
+        : error.code,
+    reason: typeof payload?.reason === "string" ? payload.reason : undefined,
     requestId,
     details,
     config: error.config,

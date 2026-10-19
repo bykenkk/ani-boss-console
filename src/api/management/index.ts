@@ -21,21 +21,18 @@ export async function listManagement<R extends Resource>(
   input: ManagementListInput = {},
   signal?: AbortSignal,
 ): Promise<ManagementList<ResourceRecords[R]>> {
-  const result = await adminRequest<{ items?: ResourceRecords[R][]; total?: string | number }>(
-    `/${resource}`,
-    {
-      method: "GET",
-      signal,
-      params: {
-        page: input.page ?? 1,
-        pageSize: input.pageSize ?? 20,
-        noPaging: input.noPaging,
-        query: JSON.stringify(input.filters ?? {}),
-        orderBy: "id desc",
-      },
+  const result = await adminRequest<ManagementList<ResourceRecords[R]>>(`/${resource}`, {
+    method: "GET",
+    signal,
+    params: {
+      page: input.page ?? 1,
+      pageSize: input.pageSize ?? 20,
+      noPaging: input.noPaging,
+      query: JSON.stringify(input.filters ?? {}),
+      orderBy: "id desc",
     },
-  );
-  return { items: result.items ?? [], total: Number(result.total ?? 0) };
+  });
+  return result;
 }
 export function getManagement<R extends Resource>(
   resource: R,
@@ -105,15 +102,17 @@ export async function saveManagement(
     },
   );
 }
-export function deleteManagement(resource: Resource, id: number): Promise<void> {
+export async function deleteManagement(resource: Resource, id: number): Promise<void> {
   const queryId = resource === "plans" || resource === "plan-quotas";
-  return adminRequest(`/${resource}${queryId ? "" : `/${id}`}`, {
+  await adminRequest(`/${resource}${queryId ? "" : `/${id}`}`, {
     method: "DELETE",
     params: queryId ? { id } : undefined,
   });
 }
-export function createTenantWithAdministrator(input: TenantWithAdministratorInput): Promise<void> {
-  return adminRequest<void, TenantWithAdministratorInput & { activationMode: string }>(
+export async function createTenantWithAdministrator(
+  input: TenantWithAdministratorInput,
+): Promise<void> {
+  await adminRequest<void, TenantWithAdministratorInput & { activationMode: string }>(
     "/tenants:with-admin",
     {
       method: "POST",
@@ -128,8 +127,8 @@ export async function resetManagementPassword(userId: number, password: string):
     data: { userId, newPassword },
   });
 }
-export function syncManagementApis(): Promise<void> {
-  return adminRequest("/apis/sync", { method: "POST" });
+export async function syncManagementApis(): Promise<void> {
+  await adminRequest("/apis/sync", { method: "POST" });
 }
 export interface TenantUsage {
   tenantId?: number;

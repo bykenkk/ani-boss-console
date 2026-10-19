@@ -5,7 +5,6 @@ import { fetchAllCursorPages, tenantPath, tenantPlanPath } from "./shared";
 import type {
   BoundTenant,
   CreateTenantPlanInput,
-  TenantMutationResult,
   TenantPlanAuditLog,
   TenantPlanDetail,
   TenantPlanListFilters,
@@ -105,8 +104,8 @@ export async function fetchTenantPlanQuotaLimits(planId: string): Promise<Tenant
   }));
 }
 
-export function createTenantPlan(input: CreateTenantPlanInput): Promise<TenantMutationResult> {
-  return runIdempotentRequest(
+export async function createTenantPlan(input: CreateTenantPlanInput): Promise<void> {
+  await runIdempotentRequest(
     createPlanScope,
     {
       code: input.code,
@@ -118,7 +117,7 @@ export function createTenantPlan(input: CreateTenantPlanInput): Promise<TenantMu
       })),
     },
     (body) =>
-      servicesRequest<TenantMutationResult, typeof body>("/tenant-plans", {
+      servicesRequest<unknown, typeof body>("/tenant-plans", {
         method: "POST",
         data: body,
       }),
@@ -126,12 +125,12 @@ export function createTenantPlan(input: CreateTenantPlanInput): Promise<TenantMu
   );
 }
 
-export function updateTenantPlan(input: UpdateTenantPlanInput): Promise<TenantMutationResult> {
-  return runIdempotentRequest(
+export async function updateTenantPlan(input: UpdateTenantPlanInput): Promise<void> {
+  await runIdempotentRequest(
     updatePlanScope,
     { name: input.name, description: input.description },
     (body) =>
-      servicesRequest<TenantMutationResult, typeof body>(tenantPlanPath(input.planId), {
+      servicesRequest<unknown, typeof body>(tenantPlanPath(input.planId), {
         method: "PUT",
         data: body,
       }),
@@ -139,10 +138,10 @@ export function updateTenantPlan(input: UpdateTenantPlanInput): Promise<TenantMu
   );
 }
 
-export function updateTenantPlanQuotaLimits(
+export async function updateTenantPlanQuotaLimits(
   input: UpdateTenantPlanLimitsInput,
-): Promise<TenantMutationResult> {
-  return runIdempotentRequest(
+): Promise<void> {
+  await runIdempotentRequest(
     updatePlanLimitsScope,
     {
       items: input.items.map((item) => ({
@@ -151,23 +150,23 @@ export function updateTenantPlanQuotaLimits(
       })),
     },
     (body) =>
-      servicesRequest<TenantMutationResult, typeof body>(
-        tenantPlanPath(input.planId, "/quota-limits"),
-        { method: "PUT", data: body },
-      ),
+      servicesRequest<unknown, typeof body>(tenantPlanPath(input.planId, "/quota-limits"), {
+        method: "PUT",
+        data: body,
+      }),
     [input.planId],
   );
 }
 
-export function updateTenantPlanStatus(
+export async function updateTenantPlanStatus(
   planId: string,
   action: "activate" | "disable",
-): Promise<TenantMutationResult> {
-  return runIdempotentRequest(
+): Promise<void> {
+  await runIdempotentRequest(
     planStatusScope,
     {},
     (body) =>
-      servicesRequest<TenantMutationResult, typeof body>(tenantPlanPath(planId, `/${action}`), {
+      servicesRequest<unknown, typeof body>(tenantPlanPath(planId, `/${action}`), {
         method: "POST",
         data: body,
       }),
@@ -175,8 +174,8 @@ export function updateTenantPlanStatus(
   );
 }
 
-export function deleteTenantPlan(planId: string): Promise<TenantMutationResult> {
-  return servicesRequest<TenantMutationResult>(tenantPlanPath(planId), { method: "DELETE" });
+export async function deleteTenantPlan(planId: string): Promise<void> {
+  await servicesRequest<unknown>(tenantPlanPath(planId), { method: "DELETE" });
 }
 
 async function fetchPlanTenants(planId: string, suffix: string): Promise<BoundTenant[]> {
@@ -200,12 +199,12 @@ export function fetchTenantPlanBindableTenants(planId: string) {
   return fetchPlanTenants(planId, "/bindable-tenants");
 }
 
-export function bindTenantPlan(tenantId: string, planId: string): Promise<TenantMutationResult> {
-  return runIdempotentRequest(
+export async function bindTenantPlan(tenantId: string, planId: string): Promise<void> {
+  await runIdempotentRequest(
     bindPlanScope,
     { plan_id: planId },
     (body) =>
-      servicesRequest<TenantMutationResult, typeof body>(tenantPath(tenantId, "/plan"), {
+      servicesRequest<unknown, typeof body>(tenantPath(tenantId, "/plan"), {
         method: "POST",
         data: body,
       }),

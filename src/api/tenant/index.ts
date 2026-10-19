@@ -72,7 +72,7 @@ const errorMessages: Record<string, string> = {
 };
 
 export function getTenantManagementErrorMessage(error: unknown) {
-  const code = error instanceof ApiError ? error.code : undefined;
+  const code = error instanceof ApiError ? (error.reason ?? error.code) : undefined;
   return (
     (code && errorMessages[code]) ||
     (error instanceof Error && error.message.trim()) ||

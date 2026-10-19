@@ -7,7 +7,6 @@ import type {
   PlatformAdministratorDetail,
   PlatformAdministratorListFilters,
   PlatformAdministratorListItem,
-  PlatformAdministratorMutationResult,
   PlatformAdministratorRoleDefinition,
   ResetPlatformAdministratorPasswordInput,
   UpdatePlatformAdministratorRoleInput,
@@ -150,66 +149,63 @@ export async function fetchPlatformAdministratorAuditLogs(
   }));
 }
 
-export function createPlatformAdministrator(
+export async function createPlatformAdministrator(
   input: CreatePlatformAdministratorInput,
-): Promise<PlatformAdministratorMutationResult> {
+): Promise<void> {
   const { displayName, roleId, ...fields } = input;
-  return runIdempotentRequest(
+  await runIdempotentRequest(
     createScope,
     { ...fields, display_name: displayName, role_id: roleId },
     (body) =>
-      servicesRequest<PlatformAdministratorMutationResult, typeof body>("/platform-admins", {
+      servicesRequest<unknown, typeof body>("/platform-admins", {
         method: "POST",
         data: body,
       }),
   );
 }
 
-export function updatePlatformAdministratorRole({
+export async function updatePlatformAdministratorRole({
   userId,
   roleId,
-}: UpdatePlatformAdministratorRoleInput): Promise<PlatformAdministratorMutationResult> {
-  return runIdempotentRequest(
+}: UpdatePlatformAdministratorRoleInput): Promise<void> {
+  await runIdempotentRequest(
     updateRoleScope,
     { role_id: roleId },
     (body) =>
-      servicesRequest<PlatformAdministratorMutationResult, typeof body>(
-        platformAdministratorPath(userId, "/role"),
-        { method: "PUT", data: body },
-      ),
+      servicesRequest<unknown, typeof body>(platformAdministratorPath(userId, "/role"), {
+        method: "PUT",
+        data: body,
+      }),
     [userId],
   );
 }
 
-export function resetPlatformAdministratorPassword({
+export async function resetPlatformAdministratorPassword({
   userId,
   newPassword,
-}: ResetPlatformAdministratorPasswordInput): Promise<PlatformAdministratorMutationResult> {
-  return runIdempotentRequest(
+}: ResetPlatformAdministratorPasswordInput): Promise<void> {
+  await runIdempotentRequest(
     resetPasswordScope,
     { new_password: newPassword },
     (body) =>
-      servicesRequest<PlatformAdministratorMutationResult, typeof body>(
-        platformAdministratorPath(userId, "/reset-password"),
-        { method: "POST", data: body },
-      ),
+      servicesRequest<unknown, typeof body>(platformAdministratorPath(userId, "/reset-password"), {
+        method: "POST",
+        data: body,
+      }),
     [userId],
   );
 }
 
-function runStatusOperation(
-  userId: string,
-  action: "disable" | "enable",
-): Promise<PlatformAdministratorMutationResult> {
+async function runStatusOperation(userId: string, action: "disable" | "enable"): Promise<void> {
   const scope = action === "disable" ? disableScope : enableScope;
-  return runIdempotentRequest(
+  await runIdempotentRequest(
     scope,
     {},
     (body) =>
-      servicesRequest<PlatformAdministratorMutationResult, typeof body>(
-        platformAdministratorPath(userId, `/${action}`),
-        { method: "POST", data: body },
-      ),
+      servicesRequest<unknown, typeof body>(platformAdministratorPath(userId, `/${action}`), {
+        method: "POST",
+        data: body,
+      }),
     [userId],
   );
 }
@@ -222,17 +218,15 @@ export function enablePlatformAdministrator(userId: string) {
   return runStatusOperation(userId, "enable");
 }
 
-export function deletePlatformAdministrator(
-  userId: string,
-): Promise<PlatformAdministratorMutationResult> {
-  return runIdempotentRequest(
+export async function deletePlatformAdministrator(userId: string): Promise<void> {
+  await runIdempotentRequest(
     deleteScope,
     {},
     (body) =>
-      servicesRequest<PlatformAdministratorMutationResult, typeof body>(
-        platformAdministratorPath(userId),
-        { method: "DELETE", data: body },
-      ),
+      servicesRequest<unknown, typeof body>(platformAdministratorPath(userId), {
+        method: "DELETE",
+        data: body,
+      }),
     [userId],
   );
 }
@@ -249,7 +243,7 @@ const platformAdministratorErrorMessages: Record<string, string> = {
 };
 
 export function getPlatformAdministratorErrorMessage(error: unknown) {
-  const code = error instanceof ApiError ? error.code : undefined;
+  const code = error instanceof ApiError ? (error.reason ?? error.code) : undefined;
   return (
     (code && platformAdministratorErrorMessages[code]) ||
     (error instanceof Error && error.message.trim()) ||

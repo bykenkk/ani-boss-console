@@ -22,10 +22,10 @@ function normalizeRedirect(redirect?: string) {
 }
 
 function getLoginErrorMessage(error: unknown) {
-  if (error instanceof ApiError && error.code === "INVALID_CREDENTIALS") {
+  if (error instanceof ApiError && (error.reason ?? error.code) === "INVALID_CREDENTIALS") {
     return "用户名或密码错误";
   }
-  if (error instanceof ApiError && error.code === "AUTH_NOT_CONFIGURED") {
+  if (error instanceof ApiError && (error.reason ?? error.code) === "AUTH_NOT_CONFIGURED") {
     return "平台登录服务尚未配置";
   }
   if (typeof navigator !== "undefined" && !navigator.onLine) {

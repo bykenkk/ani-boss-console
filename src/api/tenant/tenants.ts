@@ -140,8 +140,8 @@ export async function fetchAvailableTenantPlans(): Promise<AvailableTenantPlan[]
   return response.items;
 }
 
-export function createTenant(input: CreateTenantInput): Promise<TenantMutationResult> {
-  return runIdempotentRequest(
+export async function createTenant(input: CreateTenantInput): Promise<void> {
+  await runIdempotentRequest(
     createTenantScope,
     {
       name: input.name,
@@ -153,7 +153,7 @@ export function createTenant(input: CreateTenantInput): Promise<TenantMutationRe
       admin_password: input.administratorPassword,
     },
     (body) =>
-      servicesRequest<TenantMutationResult, typeof body>("/tenants", {
+      servicesRequest<unknown, typeof body>("/tenants", {
         method: "POST",
         data: body,
       }),
@@ -161,13 +161,13 @@ export function createTenant(input: CreateTenantInput): Promise<TenantMutationRe
   );
 }
 
-export function updateTenant(input: UpdateTenantInput): Promise<TenantMutationResult> {
+export async function updateTenant(input: UpdateTenantInput): Promise<void> {
   const { tenantId, displayName, contactEmail } = input;
-  return runIdempotentRequest(
+  await runIdempotentRequest(
     updateTenantScope,
     { display_name: displayName, contact_email: contactEmail },
     (body) =>
-      servicesRequest<TenantMutationResult, typeof body>(tenantPath(tenantId), {
+      servicesRequest<unknown, typeof body>(tenantPath(tenantId), {
         method: "PUT",
         data: body,
       }),
@@ -175,15 +175,15 @@ export function updateTenant(input: UpdateTenantInput): Promise<TenantMutationRe
   );
 }
 
-export function updateTenantStatus(
+export async function updateTenantStatus(
   tenantId: string,
   action: "freeze" | "unfreeze" | "disable",
-): Promise<TenantMutationResult> {
-  return runIdempotentRequest(
+): Promise<void> {
+  await runIdempotentRequest(
     tenantStatusScope,
     {},
     (body) =>
-      servicesRequest<TenantMutationResult, typeof body>(tenantPath(tenantId, `/${action}`), {
+      servicesRequest<unknown, typeof body>(tenantPath(tenantId, `/${action}`), {
         method: "POST",
         data: body,
       }),
@@ -203,12 +203,12 @@ export async function fetchTenantAuth(tenantId: string): Promise<TenantAuthConfi
   };
 }
 
-export function updateTenantSso(input: UpdateTenantSsoInput): Promise<TenantMutationResult> {
-  return runIdempotentRequest(
+export async function updateTenantSso(input: UpdateTenantSsoInput): Promise<void> {
+  await runIdempotentRequest(
     tenantSsoScope,
     { sso_enabled: input.ssoEnabled, provider: input.provider },
     (body) =>
-      servicesRequest<TenantMutationResult, typeof body>(tenantPath(input.tenantId, "/auth/sso"), {
+      servicesRequest<unknown, typeof body>(tenantPath(input.tenantId, "/auth/sso"), {
         method: "PUT",
         data: body,
       }),
@@ -216,15 +216,12 @@ export function updateTenantSso(input: UpdateTenantSsoInput): Promise<TenantMuta
   );
 }
 
-export function updateTenantMfa(
-  tenantId: string,
-  mfaRequired: boolean,
-): Promise<TenantMutationResult> {
-  return runIdempotentRequest(
+export async function updateTenantMfa(tenantId: string, mfaRequired: boolean): Promise<void> {
+  await runIdempotentRequest(
     tenantMfaScope,
     { mfa_required: mfaRequired },
     (body) =>
-      servicesRequest<TenantMutationResult, typeof body>(tenantPath(tenantId, "/auth/mfa"), {
+      servicesRequest<unknown, typeof body>(tenantPath(tenantId, "/auth/mfa"), {
         method: "PUT",
         data: body,
       }),
@@ -309,14 +306,14 @@ export function submitTenantQuotaChangeRequest(
   );
 }
 
-export function reviewTenantQuotaChangeRequest(
+export async function reviewTenantQuotaChangeRequest(
   input: ReviewTenantQuotaChangeInput,
-): Promise<TenantMutationResult> {
-  return runIdempotentRequest(
+): Promise<void> {
+  await runIdempotentRequest(
     quotaReviewScope,
     { approved: input.approved },
     (body) =>
-      servicesRequest<TenantMutationResult, typeof body>(
+      servicesRequest<unknown, typeof body>(
         tenantPath(
           input.tenantId,
           `/quota-requests/${encodeURIComponent(input.requestId)}/approve`,
