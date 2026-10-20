@@ -61,54 +61,6 @@ export interface GpuInventoryEventSnapshot {
   profile: ApiRuntimeProfile;
 }
 
-export type GpuPartitionShares = Exclude<GpuShareCount, 1>;
-
-export interface GpuPartitionPod {
-  namespace: string;
-  name: string;
-  reason?: string;
-}
-
-export interface GpuPartitionSkippedNode {
-  nodeName: string;
-  reason: string;
-  pods: GpuPartitionPod[];
-}
-
-export interface GpuPartitionFailedNode {
-  nodeName: string;
-  ok?: boolean;
-  reason: string;
-}
-
-export interface GpuPartitionTaskResult {
-  shares?: GpuPartitionShares;
-  appliedNodes: string[];
-  skippedNodes: GpuPartitionSkippedNode[];
-  failedNodes: GpuPartitionFailedNode[];
-  lastMessage?: string;
-}
-
-export interface GpuPartitionTask {
-  id: string;
-  idempotencyKey?: string;
-  taskType: string;
-  resourceType?: string;
-  resourceId?: string;
-  status: string;
-  attemptCount?: number;
-  maxAttempts?: number;
-  progressPct: number;
-  result?: GpuPartitionTaskResult;
-  errorMessage?: string;
-  createdAt?: string;
-  completedAt?: string;
-}
-
-export interface CreateGpuPartitionInput {
-  shares: GpuPartitionShares;
-}
-
 export interface TenantGpuAllocation {
   tenantId: string;
   tenantName: string;

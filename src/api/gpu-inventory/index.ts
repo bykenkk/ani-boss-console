@@ -1,19 +1,13 @@
 import { runIdempotentOperation } from "@/api/idempotency";
-import { ApiError, coreRequest } from "@/api/request";
+import { coreRequest } from "@/api/request";
 import { createIdempotencyScope } from "@/lib/idempotency";
 import type {
   ApiRuntimeProfile,
-  CreateGpuPartitionInput,
   GpuInventorySnapshot,
   GpuInventoryStatus,
   GpuInventoryEventSnapshot,
   GpuInventoryEventType,
   GpuOccupancy,
-  GpuPartitionFailedNode,
-  GpuPartitionShares,
-  GpuPartitionSkippedNode,
-  GpuPartitionTask,
-  GpuPartitionTaskResult,
   GpuShareCount,
   TenantGpuAllocation,
   UpdateTenantGpuQuotaInput,
@@ -106,56 +100,7 @@ interface GpuInventoryEventListResponse {
   dev_profile: ApiRuntimeProfileResponse;
 }
 
-interface GpuPartitionPodResponse {
-  namespace?: string;
-  name?: string;
-  reason?: string;
-}
-
-interface GpuPartitionSkippedNodeResponse {
-  node_name?: string;
-  reason?: string;
-  pods?: GpuPartitionPodResponse[];
-}
-
-interface GpuPartitionFailedNodeResponse {
-  node_name?: string;
-  ok?: boolean;
-  reason?: string;
-}
-
-interface GpuPartitionTaskResultResponse {
-  shares?: number;
-  applied_nodes?: string[];
-  skipped_nodes?: GpuPartitionSkippedNodeResponse[];
-  failed_nodes?: GpuPartitionFailedNodeResponse[];
-  last_message?: string;
-}
-
-interface GpuPartitionTaskResponse {
-  id?: string;
-  task_id?: string;
-  idempotency_key?: string;
-  task_type?: string;
-  resource_type?: string;
-  resource_id?: string;
-  status?: string;
-  attempt_count?: number;
-  max_attempts?: number;
-  progress_pct?: number;
-  result?: GpuPartitionTaskResultResponse | null;
-  error_message?: string | null;
-  created_at?: string;
-  completed_at?: string | null;
-}
-
-interface GpuPartitionTaskListResponse {
-  items?: GpuPartitionTaskResponse[];
-  next_cursor?: string | null;
-}
-
 const GPU_RESOURCE_TYPE = "gpu_count";
-const partitionScope = createIdempotencyScope("gpu-partition", ["POST"]);
 const reservationScope = createIdempotencyScope("tenant-gpu-reservation", ["PUT"]);
 
 export const gpuResourcePoolQueryKeys = {
@@ -163,11 +108,6 @@ export const gpuResourcePoolQueryKeys = {
   occupancy: ["gpu-resource-pool", "occupancy"] as const,
   tenants: ["gpu-resource-pool", "tenants"] as const,
   events: ["gpu-resource-pool", "events"] as const,
-};
-
-export const gpuPartitionQueryKeys = {
-  latest: ["gpu-resource-pool", "partition-task", "latest"] as const,
-  detail: (taskId: string) => ["gpu-resource-pool", "partition-task", taskId] as const,
 };
 
 function mapRuntimeProfile(profile: ApiRuntimeProfileResponse): ApiRuntimeProfile {
@@ -179,61 +119,7 @@ function mapRuntimeProfile(profile: ApiRuntimeProfileResponse): ApiRuntimeProfil
   };
 }
 
-function asPartitionShares(value?: number): GpuPartitionShares | undefined {
-  return value === 2 || value === 4 || value === 8 ? value : undefined;
-}
-
-function mapSkippedNode(node: GpuPartitionSkippedNodeResponse): GpuPartitionSkippedNode {
-  return {
-    nodeName: node.node_name || "-",
-    reason: node.reason || "-",
-    pods: (node.pods || []).map((pod) => ({
-      namespace: pod.namespace || "-",
-      name: pod.name || "-",
-      reason: pod.reason || undefined,
-    })),
-  };
-}
-
-function mapFailedNode(node: GpuPartitionFailedNodeResponse): GpuPartitionFailedNode {
-  return {
-    nodeName: node.node_name || "-",
-    ok: node.ok,
-    reason: node.reason || "-",
-  };
-}
-
-function mapTaskResult(
-  result?: GpuPartitionTaskResultResponse | null,
-): GpuPartitionTaskResult | undefined {
-  if (!result) return undefined;
-  return {
-    shares: asPartitionShares(result.shares),
-    appliedNodes: result.applied_nodes || [],
-    skippedNodes: (result.skipped_nodes || []).map(mapSkippedNode),
-    failedNodes: (result.failed_nodes || []).map(mapFailedNode),
-    lastMessage: result.last_message || undefined,
-  };
-}
-
-function mapGpuPartitionTask(response: GpuPartitionTaskResponse): GpuPartitionTask {
-  return {
-    id: response.id || response.task_id || "",
-    idempotencyKey: response.idempotency_key,
-    taskType: response.task_type || "gpu_partition",
-    resourceType: response.resource_type,
-    resourceId: response.resource_id,
-    status: response.status || "running",
-    attemptCount: response.attempt_count,
-    maxAttempts: response.max_attempts,
-    progressPct: response.progress_pct || 0,
-    result: mapTaskResult(response.result),
-    errorMessage: response.error_message || undefined,
-    createdAt: response.created_at,
-    completedAt: response.completed_at || undefined,
-  };
-}
-
+// TODO(api-migration): 当前使用 ANI 旧库存接口；对应能力迁移后替换调用，并复核分页与资源身份。
 export async function fetchGpuInventory(): Promise<GpuInventorySnapshot> {
   const response = await coreRequest<GpuInventoryListResponse>("/gpu-inventory", {
     params: { limit: 200 },
@@ -260,6 +146,7 @@ export async function fetchGpuInventory(): Promise<GpuInventorySnapshot> {
   };
 }
 
+// TODO(api-migration): 当前使用 ANI 旧占用汇总接口；对应能力迁移后替换调用并核对统计口径。
 export async function fetchGpuOccupancy(): Promise<GpuOccupancy> {
   const response = await coreRequest<GpuOccupancyResponse>("/gpu-inventory/occupancy");
   return {
@@ -275,6 +162,7 @@ export async function fetchGpuOccupancy(): Promise<GpuOccupancy> {
   };
 }
 
+// TODO(api-migration): 当前使用 ANI 旧库存事件接口；对应能力迁移后替换调用并复核分页。
 export async function fetchGpuInventoryEvents(): Promise<GpuInventoryEventSnapshot> {
   const response = await coreRequest<GpuInventoryEventListResponse>("/gpu-inventory/events", {
     params: { limit: 200 },
@@ -294,6 +182,7 @@ export async function fetchGpuInventoryEvents(): Promise<GpuInventoryEventSnapsh
   };
 }
 
+// FIXME(pagination-migration): 当前遍历旧 /quotas 游标分页汇总全量数据，需改为服务端筛选和按需分页。
 async function fetchAllTenantQuotas(): Promise<TenantQuotaResponse[]> {
   const items: TenantQuotaResponse[] = [];
   const seenCursors = new Set<string>();
@@ -312,6 +201,7 @@ async function fetchAllTenantQuotas(): Promise<TenantQuotaResponse[]> {
   return items;
 }
 
+// FIXME(api-migration): 当前从旧租户配额全量结果中筛选 GPU 数据，需迁移至服务端筛选的 GPU 配额列表。
 export async function fetchTenantGpuAllocations(): Promise<TenantGpuAllocation[]> {
   const quotas = await fetchAllTenantQuotas();
   const gpuQuotas = quotas
@@ -334,6 +224,7 @@ export async function fetchTenantGpuAllocations(): Promise<TenantGpuAllocation[]
   }));
 }
 
+// TODO(api-migration): 当前使用 ANI 旧租户 GPU 配额接口；对应写入契约迁移后替换调用并复核额度语义。
 export async function updateTenantGpuQuota({
   tenantId,
   total,
@@ -345,6 +236,7 @@ export async function updateTenantGpuQuota({
   });
 }
 
+// TODO(api-migration): 当前使用 ANI 旧租户 GPU 预留接口；对应写入契约迁移后替换调用并复核幂等行为。
 export async function updateTenantGpuReservation({
   tenantId,
   allocatedGpuCount,
@@ -366,56 +258,8 @@ export async function updateTenantGpuReservation({
   );
 }
 
-export function createGpuPartition(input: CreateGpuPartitionInput): Promise<GpuPartitionTask> {
-  return runIdempotentOperation(partitionScope, input, async (idempotencyKey) => {
-    const response = await coreRequest<GpuPartitionTaskResponse, CreateGpuPartitionInput>(
-      "/gpu-inventory/gpu-partitions",
-      {
-        method: "POST",
-        headers: { "Idempotency-Key": idempotencyKey },
-        data: input,
-      },
-    );
-    const task = mapGpuPartitionTask(response);
-    if (!task.id) throw new Error("GPU 切分任务创建成功，但响应中缺少任务 ID");
-    return task;
-  });
-}
-
-export async function fetchGpuPartitionTask(taskId: string): Promise<GpuPartitionTask> {
-  const response = await coreRequest<GpuPartitionTaskResponse>(
-    `/tasks/${encodeURIComponent(taskId)}`,
-  );
-  return mapGpuPartitionTask(response);
-}
-
-export async function fetchLatestGpuPartitionTask(): Promise<GpuPartitionTask | null> {
-  const response = await coreRequest<GpuPartitionTaskListResponse>("/tasks", {
-    params: { task_type: "gpu_partition", limit: 1 },
-  });
-  const latest = response.items?.[0];
-  return latest ? mapGpuPartitionTask(latest) : null;
-}
-
-export function getGpuPartitionErrorMessage(error: unknown): string {
-  if (!(error instanceof ApiError)) {
-    return error instanceof Error && error.message.trim() ? error.message : "请求失败，请稍后重试";
-  }
-  if (error.status === 403) return "需要平台管理员身份才能配置集群 GPU 切分";
-  if ((error.reason ?? error.code) === "NO_IDLE_WHOLECARD_GPUS")
-    return "集群内没有可切分的空闲整卡节点";
-  if (
-    (error.reason ?? error.code) === "UNAVAILABLE" ||
-    (error.reason ?? error.code) === "NOT_CONFIGURED"
-  ) {
-    return "GPU 切分服务暂不可用，请稍后重试";
-  }
-  return error.message.trim() || "请求失败，请稍后重试";
-}
-
 export type {
   ApiRuntimeProfile,
-  CreateGpuPartitionInput,
   GpuInventoryDevice,
   GpuInventoryEvent,
   GpuInventoryEventSnapshot,
@@ -423,12 +267,6 @@ export type {
   GpuInventorySnapshot,
   GpuInventoryStatus,
   GpuOccupancy,
-  GpuPartitionFailedNode,
-  GpuPartitionPod,
-  GpuPartitionShares,
-  GpuPartitionSkippedNode,
-  GpuPartitionTask,
-  GpuPartitionTaskResult,
   GpuShareCount,
   TenantGpuAllocation,
   UpdateTenantGpuQuotaInput,

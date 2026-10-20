@@ -1,7 +1,6 @@
 import { useCallback, useState } from "react";
 import type { ListPagination } from "@/components/common";
 /**
- * FIXME(pagination-migration): 旧 cursor/limit 及获授权的 page_token 列表暂不支持 total/任意跳页。
  * TODO(pagination-migration): 后端统一 page/pageSize 后切换 useListPagination，删除本 Hook 及 legacy-cursor 模式。
  * 仅记录已访问游标，不构造 offset/token，不预取或汇总其他分页；调用方原样适配字段名称。
  */

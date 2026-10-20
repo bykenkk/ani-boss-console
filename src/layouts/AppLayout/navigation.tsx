@@ -52,7 +52,9 @@ const tenantNavigation: readonly NavigationLeaf[] = [
 
 const infrastructureNavigation: readonly NavigationLeaf[] = [
   { label: "平台资源池总览", to: "/pool" },
+  { label: "GPU 集群", to: "/gpu-clusters", icon: <IconCloud /> },
   { label: "GPU 资源池", to: "/gpu", icon: <IconThunderbolt /> },
+  { label: "计算规格", to: "/compute-presets", icon: <IconApps /> },
   { label: "GPU 配额", to: "/gpu-quotas", icon: <IconSettings /> },
   { label: "节点状态", to: "/nodes" },
   { label: "存储基础设施", to: "/storage" },
@@ -126,7 +128,9 @@ const visibleAppRoutes = new Set<AppRoute>([
   "/tenants",
   "/tenants-quotas",
   "/tenants-admins",
+  "/gpu-clusters",
   "/gpu",
+  "/compute-presets",
   "/gpu-quotas",
   "/health",
   "/logs",

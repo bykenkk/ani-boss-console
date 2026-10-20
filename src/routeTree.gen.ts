@@ -17,6 +17,8 @@ import { Route as AuditApiKeysIndexRouteImport } from './routes/audit-api-keys/i
 import { Route as AuditExportIndexRouteImport } from './routes/audit-export/index'
 import { Route as AuditInferenceIndexRouteImport } from './routes/audit-inference/index'
 import { Route as AuditIndexRouteImport } from './routes/audit/index'
+import { Route as ComputePresetsIndexRouteImport } from './routes/compute-presets/index'
+import { Route as GpuClustersIndexRouteImport } from './routes/gpu-clusters/index'
 import { Route as GpuQuotasIndexRouteImport } from './routes/gpu-quotas/index'
 import { Route as GpuIndexRouteImport } from './routes/gpu/index'
 import { Route as HealthGpuIndexRouteImport } from './routes/health-gpu/index'
@@ -101,6 +103,16 @@ const AuditInferenceIndexRoute = AuditInferenceIndexRouteImport.update({
 const AuditIndexRoute = AuditIndexRouteImport.update({
   id: '/audit/',
   path: '/audit/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComputePresetsIndexRoute = ComputePresetsIndexRouteImport.update({
+  id: '/compute-presets/',
+  path: '/compute-presets/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GpuClustersIndexRoute = GpuClustersIndexRouteImport.update({
+  id: '/gpu-clusters/',
+  path: '/gpu-clusters/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GpuQuotasIndexRoute = GpuQuotasIndexRouteImport.update({
@@ -344,6 +356,8 @@ export interface FileRoutesByFullPath {
   '/audit-export/': typeof AuditExportIndexRoute
   '/audit-inference/': typeof AuditInferenceIndexRoute
   '/audit/': typeof AuditIndexRoute
+  '/compute-presets/': typeof ComputePresetsIndexRoute
+  '/gpu-clusters/': typeof GpuClustersIndexRoute
   '/gpu-quotas/': typeof GpuQuotasIndexRoute
   '/gpu/': typeof GpuIndexRoute
   '/health-gpu/': typeof HealthGpuIndexRoute
@@ -398,6 +412,8 @@ export interface FileRoutesByTo {
   '/audit-export': typeof AuditExportIndexRoute
   '/audit-inference': typeof AuditInferenceIndexRoute
   '/audit': typeof AuditIndexRoute
+  '/compute-presets': typeof ComputePresetsIndexRoute
+  '/gpu-clusters': typeof GpuClustersIndexRoute
   '/gpu-quotas': typeof GpuQuotasIndexRoute
   '/gpu': typeof GpuIndexRoute
   '/health-gpu': typeof HealthGpuIndexRoute
@@ -454,6 +470,8 @@ export interface FileRoutesById {
   '/audit-export/': typeof AuditExportIndexRoute
   '/audit-inference/': typeof AuditInferenceIndexRoute
   '/audit/': typeof AuditIndexRoute
+  '/compute-presets/': typeof ComputePresetsIndexRoute
+  '/gpu-clusters/': typeof GpuClustersIndexRoute
   '/gpu-quotas/': typeof GpuQuotasIndexRoute
   '/gpu/': typeof GpuIndexRoute
   '/health-gpu/': typeof HealthGpuIndexRoute
@@ -511,6 +529,8 @@ export interface FileRouteTypes {
     | '/audit-export/'
     | '/audit-inference/'
     | '/audit/'
+    | '/compute-presets/'
+    | '/gpu-clusters/'
     | '/gpu-quotas/'
     | '/gpu/'
     | '/health-gpu/'
@@ -565,6 +585,8 @@ export interface FileRouteTypes {
     | '/audit-export'
     | '/audit-inference'
     | '/audit'
+    | '/compute-presets'
+    | '/gpu-clusters'
     | '/gpu-quotas'
     | '/gpu'
     | '/health-gpu'
@@ -620,6 +642,8 @@ export interface FileRouteTypes {
     | '/audit-export/'
     | '/audit-inference/'
     | '/audit/'
+    | '/compute-presets/'
+    | '/gpu-clusters/'
     | '/gpu-quotas/'
     | '/gpu/'
     | '/health-gpu/'
@@ -675,6 +699,8 @@ export interface RootRouteChildren {
   AuditExportIndexRoute: typeof AuditExportIndexRoute
   AuditInferenceIndexRoute: typeof AuditInferenceIndexRoute
   AuditIndexRoute: typeof AuditIndexRoute
+  ComputePresetsIndexRoute: typeof ComputePresetsIndexRoute
+  GpuClustersIndexRoute: typeof GpuClustersIndexRoute
   GpuQuotasIndexRoute: typeof GpuQuotasIndexRoute
   GpuIndexRoute: typeof GpuIndexRoute
   HealthGpuIndexRoute: typeof HealthGpuIndexRoute
@@ -772,6 +798,20 @@ declare module '@tanstack/react-router' {
       path: '/audit'
       fullPath: '/audit/'
       preLoaderRoute: typeof AuditIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compute-presets/': {
+      id: '/compute-presets/'
+      path: '/compute-presets'
+      fullPath: '/compute-presets/'
+      preLoaderRoute: typeof ComputePresetsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gpu-clusters/': {
+      id: '/gpu-clusters/'
+      path: '/gpu-clusters'
+      fullPath: '/gpu-clusters/'
+      preLoaderRoute: typeof GpuClustersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gpu-quotas/': {
@@ -1118,6 +1158,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuditExportIndexRoute: AuditExportIndexRoute,
   AuditInferenceIndexRoute: AuditInferenceIndexRoute,
   AuditIndexRoute: AuditIndexRoute,
+  ComputePresetsIndexRoute: ComputePresetsIndexRoute,
+  GpuClustersIndexRoute: GpuClustersIndexRoute,
   GpuQuotasIndexRoute: GpuQuotasIndexRoute,
   GpuIndexRoute: GpuIndexRoute,
   HealthGpuIndexRoute: HealthGpuIndexRoute,

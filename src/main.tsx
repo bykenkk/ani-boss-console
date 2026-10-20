@@ -75,6 +75,7 @@ const queryClient = new QueryClient({
 });
 
 const COMPONENT_CONFIG = {
+  Table: { placeholder: "-" },
   Card: {
     bordered: false,
     style: { borderRadius: 8 },
