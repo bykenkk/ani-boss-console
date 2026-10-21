@@ -11,8 +11,7 @@ import {
   StatusBadge,
 } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
-import { formatCurrentDateTime, formatDateTimeMinute } from "@/lib/date";
-import { showMessage } from "@/lib/feedback";
+import { formatDateTimeMinute } from "@/lib/date";
 
 type NodeStatus = "Ready" | "NotReady";
 
@@ -97,7 +96,8 @@ const initialNodes: InfrastructureNode[] = [
 
 export const Route = createFileRoute("/nodes/")({
   component: function NodeStatusRoute() {
-    const [nodes, setNodes] = useState(initialNodes);
+    // TODO(nodes-integration): 接入节点接口后替换演示数据，并开放状态刷新操作。
+    const nodes = initialNodes;
     const [region, setRegion] = useState("all");
     const [pool, setPool] = useState("all");
     const [status, setStatus] = useState<"all" | NodeStatus>("all");
@@ -118,15 +118,6 @@ export const Route = createFileRoute("/nodes/")({
             )),
       );
     }, [keyword, nodes, pool, region, status]);
-
-    // TODO(nodes-integration): 接入真实节点状态刷新；当前仅更新本地心跳并提示成功。
-    const refreshNodes = () => {
-      const heartbeat = formatCurrentDateTime();
-      setNodes((current) =>
-        current.map((node) => (node.status === "Ready" ? { ...node, heartbeat } : node)),
-      );
-      showMessage({ type: "success", content: "节点状态已刷新" });
-    };
 
     const columns: ListColumn<InfrastructureNode>[] = [
       {
@@ -183,7 +174,7 @@ export const Route = createFileRoute("/nodes/")({
           title: "节点状态",
           subtitle: "查看计算节点健康状态、资源规格、调度能力和最后心跳。",
           extra: (
-            <Button type="primary" icon={<IconRefresh />} onClick={refreshNodes}>
+            <Button type="primary" disabled icon={<IconRefresh />}>
               刷新状态
             </Button>
           ),
