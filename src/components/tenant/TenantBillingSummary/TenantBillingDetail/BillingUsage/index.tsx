@@ -1,11 +1,9 @@
-import { Button, Modal } from "@arco-design/web-react";
+import { Button } from "@arco-design/web-react";
 import { DataTable, type ListColumn } from "@/components/common";
-import type { TenantBilling } from "@/components/tenant/model";
+import type { TenantBilling } from "../../model";
 
-import type { TenantUsageCost } from "@/components/tenant/model";
+import type { TenantUsageCost } from "../../model";
 import { formatAmount, formatUsd } from "../../formatters";
-import { formatMonth } from "@/lib/date";
-import { useTenantBillingActions } from "@/hooks/useTenantBillingActions";
 interface BillingUsageProps {
   billing: TenantBilling;
 }
@@ -29,26 +27,10 @@ const usageColumns: ListColumn<TenantUsageCost>[] = [
 ];
 
 export function BillingUsage({ billing }: BillingUsageProps) {
-  const runAction = useTenantBillingActions();
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button
-          onClick={() =>
-            Modal.confirm({
-              title: "刷新用量",
-              content:
-                "确认刷新 " +
-                billing.tenantName +
-                " " +
-                formatMonth(billing.period) +
-                " 账期的用量与费用？",
-              onOk: () => {
-                runAction(billing.tenantId, "refresh_usage");
-              },
-            })
-          }
-        >
+        <Button disabled title="账务功能未接入">
           刷新用量
         </Button>
       </div>

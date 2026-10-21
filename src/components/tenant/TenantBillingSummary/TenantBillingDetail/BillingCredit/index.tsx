@@ -1,13 +1,11 @@
 import { Button, Descriptions } from "@arco-design/web-react";
-import { useState } from "react";
 import clsx from "clsx";
 import { DataTable, type ListColumn } from "@/components/common";
-import type { TenantBilling } from "@/components/tenant/model";
+import type { TenantBilling } from "../../model";
 
-import type { TenantBillingAdjustment } from "@/components/tenant/model";
+import type { TenantBillingAdjustment } from "../../model";
 import { formatUsd } from "../../formatters";
 import { formatDateTimeMinute } from "@/lib/date";
-import { CreditAdjustmentModal } from "../../CreditAdjustmentModal";
 interface BillingCreditProps {
   billing: TenantBilling;
 }
@@ -38,11 +36,10 @@ const adjustmentColumns: ListColumn<TenantBillingAdjustment>[] = [
 ];
 
 export function BillingCredit({ billing }: BillingCreditProps) {
-  const [adjustVisible, setAdjustVisible] = useState(false);
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button type="primary" onClick={() => setAdjustVisible(true)}>
+        <Button type="primary" disabled title="账务功能未接入">
           授信调账
         </Button>
       </div>
@@ -61,13 +58,6 @@ export function BillingCredit({ billing }: BillingCreditProps) {
         pagination={false}
         noDataElement="暂无调账记录"
       />
-      {adjustVisible ? (
-        <CreditAdjustmentModal
-          tenantId={billing.tenantId}
-          onCancel={() => setAdjustVisible(false)}
-          onSuccess={() => setAdjustVisible(false)}
-        />
-      ) : null}
     </div>
   );
 }

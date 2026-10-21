@@ -2,7 +2,6 @@ import { Layout } from "@arco-design/web-react";
 import { useRouterState } from "@tanstack/react-router";
 import { useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { PlatformOverviewProvider } from "@/components/overview/PlatformOverviewProvider";
-import { TenantManagementProvider } from "@/components/tenant/TenantManagementProvider";
 import type { AppBreadcrumbItem, AppBreadcrumbNavigation } from "@/lib/navigation";
 import "./index.css";
 import { BreadcrumbNavigationProvider } from "./BreadcrumbNavigation";
@@ -67,35 +66,33 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <PlatformOverviewProvider>
-      <TenantManagementProvider>
-        <BreadcrumbNavigationProvider onChange={setDetailNavigation}>
-          <Layout className="app-layout">
-            <div
-              className="app-layout-sidebar-slot"
-              style={{
-                width: sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH,
-              }}
+      <BreadcrumbNavigationProvider onChange={setDetailNavigation}>
+        <Layout className="app-layout">
+          <div
+            className="app-layout-sidebar-slot"
+            style={{
+              width: sidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH,
+            }}
+          >
+            <Sidebar
+              items={appNavigation}
+              activePathname={pathname}
+              collapsed={sidebarCollapsed}
+              onCollapsedChange={setSidebarCollapsed}
+            />
+          </div>
+          <Layout className="app-layout-main">
+            <TopNav breadcrumbs={topNavBreadcrumbs} onBack={detailNavigation?.onBack} />
+            <Content
+              data-component="page-scroll-region"
+              className="app-layout-content"
+              style={CONTENT_STYLE}
             >
-              <Sidebar
-                items={appNavigation}
-                activePathname={pathname}
-                collapsed={sidebarCollapsed}
-                onCollapsedChange={setSidebarCollapsed}
-              />
-            </div>
-            <Layout className="app-layout-main">
-              <TopNav breadcrumbs={topNavBreadcrumbs} onBack={detailNavigation?.onBack} />
-              <Content
-                data-component="page-scroll-region"
-                className="app-layout-content"
-                style={CONTENT_STYLE}
-              >
-                {children}
-              </Content>
-            </Layout>
+              {children}
+            </Content>
           </Layout>
-        </BreadcrumbNavigationProvider>
-      </TenantManagementProvider>
+        </Layout>
+      </BreadcrumbNavigationProvider>
     </PlatformOverviewProvider>
   );
 }

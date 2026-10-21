@@ -7,8 +7,8 @@ import {
   type DetailTab,
   StatusBadge,
 } from "@/components/common";
-import { useTenantManagement } from "@/hooks/useTenantManagement";
-import { tenantBillingStatusMeta } from "@/components/tenant/model";
+import { tenantBillingDemoData } from "../demo";
+import { tenantBillingStatusMeta } from "../model";
 import { formatDate, formatDateTimeMinute, formatMonth } from "@/lib/date";
 import { formatUsd } from "../formatters";
 import { BillingUsage } from "./BillingUsage";
@@ -20,18 +20,16 @@ interface TenantBillingDetailProps {
 }
 export function TenantBillingDetail({ tenantId }: TenantBillingDetailProps) {
   const navigate = useNavigate();
-  const { tenants, tenantBillings } = useTenantManagement();
-  const tenant = tenants.find((item) => item.id === tenantId);
-  const billing = tenantBillings.find((item) => item.tenantId === tenantId);
+  const billing = tenantBillingDemoData.find((item) => item.tenantId === tenantId);
   const returnToList = () => {
     navigate({ to: "/tenants-billing" });
   };
-  if (!tenant || !billing)
+  if (!billing)
     return (
       <Result
-        status="404"
-        title="计费账户不存在"
-        subTitle="该租户可能已被移除，或尚未创建计费账户。"
+        status="info"
+        title="账务功能未接入"
+        subTitle="当前仅提供演示数据，尚无该租户的真实账务信息。"
         extra={<Button onClick={returnToList}>返回计费列表</Button>}
       />
     );
@@ -44,8 +42,9 @@ export function TenantBillingDetail({ tenantId }: TenantBillingDetailProps) {
         <Descriptions
           column={1}
           data={[
-            { label: "租户 ID", value: tenant.id },
-            { label: "租户显示名", value: tenant.displayName },
+            { label: "租户 ID", value: billing.tenantId },
+            { label: "接入状态", value: "未接入（演示数据）" },
+            { label: "租户显示名", value: billing.tenantDisplayName },
             {
               label: "状态",
               value: <StatusBadge tone={status.tone} value={status.label} />,
@@ -85,10 +84,10 @@ export function TenantBillingDetail({ tenantId }: TenantBillingDetailProps) {
       breadcrumbs={[
         { label: "租户管理" },
         { label: "租户计费与用量", onClick: returnToList },
-        { label: tenant.name },
+        { label: billing.tenantName },
       ]}
-      title={tenant.displayName}
-      subtitle={tenant.name}
+      title={billing.tenantDisplayName}
+      subtitle={`${billing.tenantName} · 账务功能未接入，当前为演示数据`}
       status={<StatusBadge tone={status.tone} value={status.label} />}
       headerItems={[
         { label: "账期", value: formatMonth(billing.period) },

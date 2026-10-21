@@ -1,6 +1,6 @@
 import { DataTable, type ListColumn } from "@/components/common";
 
-import type { TenantBillingOperation } from "@/components/tenant/model";
+import type { TenantBillingOperation } from "../../model";
 import { formatDateTimeMinute } from "@/lib/date";
 interface BillingOperationsProps {
   records: TenantBillingOperation[];
