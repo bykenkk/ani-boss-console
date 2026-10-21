@@ -1,24 +1,13 @@
 # ANI BOSS Console 文档
 
-本目录集中维护 ANI BOSS Console 的工程、UI 与 API 对接文档。仓库仅包含前端；后端迁移期以 `ani-governance` 为目标后端、`ANI` 为存量后端，具体接口的契约归属遵循 [API 对接流程](./API-INTEGRATION.md#迁移期后端归属)。文档不能替代 GitNexus 权威索引，也不作为接口契约或产品原型的副本。
+本目录集中维护 ANI BOSS Console 的工程、UI 与 API 对接文档。
 
 ## 文档职责
 
 | 文档 | 维护内容 | 不维护 |
 |------|----------|--------|
-| [工程约定](./ENGINEERING-CONVENTIONS.md) | 工程目录与命名、路由适配、公共适配层、全局类型、验证 | UI 实现细则、API 对接细则 |
+| [工程约定](./ENGINEERING-CONVENTIONS.md) | 工程目录与命名、路由适配、组件 Props 与类型组织、公共适配层、浏览器兼容、验证 | UI 实现细则、API 对接细则 |
 | [UI 开发约定](./UI-CONVENTIONS.md) | 组件选择与复用、样式、页面组合、交互反馈、请求状态展示、组件拆分 | 物理目录与通用命名、接口契约与请求层实现 |
-| [API 对接流程](./API-INTEGRATION.md) | 契约核对、API 模块与类型、请求层、幂等、SSE、预签名上传、页面接入边界 | UI 反馈呈现、产品原型副本、后端端点目录 |
+| [API 对接流程](./API-INTEGRATION.md) | 契约核对、API 模块与类型、请求层、幂等、SSE、预签名上传、页面接入边界 | UI 反馈呈现、后端端点目录 |
 
 新增规则只在所属文档维护；其他文档需要提及时仅保留链接，不复制细则。
-
-## 权威来源
-
-| 内容 | 权威来源 |
-|------|----------|
-| 页面信息架构、菜单、路由和交互规格 | GitNexus 索引 `产品原型-9.11` |
-| 后端接口、字段和执行行为 | 按 [迁移期后端归属](./API-INTEGRATION.md#迁移期后端归属) 查询 GitNexus 索引 `ani-governance` 或 `ANI` |
-| Agent 工作方式与强制项目规则 | [AGENTS.md](../AGENTS.md) |
-| 前端当前实现 | 本仓库源码与 GitNexus 索引 `ani-boss-console` |
-
-当文档与权威来源不一致时，应先核实来源并更新文档，不得根据旧文档猜测产品或接口行为。
