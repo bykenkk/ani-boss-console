@@ -1,3 +1,4 @@
+import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTenantLifecycle, tenantManagementQueryKeys } from "@/api/tenant";
 import { DataTable } from "@/components/common";
@@ -10,6 +11,8 @@ interface TenantLifecycleRecordsProps {
 }
 
 export function TenantLifecycleRecords({ tenantId }: TenantLifecycleRecordsProps) {
+  const cursor = useCursorPagination(tenantId);
+  const pageParams = { cursor: cursor.cursor, limit: cursor.limit };
   const lifecycleQuery = useQuery({
     meta: {
       errorNotification: {
@@ -18,8 +21,8 @@ export function TenantLifecycleRecords({ tenantId }: TenantLifecycleRecordsProps
         fallback: "请求失败，请稍后重试",
       },
     },
-    queryKey: tenantManagementQueryKeys.tenantLifecycle(tenantId),
-    queryFn: () => fetchTenantLifecycle(tenantId),
+    queryKey: [...tenantManagementQueryKeys.tenantLifecycle(tenantId), pageParams],
+    queryFn: ({ signal }) => fetchTenantLifecycle(tenantId, pageParams, signal),
   });
 
   return (
@@ -57,9 +60,12 @@ export function TenantLifecycleRecords({ tenantId }: TenantLifecycleRecordsProps
           render: (value: string) => formatDateTime(value),
         },
       ]}
-      data={lifecycleQuery.data || []}
+      data={lifecycleQuery.data?.items ?? []}
       loading={lifecycleQuery.isPending}
-      pagination={false}
+      pagination={cursor.getPagination(
+        lifecycleQuery.data?.next_cursor ?? undefined,
+        lifecycleQuery.isFetching,
+      )}
       scroll={{ x: 1000 }}
       noDataElement={<div className="py-8 text-center text-gray-500">暂无生命周期记录</div>}
     />

@@ -1,3 +1,4 @@
+import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { fetchTenantAuditLogs, tenantManagementQueryKeys } from "@/api/tenant";
 import { DataTable, StatusBadge } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
@@ -11,6 +12,8 @@ interface TenantAuditRecordsProps {
 }
 
 export function TenantAuditRecords({ tenantId }: TenantAuditRecordsProps) {
+  const cursor = useCursorPagination(tenantId);
+  const pageParams = { cursor: cursor.cursor, limit: cursor.limit };
   const auditQuery = useQuery({
     meta: {
       errorNotification: {
@@ -19,8 +22,8 @@ export function TenantAuditRecords({ tenantId }: TenantAuditRecordsProps) {
         fallback: "请求失败，请稍后重试",
       },
     },
-    queryKey: tenantManagementQueryKeys.tenantAudit(tenantId),
-    queryFn: () => fetchTenantAuditLogs(tenantId),
+    queryKey: [...tenantManagementQueryKeys.tenantAudit(tenantId), pageParams],
+    queryFn: ({ signal }) => fetchTenantAuditLogs(tenantId, pageParams, signal),
   });
 
   return (
@@ -64,9 +67,12 @@ export function TenantAuditRecords({ tenantId }: TenantAuditRecordsProps) {
           render: (value: string) => formatDateTime(value),
         },
       ]}
-      data={auditQuery.data || []}
+      data={auditQuery.data?.items ?? []}
       loading={auditQuery.isPending}
-      pagination={false}
+      pagination={cursor.getPagination(
+        auditQuery.data?.next_cursor ?? undefined,
+        auditQuery.isFetching,
+      )}
       scroll={{ x: 900 }}
       noDataElement={<div className="py-8 text-center text-gray-500">暂无审计记录</div>}
     />

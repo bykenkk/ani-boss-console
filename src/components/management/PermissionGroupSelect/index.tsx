@@ -25,7 +25,7 @@ export function PermissionGroupSelect({
     ...(search ? { name__contains: search } : {}),
   };
   const query = useQuery({
-    queryKey: managementKeys.list("permission-groups", { noPaging: true, filters }),
+    queryKey: managementKeys.options("permission-groups", filters),
     queryFn: ({ signal }) => listManagementOptions("permission-groups", filters, signal),
     meta: {
       errorNotification: {

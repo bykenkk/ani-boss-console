@@ -1,3 +1,4 @@
+import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { useQuery } from "@tanstack/react-query";
 import { fetchTenantAdministratorAuditLogs, tenantManagementQueryKeys } from "@/api/tenant";
 import { DataTable, StatusBadge } from "@/components/common";
@@ -13,6 +14,8 @@ export function TenantAdministratorAudit({
   tenantId,
   administratorId,
 }: TenantAdministratorAuditProps) {
+  const cursor = useCursorPagination(JSON.stringify([tenantId, administratorId]));
+  const pageParams = { cursor: cursor.cursor, limit: cursor.limit };
   const auditQuery = useQuery({
     meta: {
       errorNotification: {
@@ -21,8 +24,12 @@ export function TenantAdministratorAudit({
         fallback: "请求失败，请稍后重试",
       },
     },
-    queryKey: tenantManagementQueryKeys.administratorAudit(tenantId, administratorId),
-    queryFn: () => fetchTenantAdministratorAuditLogs(tenantId, administratorId),
+    queryKey: [
+      ...tenantManagementQueryKeys.administratorAudit(tenantId, administratorId),
+      pageParams,
+    ],
+    queryFn: ({ signal }) =>
+      fetchTenantAdministratorAuditLogs(tenantId, administratorId, pageParams, signal),
   });
 
   return (
@@ -50,9 +57,12 @@ export function TenantAdministratorAudit({
             render: (value: string) => formatDateTime(value),
           },
         ]}
-        data={auditQuery.data || []}
+        data={auditQuery.data?.items ?? []}
         loading={auditQuery.isPending}
-        pagination={false}
+        pagination={cursor.getPagination(
+          auditQuery.data?.next_cursor ?? undefined,
+          auditQuery.isFetching,
+        )}
         scroll={{ x: 950 }}
         noDataElement={<div className="py-8 text-center text-gray-500">暂无操作记录</div>}
       />

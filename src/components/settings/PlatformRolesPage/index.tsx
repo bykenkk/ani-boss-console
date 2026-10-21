@@ -131,7 +131,8 @@ export function PlatformRolesPage() {
     },
   });
 
-  // FIXME: 确认受保护角色允许的编辑、权限分配和删除范围后，按后端规则限制操作入口。
+  // FIXME: 当前编辑和删除入口未依据 isProtected 区分限制，可能向受保护角色展示不可执行的操作。
+  // 核实后端对受保护角色的编辑、权限分配和删除规则后，按实际允许范围限制入口。
   const rowActions: RowAction<ManagedRole>[] = [
     { key: "edit", label: "编辑", onClick: setEditing },
 

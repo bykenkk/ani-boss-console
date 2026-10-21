@@ -1,3 +1,4 @@
+import type { CursorPageParams } from "@/api/types";
 import { runIdempotentRequest } from "@/api/idempotency";
 import { ApiError, servicesRequest } from "@/api/request";
 import { createIdempotencyScope } from "@/lib/idempotency";
@@ -78,35 +79,18 @@ function mapListItem(item: PlatformAdministratorListItemResponse): PlatformAdmin
   };
 }
 
-async function fetchAllCursorPages<T>(path: string, params: object): Promise<T[]> {
-  const items: T[] = [];
-  const seenCursors = new Set<string>();
-  let cursor: string | undefined;
-
-  do {
-    const response = await servicesRequest<CursorListResponse<T>>(path, {
-      method: "GET",
-      params: { ...params, limit: 100, cursor },
-    });
-    items.push(...response.items);
-    const nextCursor = response.next_cursor || undefined;
-    if (!nextCursor || seenCursors.has(nextCursor)) break;
-    seenCursors.add(nextCursor);
-    cursor = nextCursor;
-  } while (cursor);
-
-  return items;
-}
-
+// TODO(pagination-migration): 当前保留 ANI 游标契约；正式页码契约完成后迁移，当前按需查询单页。
 export async function fetchPlatformAdministrators(
   filters: PlatformAdministratorListFilters = {},
-): Promise<PlatformAdministratorListItem[]> {
+  page: CursorPageParams = {},
+  signal?: AbortSignal,
+): Promise<CursorListResponse<PlatformAdministratorListItem>> {
   const { roleId, ...params } = filters;
-  const items = await fetchAllCursorPages<PlatformAdministratorListItemResponse>(
+  const response = await servicesRequest<CursorListResponse<PlatformAdministratorListItemResponse>>(
     "/platform-admins",
-    { ...params, role_id: roleId },
+    { params: { ...params, role_id: roleId, limit: 20, ...page }, signal },
   );
-  return items.map(mapListItem);
+  return { ...response, items: response.items.map(mapListItem) };
 }
 
 export async function fetchPlatformAdministrator(
@@ -132,21 +116,27 @@ export async function fetchPlatformAdministratorRoles(): Promise<
   }));
 }
 
+// TODO(pagination-migration): 当前保留 ANI 游标契约；正式页码契约完成后迁移，当前按需查询单页。
 export async function fetchPlatformAdministratorAuditLogs(
   userId: string,
-): Promise<PlatformAdministratorAuditLog[]> {
-  const items = await fetchAllCursorPages<PlatformAuditLogResponse>(
+  page: CursorPageParams = {},
+  signal?: AbortSignal,
+): Promise<CursorListResponse<PlatformAdministratorAuditLog>> {
+  const response = await servicesRequest<CursorListResponse<PlatformAuditLogResponse>>(
     platformAdministratorPath(userId, "/audit-logs"),
-    {},
+    { params: { limit: 20, ...page }, signal },
   );
-  return items.map((item) => ({
-    id: item.id,
-    action: item.action,
-    resource: item.resource,
-    result: item.result,
-    details: item.details ?? null,
-    createdAt: item.created_at,
-  }));
+  return {
+    ...response,
+    items: response.items.map((item) => ({
+      id: item.id,
+      action: item.action,
+      resource: item.resource,
+      result: item.result,
+      details: item.details ?? null,
+      createdAt: item.created_at,
+    })),
+  };
 }
 
 export async function createPlatformAdministrator(

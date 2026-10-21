@@ -1,3 +1,4 @@
+import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { Button, Dropdown, Menu, Modal, Spin, Tooltip } from "@arco-design/web-react";
 import { IconMoreVertical } from "@arco-design/web-react/icon";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -72,6 +73,8 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
     queryKey: platformAdministratorQueryKeys.roles,
     queryFn: fetchPlatformAdministratorRoles,
   });
+  const cursor = useCursorPagination(userId);
+  const pageParams = { cursor: cursor.cursor, limit: cursor.limit };
   const auditQuery = useQuery({
     meta: {
       errorNotification: {
@@ -80,8 +83,8 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
         fallback: "请求失败，请稍后重试",
       },
     },
-    queryKey: platformAdministratorQueryKeys.auditLogs(userId),
-    queryFn: () => fetchPlatformAdministratorAuditLogs(userId),
+    queryKey: [...platformAdministratorQueryKeys.auditLogs(userId), pageParams],
+    queryFn: ({ signal }) => fetchPlatformAdministratorAuditLogs(userId, pageParams, signal),
   });
 
   const invalidateAll = () =>
@@ -264,7 +267,16 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
     {
       key: "operations",
       title: "操作记录",
-      content: <OperationRecords records={auditQuery.data || []} loading={auditQuery.isPending} />,
+      content: (
+        <OperationRecords
+          records={auditQuery.data?.items ?? []}
+          loading={auditQuery.isPending}
+          pagination={cursor.getPagination(
+            auditQuery.data?.next_cursor ?? undefined,
+            auditQuery.isFetching,
+          )}
+        />
+      ),
     },
   ];
 

@@ -1,6 +1,6 @@
 import { Empty, Spin, Tree, Typography } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
-import { listManagement, managementKeys } from "@/api/management";
+import { listManagementOptions, managementKeys } from "@/api/management";
 import { buildPermissionApiTree, getCheckedApiIds } from "./api-tree";
 
 interface Props {
@@ -10,14 +10,14 @@ interface Props {
 
 export function ApiTreeSelect({ value = [], onChange }: Props) {
   const query = useQuery({
-    queryKey: managementKeys.list("apis", { noPaging: true }),
-    queryFn: ({ signal }) => listManagement("apis", { noPaging: true }, signal),
+    queryKey: managementKeys.options("apis"),
+    queryFn: ({ signal }) => listManagementOptions("apis", {}, signal),
     meta: {
       errorNotification: { id: "permission-apis", action: "关联 API 加载" },
     },
   });
-  // FIXME: 沿用管理选项的 noPaging 查询，仍受后端 10000 条上限约束。
-  const items = query.data?.items ?? [];
+  // TODO(options-pagination): API 选项暂取服务端首 100 项；后端选项契约完善后迁移，未加载的已有关联仍保留。
+  const items = query.data ?? [];
   const treeData = buildPermissionApiTree(items);
 
   return (

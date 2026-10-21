@@ -182,7 +182,8 @@ export async function fetchGpuInventoryEvents(): Promise<GpuInventoryEventSnapsh
   };
 }
 
-// FIXME(pagination-migration): 当前遍历旧 /quotas 游标分页汇总全量数据，需改为服务端筛选和按需分页。
+// FIXME(pagination-migration): 当前遍历旧 /quotas 游标分页汇总全量数据，请求数、加载耗时和内存占用随租户数增长。
+// 核实 GPU 配额列表的服务端筛选与分页契约后，改为按需查询当前页，并迁移调用方后移除此方法。
 async function fetchAllTenantQuotas(): Promise<TenantQuotaResponse[]> {
   const items: TenantQuotaResponse[] = [];
   const seenCursors = new Set<string>();
@@ -201,7 +202,8 @@ async function fetchAllTenantQuotas(): Promise<TenantQuotaResponse[]> {
   return items;
 }
 
-// FIXME(api-migration): 当前从旧租户配额全量结果中筛选 GPU 数据，需迁移至服务端筛选的 GPU 配额列表。
+// FIXME(api-migration): 当前在前端筛选 GPU 配额，页面必须等待旧租户配额全量加载，无法独立按 GPU 条件请求当前页。
+// 当前 ANI /quotas 仅支持 limit/cursor，无 GPU 条件；后端补齐 GPU 筛选与分页契约后迁移，不用单页本地筛选伪装整改完成。
 export async function fetchTenantGpuAllocations(): Promise<TenantGpuAllocation[]> {
   const quotas = await fetchAllTenantQuotas();
   const gpuQuotas = quotas

@@ -21,7 +21,7 @@ export function RoleSelect({ value, onChange, multiple, tenantId, disabled }: Pr
     ...(search ? { name__contains: search } : {}),
   };
   const query = useQuery({
-    queryKey: managementKeys.list("roles", { noPaging: true, filters }),
+    queryKey: managementKeys.options("roles", filters),
     queryFn: ({ signal }) => listManagementOptions("roles", filters, signal),
     meta: {
       errorNotification: { id: withId("management-options", "roles"), action: "关联选项加载" },

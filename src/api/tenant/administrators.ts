@@ -1,3 +1,5 @@
+import type { CursorPageParams } from "@/api/types";
+import { fetchCursorPage, type CursorListResponse } from "./shared";
 import { runIdempotentRequest } from "@/api/idempotency";
 import { servicesRequest } from "@/api/request";
 import { createIdempotencyScope } from "@/lib/idempotency";
@@ -72,6 +74,8 @@ function mapAdministratorFilters(filters: TenantAdministratorListFilters) {
   };
 }
 
+// FIXME(pagination-migration): 管理员详情仍通过全量列表查找所属租户，数据增长会增加加载耗时。
+// 当前 /tenant-admins 无管理员 ID 精确筛选且详情要求 tenantId；后端补齐直接定位契约后移除全量查询，不以首屏未命中判定不存在。
 export async function fetchTenantAdministrators(
   filters: TenantAdministratorListFilters = {},
 ): Promise<TenantAdministratorListItem[]> {
@@ -82,13 +86,18 @@ export async function fetchTenantAdministrators(
   return items.map(mapAdministrator);
 }
 
+// TODO(pagination-migration): 当前保留 ANI 游标契约；正式页码契约完成后迁移，当前按需查询单页。
 export async function fetchTenantScopedAdministrators(
   tenantId: string,
-): Promise<TenantAdministratorListItem[]> {
-  const items = await fetchAllCursorPages<TenantAdministratorResponse>(
+  page: CursorPageParams = {},
+  signal?: AbortSignal,
+): Promise<CursorListResponse<TenantAdministratorListItem>> {
+  const response = await fetchCursorPage<TenantAdministratorResponse>(
     tenantPath(tenantId, "/admins"),
+    page,
+    signal,
   );
-  return items.map(mapAdministrator);
+  return { ...response, items: response.items.map(mapAdministrator) };
 }
 
 export async function fetchTenantAdministrator(
@@ -251,11 +260,14 @@ export async function deleteTenantAdministrator(tenantId: string, userId: string
   });
 }
 
+// TODO(pagination-migration): 当前保留 ANI 游标契约；正式页码契约完成后迁移，当前按需查询单页。
 export async function fetchTenantAdministratorAuditLogs(
   tenantId: string,
   userId: string,
-): Promise<TenantAdministratorAuditLog[]> {
-  const items = await fetchAllCursorPages<{
+  page: CursorPageParams = {},
+  signal?: AbortSignal,
+): Promise<CursorListResponse<TenantAdministratorAuditLog>> {
+  const response = await fetchCursorPage<{
     id: string;
     action: string;
     resource: string;
@@ -263,14 +275,17 @@ export async function fetchTenantAdministratorAuditLogs(
     user_id?: string | null;
     details?: Record<string, unknown> | null;
     created_at: string;
-  }>(tenantAdministratorPath(tenantId, userId, "/audit-logs"));
-  return items.map((item) => ({
-    id: item.id,
-    action: item.action,
-    resource: item.resource,
-    result: item.result,
-    userId: item.user_id ?? null,
-    details: item.details ?? null,
-    createdAt: item.created_at,
-  }));
+  }>(tenantAdministratorPath(tenantId, userId, "/audit-logs"), page, signal);
+  return {
+    ...response,
+    items: response.items.map((item) => ({
+      id: item.id,
+      action: item.action,
+      resource: item.resource,
+      result: item.result,
+      userId: item.user_id ?? null,
+      details: item.details ?? null,
+      createdAt: item.created_at,
+    })),
+  };
 }

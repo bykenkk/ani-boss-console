@@ -1,7 +1,8 @@
 import { useCallback, useState } from "react";
 import type { ListPagination } from "@/components/common";
 /**
- * TODO(pagination-migration): 后端统一 page/pageSize 后切换 useListPagination，删除本 Hook 及 legacy-cursor 模式。
+ * TODO(pagination-migration): 对应后端页码契约完成后，将调用方迁移至 useListPagination；
+ * 所有过渡调用方迁移并验证后，删除本 Hook 及 legacy-cursor 模式。
  * 仅记录已访问游标，不构造 offset/token，不预取或汇总其他分页；调用方原样适配字段名称。
  */
 export function useCursorPagination(scope: string, initialPageSize = 20) {

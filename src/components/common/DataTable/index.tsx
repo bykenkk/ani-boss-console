@@ -25,7 +25,7 @@ export type ListPagination = {
   onPageSizeChange: (pageSize: number) => void;
 } & (
   | { mode?: "total"; total: number }
-  // TODO(pagination-migration): 后端统一 page/pageSize 后移除临时游标模式。
+  // TODO(pagination-migration): 对应后端页码契约完成且所有过渡调用方迁移至正式分页并验证后，移除临时游标模式。
   | { mode: "legacy-cursor"; hasNextPage: boolean }
 );
 

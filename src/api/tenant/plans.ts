@@ -1,7 +1,9 @@
+import type { CursorPageParams } from "@/api/types";
+import { fetchCursorPage, type CursorListResponse } from "./shared";
 import { runIdempotentRequest } from "@/api/idempotency";
 import { servicesRequest } from "@/api/request";
 import { createIdempotencyScope } from "@/lib/idempotency";
-import { fetchAllCursorPages, tenantPath, tenantPlanPath } from "./shared";
+import { tenantPath, tenantPlanPath } from "./shared";
 import type {
   BoundTenant,
   CreateTenantPlanInput,
@@ -54,11 +56,18 @@ function mapTenantPlan(item: TenantPlanResponse): TenantPlanListItem {
   };
 }
 
+// TODO(pagination-migration): 当前保留 ANI 游标契约；正式页码契约完成后迁移，当前按需查询单页。
 export async function fetchTenantPlans(
   filters: TenantPlanListFilters = {},
-): Promise<TenantPlanListItem[]> {
-  const items = await fetchAllCursorPages<TenantPlanResponse>("/tenant-plans", filters);
-  return items.map(mapTenantPlan);
+  page: CursorPageParams = {},
+  signal?: AbortSignal,
+): Promise<CursorListResponse<TenantPlanListItem>> {
+  const response = await fetchCursorPage<TenantPlanResponse>(
+    "/tenant-plans",
+    { ...filters, ...page },
+    signal,
+  );
+  return { ...response, items: response.items.map(mapTenantPlan) };
 }
 
 export async function fetchTenantPlan(planId: string): Promise<TenantPlanDetail> {
@@ -212,19 +221,27 @@ export async function bindTenantPlan(tenantId: string, planId: string): Promise<
   );
 }
 
-export async function fetchTenantPlanAuditLogs(planId: string): Promise<TenantPlanAuditLog[]> {
-  const items = await fetchAllCursorPages<{
+// TODO(pagination-migration): 当前保留 ANI 游标契约；正式页码契约完成后迁移，当前按需查询单页。
+export async function fetchTenantPlanAuditLogs(
+  planId: string,
+  page: CursorPageParams = {},
+  signal?: AbortSignal,
+): Promise<CursorListResponse<TenantPlanAuditLog>> {
+  const response = await fetchCursorPage<{
     id: string;
     action: string;
     result: "success" | "failure";
     details?: Record<string, unknown> | null;
     created_at: string;
-  }>(tenantPlanPath(planId, "/audit-logs"));
-  return items.map((item) => ({
-    id: item.id,
-    action: item.action,
-    result: item.result,
-    details: item.details ?? null,
-    createdAt: item.created_at,
-  }));
+  }>(tenantPlanPath(planId, "/audit-logs"), page, signal);
+  return {
+    ...response,
+    items: response.items.map((item) => ({
+      id: item.id,
+      action: item.action,
+      result: item.result,
+      details: item.details ?? null,
+      createdAt: item.created_at,
+    })),
+  };
 }

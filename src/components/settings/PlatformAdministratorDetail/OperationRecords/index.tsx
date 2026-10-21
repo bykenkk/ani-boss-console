@@ -1,6 +1,6 @@
-import { Empty, Spin } from "@arco-design/web-react";
+import { Spin } from "@arco-design/web-react";
 import type { PlatformAdministratorAuditLog } from "@/api/platform-admins";
-import { DataTable, type ListColumn, StatusBadge } from "@/components/common";
+import { DataTable, type ListColumn, type ListPagination, StatusBadge } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 
 const actionLabels: Record<string, string> = {
@@ -39,13 +39,13 @@ const columns: ListColumn<PlatformAdministratorAuditLog>[] = [
   },
 ];
 
-export function OperationRecords({
-  records,
-  loading,
-}: {
+interface OperationRecordsProps {
   records: PlatformAdministratorAuditLog[];
   loading: boolean;
-}) {
+  pagination: ListPagination;
+}
+
+export function OperationRecords({ records, loading, pagination }: OperationRecordsProps) {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
@@ -54,14 +54,12 @@ export function OperationRecords({
     );
   }
 
-  if (!records.length) return <Empty description="暂无操作记录" />;
-
   return (
     <DataTable
       rowKey="id"
       columns={columns}
       data={records}
-      pagination={false}
+      pagination={pagination}
       scroll={{ x: 760 }}
     />
   );

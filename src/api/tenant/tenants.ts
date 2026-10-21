@@ -1,7 +1,9 @@
+import type { CursorPageParams } from "@/api/types";
+import { fetchCursorPage, type CursorListResponse } from "./shared";
 import { runIdempotentRequest } from "@/api/idempotency";
 import { servicesRequest } from "@/api/request";
 import { createIdempotencyScope } from "@/lib/idempotency";
-import { fetchAllCursorPages, tenantPath } from "./shared";
+import { tenantPath } from "./shared";
 import type {
   AvailableTenantPlan,
   CreateTenantInput,
@@ -112,9 +114,18 @@ function mapTenantListItem(item: TenantListItemResponse): TenantListItem {
   };
 }
 
-export async function fetchTenants(filters: TenantListFilters = {}): Promise<TenantListItem[]> {
-  const items = await fetchAllCursorPages<TenantListItemResponse>("/tenants", filters);
-  return items.map(mapTenantListItem);
+// TODO(pagination-migration): 当前保留 ANI 游标契约；正式页码契约完成后迁移，当前按需查询单页。
+export async function fetchTenants(
+  filters: TenantListFilters = {},
+  page: CursorPageParams = {},
+  signal?: AbortSignal,
+): Promise<CursorListResponse<TenantListItem>> {
+  const response = await fetchCursorPage<TenantListItemResponse>(
+    "/tenants",
+    { ...filters, ...page },
+    signal,
+  );
+  return { ...response, items: response.items.map(mapTenantListItem) };
 }
 
 export async function fetchTenant(tenantId: string): Promise<TenantDetail> {
@@ -324,27 +335,51 @@ export async function reviewTenantQuotaChangeRequest(
   );
 }
 
-export async function fetchTenantLifecycle(tenantId: string): Promise<TenantLifecycleEntry[]> {
-  const items = await fetchAllCursorPages<LifecycleResponse>(tenantPath(tenantId, "/lifecycle"));
-  return items.map((item) => ({
-    id: item.id,
-    action: item.action,
-    reason: item.reason ?? null,
-    userId: item.user_id ?? null,
-    requestId: item.request_id ?? null,
-    createdAt: item.created_at,
-  }));
+// TODO(pagination-migration): 当前保留 ANI 游标契约；正式页码契约完成后迁移，当前按需查询单页。
+export async function fetchTenantLifecycle(
+  tenantId: string,
+  page: CursorPageParams = {},
+  signal?: AbortSignal,
+): Promise<CursorListResponse<TenantLifecycleEntry>> {
+  const response = await fetchCursorPage<LifecycleResponse>(
+    tenantPath(tenantId, "/lifecycle"),
+    page,
+    signal,
+  );
+  return {
+    ...response,
+    items: response.items.map((item) => ({
+      id: item.id,
+      action: item.action,
+      reason: item.reason ?? null,
+      userId: item.user_id ?? null,
+      requestId: item.request_id ?? null,
+      createdAt: item.created_at,
+    })),
+  };
 }
 
-export async function fetchTenantAuditLogs(tenantId: string): Promise<TenantAuditLogEntry[]> {
-  const items = await fetchAllCursorPages<AuditResponse>(tenantPath(tenantId, "/audit-logs"));
-  return items.map((item) => ({
-    id: item.id,
-    action: item.action,
-    resource: item.resource,
-    result: item.result,
-    userId: item.user_id ?? null,
-    details: item.details ?? null,
-    createdAt: item.created_at,
-  }));
+// TODO(pagination-migration): 当前保留 ANI 游标契约；正式页码契约完成后迁移，当前按需查询单页。
+export async function fetchTenantAuditLogs(
+  tenantId: string,
+  page: CursorPageParams = {},
+  signal?: AbortSignal,
+): Promise<CursorListResponse<TenantAuditLogEntry>> {
+  const response = await fetchCursorPage<AuditResponse>(
+    tenantPath(tenantId, "/audit-logs"),
+    page,
+    signal,
+  );
+  return {
+    ...response,
+    items: response.items.map((item) => ({
+      id: item.id,
+      action: item.action,
+      resource: item.resource,
+      result: item.result,
+      userId: item.user_id ?? null,
+      details: item.details ?? null,
+      createdAt: item.created_at,
+    })),
+  };
 }

@@ -15,7 +15,7 @@ export function TenantSelect({ value, onChange, disabled, includePlatform }: Pro
   const [search, setSearch] = useState("");
   const filters = { ...(search ? { name__contains: search } : {}) };
   const query = useQuery({
-    queryKey: managementKeys.list("tenants", { noPaging: true, filters }),
+    queryKey: managementKeys.options("tenants", filters),
     queryFn: ({ signal }) => listManagementOptions("tenants", filters, signal),
     meta: {
       errorNotification: { id: withId("management-options", "tenants"), action: "关联选项加载" },

@@ -1,3 +1,4 @@
+import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { SummaryStrip } from "@/components/common";
 import { Button, Modal } from "@arco-design/web-react";
 import { IconPlus } from "@arco-design/web-react/icon";
@@ -39,8 +40,6 @@ export function TenantPlansPage() {
   const { canManage } = useTenantManagementAccess();
   const [keyword, setKeyword] = useState("");
   const [status, setStatus] = useState<"all" | TenantPlanStatus>("all");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const [createVisible, setCreateVisible] = useState(false);
   const deferredKeyword = useDeferredValue(keyword.trim());
   const filters = useMemo<TenantPlanListFilters>(() => {
@@ -50,6 +49,8 @@ export function TenantPlansPage() {
     return next;
   }, [deferredKeyword, status]);
 
+  const cursor = useCursorPagination(JSON.stringify(filters));
+  const pageParams = { cursor: cursor.cursor, limit: cursor.limit };
   const listQuery = useQuery({
     meta: {
       errorNotification: {
@@ -58,8 +59,8 @@ export function TenantPlansPage() {
         fallback: "请求失败，请稍后重试",
       },
     },
-    queryKey: tenantManagementQueryKeys.planList(filters),
-    queryFn: () => fetchTenantPlans(filters),
+    queryKey: [...tenantManagementQueryKeys.planList(filters), pageParams],
+    queryFn: ({ signal }) => fetchTenantPlans(filters, pageParams, signal),
   });
   const invalidateAll = () =>
     queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
@@ -151,7 +152,7 @@ export function TenantPlansPage() {
       render: (value: string) => formatDateTime(value),
     },
   ];
-  const data = listQuery.data || [];
+  const data = listQuery.data?.items ?? [];
   const operationPending = statusMutation.isPending || deleteMutation.isPending;
 
   return (
@@ -161,14 +162,22 @@ export function TenantPlansPage() {
           <SummaryStrip
             pending={listQuery.isPending}
             items={[
-              { label: "策略总数", value: data.length, unit: "条", note: "当前筛选范围" },
+              { label: "本页策略", value: data.length, unit: "条", note: "当前筛选页" },
               {
-                label: "已发布",
+                label: "本页已发布",
                 value: data.filter((t) => t.status === "active").length,
                 unit: "条",
               },
-              { label: "草稿", value: data.filter((t) => t.status === "draft").length, unit: "条" },
-              { label: "绑定租户", value: data.reduce((n, t) => n + t.tenantCount, 0), unit: "个" },
+              {
+                label: "本页草稿",
+                value: data.filter((t) => t.status === "draft").length,
+                unit: "条",
+              },
+              {
+                label: "本页绑定租户",
+                value: data.reduce((n, t) => n + t.tenantCount, 0),
+                unit: "个",
+              },
             ]}
           />
         }
@@ -190,7 +199,7 @@ export function TenantPlansPage() {
           value: status,
           onChange: (value) => {
             setStatus(value);
-            setPage(1);
+            cursor.resetPagination();
           },
           items: [
             { value: "all", label: "全部" },
@@ -208,14 +217,14 @@ export function TenantPlansPage() {
             onFieldChange: () => undefined,
             onChange: (value) => {
               setKeyword(value);
-              setPage(1);
+              cursor.resetPagination();
             },
           },
           refresh: {
             spinning: listQuery.isFetching,
             onClick: () => void listQuery.refetch(),
           },
-          tools: <span className="text-xs text-gray-500">共 {data.length} 条配额策略</span>,
+          tools: <span className="text-xs text-gray-500">本页 {data.length} 条配额策略</span>,
         }}
       >
         <ListDataTable
@@ -223,16 +232,10 @@ export function TenantPlansPage() {
           columns={columns}
           data={data}
           loading={listQuery.isPending}
-          pagination={{
-            page,
-            pageSize,
-            total: data.length,
-            onPageChange: setPage,
-            onPageSizeChange: (nextPageSize) => {
-              setPage(1);
-              setPageSize(nextPageSize);
-            },
-          }}
+          pagination={cursor.getPagination(
+            listQuery.data?.next_cursor ?? undefined,
+            listQuery.isFetching,
+          )}
           rowActions={[
             {
               key: "status",

@@ -1,3 +1,4 @@
+import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { Button } from "@arco-design/web-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -36,6 +37,8 @@ export function TenantScopedAdministrators({
 }: TenantScopedAdministratorsProps) {
   const queryClient = useQueryClient();
   const [inviteVisible, setInviteVisible] = useState(false);
+  const cursor = useCursorPagination(tenantId);
+  const pageParams = { cursor: cursor.cursor, limit: cursor.limit };
   const administratorsQuery = useQuery({
     meta: {
       errorNotification: {
@@ -44,8 +47,8 @@ export function TenantScopedAdministrators({
         fallback: "请求失败，请稍后重试",
       },
     },
-    queryKey: tenantManagementQueryKeys.tenantScopedAdministrators(tenantId),
-    queryFn: () => fetchTenantScopedAdministrators(tenantId),
+    queryKey: [...tenantManagementQueryKeys.tenantScopedAdministrators(tenantId), pageParams],
+    queryFn: ({ signal }) => fetchTenantScopedAdministrators(tenantId, pageParams, signal),
   });
   const inviteMutation = useMutation({
     meta: {
@@ -114,9 +117,12 @@ export function TenantScopedAdministrators({
               render: (value: string | null) => formatDateTime(value),
             },
           ]}
-          data={administratorsQuery.data || []}
+          data={administratorsQuery.data?.items ?? []}
           loading={administratorsQuery.isPending}
-          pagination={false}
+          pagination={cursor.getPagination(
+            administratorsQuery.data?.next_cursor ?? undefined,
+            administratorsQuery.isFetching,
+          )}
           scroll={{ x: 900 }}
           noDataElement={<div className="py-8 text-center text-gray-500">暂无管理员</div>}
         />

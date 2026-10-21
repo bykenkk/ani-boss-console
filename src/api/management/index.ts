@@ -1,4 +1,5 @@
 import { adminRequest } from "@/api/request";
+import { withFirst100 } from "@/api/pagination";
 import { encryptManagementPassword } from "./password";
 import type {
   EditValues,
@@ -14,6 +15,8 @@ export const managementKeys = {
   all: ["management"] as const,
   list: (resource: Resource, input: ManagementListInput) =>
     ["management", resource, "list", input] as const,
+  options: (resource: Resource, filters: ManagementListInput["filters"] = {}) =>
+    ["management", resource, "options", filters] as const,
   detail: (resource: Resource, id: number) => ["management", resource, "detail", id] as const,
 };
 export async function listManagement<R extends Resource>(
@@ -46,8 +49,14 @@ export async function listManagementOptions<R extends Resource>(
   filters: ManagementListInput["filters"] = {},
   signal?: AbortSignal,
 ): Promise<ResourceRecords[R][]> {
-  // FIXME: noPaging 仍受后端 10000 条上限约束；需改为服务端分页加载，确保关联选项完整。
-  const { items } = await listManagement(resource, { noPaging: true, filters }, signal);
+  // TODO(options-pagination): 普通选项仅取服务端首 100 项；后端选项查询能力完善后移除固定分页策略。
+  // FIXME(group-tree-pagination): 权限分组接口先分页后组树，直接截断可能丢失父节点；保留原树查询，待后端提供独立选项契约后迁移。
+  const { items } =
+    resource === "permission-groups"
+      ? await listManagement(resource, { noPaging: true, filters }, signal)
+      : await withFirst100((params: ManagementListInput, requestSignal?: AbortSignal) =>
+          listManagement(resource, params, requestSignal),
+        )({ filters }, signal);
   if (resource !== "permission-groups") return items;
   const flatten = (
     nodes: ResourceRecords["permission-groups"][],
@@ -61,6 +70,9 @@ export async function saveManagement(
 ): Promise<void> {
   const { password, ...values } = input.values;
   let data: EditValues = values;
+  // FIXME(permission-update-mask): 权限更新暂以详情预读、全量合并并省略 mask 避免关联被清空，仍存在并发覆盖窗口。
+  // TODO(permission-update-mask): Governance 按原始 mask 快照关联、仅替换选中关联的修复部署并验证后，
+  // 移除 permissions 的详情预读与全量合并，改为仅提交已编辑字段；users 的租户与角色补齐逻辑单独保留。
   if (input.id !== undefined && (resource === "permissions" || resource === "users")) {
     const current = await getManagement(resource, input.id);
     // PermissionRepo 无条件替换 menuIds/apiIds；UserService 校验 tenantId 和完整角色集。
@@ -89,9 +101,8 @@ export async function saveManagement(
       : {
           id: input.id,
           data,
-          // FIXME: 后端修复 PermissionRepo 的关联 updateMask 处理后，恢复仅提交已编辑字段。
-          // 当前关联 mask 被剔除后 DTO 会被原地过滤，导致关联被清空。
-          // 该接口允许省略 mask；以上最新详情合并用户修改后完整提交，保留菜单关联。
+          // TODO(permission-update-mask): 上方权限兼容逻辑移除时，同步恢复 permissions 的 updateMask。
+          // 联调验证只改普通字段保留关联、修改关联按提交值替换、显式空数组清空；通过后再移除兼容标记。
           ...(resource === "permissions" ? {} : { updateMask: Object.keys(values).join(",") }),
         };
   await adminRequest<void, typeof body>(

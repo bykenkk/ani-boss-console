@@ -1,6 +1,6 @@
 import { Empty, Spin, Tree, Typography } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
-import { listManagement, managementKeys } from "@/api/management";
+import { listManagement, listManagementOptions, managementKeys } from "@/api/management";
 import {
   buildRolePermissionTree,
   getCheckedPermissionIds,
@@ -21,14 +21,15 @@ export function PermissionTreeSelect({ value = [], onChange }: Props) {
     },
   });
   const permissions = useQuery({
-    queryKey: managementKeys.list("permissions", { noPaging: true }),
-    queryFn: ({ signal }) => listManagement("permissions", { noPaging: true }, signal),
+    queryKey: managementKeys.options("permissions"),
+    queryFn: ({ signal }) => listManagementOptions("permissions", {}, signal),
     meta: {
       errorNotification: { id: "role-permissions", action: "权限点加载" },
     },
   });
-  // FIXME: 沿用管理选项的 noPaging 查询，仍受后端 10000 条上限约束。
-  const items = permissions.data?.items ?? [];
+  // FIXME(group-tree-pagination): 分组仍依赖 noPaging 的服务端组树结果；后端提供不丢父节点的选项契约后迁移。
+  // TODO(options-pagination): 权限点暂取服务端首 100 项，未加载的已有权限继续保留；后端选项契约完善后移除固定分页。
+  const items = permissions.data ?? [];
   const treeData =
     groups.data && permissions.data ? buildRolePermissionTree(groups.data.items, items) : [];
   const loading = groups.isPending || permissions.isPending;
