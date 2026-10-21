@@ -1,13 +1,8 @@
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { Button } from "@arco-design/web-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import {
-  fetchTenantScopedAdministrators,
-  getTenantManagementErrorMessage,
-  inviteTenantAdministrator,
-  tenantManagementQueryKeys,
-} from "@/api/tenant";
+import { fetchTenantScopedAdministrators, tenantManagementQueryKeys } from "@/api/tenant";
 import { DataTable, StatusBadge } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
@@ -21,21 +16,12 @@ interface TenantScopedAdministratorsProps {
   canManage: boolean;
 }
 
-async function runTenantAdministratorOperation<T>(operation: () => Promise<T>): Promise<T> {
-  try {
-    return await operation();
-  } catch (error) {
-    throw new Error(getTenantManagementErrorMessage(error));
-  }
-}
-
 export function TenantScopedAdministrators({
   tenantId,
   tenantName,
   tenantDisplayName,
   canManage,
 }: TenantScopedAdministratorsProps) {
-  const queryClient = useQueryClient();
   const [inviteVisible, setInviteVisible] = useState(false);
   const cursor = useCursorPagination(tenantId);
   const pageParams = { cursor: cursor.cursor, limit: cursor.limit };
@@ -50,32 +36,12 @@ export function TenantScopedAdministrators({
     queryKey: [...tenantManagementQueryKeys.tenantScopedAdministrators(tenantId), pageParams],
     queryFn: ({ signal }) => fetchTenantScopedAdministrators(tenantId, pageParams, signal),
   });
-  const inviteMutation = useMutation({
-    meta: {
-      feedback: {
-        channel: "message",
-        action: "租户管理员邀请",
-        successText: "管理员邀请已发送",
-        errorFallback: "管理员邀请失败，请稍后重试",
-      },
-    },
-    mutationFn: (input: Parameters<typeof inviteTenantAdministrator>[0]) =>
-      runTenantAdministratorOperation(() => inviteTenantAdministrator(input)),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
-      setInviteVisible(false);
-    },
-  });
 
   return (
     <>
       <div className="space-y-4">
         <div className="flex justify-end">
-          <Button
-            type="primary"
-            disabled={!canManage || inviteMutation.isPending}
-            onClick={() => setInviteVisible(true)}
-          >
+          <Button type="primary" disabled={!canManage} onClick={() => setInviteVisible(true)}>
             邀请管理员
           </Button>
         </div>
@@ -112,7 +78,7 @@ export function TenantScopedAdministrators({
             {
               title: "最近登录",
               dataIndex: "lastLoginAt",
-              width: 150,
+              width: 180,
               ellipsis: true,
               render: (value: string | null) => formatDateTime(value),
             },
@@ -131,10 +97,9 @@ export function TenantScopedAdministrators({
       {inviteVisible ? (
         <TenantAdministratorInviteModal
           tenantId={tenantId}
-          tenantOptions={[{ id: tenantId, name: tenantName, displayName: tenantDisplayName }]}
-          loading={inviteMutation.isPending}
+          tenantName={tenantDisplayName || tenantName}
           onCancel={() => setInviteVisible(false)}
-          onSubmit={(input) => inviteMutation.mutate(input)}
+          onSuccess={() => setInviteVisible(false)}
         />
       ) : null}
     </>

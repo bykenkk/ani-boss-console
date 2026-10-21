@@ -66,12 +66,16 @@ export function TenantPlansPage() {
     queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
   const statusMutation = useMutation({
     meta: {
-      feedback: {
-        channel: "notification",
-        id: "tenant-plan-status",
-        action: "配额策略状态更新",
-        successText: "配额策略状态已更新",
-        errorFallback: "配额策略状态更新失败，请稍后重试",
+      feedback: (variables) => {
+        const input = variables as { planId: string; action: "activate" | "disable" };
+        const action = input.action === "activate" ? "发布配额策略" : "停用配额策略";
+        return {
+          channel: "notification",
+          id: withId("tenant-plan-status", input.planId),
+          action,
+          successText: action + "成功",
+          errorFallback: action + "失败，请稍后重试",
+        };
       },
     },
     mutationFn: ({ planId, action }: { planId: string; action: "activate" | "disable" }) =>
@@ -82,13 +86,13 @@ export function TenantPlansPage() {
   });
   const deleteMutation = useMutation({
     meta: {
-      feedback: {
+      feedback: (variables) => ({
         channel: "notification",
-        id: "tenant-plan-delete",
+        id: withId("tenant-plan-delete", variables as string),
         action: "配额策略删除",
         successText: "配额策略已删除",
         errorFallback: "配额策略删除失败，请稍后重试",
-      },
+      }),
     },
     mutationFn: (planId: string) => runTenantPlanOperation(() => deleteTenantPlan(planId)),
     onSuccess: async () => {
@@ -148,7 +152,7 @@ export function TenantPlansPage() {
     {
       title: "更新时间",
       dataIndex: "updatedAt",
-      width: 150,
+      width: 180,
       render: (value: string) => formatDateTime(value),
     },
   ];

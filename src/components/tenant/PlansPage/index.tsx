@@ -53,7 +53,7 @@ const columns: ListColumn<ManagedPlan>[] = [
     key: "dataRetentionDays",
     dataIndex: "dataRetentionDays",
     title: "数据保留天数",
-    width: 160,
+    width: 180,
     ellipsis: true,
     render: (value) => String(value ?? "-"),
   },
@@ -133,7 +133,7 @@ export function PlansPage() {
             </Button>
           ),
           filters: (
-            <Space wrap>
+            <Space>
               <Input.Search
                 aria-label="搜索"
                 placeholder="搜索名称"

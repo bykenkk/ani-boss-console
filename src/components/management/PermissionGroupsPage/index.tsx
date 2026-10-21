@@ -55,7 +55,7 @@ const columns: ListColumn<ManagedPermissionGroup>[] = [
     key: "status",
     dataIndex: "status",
     title: "状态",
-    width: 160,
+    width: 120,
     ellipsis: true,
     render: (value: string | undefined) => (
       <StatusBadge
@@ -151,7 +151,7 @@ export function PermissionGroupsPage() {
             </Button>
           ),
           filters: (
-            <Space wrap>
+            <Space>
               <Input.Search
                 aria-label="搜索"
                 placeholder="搜索名称"

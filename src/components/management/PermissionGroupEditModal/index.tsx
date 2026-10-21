@@ -41,7 +41,6 @@ export function PermissionGroupEditModal(props: Props) {
       okText="保存"
       okButtonProps={{ disabled: true }}
       onCancel={onCancel}
-      maskClosable={false}
       style={{ width: 680 }}
     >
       {detail.isPending && (
@@ -103,7 +102,6 @@ function PermissionGroupEditForm({ record, defaults, onCancel, onSuccess }: Prop
       cancelButtonProps={{ disabled: mutation.isPending }}
       closable={!mutation.isPending}
       escToExit={!mutation.isPending}
-      maskClosable={false}
       style={{ width: 680 }}
     >
       <Form

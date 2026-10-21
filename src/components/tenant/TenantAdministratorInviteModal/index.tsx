@@ -1,77 +1,81 @@
-import { Form, Input, Modal, Select } from "@arco-design/web-react";
-import { useState } from "react";
-import type { InviteTenantAdministratorInput } from "@/api/tenant";
-import { showMessage } from "@/lib/feedback";
-
-interface TenantAdministratorInviteModalProps {
-  loading: boolean;
-  onCancel: () => void;
-
-  tenantId?: string;
-  tenantOptions: Array<{ id: string; name: string; displayName: string | null }>;
-  onSubmit: (input: InviteTenantAdministratorInput) => void;
+import { Form, Input, Modal } from "@arco-design/web-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { validateForm } from "@/lib/form";
+import {
+  inviteTenantAdministrator,
+  tenantManagementQueryKeys,
+  getTenantManagementErrorMessage,
+} from "@/api/tenant";
+interface TenantAdministratorInvitationFormValues {
+  email: string;
+  username: string;
 }
-
+interface TenantAdministratorInviteModalProps {
+  tenantId: string;
+  tenantName: string;
+  onCancel: () => void;
+  onSuccess: () => void;
+}
 export function TenantAdministratorInviteModal({
   tenantId,
-  tenantOptions,
-  loading,
+  tenantName,
   onCancel,
-  onSubmit,
+  onSuccess,
 }: TenantAdministratorInviteModalProps) {
-  const [draft, setDraft] = useState({
-    tenantId: tenantId ?? tenantOptions[0]?.id ?? "",
-    email: "",
-    username: "",
+  const [form] = Form.useForm<TenantAdministratorInvitationFormValues>();
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    meta: {
+      feedback: {
+        channel: "message",
+        action: "租户管理员邀请",
+        successText: "管理员邀请已发送",
+        errorFallback: "租户管理员邀请失败，请稍后重试",
+      },
+    },
+    mutationFn: async (values: TenantAdministratorInvitationFormValues) => {
+      try {
+        return await inviteTenantAdministrator({
+          tenantId,
+          email: values.email.trim(),
+          username: values.username.trim(),
+        });
+      } catch (error) {
+        throw new Error(getTenantManagementErrorMessage(error));
+      }
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
+      onSuccess();
+    },
   });
-
-  const submit = () => {
-    if (!draft.tenantId || !draft.email.includes("@") || !draft.username.trim()) {
-      showMessage({ type: "warning", content: "请选择租户并填写有效的邮箱和用户名" });
-      return;
-    }
-    onSubmit({
-      tenantId: draft.tenantId,
-      email: draft.email.trim(),
-      username: draft.username.trim(),
-    });
-  };
-
   return (
     <Modal
-      title="邀请租户管理员"
       visible
       okText="发送邀请"
-      confirmLoading={loading}
-      cancelButtonProps={{ disabled: loading }}
-      onOk={submit}
+      title="邀请租户管理员"
+      confirmLoading={mutation.isPending}
+      cancelButtonProps={{ disabled: mutation.isPending }}
       onCancel={onCancel}
+      onOk={async () => mutation.mutate(await validateForm(form))}
     >
-      <Form layout="vertical">
-        <Form.Item label="租户" required>
-          <Select
-            disabled={Boolean(tenantId)}
-            value={draft.tenantId}
-            options={tenantOptions.map((tenant) => ({
-              label: `${tenant.displayName || tenant.name} · ${tenant.name}`,
-              value: tenant.id,
-            }))}
-            onChange={(nextTenantId) =>
-              setDraft((current) => ({ ...current, tenantId: nextTenantId }))
-            }
-          />
+      <Form form={form} layout="vertical">
+        <Form.Item label="租户">
+          <Input value={tenantName} disabled />
         </Form.Item>
-        <Form.Item label="用户名" required>
-          <Input
-            value={draft.username}
-            onChange={(username) => setDraft((current) => ({ ...current, username }))}
-          />
+        <Form.Item
+          label="用户名"
+          field="username"
+          rules={[{ required: true, match: /\S/, message: "请输入用户名" }]}
+        >
+          <Input />
         </Form.Item>
-        <Form.Item label="邮箱" required>
-          <Input
-            value={draft.email}
-            onChange={(email) => setDraft((current) => ({ ...current, email }))}
-          />
+        <Form.Item
+          label="邮箱"
+          field="email"
+          rules={[{ required: true, type: "email", message: "请输入有效的邮箱" }]}
+        >
+          <Input />
         </Form.Item>
       </Form>
     </Modal>

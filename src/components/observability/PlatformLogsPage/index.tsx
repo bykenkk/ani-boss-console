@@ -2,6 +2,7 @@ import { SummaryStrip } from "@/components/common";
 import { Button, Input, Select, Space } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import clsx from "clsx";
 import {
   fetchPlatformComponents,
   platformQueryKeys,
@@ -144,7 +145,7 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
           className: "bg-gray-100 text-gray-600",
         };
         return (
-          <span className={`inline-flex rounded px-2 py-0.5 text-xs ${meta.className}`}>
+          <span className={clsx("inline-flex rounded px-2 py-0.5 text-xs", meta.className)}>
             {meta.label}
           </span>
         );
@@ -152,7 +153,7 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
     },
     {
       title: "Pod / 容器",
-      width: 240,
+      width: 200,
       render: (_, log) => <ResourceNameId name={log.pod || "-"} id={log.container || "-"} />,
     },
     {

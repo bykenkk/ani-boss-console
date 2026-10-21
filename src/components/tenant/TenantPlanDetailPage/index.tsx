@@ -8,7 +8,6 @@ import {
   fetchTenantPlan,
   getTenantManagementErrorMessage,
   tenantManagementQueryKeys,
-  updateTenantPlan,
   updateTenantPlanStatus,
 } from "@/api/tenant";
 import {
@@ -57,30 +56,17 @@ export function TenantPlanDetailPage({ planId }: TenantPlanDetailPageProps) {
   });
   const invalidateAll = () =>
     queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
-  const updateMutation = useMutation({
-    meta: {
-      feedback: {
-        channel: "message",
-        action: "配额策略更新",
-        successText: "配额策略已更新",
-        errorFallback: "配额策略更新失败，请稍后重试",
-      },
-    },
-    mutationFn: (input: { name: string; description: string }) =>
-      runTenantPlanOperation(() => updateTenantPlan({ planId, ...input })),
-    onSuccess: async () => {
-      await invalidateAll();
-      setEditVisible(false);
-    },
-  });
   const statusMutation = useMutation({
     meta: {
-      feedback: {
-        channel: "notification",
-        id: withId("tenant-plan-status", planId),
-        action: "配额策略状态更新",
-        successText: "配额策略状态已更新",
-        errorFallback: "配额策略状态更新失败，请稍后重试",
+      feedback: (variables) => {
+        const action = variables === "activate" ? "发布配额策略" : "停用配额策略";
+        return {
+          channel: "notification",
+          id: withId("tenant-plan-status", planId),
+          action,
+          successText: action + "成功",
+          errorFallback: action + "失败，请稍后重试",
+        };
       },
     },
     mutationFn: (action: "activate" | "disable") =>
@@ -139,8 +125,7 @@ export function TenantPlanDetailPage({ planId }: TenantPlanDetailPageProps) {
   }
 
   const status = tenantPlanStatusMeta[plan.status];
-  const operationPending =
-    updateMutation.isPending || statusMutation.isPending || deleteMutation.isPending;
+  const operationPending = statusMutation.isPending || deleteMutation.isPending;
   const confirmStatus = () => {
     const action = plan.status === "active" ? "disable" : "activate";
     const label = action === "activate" ? "发布" : "停用";
@@ -238,7 +223,7 @@ export function TenantPlanDetailPage({ planId }: TenantPlanDetailPageProps) {
         actions={
           <Tooltip content="更多操作">
             <Dropdown trigger="click" droplist={moreMenu} disabled={!canManage || operationPending}>
-              <Button icon={<IconMoreVertical />} aria-label="更多操作" />
+              <Button icon={<IconMoreVertical />} aria-label="更多操作" title="更多操作" />
             </Dropdown>
           </Tooltip>
         }
@@ -251,12 +236,8 @@ export function TenantPlanDetailPage({ planId }: TenantPlanDetailPageProps) {
       {editVisible ? (
         <TenantPlanModal
           plan={plan}
-          quotaMeta={[]}
-          loading={updateMutation.isPending}
           onCancel={() => setEditVisible(false)}
-          onSubmit={(input) => {
-            if (!("code" in input)) updateMutation.mutate(input);
-          }}
+          onSuccess={() => setEditVisible(false)}
         />
       ) : null}
     </>

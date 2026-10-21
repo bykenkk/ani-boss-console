@@ -1,4 +1,5 @@
 import { Card, Tabs } from "@arco-design/web-react";
+import clsx from "clsx";
 import { useMemo, useState, type ReactNode } from "react";
 import { useBreadcrumbNavigation } from "@/hooks/useBreadcrumbNavigation";
 import styles from "./index.module.less";
@@ -69,10 +70,19 @@ export function DetailPageFrame({
           {icon ? <div className={styles.identityIcon}>{icon}</div> : null}
           <div className={styles.identityText}>
             <div className={styles.titleRow}>
-              <h1 className={styles.title}>{title}</h1>
+              <h1 className={styles.title} title={typeof title === "string" ? title : undefined}>
+                {title}
+              </h1>
               {status ? <div className={styles.status}>{status}</div> : null}
             </div>
-            {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
+            {subtitle ? (
+              <p
+                className={styles.subtitle}
+                title={typeof subtitle === "string" ? subtitle : undefined}
+              >
+                {subtitle}
+              </p>
+            ) : null}
           </div>
         </div>
 
@@ -80,7 +90,16 @@ export function DetailPageFrame({
           {headerItems.map((item, index) => (
             <div key={index} className={styles.headerItem}>
               <span className={styles.headerItemLabel}>{item.label}</span>
-              <span className={styles.headerItemValue}>{item.value ?? "-"}</span>
+              <span
+                className={styles.headerItemValue}
+                title={
+                  typeof item.value === "string" || typeof item.value === "number"
+                    ? String(item.value)
+                    : undefined
+                }
+              >
+                {item.value ?? "-"}
+              </span>
             </div>
           ))}
         </div>
@@ -89,9 +108,10 @@ export function DetailPageFrame({
       </section>
 
       <div
-        className={`${styles.workspace} ${
-          tabs?.length ? styles.workspaceSplit : styles.workspaceSingle
-        }`}
+        className={clsx(
+          styles.workspace,
+          tabs?.length ? styles.workspaceSplit : styles.workspaceSingle,
+        )}
       >
         <aside className={styles.leftPane} aria-label="详情信息">
           {cards.map((card) => (

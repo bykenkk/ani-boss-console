@@ -60,7 +60,6 @@ function PlanQuotaEditForm({ record, defaults, onCancel, onSuccess }: Props) {
       cancelButtonProps={{ disabled: mutation.isPending }}
       closable={!mutation.isPending}
       escToExit={!mutation.isPending}
-      maskClosable={false}
       style={{ width: 680 }}
     >
       <Form

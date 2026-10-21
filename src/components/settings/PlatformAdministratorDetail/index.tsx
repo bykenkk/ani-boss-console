@@ -1,4 +1,3 @@
-import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { Button, Dropdown, Menu, Modal, Spin, Tooltip } from "@arco-design/web-react";
 import { IconMoreVertical } from "@arco-design/web-react/icon";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -9,12 +8,8 @@ import {
   disablePlatformAdministrator,
   enablePlatformAdministrator,
   fetchPlatformAdministrator,
-  fetchPlatformAdministratorAuditLogs,
-  fetchPlatformAdministratorRoles,
   getPlatformAdministratorErrorMessage,
   platformAdministratorQueryKeys,
-  resetPlatformAdministratorPassword,
-  updatePlatformAdministratorRole,
 } from "@/api/platform-admins";
 import { getAccessTokenRoles } from "@/stores/auth";
 import { useAuthState } from "@/hooks/useAuthState";
@@ -24,10 +19,8 @@ import { withId } from "@/lib/id";
 import { AccountOverview } from "./AccountOverview";
 import { OperationRecords } from "./OperationRecords";
 // import { PermissionMatrix } from "./PermissionMatrix";
-import {
-  PlatformAdministratorPasswordModal,
-  PlatformAdministratorRoleModal,
-} from "../PlatformAdministratorsPage/PlatformAdministratorModals";
+import { PlatformAdministratorPasswordModal } from "../PlatformAdministratorPasswordModal";
+import { PlatformAdministratorRoleModal } from "../PlatformAdministratorRoleModal";
 import { PlatformAdministratorStatusBadge } from "../PlatformAdministratorStatusBadge";
 import { platformAdministratorRoleLabels, platformAdministratorSourceLabels } from "../model";
 
@@ -62,72 +55,21 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
     queryKey: platformAdministratorQueryKeys.detail(userId),
     queryFn: () => fetchPlatformAdministrator(userId),
   });
-  const rolesQuery = useQuery({
-    meta: {
-      errorNotification: {
-        id: "platform-administrator-roles",
-        action: "平台角色权限加载",
-        fallback: "请求失败，请稍后重试",
-      },
-    },
-    queryKey: platformAdministratorQueryKeys.roles,
-    queryFn: fetchPlatformAdministratorRoles,
-  });
-  const cursor = useCursorPagination(userId);
-  const pageParams = { cursor: cursor.cursor, limit: cursor.limit };
-  const auditQuery = useQuery({
-    meta: {
-      errorNotification: {
-        id: withId("platform-administrator-audit", userId),
-        action: "账号操作记录加载",
-        fallback: "请求失败，请稍后重试",
-      },
-    },
-    queryKey: [...platformAdministratorQueryKeys.auditLogs(userId), pageParams],
-    queryFn: ({ signal }) => fetchPlatformAdministratorAuditLogs(userId, pageParams, signal),
-  });
 
   const invalidateAll = () =>
     queryClient.invalidateQueries({ queryKey: platformAdministratorQueryKeys.all });
-  const roleMutation = useMutation({
-    meta: {
-      feedback: {
-        channel: "message",
-        action: "账号角色更新",
-        successText: "账号角色已更新",
-        errorFallback: "账号角色更新失败，请稍后重试",
-      },
-    },
-    mutationFn: (input: Parameters<typeof updatePlatformAdministratorRole>[0]) =>
-      runAdministratorOperation(() => updatePlatformAdministratorRole(input)),
-    onSuccess: async () => {
-      await invalidateAll();
-      setRoleVisible(false);
-    },
-  });
-  const passwordMutation = useMutation({
-    meta: {
-      feedback: {
-        channel: "message",
-        action: "账号密码重置",
-        successText: "账号密码已重置",
-        errorFallback: "账号密码重置失败，请稍后重试",
-      },
-    },
-    mutationFn: (input: Parameters<typeof resetPlatformAdministratorPassword>[0]) =>
-      runAdministratorOperation(() => resetPlatformAdministratorPassword(input)),
-    onSuccess: async () => {
-      await invalidateAll();
-      setPasswordVisible(false);
-    },
-  });
   const statusMutation = useMutation({
     meta: {
-      feedback: {
-        channel: "notification",
-        id: "platform-administrator-status",
-        action: "账号状态更新",
-        errorFallback: "账号状态更新失败，请稍后重试",
+      feedback: (variables) => {
+        const { status } = variables as { status: "active" | "disabled" };
+        const action = status === "active" ? "禁用账号" : "启用账号";
+        return {
+          channel: "notification",
+          id: withId("platform-administrator-status", userId),
+          action,
+          successText: action + "成功",
+          errorFallback: action + "失败，请稍后重试",
+        };
       },
     },
     mutationFn: ({ status }: { status: "active" | "disabled" }) =>
@@ -144,7 +86,7 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
     meta: {
       feedback: {
         channel: "notification",
-        id: "platform-administrator-delete",
+        id: withId("platform-administrator-delete", userId),
         action: "平台运营账号删除",
         successText: "账号已删除",
         errorFallback: "账号删除失败，请稍后重试",
@@ -197,11 +139,7 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
     );
   }
 
-  const operationPending =
-    roleMutation.isPending ||
-    passwordMutation.isPending ||
-    statusMutation.isPending ||
-    deleteMutation.isPending;
+  const operationPending = statusMutation.isPending || deleteMutation.isPending;
   const confirmStatusChange = () => {
     const action = detail.status === "active" ? "禁用" : "启用";
     Modal.confirm({
@@ -267,16 +205,7 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
     {
       key: "operations",
       title: "操作记录",
-      content: (
-        <OperationRecords
-          records={auditQuery.data?.items ?? []}
-          loading={auditQuery.isPending}
-          pagination={cursor.getPagination(
-            auditQuery.data?.next_cursor ?? undefined,
-            auditQuery.isFetching,
-          )}
-        />
-      ),
+      content: <OperationRecords userId={userId} />,
     },
   ];
 
@@ -300,7 +229,7 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
         actions={
           <Tooltip content="更多操作">
             <Dropdown trigger="click" droplist={moreMenu} disabled={!canManage || operationPending}>
-              <Button icon={<IconMoreVertical />} aria-label="更多操作" />
+              <Button icon={<IconMoreVertical />} aria-label="更多操作" title="更多操作" />
             </Dropdown>
           </Tooltip>
         }
@@ -311,19 +240,20 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
         onBack={returnToList}
       />
 
-      <PlatformAdministratorRoleModal
-        target={roleVisible ? detail : null}
-        loading={roleMutation.isPending}
-        roles={rolesQuery.data || []}
-        onCancel={() => setRoleVisible(false)}
-        onSubmit={(roleId) => roleMutation.mutate({ userId, roleId })}
-      />
-      <PlatformAdministratorPasswordModal
-        target={passwordVisible ? detail : null}
-        loading={passwordMutation.isPending}
-        onCancel={() => setPasswordVisible(false)}
-        onSubmit={(newPassword) => passwordMutation.mutate({ userId, newPassword })}
-      />
+      {roleVisible ? (
+        <PlatformAdministratorRoleModal
+          target={detail}
+          onCancel={() => setRoleVisible(false)}
+          onSuccess={() => setRoleVisible(false)}
+        />
+      ) : null}
+      {passwordVisible ? (
+        <PlatformAdministratorPasswordModal
+          target={detail}
+          onCancel={() => setPasswordVisible(false)}
+          onSuccess={() => setPasswordVisible(false)}
+        />
+      ) : null}
     </>
   );
 }

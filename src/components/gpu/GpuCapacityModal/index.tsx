@@ -9,12 +9,12 @@ import {
 import { DataTable, type ListColumn } from "@/components/common";
 import { withId } from "@/lib/id";
 const columns: ListColumn<GpuDeviceCapacity>[] = [
-  { title: "设备 ID", dataIndex: "device_id" },
-  { title: "安全预算（MiB）", dataIndex: "safe_memory_budget_mib" },
-  { title: "实际占用（MiB）", dataIndex: "committed_memory_mib" },
-  { title: "理论份数", dataIndex: "nominal_units" },
-  { title: "跨规格已占槽数", dataIndex: "known_committed_units" },
-  { title: "本规格可用份数", dataIndex: "known_free_units" },
+  { title: "设备 ID", width: 160, dataIndex: "device_id" },
+  { title: "安全预算（MiB）", width: 160, dataIndex: "safe_memory_budget_mib" },
+  { title: "实际占用（MiB）", width: 160, dataIndex: "committed_memory_mib" },
+  { title: "理论份数", width: 160, dataIndex: "nominal_units" },
+  { title: "跨规格已占槽数", width: 160, dataIndex: "known_committed_units" },
+  { title: "本规格可用份数", width: 160, dataIndex: "known_free_units" },
 ];
 export function GpuCapacityModal({
   profile,

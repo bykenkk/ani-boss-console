@@ -9,7 +9,6 @@ import {
   fetchTenantAdministrators,
   getTenantManagementErrorMessage,
   resendTenantAdministratorInvitation,
-  resetTenantAdministratorPassword,
   tenantManagementQueryKeys,
   updateTenantAdministratorStatus,
 } from "@/api/tenant";
@@ -81,7 +80,8 @@ export function TenantAdministratorDetailPage({
   const resendMutation = useMutation({
     meta: {
       feedback: {
-        channel: "message",
+        channel: "notification",
+        id: withId("tenant-administrator-resend", administratorId),
         action: "管理员邀请重发",
         successText: "邀请已重新发送",
         errorFallback: "邀请重发失败，请稍后重试",
@@ -95,36 +95,17 @@ export function TenantAdministratorDetailPage({
       await invalidateAll();
     },
   });
-  const passwordMutation = useMutation({
-    meta: {
-      feedback: {
-        channel: "message",
-        action: "管理员密码重置",
-        successText: "管理员密码已重置",
-        errorFallback: "管理员密码重置失败，请稍后重试",
-      },
-    },
-    mutationFn: (newPassword: string) =>
-      runAdministratorOperation(() =>
-        resetTenantAdministratorPassword({
-          tenantId: tenantId!,
-          userId: administratorId,
-          newPassword,
-        }),
-      ),
-    onSuccess: async () => {
-      await invalidateAll();
-      setPasswordVisible(false);
-    },
-  });
   const statusMutation = useMutation({
     meta: {
-      feedback: {
-        channel: "notification",
-        id: withId("tenant-administrator-status", administratorId),
-        action: "管理员状态更新",
-        successText: "管理员状态已更新",
-        errorFallback: "管理员状态更新失败，请稍后重试",
+      feedback: (variables) => {
+        const action = variables === "disable" ? "禁用管理员" : "启用管理员";
+        return {
+          channel: "notification",
+          id: withId("tenant-administrator-status", administratorId),
+          action,
+          successText: action + "成功",
+          errorFallback: action + "失败，请稍后重试",
+        };
       },
     },
     mutationFn: (action: "disable" | "enable") =>
@@ -187,10 +168,7 @@ export function TenantAdministratorDetailPage({
 
   const status = tenantAdministratorStatusMeta[administrator.status];
   const operationPending =
-    resendMutation.isPending ||
-    passwordMutation.isPending ||
-    statusMutation.isPending ||
-    deleteMutation.isPending;
+    resendMutation.isPending || statusMutation.isPending || deleteMutation.isPending;
   const confirmStatus = () => {
     const action = administrator.status === "active" ? "disable" : "enable";
     const label = action === "disable" ? "禁用" : "启用";
@@ -306,7 +284,7 @@ export function TenantAdministratorDetailPage({
         actions={
           <Tooltip content="更多操作">
             <Dropdown trigger="click" droplist={moreMenu} disabled={!canManage || operationPending}>
-              <Button icon={<IconMoreVertical />} aria-label="更多操作" />
+              <Button icon={<IconMoreVertical />} aria-label="更多操作" title="更多操作" />
             </Dropdown>
           </Tooltip>
         }
@@ -318,9 +296,10 @@ export function TenantAdministratorDetailPage({
 
       {passwordVisible ? (
         <TenantAdministratorPasswordModal
-          loading={passwordMutation.isPending}
+          tenantId={tenantId}
+          administratorId={administrator.id}
           onCancel={() => setPasswordVisible(false)}
-          onSubmit={(newPassword) => passwordMutation.mutate(newPassword)}
+          onSuccess={() => setPasswordVisible(false)}
         />
       ) : null}
     </>

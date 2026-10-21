@@ -1,47 +1,51 @@
-import { Form, Modal, Select } from "@arco-design/web-react";
-import { useState } from "react";
-import type { BoundTenant } from "@/api/tenant";
-
+import { Form, Modal } from "@arco-design/web-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  bindTenantPlan,
+  tenantManagementQueryKeys,
+  getTenantManagementErrorMessage,
+} from "@/api/tenant";
+import { validateForm } from "@/lib/form";
+import { TenantPlanBindingFields } from "./TenantPlanBindingFields";
 interface TenantPlanBindModalProps {
-  loading: boolean;
+  planId: string;
   onCancel: () => void;
-
-  tenants: BoundTenant[];
-  onSubmit: (tenantId: string) => void;
+  onSuccess: () => void;
 }
-
-export function TenantPlanBindModal({
-  tenants,
-  loading,
-  onCancel,
-  onSubmit,
-}: TenantPlanBindModalProps) {
-  const [tenantId, setTenantId] = useState(tenants[0]?.id ?? "");
-
+interface TenantPlanBindingFormValues {
+  tenantId: string;
+}
+export function TenantPlanBindModal({ planId, onCancel, onSuccess }: TenantPlanBindModalProps) {
+  const [form] = Form.useForm<TenantPlanBindingFormValues>();
+  const client = useQueryClient();
+  const mutation = useMutation({
+    meta: {
+      feedback: { channel: "message", action: "配额策略绑定", successText: "租户配额策略已更新" },
+    },
+    mutationFn: async ({ tenantId }: TenantPlanBindingFormValues) => {
+      try {
+        return await bindTenantPlan(tenantId, planId);
+      } catch (error) {
+        throw new Error(getTenantManagementErrorMessage(error));
+      }
+    },
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
+      onSuccess();
+    },
+  });
   return (
     <Modal
-      title="绑定租户"
       visible
       okText="确认绑定"
-      confirmLoading={loading}
-      cancelButtonProps={{ disabled: loading }}
-      okButtonProps={{ disabled: !tenantId }}
-      onOk={() => {
-        if (tenantId) onSubmit(tenantId);
-      }}
+      title="绑定租户"
+      confirmLoading={mutation.isPending}
+      cancelButtonProps={{ disabled: mutation.isPending }}
       onCancel={onCancel}
+      onOk={async () => mutation.mutate(await validateForm(form))}
     >
-      <Form layout="vertical">
-        <Form.Item label="目标租户" required>
-          <Select
-            value={tenantId}
-            options={tenants.map((tenant) => ({
-              label: `${tenant.displayName} · ${tenant.name}`,
-              value: tenant.id,
-            }))}
-            onChange={setTenantId}
-          />
-        </Form.Item>
+      <Form form={form} layout="vertical">
+        <TenantPlanBindingFields planId={planId} />
       </Form>
     </Modal>
   );

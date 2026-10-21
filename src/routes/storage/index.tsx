@@ -143,7 +143,7 @@ export const Route = createFileRoute("/storage/")({
       {
         title: "存储后端 / ID",
         dataIndex: "name",
-        width: 220,
+        width: 200,
         fixed: "left",
         render: (_, backend) => <ResourceNameId name={backend.name} id={backend.id} />,
       },

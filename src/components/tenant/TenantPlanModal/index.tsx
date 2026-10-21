@@ -1,107 +1,78 @@
-import { Form, Input, InputNumber, Modal } from "@arco-design/web-react";
-import { useState } from "react";
-import type { CreateTenantPlanInput, TenantPlanDetail, TenantQuotaMetaItem } from "@/api/tenant";
-import { showMessage } from "@/lib/feedback";
-
-interface TenantPlanModalProps {
-  loading: boolean;
-  onCancel: () => void;
-
-  plan?: TenantPlanDetail;
-  quotaMeta: TenantQuotaMetaItem[];
-  onSubmit: (input: CreateTenantPlanInput | { name: string; description: string }) => void;
+import { Form, Input, Modal } from "@arco-design/web-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { validateForm } from "@/lib/form";
+import {
+  updateTenantPlan,
+  tenantManagementQueryKeys,
+  getTenantManagementErrorMessage,
+  type TenantPlanDetail,
+} from "@/api/tenant";
+interface TenantPlanEditFormValues {
+  name: string;
+  description: string;
 }
-
-export function TenantPlanModal({
-  plan,
-  quotaMeta,
-  loading,
-  onCancel,
-  onSubmit,
-}: TenantPlanModalProps) {
-  const [draft, setDraft] = useState({
-    code: plan?.code ?? "",
-    name: plan?.name ?? "",
-    description: plan?.description ?? "",
-    limits: Object.fromEntries(quotaMeta.map((item) => [item.resourceType, item.defaultQuota])),
+interface TenantPlanModalProps {
+  plan: TenantPlanDetail;
+  onCancel: () => void;
+  onSuccess: () => void;
+}
+export function TenantPlanModal({ plan, onCancel, onSuccess }: TenantPlanModalProps) {
+  const [form] = Form.useForm<TenantPlanEditFormValues>();
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    meta: {
+      feedback: {
+        channel: "message",
+        action: "配额策略更新",
+        successText: "配额策略已更新",
+        errorFallback: "配额策略更新失败，请稍后重试",
+      },
+    },
+    mutationFn: async (values: TenantPlanEditFormValues) => {
+      try {
+        return await updateTenantPlan({
+          planId: plan.id,
+          name: values.name.trim(),
+          description: (values.description ?? "").trim(),
+        });
+      } catch (error) {
+        throw new Error(getTenantManagementErrorMessage(error));
+      }
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
+      onSuccess();
+    },
   });
-
-  const submit = () => {
-    if (!draft.name.trim() || (!plan && !draft.code.trim())) {
-      showMessage({ type: "warning", content: "请填写策略编码和名称" });
-      return;
-    }
-    if (plan) {
-      onSubmit({ name: draft.name.trim(), description: draft.description.trim() });
-      return;
-    }
-    onSubmit({
-      code: draft.code.trim(),
-      name: draft.name.trim(),
-      description: draft.description.trim(),
-      quotaLimits: quotaMeta.map((item) => ({
-        resourceType: item.resourceType,
-        total: draft.limits[item.resourceType] ?? item.defaultQuota,
-      })),
-    });
-  };
-
   return (
     <Modal
-      title={plan ? "编辑配额策略" : "新建配额策略"}
       visible
+      okText="保存"
+      title="编辑配额策略"
       style={{ width: 720 }}
-      okText={plan ? "保存" : "创建草稿"}
-      confirmLoading={loading}
-      cancelButtonProps={{ disabled: loading }}
-      onOk={submit}
+      confirmLoading={mutation.isPending}
+      cancelButtonProps={{ disabled: mutation.isPending }}
       onCancel={onCancel}
+      onOk={async () => mutation.mutate(await validateForm(form))}
     >
-      <Form layout="vertical">
-        <div className="grid grid-cols-2 gap-x-4">
-          <Form.Item label="策略编码" required>
-            <Input
-              value={draft.code}
-              disabled={Boolean(plan)}
-              onChange={(code) => setDraft((current) => ({ ...current, code }))}
-            />
-          </Form.Item>
-          <Form.Item label="策略名称" required>
-            <Input
-              value={draft.name}
-              onChange={(name) => setDraft((current) => ({ ...current, name }))}
-            />
-          </Form.Item>
-        </div>
-        <Form.Item label="说明">
-          <Input.TextArea
-            value={draft.description}
-            onChange={(description) => setDraft((current) => ({ ...current, description }))}
-          />
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={{ name: plan.name, description: plan.description ?? "" }}
+      >
+        <Form.Item label="策略编码">
+          <Input value={plan.code} disabled />
         </Form.Item>
-        {!plan ? (
-          <div className="grid max-h-72 grid-cols-2 gap-x-4 overflow-auto">
-            {quotaMeta.map((item) => (
-              <Form.Item key={item.resourceType} label={`${item.displayName}（${item.unit}）`}>
-                <InputNumber
-                  className="w-full"
-                  min={0}
-                  precision={item.isDiscrete ? 0 : 2}
-                  value={draft.limits[item.resourceType]}
-                  onChange={(value) =>
-                    setDraft((current) => ({
-                      ...current,
-                      limits: {
-                        ...current.limits,
-                        [item.resourceType]: Number(value) || 0,
-                      },
-                    }))
-                  }
-                />
-              </Form.Item>
-            ))}
-          </div>
-        ) : null}
+        <Form.Item
+          label="策略名称"
+          field="name"
+          rules={[{ required: true, match: /\S/, message: "请填写策略名称" }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item label="说明" field="description">
+          <Input.TextArea />
+        </Form.Item>
       </Form>
     </Modal>
   );

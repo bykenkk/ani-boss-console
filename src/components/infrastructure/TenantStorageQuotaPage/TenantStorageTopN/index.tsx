@@ -55,7 +55,7 @@ const columns: ListColumn<TenantHotItem>[] = [
   {
     title: "租户 / ID",
     dataIndex: "name",
-    width: 220,
+    width: 200,
     render: (_, item) => <ResourceNameId name={item.name} id={item.id} />,
   },
   {

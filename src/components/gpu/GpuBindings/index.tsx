@@ -19,13 +19,13 @@ const columns: ListColumn<GpuBinding>[] = [
   {
     title: "容器名称",
     dataIndex: "binding.container_name",
-    width: 180,
+    width: 200,
     ellipsis: true,
   },
   { title: "物理设备 ID", dataIndex: "physical_device_id", width: 220, ellipsis: true },
   {
     title: "分配状态",
-    width: 160,
+    width: 120,
     ellipsis: true,
     render: (_, item) => (
       <StatusBadge

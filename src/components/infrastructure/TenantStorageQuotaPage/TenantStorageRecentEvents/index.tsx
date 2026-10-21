@@ -51,7 +51,7 @@ const columns: ListColumn<TenantStorageEvent>[] = [
   {
     title: "时间",
     dataIndex: "at",
-    width: 170,
+    width: 180,
     render: (value: string) => formatDateTimeMinute(value),
   },
   {
@@ -70,7 +70,7 @@ const columns: ListColumn<TenantStorageEvent>[] = [
     ),
   },
   { title: "租户", dataIndex: "tenant", width: 190 },
-  { title: "事件", dataIndex: "message" },
+  { title: "事件", width: 240, dataIndex: "message" },
 ];
 
 export function TenantStorageRecentEvents() {

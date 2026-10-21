@@ -20,7 +20,7 @@ import { withId } from "@/lib/id";
 import type { GpuAccess } from "../GpuResourcesPage/types";
 import { GpuCapacityModal } from "../GpuCapacityModal";
 const columns: ListColumn<GpuProfile>[] = [
-  { title: "规格名称", dataIndex: "display_name", width: 220, ellipsis: true },
+  { title: "规格名称", dataIndex: "display_name", width: 200, ellipsis: true },
   { title: "规格 ID", dataIndex: "profile_id", width: 220, ellipsis: true },
   { title: "规格版本", dataIndex: "profile_version", width: 100, ellipsis: true },
   { title: "供给组 ID", dataIndex: "spec.group_id", width: 220, ellipsis: true },
@@ -92,11 +92,15 @@ export function GpuProfiles({ clusterId, access }: { clusterId: string; access: 
   const stateMutation = useMutation({
     mutationFn: setGpuProfileState,
     meta: {
-      feedback: {
-        channel: "notification",
-        id: "gpu-profile-state",
-        action: "GPU 规格状态更新",
-        successText: "GPU 规格状态已更新",
+      feedback: (variables) => {
+        const input = variables as Parameters<typeof setGpuProfileState>[0];
+        const action = input.desired === "PROFILE_ACTIVE" ? "启用 GPU 规格" : "停用 GPU 规格";
+        return {
+          channel: "notification",
+          id: withId("gpu-profile-state", input.profile_id),
+          action,
+          successText: action + "成功",
+        };
       },
     },
     onSuccess: refresh,

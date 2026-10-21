@@ -1,12 +1,9 @@
 import { Button } from "@arco-design/web-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
-  bindTenantPlan,
-  fetchTenantPlanBindableTenants,
   fetchTenantPlanBoundTenants,
-  getTenantManagementErrorMessage,
   tenantManagementQueryKeys,
   type TenantPlanStatus,
 } from "@/api/tenant";
@@ -21,20 +18,11 @@ interface TenantPlanBoundTenantsProps {
   canManage: boolean;
 }
 
-async function runTenantPlanBindingOperation<T>(operation: () => Promise<T>): Promise<T> {
-  try {
-    return await operation();
-  } catch (error) {
-    throw new Error(getTenantManagementErrorMessage(error));
-  }
-}
-
 export function TenantPlanBoundTenants({
   planId,
   planStatus,
   canManage,
 }: TenantPlanBoundTenantsProps) {
-  const queryClient = useQueryClient();
   const [bindVisible, setBindVisible] = useState(false);
   const boundQuery = useQuery({
     meta: {
@@ -47,33 +35,6 @@ export function TenantPlanBoundTenants({
     queryKey: tenantManagementQueryKeys.planBoundTenants(planId),
     queryFn: () => fetchTenantPlanBoundTenants(planId),
   });
-  const bindableQuery = useQuery({
-    meta: {
-      errorNotification: {
-        id: withId("tenant-plan-bindable", planId),
-        action: "可绑定租户加载",
-        fallback: "请求失败，请稍后重试",
-      },
-    },
-    queryKey: tenantManagementQueryKeys.planBindableTenants(planId),
-    queryFn: () => fetchTenantPlanBindableTenants(planId),
-  });
-  const bindMutation = useMutation({
-    meta: {
-      feedback: {
-        channel: "message",
-        action: "配额策略绑定",
-        successText: "租户配额策略已更新",
-        errorFallback: "配额策略绑定失败，请稍后重试",
-      },
-    },
-    mutationFn: (tenantId: string) =>
-      runTenantPlanBindingOperation(() => bindTenantPlan(tenantId, planId)),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
-      setBindVisible(false);
-    },
-  });
 
   return (
     <>
@@ -81,12 +42,7 @@ export function TenantPlanBoundTenants({
         <div className="flex justify-end">
           <Button
             type="primary"
-            disabled={
-              !canManage ||
-              planStatus !== "active" ||
-              !bindableQuery.data?.length ||
-              bindMutation.isPending
-            }
+            disabled={!canManage || planStatus !== "active"}
             onClick={() => setBindVisible(true)}
           >
             绑定租户
@@ -97,7 +53,7 @@ export function TenantPlanBoundTenants({
           columns={[
             {
               title: "租户",
-              width: 260,
+              width: 200,
               render: (_, tenant) => (
                 <Link to="/tenants/$tenantId" params={{ tenantId: tenant.id }}>
                   {tenant.displayName}
@@ -124,10 +80,9 @@ export function TenantPlanBoundTenants({
 
       {bindVisible ? (
         <TenantPlanBindModal
-          tenants={bindableQuery.data || []}
-          loading={bindMutation.isPending}
+          planId={planId}
           onCancel={() => setBindVisible(false)}
-          onSubmit={(tenantId) => bindMutation.mutate(tenantId)}
+          onSuccess={() => setBindVisible(false)}
         />
       ) : null}
     </>

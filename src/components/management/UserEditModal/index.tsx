@@ -43,7 +43,6 @@ export function UserEditModal(props: Props) {
       okText="保存"
       okButtonProps={{ disabled: true }}
       onCancel={onCancel}
-      maskClosable={false}
       style={{ width: 680 }}
     >
       {detail.isPending && (
@@ -110,7 +109,6 @@ function UserEditForm({ record, defaults, userScope, onCancel, onSuccess }: Prop
       cancelButtonProps={{ disabled: mutation.isPending }}
       closable={!mutation.isPending}
       escToExit={!mutation.isPending}
-      maskClosable={false}
       style={{ width: 680 }}
     >
       <Form

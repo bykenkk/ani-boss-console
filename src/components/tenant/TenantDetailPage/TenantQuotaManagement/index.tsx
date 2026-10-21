@@ -1,29 +1,14 @@
-import {
-  fetchTenantQuota,
-  getTenantManagementErrorMessage,
-  reviewTenantQuotaChangeRequest,
-  submitTenantQuotaChangeRequest,
-  tenantManagementQueryKeys,
-  type TenantQuotaItem,
-} from "@/api/tenant";
+import { fetchTenantQuota, tenantManagementQueryKeys, type TenantQuotaItem } from "@/api/tenant";
 import { DataTable, type ListColumn } from "@/components/common";
 import { withId } from "@/lib/id";
 import { Progress } from "@arco-design/web-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { TenantQuotaRequestModal } from "@/components/tenant/TenantQuotaRequestModal";
 
 interface TenantQuotaManagementProps {
   tenantId: string;
   canManage: boolean;
-}
-
-async function runTenantQuotaOperation<T>(operation: () => Promise<T>): Promise<T> {
-  try {
-    return await operation();
-  } catch (error) {
-    throw new Error(getTenantManagementErrorMessage(error));
-  }
 }
 
 const quotaColumns: ListColumn<TenantQuotaItem>[] = [
@@ -70,7 +55,6 @@ const quotaColumns: ListColumn<TenantQuotaItem>[] = [
 ];
 
 export function TenantQuotaManagement({ tenantId, canManage }: TenantQuotaManagementProps) {
-  const queryClient = useQueryClient();
   const [quotaTarget, setQuotaTarget] = useState<TenantQuotaItem | null>(null);
   const quotaQuery = useQuery({
     meta: {
@@ -82,34 +66,6 @@ export function TenantQuotaManagement({ tenantId, canManage }: TenantQuotaManage
     },
     queryKey: tenantManagementQueryKeys.tenantQuota(tenantId),
     queryFn: () => fetchTenantQuota(tenantId),
-  });
-  const invalidateAll = () =>
-    queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
-  const quotaAdjustmentMutation = useMutation({
-    meta: {
-      feedback: {
-        channel: "message",
-        action: "配额调整",
-        successText: "配额已调整",
-        errorFallback: "配额调整失败，请稍后重试",
-      },
-    },
-    mutationFn: ({ resourceType, newValue }: { resourceType: string; newValue: number }) =>
-      runTenantQuotaOperation(async () => {
-        const request = await submitTenantQuotaChangeRequest({
-          tenantId,
-          items: [{ resourceType, newValue }],
-        });
-        return reviewTenantQuotaChangeRequest({
-          tenantId,
-          requestId: request.id,
-          approved: true,
-        });
-      }),
-    onSuccess: async () => {
-      await invalidateAll();
-      setQuotaTarget(null);
-    },
   });
 
   return (
@@ -126,7 +82,7 @@ export function TenantQuotaManagement({ tenantId, canManage }: TenantQuotaManage
             {
               key: "adjust",
               label: "配额调整",
-              disabled: () => !canManage || quotaAdjustmentMutation.isPending,
+              disabled: () => !canManage,
               onClick: setQuotaTarget,
             },
           ]}
@@ -137,14 +93,9 @@ export function TenantQuotaManagement({ tenantId, canManage }: TenantQuotaManage
       {quotaTarget ? (
         <TenantQuotaRequestModal
           item={quotaTarget}
-          loading={quotaAdjustmentMutation.isPending}
+          tenantId={tenantId}
           onCancel={() => setQuotaTarget(null)}
-          onSubmit={(newValue) =>
-            quotaAdjustmentMutation.mutate({
-              resourceType: quotaTarget.resourceType,
-              newValue,
-            })
-          }
+          onSuccess={() => setQuotaTarget(null)}
         />
       ) : null}
     </>

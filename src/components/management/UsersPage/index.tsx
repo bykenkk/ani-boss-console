@@ -34,7 +34,7 @@ const columns: ListColumn<ManagedUser>[] = [
     key: "realname",
     dataIndex: "realname",
     title: "姓名",
-    width: 160,
+    width: 200,
     ellipsis: true,
     render: (value) => String(value ?? "-"),
   },
@@ -66,7 +66,7 @@ const columns: ListColumn<ManagedUser>[] = [
     key: "status",
     dataIndex: "status",
     title: "状态",
-    width: 160,
+    width: 120,
     ellipsis: true,
     render: (value: string | undefined) => (
       <StatusBadge
@@ -196,7 +196,7 @@ export function UsersPage({ scope = "all" }: { scope?: "all" | "platform" | "ten
             </Button>
           ),
           filters: (
-            <Space wrap>
+            <Space>
               <Input.Search
                 aria-label="搜索"
                 placeholder="搜索用户名"

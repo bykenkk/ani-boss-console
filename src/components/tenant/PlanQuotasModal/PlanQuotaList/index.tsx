@@ -103,7 +103,7 @@ export function PlanQuotaList({ planId }: { planId: number }) {
             </Button>
           ),
           filters: (
-            <Space wrap>
+            <Space>
               <Input.Search
                 aria-label="搜索"
                 placeholder="搜索名称"

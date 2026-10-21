@@ -78,7 +78,7 @@ const columns: ListColumn<ManagedApi>[] = [
     key: "status",
     dataIndex: "status",
     title: "状态",
-    width: 160,
+    width: 120,
     ellipsis: true,
     render: (value: string | undefined) => (
       <StatusBadge
@@ -175,7 +175,7 @@ export function ApisPage() {
             </Button>
           ),
           filters: (
-            <Space wrap>
+            <Space>
               <Input.Search
                 aria-label="搜索"
                 placeholder="搜索接口路径"

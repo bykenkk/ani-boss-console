@@ -1,54 +1,59 @@
-import { Input, InputNumber, Modal } from "@arco-design/web-react";
-
+import { Form, Input, InputNumber, Modal } from "@arco-design/web-react";
+import { useTenantManagement } from "@/hooks/useTenantManagement";
+import { validateForm } from "@/lib/form";
+import { showMessage } from "@/lib/feedback";
 interface CreditAdjustmentModalProps {
-  visible: boolean;
-  amount: number;
-  reason: string;
-  onAmountChange: (value: number) => void;
-  onReasonChange: (value: string) => void;
-  onConfirm: () => void;
+  tenantId: string;
   onCancel: () => void;
+  onSuccess: () => void;
 }
-
+interface CreditAdjustmentFormValues {
+  amount: number;
+  reason?: string;
+}
 export function CreditAdjustmentModal({
-  visible,
-  amount,
-  reason,
-  onAmountChange,
-  onReasonChange,
-  onConfirm,
+  tenantId,
   onCancel,
+  onSuccess,
 }: CreditAdjustmentModalProps) {
+  const [form] = Form.useForm<CreditAdjustmentFormValues>();
+  const { applyTenantBillingAction } = useTenantManagement();
+  const submit = async () => {
+    const values = await validateForm(form);
+    const result = applyTenantBillingAction(tenantId, "adjust_credit", {
+      amountUsd: values.amount,
+      reason: values.reason,
+    });
+    showMessage({
+      type: result.ok ? "success" : "error",
+      content: result.ok ? (result.message ?? "授信调账已完成") : (result.reason ?? "授信调账失败"),
+    });
+    if (result.ok) onSuccess();
+  };
   return (
-    <Modal
-      title="授信调账"
-      visible={visible}
-      onCancel={onCancel}
-      onOk={onConfirm}
-      okText="确认调账"
-    >
-      <div className="space-y-4">
-        <div>
-          <div className="mb-2 text-sm text-gray-600">调账金额（USD）</div>
+    <Modal visible title="授信调账" onCancel={onCancel} onOk={submit} okText="确认调账">
+      <Form form={form} layout="vertical">
+        <Form.Item
+          field="amount"
+          label="调账金额（USD）"
+          rules={[
+            { required: true, message: "请输入调账金额" },
+            {
+              validator: (value, callback) =>
+                callback(!Number.isFinite(value) || value === 0 ? "请输入非零调账金额" : undefined),
+            },
+          ]}
+        >
           <InputNumber
-            value={amount}
             precision={2}
             className="w-full"
             placeholder="正数增加余额与授信，负数扣减余额"
-            onChange={(value) => onAmountChange(Number(value) || 0)}
           />
-        </div>
-        <div>
-          <div className="mb-2 text-sm text-gray-600">调账原因</div>
-          <Input.TextArea
-            value={reason}
-            placeholder="未填写时记为人工调账"
-            maxLength={200}
-            showWordLimit
-            onChange={onReasonChange}
-          />
-        </div>
-      </div>
+        </Form.Item>
+        <Form.Item field="reason" label="调账原因">
+          <Input.TextArea placeholder="未填写时记为人工调账" maxLength={200} showWordLimit />
+        </Form.Item>
+      </Form>
     </Modal>
   );
 }

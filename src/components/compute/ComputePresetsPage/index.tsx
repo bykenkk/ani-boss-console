@@ -1,3 +1,4 @@
+import { withId } from "@/lib/id";
 import { useState } from "react";
 import { Button, Input, Modal, Select, Space } from "@arco-design/web-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,7 +23,7 @@ import { useListPagination } from "@/hooks/useListPagination";
 import { formatDateTime } from "@/lib/date";
 import { ComputePresetEditModal } from "../ComputePresetEditModal";
 const columns: ListColumn<ComputePreset>[] = [
-  { title: "规格名称", dataIndex: "name", width: 220, ellipsis: true },
+  { title: "规格名称", dataIndex: "name", width: 200, ellipsis: true },
   { title: "规格编码", dataIndex: "code", width: 200, ellipsis: true },
   { title: "规格 ID", dataIndex: "id", width: 220, ellipsis: true },
   {
@@ -72,7 +73,7 @@ const columns: ListColumn<ComputePreset>[] = [
   },
   {
     title: "状态",
-    width: 110,
+    width: 120,
     render: (_, row) => (
       <StatusBadge
         value={row.enabled ? "启用" : "停用"}
@@ -88,7 +89,7 @@ const columns: ListColumn<ComputePreset>[] = [
   },
   {
     title: "更新时间",
-    width: 190,
+    width: 180,
     ellipsis: true,
     render: (_, row) => formatDateTime(row.updated_at),
   },
@@ -116,11 +117,15 @@ export function ComputePresetsPage() {
   const stateMutation = useMutation({
     mutationFn: setComputePresetEnabled,
     meta: {
-      feedback: {
-        channel: "notification",
-        id: "compute-preset-state",
-        action: "计算规格状态更新",
-        successText: "计算规格状态已更新",
+      feedback: (variables) => {
+        const input = variables as Parameters<typeof setComputePresetEnabled>[0];
+        const action = input.enabled ? "启用计算规格" : "停用计算规格";
+        return {
+          channel: "notification",
+          id: withId("compute-preset-state", input.id),
+          action,
+          successText: action + "成功",
+        };
       },
     },
     onSuccess: refresh,
@@ -190,7 +195,7 @@ export function ComputePresetsPage() {
             </Button>
           ) : null,
           filters: (
-            <Space wrap>
+            <Space>
               <Input.Search
                 aria-label="规格名称"
                 placeholder="搜索规格名称"

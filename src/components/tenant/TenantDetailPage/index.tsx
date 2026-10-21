@@ -7,9 +7,7 @@ import {
   fetchTenant,
   getTenantManagementErrorMessage,
   tenantManagementQueryKeys,
-  updateTenant,
   updateTenantStatus,
-  type UpdateTenantInput,
 } from "@/api/tenant";
 import {
   DetailPageFrame,
@@ -58,29 +56,18 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
   });
   const invalidateAll = () =>
     queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
-  const profileMutation = useMutation({
-    meta: {
-      feedback: {
-        channel: "message",
-        action: "租户信息更新",
-        successText: "租户信息已更新",
-        errorFallback: "租户信息更新失败，请稍后重试",
-      },
-    },
-    mutationFn: (input: UpdateTenantInput) => runTenantOperation(() => updateTenant(input)),
-    onSuccess: async () => {
-      await invalidateAll();
-      setProfileVisible(false);
-    },
-  });
   const statusMutation = useMutation({
     meta: {
-      feedback: {
-        channel: "notification",
-        id: withId("tenant-status", tenantId),
-        action: "租户状态更新",
-        successText: "租户状态已更新",
-        errorFallback: "租户状态更新失败，请稍后重试",
+      feedback: (variables) => {
+        const label =
+          variables === "freeze" ? "冻结租户" : variables === "unfreeze" ? "解冻租户" : "禁用租户";
+        return {
+          channel: "notification",
+          id: withId("tenant-status", tenantId),
+          action: label,
+          successText: label + "成功",
+          errorFallback: label + "失败，请稍后重试",
+        };
       },
     },
     mutationFn: (action: "freeze" | "unfreeze" | "disable") =>
@@ -121,7 +108,7 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
   }
 
   const status = tenantStatusMeta[tenant.status];
-  const operationPending = profileMutation.isPending || statusMutation.isPending;
+  const operationPending = statusMutation.isPending;
   const confirmStatusChange = (action: "freeze" | "unfreeze" | "disable") => {
     const label = action === "freeze" ? "冻结" : action === "unfreeze" ? "解冻" : "禁用";
     Modal.confirm({
@@ -227,7 +214,7 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
         actions={
           <Tooltip content="更多操作">
             <Dropdown trigger="click" droplist={moreMenu} disabled={!canManage || operationPending}>
-              <Button icon={<IconMoreVertical />} aria-label="更多操作" />
+              <Button icon={<IconMoreVertical />} aria-label="更多操作" title="更多操作" />
             </Dropdown>
           </Tooltip>
         }
@@ -242,9 +229,8 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
           tenantId={tenant.id}
           displayName={tenant.displayName}
           contactEmail={tenant.contactEmail}
-          loading={profileMutation.isPending}
           onCancel={() => setProfileVisible(false)}
-          onSubmit={(input) => profileMutation.mutate(input)}
+          onSuccess={() => setProfileVisible(false)}
         />
       ) : null}
     </>

@@ -1,68 +1,84 @@
 import { Form, Input, Modal } from "@arco-design/web-react";
-import { useState } from "react";
-import type { UpdateTenantInput } from "@/api/tenant";
-import { showMessage } from "@/lib/feedback";
-
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { validateForm } from "@/lib/form";
+import {
+  updateTenant,
+  tenantManagementQueryKeys,
+  getTenantManagementErrorMessage,
+} from "@/api/tenant";
+interface TenantProfileFormValues {
+  displayName: string;
+  contactEmail: string;
+}
 interface TenantProfileModalProps {
-  loading: boolean;
-  onCancel: () => void;
-
   tenantId: string;
   displayName: string;
   contactEmail: string | null;
-  onSubmit: (input: UpdateTenantInput) => void;
+  onCancel: () => void;
+  onSuccess: () => void;
 }
-
 export function TenantProfileModal({
   tenantId,
   displayName,
   contactEmail,
-  loading,
   onCancel,
-  onSubmit,
+  onSuccess,
 }: TenantProfileModalProps) {
-  const [draft, setDraft] = useState({ displayName, contactEmail: contactEmail ?? "" });
-
-  const submit = () => {
-    if (!draft.displayName.trim()) {
-      showMessage({ type: "warning", content: "请填写租户显示名" });
-      return;
-    }
-    if (draft.contactEmail && !draft.contactEmail.includes("@")) {
-      showMessage({ type: "warning", content: "请输入有效的联系邮箱" });
-      return;
-    }
-    onSubmit({
-      tenantId,
-      displayName: draft.displayName.trim(),
-      contactEmail: draft.contactEmail.trim(),
-    });
-  };
-
+  const [form] = Form.useForm<TenantProfileFormValues>();
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    meta: {
+      feedback: {
+        channel: "message",
+        action: "租户信息更新",
+        successText: "租户信息已更新",
+        errorFallback: "租户信息更新失败，请稍后重试",
+      },
+    },
+    mutationFn: async (values: TenantProfileFormValues) => {
+      try {
+        return await updateTenant({
+          tenantId,
+          displayName: values.displayName.trim(),
+          contactEmail: (values.contactEmail ?? "").trim(),
+        });
+      } catch (error) {
+        throw new Error(getTenantManagementErrorMessage(error));
+      }
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
+      onSuccess();
+    },
+  });
   return (
     <Modal
-      title="编辑租户信息"
       visible
       okText="保存"
-      confirmLoading={loading}
-      cancelButtonProps={{ disabled: loading }}
-      onOk={submit}
+      title="编辑租户信息"
+      confirmLoading={mutation.isPending}
+      cancelButtonProps={{ disabled: mutation.isPending }}
       onCancel={onCancel}
+      onOk={async () => mutation.mutate(await validateForm(form))}
     >
-      <Form layout="vertical">
-        <Form.Item label="显示名" required>
-          <Input
-            value={draft.displayName}
-            onChange={(displayName) => setDraft((current) => ({ ...current, displayName }))}
-          />
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={{ displayName, contactEmail: contactEmail ?? "" }}
+      >
+        <Form.Item
+          label="显示名"
+          field="displayName"
+          rules={[{ required: true, match: /\S/, message: "请填写租户显示名" }]}
+        >
+          <Input />
         </Form.Item>
-        <Form.Item label="联系邮箱">
-          <Input
-            value={draft.contactEmail}
-            onChange={(nextContactEmail) =>
-              setDraft((current) => ({ ...current, contactEmail: nextContactEmail }))
-            }
-          />
+        <Form.Item
+          label="联系邮箱"
+          field="contactEmail"
+          rules={[{ type: "email", message: "请输入有效的联系邮箱" }]}
+        >
+          <Input />
         </Form.Item>
       </Form>
     </Modal>

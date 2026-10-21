@@ -1,62 +1,70 @@
-import { Form, InputNumber, Modal } from "@arco-design/web-react";
-import { useState } from "react";
-import type { TenantPlanQuotaLimit } from "@/api/tenant";
-
-interface TenantPlanLimitsModalProps {
-  loading: boolean;
-  onCancel: () => void;
-
-  limits: TenantPlanQuotaLimit[];
-  onSubmit: (items: Array<{ resourceType: string; total: number }>) => void;
+import { Form, Modal } from "@arco-design/web-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { validateForm } from "@/lib/form";
+import {
+  updateTenantPlanQuotaLimits,
+  tenantManagementQueryKeys,
+  getTenantManagementErrorMessage,
+  type TenantPlanQuotaLimit,
+} from "@/api/tenant";
+import { TenantPlanLimitFields } from "./TenantPlanLimitFields";
+interface TenantPlanLimitsFormValues {
+  limits: Record<string, number>;
 }
-
+interface TenantPlanLimitsModalProps {
+  planId: string;
+  limits: TenantPlanQuotaLimit[];
+  onCancel: () => void;
+  onSuccess: () => void;
+}
 export function TenantPlanLimitsModal({
+  planId,
   limits,
-  loading,
   onCancel,
-  onSubmit,
+  onSuccess,
 }: TenantPlanLimitsModalProps) {
-  const [values, setValues] = useState<Record<string, number>>(() =>
-    Object.fromEntries(limits.map((item) => [item.resourceType, item.total])),
-  );
-
+  const [form] = Form.useForm<TenantPlanLimitsFormValues>();
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    meta: {
+      feedback: {
+        channel: "message",
+        action: "配额上限更新",
+        successText: "配额上限已更新",
+        errorFallback: "配额上限更新失败，请稍后重试",
+      },
+    },
+    mutationFn: async (values: TenantPlanLimitsFormValues) => {
+      try {
+        return await updateTenantPlanQuotaLimits({
+          planId,
+          items: limits.map((item) => ({
+            resourceType: item.resourceType,
+            total: values.limits[item.resourceType],
+          })),
+        });
+      } catch (error) {
+        throw new Error(getTenantManagementErrorMessage(error));
+      }
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
+      onSuccess();
+    },
+  });
   return (
     <Modal
-      title="编辑配额上限"
       visible
-      style={{ width: 680 }}
       okText="保存限额"
-      confirmLoading={loading}
-      cancelButtonProps={{ disabled: loading }}
-      onOk={() =>
-        onSubmit(
-          limits.map((item) => ({
-            resourceType: item.resourceType,
-            total: values[item.resourceType] ?? item.total,
-          })),
-        )
-      }
+      title="编辑配额上限"
+      style={{ width: 680 }}
+      confirmLoading={mutation.isPending}
+      cancelButtonProps={{ disabled: mutation.isPending }}
       onCancel={onCancel}
+      onOk={async () => mutation.mutate(await validateForm(form))}
     >
-      <Form layout="vertical">
-        <div className="grid grid-cols-2 gap-x-4">
-          {limits.map((item) => (
-            <Form.Item key={item.resourceType} label={`${item.displayName}（${item.unit}）`}>
-              <InputNumber
-                className="w-full"
-                min={0}
-                precision={0}
-                value={values[item.resourceType]}
-                onChange={(value) =>
-                  setValues((current) => ({
-                    ...current,
-                    [item.resourceType]: Number(value) || 0,
-                  }))
-                }
-              />
-            </Form.Item>
-          ))}
-        </div>
+      <Form form={form} layout="vertical">
+        <TenantPlanLimitFields limits={limits} />
       </Form>
     </Modal>
   );

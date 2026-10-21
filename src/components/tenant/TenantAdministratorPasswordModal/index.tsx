@@ -1,41 +1,73 @@
 import { Form, Input, Modal } from "@arco-design/web-react";
-import { useState } from "react";
-import { showMessage } from "@/lib/feedback";
-
-interface TenantAdministratorPasswordModalProps {
-  loading: boolean;
-  onCancel: () => void;
-  onSubmit: (newPassword: string) => void;
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { validateForm } from "@/lib/form";
+import {
+  resetTenantAdministratorPassword,
+  tenantManagementQueryKeys,
+  getTenantManagementErrorMessage,
+} from "@/api/tenant";
+interface TenantAdministratorPasswordFormValues {
+  newPassword: string;
 }
-
+interface TenantAdministratorPasswordModalProps {
+  tenantId: string;
+  administratorId: string;
+  onCancel: () => void;
+  onSuccess: () => void;
+}
 export function TenantAdministratorPasswordModal({
-  loading,
+  tenantId,
+  administratorId,
   onCancel,
-  onSubmit,
+  onSuccess,
 }: TenantAdministratorPasswordModalProps) {
-  const [password, setPassword] = useState("");
-
-  const submit = () => {
-    if (password.length < 8) {
-      showMessage({ type: "warning", content: "新密码至少需要 8 位" });
-      return;
-    }
-    onSubmit(password);
-  };
-
+  const [form] = Form.useForm<TenantAdministratorPasswordFormValues>();
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    meta: {
+      feedback: {
+        channel: "message",
+        action: "管理员密码重置",
+        successText: "管理员密码已重置",
+        errorFallback: "管理员密码重置失败，请稍后重试",
+      },
+    },
+    mutationFn: async (values: TenantAdministratorPasswordFormValues) => {
+      try {
+        return await resetTenantAdministratorPassword({
+          tenantId,
+          userId: administratorId,
+          newPassword: values.newPassword,
+        });
+      } catch (error) {
+        throw new Error(getTenantManagementErrorMessage(error));
+      }
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
+      onSuccess();
+    },
+  });
   return (
     <Modal
-      title="重置管理员密码"
       visible
       okText="确认重置"
-      confirmLoading={loading}
-      cancelButtonProps={{ disabled: loading }}
-      onOk={submit}
+      title="重置管理员密码"
+      confirmLoading={mutation.isPending}
+      cancelButtonProps={{ disabled: mutation.isPending }}
       onCancel={onCancel}
+      onOk={async () => mutation.mutate(await validateForm(form))}
     >
-      <Form layout="vertical">
-        <Form.Item label="新密码" required>
-          <Input.Password value={password} onChange={setPassword} />
+      <Form form={form} layout="vertical">
+        <Form.Item
+          label="新密码"
+          field="newPassword"
+          rules={[
+            { required: true, message: "请输入新密码" },
+            { minLength: 8, message: "新密码至少需要 8 位" },
+          ]}
+        >
+          <Input.Password autoComplete="new-password" />
         </Form.Item>
       </Form>
     </Modal>

@@ -2,7 +2,8 @@ import { Button, Modal, Typography } from "@arco-design/web-react";
 import { IconDownload } from "@arco-design/web-react/icon";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { showMessage } from "@/lib/feedback";
+import { showNotification } from "@/lib/feedback";
+import { useTenantBillingActions } from "@/hooks/useTenantBillingActions";
 import {
   ListDataTable,
   ResourceNameId,
@@ -22,65 +23,30 @@ import {
 import { formatDate, formatDateTimeMinute, formatMonth } from "@/lib/date";
 
 export function TenantBillingList() {
-  const { tenantBillings, applyTenantBillingAction } = useTenantManagement();
+  const { tenantBillings } = useTenantManagement();
+  const runAction = useTenantBillingActions();
   const [adjustingBilling, setAdjustingBilling] = useState<TenantBilling>();
-  const [adjustmentAmount, setAdjustmentAmount] = useState(0);
-  const [adjustmentReason, setAdjustmentReason] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-
-  const showResult = (
-    result: { ok: boolean; reason?: string; message?: string },
-    success: string,
-  ) => {
-    if (result.ok) {
-      showMessage({ type: "success", content: result.message ?? success });
-      return true;
-    }
-    showMessage({ type: "error", content: result.reason ?? "操作失败" });
-    return false;
-  };
 
   const confirmAction = (
     billing: TenantBilling,
     action: Exclude<TenantBillingAction, "adjust_credit" | "export_statement">,
     title: string,
     content: string,
-    success: string,
   ) => {
     Modal.confirm({
       title,
       content,
-      onOk: () => void showResult(applyTenantBillingAction(billing.tenantId, action), success),
+      onOk: () => {
+        runAction(billing.tenantId, action);
+      },
     });
-  };
-
-  const submitAdjustment = () => {
-    if (!adjustingBilling) return;
-    if (!adjustmentAmount) {
-      showMessage({ type: "warning", content: "请输入非零调账金额" });
-      return;
-    }
-    if (
-      showResult(
-        applyTenantBillingAction(adjustingBilling.tenantId, "adjust_credit", {
-          amountUsd: adjustmentAmount,
-          reason: adjustmentReason,
-        }),
-        "授信调账已完成",
-      )
-    ) {
-      setAdjustingBilling(undefined);
-      setAdjustmentAmount(0);
-      setAdjustmentReason("");
-    }
   };
 
   const handleMoreAction = (action: string, billing: TenantBilling) => {
     if (action === "adjust_credit") {
       setAdjustingBilling(billing);
-      setAdjustmentAmount(0);
-      setAdjustmentReason("");
       return;
     }
     if (action === "generate_invoice") {
@@ -89,22 +55,15 @@ export function TenantBillingList() {
         "generate_invoice",
         "生成账单",
         `确认按本期用量费用 ${formatUsd(billing.usageCostUsd)} 生成账单？`,
-        "账单已生成",
       );
       return;
     }
     if (action === "mark_settled") {
-      confirmAction(
-        billing,
-        "mark_settled",
-        "标记结清",
-        "确认该租户已完成线下结算并标记结清？",
-        "账单已结清",
-      );
+      confirmAction(billing, "mark_settled", "标记结清", "确认该租户已完成线下结算并标记结清？");
       return;
     }
     if (action === "export_statement") {
-      showResult(applyTenantBillingAction(billing.tenantId, "export_statement"), "对账单已导出");
+      runAction(billing.tenantId, "export_statement");
     }
   };
 
@@ -112,7 +71,7 @@ export function TenantBillingList() {
     {
       title: "租户",
       dataIndex: "tenantName",
-      width: 190,
+      width: 200,
       fixed: "left",
       render: (_, item) => (
         <Link to="/tenants-billing/$tenantId" params={{ tenantId: item.tenantId }}>
@@ -123,7 +82,7 @@ export function TenantBillingList() {
     {
       title: "账期状态",
       dataIndex: "status",
-      width: 110,
+      width: 120,
       render: (status: TenantBillingStatus) => (
         <StatusBadge
           tone={tenantBillingStatusMeta[status].tone}
@@ -134,7 +93,7 @@ export function TenantBillingList() {
     {
       title: "账期",
       dataIndex: "period",
-      width: 100,
+      width: 180,
       render: (value: string) => formatMonth(value),
     },
     {
@@ -169,13 +128,13 @@ export function TenantBillingList() {
     {
       title: "到期日",
       dataIndex: "dueDate",
-      width: 120,
+      width: 180,
       render: (value: string) => formatDate(value),
     },
     {
       title: "更新时间",
       dataIndex: "updatedAt",
-      width: 160,
+      width: 180,
       render: (value: string) => formatDateTimeMinute(value),
     },
   ];
@@ -190,9 +149,11 @@ export function TenantBillingList() {
             <Button
               icon={<IconDownload />}
               onClick={() =>
-                showMessage({
-                  type: "success",
-                  content: `已导出 ${tenantBillings.length} 条计费记录`,
+                showNotification({
+                  id: "tenant-billing-export",
+                  state: "success",
+                  action: "导出计费记录",
+                  title: `已导出 ${tenantBillings.length} 条计费记录`,
                 })
               }
             >
@@ -214,7 +175,6 @@ export function TenantBillingList() {
                   "refresh_usage",
                   "刷新用量",
                   `确认刷新 ${item.tenantName} ${item.period} 账期的用量与费用？`,
-                  "用量与费用已刷新",
                 ),
             },
             {
@@ -255,19 +215,13 @@ export function TenantBillingList() {
         />
       </ListPageFrame>
 
-      <CreditAdjustmentModal
-        visible={Boolean(adjustingBilling)}
-        amount={adjustmentAmount}
-        reason={adjustmentReason}
-        onAmountChange={setAdjustmentAmount}
-        onReasonChange={setAdjustmentReason}
-        onConfirm={submitAdjustment}
-        onCancel={() => {
-          setAdjustingBilling(undefined);
-          setAdjustmentAmount(0);
-          setAdjustmentReason("");
-        }}
-      />
+      {adjustingBilling ? (
+        <CreditAdjustmentModal
+          tenantId={adjustingBilling.tenantId}
+          onCancel={() => setAdjustingBilling(undefined)}
+          onSuccess={() => setAdjustingBilling(undefined)}
+        />
+      ) : null}
     </>
   );
 }

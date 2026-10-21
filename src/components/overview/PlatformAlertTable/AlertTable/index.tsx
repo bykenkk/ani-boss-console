@@ -70,7 +70,7 @@ export function AlertTable({ rows, onUpdate, extra }: AlertTableProps) {
         {
           title: "时间",
           dataIndex: "time",
-          width: 120,
+          width: 180,
           render: (value: string) => formatMonthDayTime(value),
         },
         {

@@ -15,7 +15,7 @@ import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { withId } from "@/lib/id";
 import type { GpuAccess } from "../GpuResourcesPage/types";
 const columns: ListColumn<GpuSupplyGroup>[] = [
-  { title: "供给组名称", dataIndex: "display_name", width: 220, ellipsis: true },
+  { title: "供给组名称", dataIndex: "display_name", width: 200, ellipsis: true },
   { title: "供给组 ID", dataIndex: "group_id", width: 220, ellipsis: true },
   { title: "GPU 型号", dataIndex: "model_key", width: 180, ellipsis: true },
   {

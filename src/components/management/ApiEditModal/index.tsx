@@ -36,7 +36,6 @@ export function ApiEditModal(props: Props) {
       title={record ? "编辑API" : "新建API"}
       footer={null}
       onCancel={onCancel}
-      maskClosable={false}
       style={{ width: 680 }}
     >
       {!record || detail.isSuccess ? (

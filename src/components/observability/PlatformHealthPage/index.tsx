@@ -58,7 +58,7 @@ export function PlatformHealthPage() {
     },
     {
       title: "状态",
-      width: 90,
+      width: 120,
       render: (_, component) => (
         <StatusBadge
           value={component.status}

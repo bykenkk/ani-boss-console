@@ -1,7 +1,8 @@
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ReactNode } from "react";
+import type { ButtonProps } from "@arco-design/web-react";
 
 type ResourcePageTitleProps = {
-  iconClassName?: string;
+  icon?: ReactNode;
   title: ReactNode;
   subtitle?: ReactNode;
 };
@@ -9,12 +10,12 @@ type ResourcePageTitleProps = {
 export type ResourcePageHeaderAction = {
   key: string;
   label: ReactNode;
-  iconClassName?: string;
+  icon?: ReactNode;
   variant?: "primary" | "outline" | "secondary" | "danger";
   tooltip?: ReactNode;
   disabled?: boolean;
   onClick?: () => void;
-  buttonProps?: Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "disabled" | "onClick">;
+  buttonProps?: Omit<ButtonProps, "children" | "disabled" | "onClick" | "icon">;
 };
 
 type ResourcePageHeaderBaseConfig = ResourcePageTitleProps;

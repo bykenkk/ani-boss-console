@@ -1,6 +1,12 @@
-import { Spin } from "@arco-design/web-react";
+import { useQuery } from "@tanstack/react-query";
+import { useCursorPagination } from "@/hooks/useCursorPagination";
+import {
+  fetchPlatformAdministratorAuditLogs,
+  platformAdministratorQueryKeys,
+} from "@/api/platform-admins";
+import { withId } from "@/lib/id";
 import type { PlatformAdministratorAuditLog } from "@/api/platform-admins";
-import { DataTable, type ListColumn, type ListPagination, StatusBadge } from "@/components/common";
+import { DataTable, type ListColumn, StatusBadge } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 
 const actionLabels: Record<string, string> = {
@@ -19,7 +25,7 @@ const columns: ListColumn<PlatformAdministratorAuditLog>[] = [
     width: 180,
     render: (value) => actionLabels[value] ?? value,
   },
-  { title: "资源", dataIndex: "resource", render: (value) => value || "-" },
+  { title: "资源", width: 240, dataIndex: "resource", render: (value) => value || "-" },
   {
     title: "结果",
     dataIndex: "result",
@@ -40,26 +46,33 @@ const columns: ListColumn<PlatformAdministratorAuditLog>[] = [
 ];
 
 interface OperationRecordsProps {
-  records: PlatformAdministratorAuditLog[];
-  loading: boolean;
-  pagination: ListPagination;
+  userId: string;
 }
 
-export function OperationRecords({ records, loading, pagination }: OperationRecordsProps) {
-  if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Spin />
-      </div>
-    );
-  }
-
+export function OperationRecords({ userId }: OperationRecordsProps) {
+  const cursor = useCursorPagination(userId);
+  const pageParams = { cursor: cursor.cursor, limit: cursor.limit };
+  const auditQuery = useQuery({
+    queryKey: [...platformAdministratorQueryKeys.auditLogs(userId), pageParams],
+    queryFn: ({ signal }) => fetchPlatformAdministratorAuditLogs(userId, pageParams, signal),
+    meta: {
+      errorNotification: {
+        id: withId("platform-administrator-audit", userId),
+        action: "账号操作记录加载",
+        fallback: "请求失败，请稍后重试",
+      },
+    },
+  });
   return (
     <DataTable
       rowKey="id"
       columns={columns}
-      data={records}
-      pagination={pagination}
+      data={auditQuery.data?.items ?? []}
+      loading={auditQuery.isPending}
+      pagination={cursor.getPagination(
+        auditQuery.data?.next_cursor ?? undefined,
+        auditQuery.isFetching,
+      )}
       scroll={{ x: 760 }}
     />
   );

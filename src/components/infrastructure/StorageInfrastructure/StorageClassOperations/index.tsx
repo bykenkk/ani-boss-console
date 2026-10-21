@@ -80,7 +80,7 @@ const columns: ListColumn<StorageClassItem>[] = [
   {
     title: "StorageClass / ID",
     dataIndex: "name",
-    width: 210,
+    width: 200,
     render: (_, item) => <ResourceNameId name={item.name} id={item.id} />,
   },
   { title: "类型", dataIndex: "type", width: 80 },

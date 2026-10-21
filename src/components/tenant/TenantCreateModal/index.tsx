@@ -102,7 +102,6 @@ export function TenantCreateModal({ onCancel, onSuccess }: TenantCreateModalProp
       visible
       style={{ width: 720 }}
       closable={!pending}
-      maskClosable={!pending}
       escToExit={!pending}
       onCancel={() => {
         if (!pending) onCancel();

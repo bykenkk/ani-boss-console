@@ -63,7 +63,7 @@ export function TenantAuditRecords({ tenantId }: TenantAuditRecordsProps) {
         {
           title: "时间",
           dataIndex: "createdAt",
-          width: 150,
+          width: 180,
           render: (value: string) => formatDateTime(value),
         },
       ]}

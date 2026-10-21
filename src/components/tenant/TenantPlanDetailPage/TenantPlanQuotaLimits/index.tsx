@@ -1,14 +1,12 @@
 import {
   fetchTenantPlanQuotaLimits,
-  getTenantManagementErrorMessage,
   tenantManagementQueryKeys,
-  updateTenantPlanQuotaLimits,
   type TenantPlanStatus,
 } from "@/api/tenant";
 import { DataTable } from "@/components/common";
 import { withId } from "@/lib/id";
 import { Button } from "@arco-design/web-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { TenantPlanLimitsModal } from "@/components/tenant/TenantPlanLimitsModal";
 
@@ -18,20 +16,11 @@ interface TenantPlanQuotaLimitsProps {
   canManage: boolean;
 }
 
-async function runTenantPlanLimitOperation<T>(operation: () => Promise<T>): Promise<T> {
-  try {
-    return await operation();
-  } catch (error) {
-    throw new Error(getTenantManagementErrorMessage(error));
-  }
-}
-
 export function TenantPlanQuotaLimits({
   planId,
   planStatus,
   canManage,
 }: TenantPlanQuotaLimitsProps) {
-  const queryClient = useQueryClient();
   const [limitsVisible, setLimitsVisible] = useState(false);
   const limitsQuery = useQuery({
     meta: {
@@ -44,29 +33,13 @@ export function TenantPlanQuotaLimits({
     queryKey: tenantManagementQueryKeys.planLimits(planId),
     queryFn: () => fetchTenantPlanQuotaLimits(planId),
   });
-  const limitsMutation = useMutation({
-    meta: {
-      feedback: {
-        channel: "message",
-        action: "配额上限更新",
-        successText: "配额上限已更新",
-        errorFallback: "配额上限更新失败，请稍后重试",
-      },
-    },
-    mutationFn: (items: Array<{ resourceType: string; total: number }>) =>
-      runTenantPlanLimitOperation(() => updateTenantPlanQuotaLimits({ planId, items })),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
-      setLimitsVisible(false);
-    },
-  });
 
   return (
     <>
       <div className="space-y-4 py-4">
         <div className="flex justify-end">
           <Button
-            disabled={!canManage || planStatus !== "draft" || limitsMutation.isPending}
+            disabled={!canManage || planStatus !== "draft"}
             onClick={() => setLimitsVisible(true)}
           >
             编辑限额
@@ -112,9 +85,9 @@ export function TenantPlanQuotaLimits({
       {limitsVisible ? (
         <TenantPlanLimitsModal
           limits={limitsQuery.data || []}
-          loading={limitsMutation.isPending}
+          planId={planId}
           onCancel={() => setLimitsVisible(false)}
-          onSubmit={(items) => limitsMutation.mutate(items)}
+          onSuccess={() => setLimitsVisible(false)}
         />
       ) : null}
     </>

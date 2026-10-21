@@ -192,7 +192,7 @@ export const Route = createFileRoute("/pool/")({
       {
         title: "区域 / 编码",
         dataIndex: "name",
-        width: 180,
+        width: 200,
         render: (_, region) => <ResourceNameId name={region.name} id={region.code} />,
       },
       {
@@ -262,7 +262,7 @@ export const Route = createFileRoute("/pool/")({
       {
         title: "更新时间",
         dataIndex: "updatedAt",
-        width: 160,
+        width: 180,
         render: (value: string) => formatDateTimeMinute(value),
       },
     ];

@@ -47,7 +47,7 @@ export function MeteringTenantTable({
     },
     {
       title: "租户",
-      width: 250,
+      width: 200,
       render: (_, row) => (
         <ResourceNameId
           name={names.get(row.id) || row.id}

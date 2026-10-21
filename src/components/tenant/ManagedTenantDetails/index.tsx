@@ -47,8 +47,8 @@ export function ManagedTenantDetails({ tenantId }: { tenantId: number }) {
         loading={usage.isPending}
         pagination={false}
         columns={[
-          { key: "quotaCode", dataIndex: "quotaCode", title: "配额编码" },
-          { key: "quotaValue", dataIndex: "quotaValue", title: "上限" },
+          { key: "quotaCode", dataIndex: "quotaCode", title: "配额编码", width: 240 },
+          { key: "quotaValue", dataIndex: "quotaValue", title: "上限", width: 160 },
         ]}
       />
       <Alert content="配额策略与计费业务入口继续保留；未建立新旧租户对应关系前，请在业务页面独立选择租户。" />

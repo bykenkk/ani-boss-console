@@ -42,7 +42,6 @@ export function TenantEditModal(props: Props) {
       okText="保存"
       okButtonProps={{ disabled: true }}
       onCancel={onCancel}
-      maskClosable={false}
       style={{ width: 680 }}
     >
       {detail.isPending && (
@@ -122,7 +121,6 @@ function TenantEditForm({ record, defaults, onCancel, onSuccess }: Props) {
       cancelButtonProps={{ disabled: mutation.isPending }}
       closable={!mutation.isPending}
       escToExit={!mutation.isPending}
-      maskClosable={false}
       style={{ width: 680 }}
     >
       <Form

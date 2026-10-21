@@ -1,11 +1,9 @@
 import { Button, Tag } from "@arco-design/web-react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   fetchTenantRoles,
-  getTenantManagementErrorMessage,
   tenantManagementQueryKeys,
-  updateTenantAdministratorRole,
   type TenantAdministratorRole as TenantAdministratorRoleName,
 } from "@/api/tenant";
 import { DataTable } from "@/components/common";
@@ -28,43 +26,17 @@ export function TenantAdministratorRole({
   isInviting,
   canManage,
 }: TenantAdministratorRoleProps) {
-  const queryClient = useQueryClient();
   const [modalVisible, setModalVisible] = useState(false);
   const rolesQuery = useQuery({
     meta: {
       errorNotification: {
-        id: withId("tenant-administrator-roles", administratorId),
+        id: withId("tenant-administrator-roles", tenantId),
         action: "租户角色加载",
         fallback: "请求失败，请稍后重试",
       },
     },
     queryKey: tenantManagementQueryKeys.administratorRoles(tenantId),
     queryFn: () => fetchTenantRoles(tenantId),
-  });
-  const roleMutation = useMutation({
-    meta: {
-      feedback: {
-        channel: "message",
-        action: "管理员角色更新",
-        successText: "管理员角色已更新",
-        errorFallback: "管理员角色更新失败，请稍后重试",
-      },
-    },
-    mutationFn: async (roleId: string) => {
-      try {
-        return await updateTenantAdministratorRole({
-          tenantId,
-          userId: administratorId,
-          roleId,
-        });
-      } catch (error) {
-        throw new Error(getTenantManagementErrorMessage(error));
-      }
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: tenantManagementQueryKeys.all });
-      setModalVisible(false);
-    },
   });
 
   return (
@@ -74,10 +46,7 @@ export function TenantAdministratorRole({
           当前角色：
           <Tag>{tenantAdministratorRoleLabels[currentRole]}</Tag>
         </div>
-        <Button
-          disabled={!canManage || isInviting || roleMutation.isPending}
-          onClick={() => setModalVisible(true)}
-        >
+        <Button disabled={!canManage || isInviting} onClick={() => setModalVisible(true)}>
           修改角色
         </Button>
       </div>
@@ -114,9 +83,10 @@ export function TenantAdministratorRole({
         <TenantAdministratorRoleModal
           roles={rolesQuery.data || []}
           currentRole={currentRole}
-          loading={roleMutation.isPending}
+          tenantId={tenantId}
+          administratorId={administratorId}
           onCancel={() => setModalVisible(false)}
-          onSubmit={(roleId) => roleMutation.mutate(roleId)}
+          onSuccess={() => setModalVisible(false)}
         />
       ) : null}
     </div>

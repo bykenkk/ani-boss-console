@@ -131,14 +131,14 @@ export const Route = createFileRoute("/nodes/")({
       {
         title: "节点 / ID",
         dataIndex: "name",
-        width: 190,
+        width: 200,
         fixed: "left",
         render: (_, node) => <ResourceNameId name={node.name} id={node.id} />,
       },
       {
         title: "状态",
         dataIndex: "status",
-        width: 140,
+        width: 120,
         render: (value: NodeStatus) => (
           <StatusBadge value={value} tone={value === "Ready" ? "success" : "danger"} />
         ),
@@ -171,7 +171,7 @@ export const Route = createFileRoute("/nodes/")({
       {
         title: "最后心跳",
         dataIndex: "heartbeat",
-        width: 160,
+        width: 180,
         render: (value: string) => formatDateTimeMinute(value),
       },
     ];

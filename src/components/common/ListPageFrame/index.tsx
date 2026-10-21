@@ -21,7 +21,6 @@ export function ListPageFrame<
         {toolbar.tools}
         {toolbar.refresh ? (
           <ToolbarIconButton
-            iconClassName="icon-refresh-1"
             label={toolbar.refresh.label ?? "刷新"}
             spinning={toolbar.refresh.spinning}
             disabled={toolbar.refresh.disabled}
