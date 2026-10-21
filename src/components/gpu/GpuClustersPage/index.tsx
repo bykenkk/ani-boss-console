@@ -1,12 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchPermissionCodes } from "@/api/auth/permissions";
 import { ResourcePageFrame } from "@/components/common";
-import { useAuthState } from "@/hooks/useAuthState";
 import { GpuClusters } from "../GpuClusters";
 export function GpuClustersPage() {
-  const auth = useAuthState();
   const permissions = useQuery({
-    queryKey: ["auth", "permission-codes", auth.tokens?.access_token],
+    queryKey: ["auth", "permission-codes"],
     queryFn: ({ signal }) => fetchPermissionCodes(signal),
     meta: { errorNotification: { id: "permission-codes", action: "当前权限加载" } },
   });

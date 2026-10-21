@@ -18,7 +18,6 @@ import {
   type ListColumn,
   type RowAction,
 } from "@/components/common";
-import { useAuthState } from "@/hooks/useAuthState";
 import { useListPagination } from "@/hooks/useListPagination";
 import { formatDateTime } from "@/lib/date";
 import { ComputePresetEditModal } from "../ComputePresetEditModal";
@@ -95,13 +94,12 @@ const columns: ListColumn<ComputePreset>[] = [
   },
 ];
 export function ComputePresetsPage() {
-  const auth = useAuthState();
   const client = useQueryClient();
   const [filters, setFilters] = useState<Omit<ComputePresetListParams, "page" | "pageSize">>({});
   const [editing, setEditing] = useState<ComputePreset | "create">();
   const pagination = useListPagination(JSON.stringify(filters));
   const permissions = useQuery({
-    queryKey: ["auth", "permission-codes", auth.tokens?.access_token],
+    queryKey: ["auth", "permission-codes"],
     queryFn: ({ signal }) => fetchPermissionCodes(signal),
     meta: { errorNotification: { id: "permission-codes", action: "当前权限加载" } },
   });

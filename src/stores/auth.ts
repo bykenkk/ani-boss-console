@@ -83,12 +83,3 @@ export function getAccessTokenJti() {
   const payload = decodeJwtPayload(token);
   return typeof payload?.jti === "string" && payload.jti ? payload.jti : null;
 }
-
-export function getAccessTokenRoles(accessToken = authStore.getState().tokens?.access_token) {
-  if (!accessToken) return [];
-  const payload = decodeJwtPayload(accessToken);
-  const roles = payload?.roles;
-  return Array.isArray(roles)
-    ? roles.filter((role): role is string => typeof role === "string")
-    : [];
-}

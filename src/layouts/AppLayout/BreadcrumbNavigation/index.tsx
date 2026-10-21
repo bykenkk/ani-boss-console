@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { BreadcrumbNavigationContext } from "@/hooks/useBreadcrumbNavigation";
 import type { AppBreadcrumbNavigation } from "@/lib/navigation";
+
+import { BreadcrumbNavigationContext } from "@/hooks/useNavigationContext";
 
 interface BreadcrumbNavigationProviderProps {
   children: ReactNode;

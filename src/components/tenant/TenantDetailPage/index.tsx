@@ -19,7 +19,7 @@ import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
 import { tenantStatusMeta } from "../apiModel";
 import { TenantProfileModal } from "@/components/tenant/TenantProfileModal";
-import { useTenantManagementAccess } from "@/hooks/useTenantManagementAccess";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { TenantAuditRecords } from "./TenantAuditRecords";
 // import { TenantIdentitySettings } from "./TenantIdentitySettings";
 import { TenantLifecycleRecords } from "./TenantLifecycleRecords";
@@ -41,7 +41,7 @@ async function runTenantOperation<T>(operation: () => Promise<T>): Promise<T> {
 export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { canManage } = useTenantManagementAccess();
+  const { canManage } = useCurrentUser();
   const [profileVisible, setProfileVisible] = useState(false);
   const detailQuery = useQuery({
     meta: {
@@ -161,13 +161,13 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
     {
       key: "identity",
       title: "认证与安全",
-      content: <TenantIdentitySettings tenantId={tenant.id} canManage={canManage} />,
+      content: <TenantIdentitySettings tenantId={tenant.id} canManage={canManage("tenants")} />,
     },
     */
     {
       key: "quota",
       title: "配额",
-      content: <TenantQuotaManagement tenantId={tenant.id} canManage={canManage} />,
+      content: <TenantQuotaManagement tenantId={tenant.id} canManage={canManage("tenants")} />,
     },
     {
       key: "administrators",
@@ -177,7 +177,7 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
           tenantId={tenant.id}
           tenantName={tenant.name}
           tenantDisplayName={tenant.displayName}
-          canManage={canManage}
+          canManage={canManage("tenants")}
         />
       ),
     },
@@ -213,7 +213,11 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
         ]}
         actions={
           <Tooltip content="更多操作">
-            <Dropdown trigger="click" droplist={moreMenu} disabled={!canManage || operationPending}>
+            <Dropdown
+              trigger="click"
+              droplist={moreMenu}
+              disabled={!canManage("tenants") || operationPending}
+            >
               <Button icon={<IconMoreVertical />} aria-label="更多操作" title="更多操作" />
             </Dropdown>
           </Tooltip>

@@ -124,6 +124,7 @@ export const Route = createFileRoute("/pool/")({
       );
     };
 
+    // TODO(region-capacity-integration): 接入区域容量刷新；当前仅更新本地时间并提示成功。
     const refreshRegion = (region: PlatformRegion) => {
       updateRegion(region.id, (current) => ({
         ...current,
@@ -132,6 +133,7 @@ export const Route = createFileRoute("/pool/")({
       showMessage({ type: "success", content: `${region.name}容量已刷新` });
     };
 
+    // TODO(region-access-integration): 接入区域租户开通配置；当前仅修改本地状态并提示成功。
     const confirmTenantAccess = (region: PlatformRegion, open: boolean) => {
       if (open && region.status !== "enabled") {
         showMessage({ type: "warning", content: "仅已启用区域可开放租户开通" });
@@ -158,6 +160,7 @@ export const Route = createFileRoute("/pool/")({
       });
     };
 
+    // TODO(region-status-integration): 接入区域启停操作；当前仅修改本地状态并提示成功。
     const confirmStatusChange = (region: PlatformRegion) => {
       const enable = region.status !== "enabled";
       Modal.confirm({
@@ -182,6 +185,7 @@ export const Route = createFileRoute("/pool/")({
       });
     };
 
+    // TODO(region-capacity-integration): 接入全部区域容量刷新；当前仅更新本地时间并提示成功。
     const refreshAll = () => {
       const updatedAt = formatCurrentDateTime();
       setRegions((current) => current.map((region) => ({ ...region, updatedAt })));

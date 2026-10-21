@@ -4,14 +4,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { acceleratorKeys, listGpuClusterOptions, type GpuCluster } from "@/api/accelerator";
 import { fetchPermissionCodes } from "@/api/auth/permissions";
 import { ResourcePageFrame } from "@/components/common";
-import { useAuthState } from "@/hooks/useAuthState";
 import { GpuClusterResources } from "../GpuClusterResources";
 export function GpuResourcesPage() {
-  const auth = useAuthState();
   const client = useQueryClient();
   const [cluster, setCluster] = useState<GpuCluster>();
   const permissions = useQuery({
-    queryKey: ["auth", "permission-codes", auth.tokens?.access_token],
+    queryKey: ["auth", "permission-codes"],
     queryFn: ({ signal }) => fetchPermissionCodes(signal),
     meta: { errorNotification: { id: "permission-codes", action: "当前权限加载" } },
   });

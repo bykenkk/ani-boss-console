@@ -20,7 +20,7 @@ import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
 import { tenantPlanStatusMeta } from "../apiModel";
 import { TenantPlanModal } from "@/components/tenant/TenantPlanModal";
-import { useTenantManagementAccess } from "@/hooks/useTenantManagementAccess";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { TenantPlanAudit } from "./TenantPlanAudit";
 import { TenantPlanBoundTenants } from "./TenantPlanBoundTenants";
 import { TenantPlanQuotaLimits } from "./TenantPlanQuotaLimits";
@@ -40,7 +40,7 @@ async function runTenantPlanOperation<T>(operation: () => Promise<T>): Promise<T
 export function TenantPlanDetailPage({ planId }: TenantPlanDetailPageProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { canManage } = useTenantManagementAccess();
+  const { canManage } = useCurrentUser();
   const [editVisible, setEditVisible] = useState(false);
 
   const detailQuery = useQuery({
@@ -186,14 +186,22 @@ export function TenantPlanDetailPage({ planId }: TenantPlanDetailPageProps) {
       key: "limits",
       title: "资源限额",
       content: (
-        <TenantPlanQuotaLimits planId={plan.id} planStatus={plan.status} canManage={canManage} />
+        <TenantPlanQuotaLimits
+          planId={plan.id}
+          planStatus={plan.status}
+          canManage={canManage("tenants")}
+        />
       ),
     },
     {
       key: "tenants",
       title: "关联租户",
       content: (
-        <TenantPlanBoundTenants planId={plan.id} planStatus={plan.status} canManage={canManage} />
+        <TenantPlanBoundTenants
+          planId={plan.id}
+          planStatus={plan.status}
+          canManage={canManage("tenants")}
+        />
       ),
     },
     {
@@ -222,7 +230,11 @@ export function TenantPlanDetailPage({ planId }: TenantPlanDetailPageProps) {
         ]}
         actions={
           <Tooltip content="更多操作">
-            <Dropdown trigger="click" droplist={moreMenu} disabled={!canManage || operationPending}>
+            <Dropdown
+              trigger="click"
+              droplist={moreMenu}
+              disabled={!canManage("tenants") || operationPending}
+            >
               <Button icon={<IconMoreVertical />} aria-label="更多操作" title="更多操作" />
             </Dropdown>
           </Tooltip>

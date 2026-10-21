@@ -1,10 +1,11 @@
 import { SummaryStrip } from "@/components/common";
 import { Button, Input, Select, Space } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import clsx from "clsx";
 import {
   fetchPlatformComponents,
+  streamPlatformComponentLogs,
   platformQueryKeys,
   type PlatformComponentLog,
 } from "@/api/platform";
@@ -17,10 +18,15 @@ import {
   type StatusBadgeTone,
 } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
-import {
-  usePlatformComponentLogs,
-  type LogConnectionState,
-} from "@/hooks/usePlatformComponentLogs";
+import { ApiError } from "@/api/request";
+import { closeNotification, showNotification } from "@/lib/feedback";
+import { withId } from "@/lib/id";
+
+type LogConnectionState = "idle" | "connecting" | "connected" | "reconnecting" | "failed";
+
+function getLogIdentity(log: PlatformComponentLog) {
+  return [log.timestamp, log.pod, log.container, log.stream, log.message].join("\u0000");
+}
 
 interface PlatformLogsPageProps {
   initialComponent?: string;
@@ -114,9 +120,95 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
 
   const component = componentOverride ?? initialComponent ?? componentOptions[0]?.value ?? "";
 
-  const stream = usePlatformComponentLogs(component);
+  const [logState, setLogState] = useState<{
+    component: string;
+    logs: PlatformComponentLog[];
+  }>({ component: "", logs: [] });
+  const [streamConnection, setConnection] = useState<{
+    component: string;
+    state: LogConnectionState;
+  }>({ component: "", state: "idle" });
+  const [restartKey, setRestartKey] = useState(0);
 
-  const displayLogs = useMemo(() => stream.logs.map(parseLog).reverse(), [stream.logs]);
+  useEffect(() => {
+    if (!component) return;
+
+    const controller = new AbortController();
+    const seen = new Set<string>();
+    let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
+    let cancelled = false;
+    const feedbackId = withId("platform-component-logs", component);
+
+    const connect = async (isReconnect: boolean) => {
+      setConnection({ component, state: isReconnect ? "reconnecting" : "connecting" });
+      try {
+        await streamPlatformComponentLogs({
+          component,
+          limit: 100,
+          intervalSeconds: 2,
+          signal: controller.signal,
+          onConnected: () => {
+            if (cancelled) return;
+            closeNotification(feedbackId);
+            setConnection({ component, state: "connected" });
+          },
+          onLog: (log) => {
+            if (cancelled) return;
+            const identity = getLogIdentity(log);
+            if (seen.has(identity)) return;
+            seen.add(identity);
+            setLogState((current) => ({
+              component,
+              logs: [...(current.component === component ? current.logs : []), log].slice(-500),
+            }));
+          },
+        });
+        if (cancelled) return;
+        setConnection({ component, state: "reconnecting" });
+        reconnectTimer = setTimeout(() => void connect(true), 1_000);
+      } catch (streamError) {
+        if (cancelled || controller.signal.aborted) return;
+        showNotification({
+          id: feedbackId,
+          state: "error",
+          action: "组件日志流连接",
+          content: { error: streamError, fallback: "组件日志流连接失败" },
+        });
+        if (streamError instanceof ApiError && streamError.status === 404) {
+          setConnection({ component, state: "failed" });
+          return;
+        }
+        setConnection({ component, state: "reconnecting" });
+        reconnectTimer = setTimeout(() => void connect(true), 2_000);
+      }
+    };
+
+    void connect(false);
+    return () => {
+      cancelled = true;
+      controller.abort();
+      closeNotification(feedbackId);
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+    };
+  }, [component, restartKey]);
+
+  const restart = useCallback(() => {
+    setLogState({ component, logs: [] });
+    setRestartKey((current) => current + 1);
+  }, [component]);
+  const clear = useCallback(() => setLogState({ component, logs: [] }), [component]);
+
+  const logs = useMemo(
+    () => (logState.component === component ? logState.logs : []),
+    [component, logState],
+  );
+  const connectionState = !component
+    ? "idle"
+    : streamConnection.component === component
+      ? streamConnection.state
+      : "connecting";
+
+  const displayLogs = useMemo(() => logs.map(parseLog).reverse(), [logs]);
   const filteredLogs = useMemo(() => {
     const query = keyword.trim().toLowerCase();
     return displayLogs.filter((log) => {
@@ -171,7 +263,7 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
     },
     { title: "摘要", dataIndex: "displayMessage", width: 520, ellipsis: true },
   ];
-  const connection = connectionMeta[stream.connectionState];
+  const connection = connectionMeta[connectionState];
 
   return (
     <ListPageFrame
@@ -204,7 +296,7 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
         extra: (
           <div className="flex items-center gap-2">
             <StatusBadge value={connection.label} tone={connection.tone} />
-            <Button disabled={!component} onClick={stream.restart}>
+            <Button disabled={!component} onClick={restart}>
               重新连接
             </Button>
           </div>
@@ -240,7 +332,7 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
           </Space>
         ),
         actions: (
-          <Button disabled={stream.logs.length === 0} onClick={stream.clear}>
+          <Button disabled={logs.length === 0} onClick={clear}>
             清空
           </Button>
         ),

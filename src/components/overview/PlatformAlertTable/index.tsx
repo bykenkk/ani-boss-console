@@ -6,10 +6,9 @@ import { AlertTable } from "./AlertTable";
 
 interface PlatformAlertTableProps {
   alerts: AlertItem[];
-  onUpdate: (id: number, status: AlertItem["status"]) => void;
 }
 
-export function PlatformAlertTable({ alerts, onUpdate }: PlatformAlertTableProps) {
+export function PlatformAlertTable({ alerts }: PlatformAlertTableProps) {
   const [keyword, setKeyword] = useState("");
   const [level, setLevel] = useState("全部级别");
   const [status, setStatus] = useState("全部状态");
@@ -26,7 +25,6 @@ export function PlatformAlertTable({ alerts, onUpdate }: PlatformAlertTableProps
     <Card className="overflow-hidden rounded-lg">
       <AlertTable
         rows={rows}
-        onUpdate={onUpdate}
         extra={
           <AlertFilters
             keyword={keyword}

@@ -1,7 +1,7 @@
 import { Card, Tabs } from "@arco-design/web-react";
 import clsx from "clsx";
-import { useMemo, useState, type ReactNode } from "react";
-import { useBreadcrumbNavigation } from "@/hooks/useBreadcrumbNavigation";
+import { useLayoutEffect, useMemo, useState, type ReactNode } from "react";
+import { useNavigationContext } from "@/hooks/useNavigationContext";
 import styles from "./index.module.less";
 
 export interface DetailBreadcrumbItem {
@@ -61,7 +61,12 @@ export function DetailPageFrame({
     [breadcrumbs, onBack],
   );
 
-  useBreadcrumbNavigation(breadcrumbNavigation);
+  const setNavigation = useNavigationContext();
+  useLayoutEffect(() => {
+    if (!setNavigation) return undefined;
+    setNavigation(breadcrumbNavigation);
+    return () => setNavigation(null);
+  }, [breadcrumbNavigation, setNavigation]);
 
   return (
     <div className={styles.page}>

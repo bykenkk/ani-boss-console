@@ -25,7 +25,8 @@ import {
 import { formatDateTime } from "@/lib/date";
 import { tenantPlanStatusMeta } from "../apiModel";
 import { TenantPlanCreateModal } from "@/components/tenant/TenantPlanCreateModal";
-import { useTenantManagementAccess } from "@/hooks/useTenantManagementAccess";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { withId } from "@/lib/id";
 
 async function runTenantPlanOperation<T>(operation: () => Promise<T>): Promise<T> {
   try {
@@ -37,7 +38,7 @@ async function runTenantPlanOperation<T>(operation: () => Promise<T>): Promise<T
 
 export function TenantPlansPage() {
   const queryClient = useQueryClient();
-  const { canManage } = useTenantManagementAccess();
+  const { canManage } = useCurrentUser();
   const [keyword, setKeyword] = useState("");
   const [status, setStatus] = useState<"all" | TenantPlanStatus>("all");
   const [createVisible, setCreateVisible] = useState(false);
@@ -192,7 +193,7 @@ export function TenantPlansPage() {
             <Button
               type="primary"
               icon={<IconPlus />}
-              disabled={!canManage}
+              disabled={!canManage("tenants")}
               onClick={() => setCreateVisible(true)}
             >
               新建策略
@@ -246,7 +247,7 @@ export function TenantPlansPage() {
               label: (plan) => (plan.status === "active" ? "停用" : "发布"),
               widthLabel: "发布",
               visible: (plan) => plan.status !== "disabled",
-              disabled: () => !canManage || operationPending,
+              disabled: () => !canManage("tenants") || operationPending,
               onClick: confirmStatus,
             },
             {
@@ -254,7 +255,7 @@ export function TenantPlansPage() {
               label: "删除",
               intent: "danger",
               visible: (plan) => plan.status !== "active",
-              disabled: () => !canManage || operationPending,
+              disabled: () => !canManage("tenants") || operationPending,
               onClick: confirmDelete,
             },
           ]}

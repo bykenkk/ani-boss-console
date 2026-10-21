@@ -24,7 +24,7 @@ interface TopNavProps {
 export function TopNav({ breadcrumbs, onBack }: TopNavProps) {
   const queryClient = useQueryClient();
   const [userMenuVisible, setUserMenuVisible] = useState(false);
-  const { data: user } = useCurrentUser();
+  const { user } = useCurrentUser();
   const username = user?.username || "-";
   const roles = (user?.roleNames?.length ? user.roleNames : user?.roles)?.join("、") || "-";
   const avatar = user?.avatar ? (

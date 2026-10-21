@@ -15,7 +15,7 @@ import { meteringDimensions, type MeteringDimension } from "../model";
 import { MeteringTenantTable } from "./MeteringTenantTable";
 import { TenantMeteringDrawer } from "./TenantMeteringDrawer";
 
-import { useMeteringTenants } from "@/hooks/useMeteringTenants";
+import { fetchTenants, tenantManagementQueryKeys } from "@/api/tenant";
 import styles from "../MeteringPresentation/index.module.less";
 
 function sumTenantItems(items: PlatformMeteringUsageItem[]) {
@@ -28,7 +28,20 @@ function sumTenantItems(items: PlatformMeteringUsageItem[]) {
 }
 
 export function TenantUsageRankingPage() {
-  const tenantsQuery = useMeteringTenants();
+  const tenantsQuery = useQuery({
+    queryKey: [...tenantManagementQueryKeys.tenantList(), "options", { limit: 100 }],
+    // TODO(options-pagination): 租户名称暂取 ANI 首 100 项；服务端支持按计量租户 ID 查询后替换，未加载名称的记录继续展示 ID。
+    queryFn: ({ signal }) => fetchTenants({}, { limit: 100 }, signal),
+    select: (response) => response.items,
+    staleTime: 60_000,
+    meta: {
+      errorNotification: {
+        id: "metering-tenant-names",
+        action: "租户名称加载",
+        fallback: "请求失败，请稍后重试",
+      },
+    },
+  });
   const [period, setPeriod] = useState<MeteringPeriod>("month");
   const periodLabel =
     period === "month" ? "本月" : period === "recent-seven-days" ? "近7日" : "上月";

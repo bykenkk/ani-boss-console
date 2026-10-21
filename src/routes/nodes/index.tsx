@@ -119,6 +119,7 @@ export const Route = createFileRoute("/nodes/")({
       );
     }, [keyword, nodes, pool, region, status]);
 
+    // TODO(nodes-integration): 接入真实节点状态刷新；当前仅更新本地心跳并提示成功。
     const refreshNodes = () => {
       const heartbeat = formatCurrentDateTime();
       setNodes((current) =>

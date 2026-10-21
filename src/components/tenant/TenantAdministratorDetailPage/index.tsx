@@ -26,7 +26,7 @@ import {
   tenantAdministratorStatusMeta,
 } from "../apiModel";
 import { TenantAdministratorPasswordModal } from "@/components/tenant/TenantAdministratorPasswordModal";
-import { useTenantManagementAccess } from "@/hooks/useTenantManagementAccess";
+import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { TenantAdministratorAudit } from "./TenantAdministratorAudit";
 import { TenantAdministratorRole } from "./TenantAdministratorRole";
 
@@ -47,7 +47,7 @@ export function TenantAdministratorDetailPage({
 }: TenantAdministratorDetailPageProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { canManage } = useTenantManagementAccess();
+  const { canManage } = useCurrentUser();
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const locatorQuery = useQuery({
@@ -250,7 +250,7 @@ export function TenantAdministratorDetailPage({
           administratorId={administrator.id}
           currentRole={administrator.role}
           isInviting={administrator.isInviting}
-          canManage={canManage}
+          canManage={canManage("tenants")}
         />
       ),
     },
@@ -283,7 +283,11 @@ export function TenantAdministratorDetailPage({
         ]}
         actions={
           <Tooltip content="更多操作">
-            <Dropdown trigger="click" droplist={moreMenu} disabled={!canManage || operationPending}>
+            <Dropdown
+              trigger="click"
+              droplist={moreMenu}
+              disabled={!canManage("tenants") || operationPending}
+            >
               <Button icon={<IconMoreVertical />} aria-label="更多操作" title="更多操作" />
             </Dropdown>
           </Tooltip>
