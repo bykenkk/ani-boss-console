@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 export type AppRoute =
+  | "/notification-channels"
   | "/tenant-plans"
   | "/permissions"
   | "/permission-groups"

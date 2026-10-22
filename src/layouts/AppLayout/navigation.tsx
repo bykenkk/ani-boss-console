@@ -93,6 +93,10 @@ const auditNavigation: readonly NavigationLeaf[] = [
   { label: "合规导出与取证", to: "/audit-export", icon: <IconExport /> },
 ];
 
+const notificationNavigation: readonly NavigationLeaf[] = [
+  { label: "通知渠道", to: "/notification-channels", icon: <IconEmail /> },
+];
+
 const settingsNavigation: readonly NavigationLeaf[] = [
   { label: "权限分组管理", to: "/permission-groups", icon: <IconApps /> },
   { label: "权限点管理", to: "/permissions", icon: <IconLock /> },
@@ -122,6 +126,7 @@ const integrationNavigation: readonly NavigationLeaf[] = [
 ];
 
 const visibleAppRoutes = new Set<AppRoute>([
+  "/notification-channels",
   "/tenant-plans",
   "/permissions",
   "/permission-groups",
@@ -192,6 +197,12 @@ const completeAppNavigation: readonly NavigationItem[] = [
     label: "审计合规",
     icon: <IconSafe />,
     children: auditNavigation,
+  },
+  {
+    key: "notification-management",
+    label: "通知管理",
+    icon: <IconEmail />,
+    children: notificationNavigation,
   },
   {
     key: "platform-settings",

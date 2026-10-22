@@ -36,6 +36,7 @@ import { Route as MeteringIndexRouteImport } from './routes/metering/index'
 import { Route as MetricsIndexRouteImport } from './routes/metrics/index'
 import { Route as NetworkIndexRouteImport } from './routes/network/index'
 import { Route as NodesIndexRouteImport } from './routes/nodes/index'
+import { Route as NotificationChannelsIndexRouteImport } from './routes/notification-channels/index'
 import { Route as NotifyIndexRouteImport } from './routes/notify/index'
 import { Route as OpsSystemIndexRouteImport } from './routes/ops-system/index'
 import { Route as OverviewAlertsIndexRouteImport } from './routes/overview-alerts/index'
@@ -202,6 +203,12 @@ const NodesIndexRoute = NodesIndexRouteImport.update({
   path: '/nodes/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotificationChannelsIndexRoute =
+  NotificationChannelsIndexRouteImport.update({
+    id: '/notification-channels/',
+    path: '/notification-channels/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const NotifyIndexRoute = NotifyIndexRouteImport.update({
   id: '/notify/',
   path: '/notify/',
@@ -387,6 +394,7 @@ export interface FileRoutesByFullPath {
   '/metrics/': typeof MetricsIndexRoute
   '/network/': typeof NetworkIndexRoute
   '/nodes/': typeof NodesIndexRoute
+  '/notification-channels/': typeof NotificationChannelsIndexRoute
   '/notify/': typeof NotifyIndexRoute
   '/ops-system/': typeof OpsSystemIndexRoute
   '/overview-alerts/': typeof OverviewAlertsIndexRoute
@@ -445,6 +453,7 @@ export interface FileRoutesByTo {
   '/metrics': typeof MetricsIndexRoute
   '/network': typeof NetworkIndexRoute
   '/nodes': typeof NodesIndexRoute
+  '/notification-channels': typeof NotificationChannelsIndexRoute
   '/notify': typeof NotifyIndexRoute
   '/ops-system': typeof OpsSystemIndexRoute
   '/overview-alerts': typeof OverviewAlertsIndexRoute
@@ -505,6 +514,7 @@ export interface FileRoutesById {
   '/metrics/': typeof MetricsIndexRoute
   '/network/': typeof NetworkIndexRoute
   '/nodes/': typeof NodesIndexRoute
+  '/notification-channels/': typeof NotificationChannelsIndexRoute
   '/notify/': typeof NotifyIndexRoute
   '/ops-system/': typeof OpsSystemIndexRoute
   '/overview-alerts/': typeof OverviewAlertsIndexRoute
@@ -566,6 +576,7 @@ export interface FileRouteTypes {
     | '/metrics/'
     | '/network/'
     | '/nodes/'
+    | '/notification-channels/'
     | '/notify/'
     | '/ops-system/'
     | '/overview-alerts/'
@@ -624,6 +635,7 @@ export interface FileRouteTypes {
     | '/metrics'
     | '/network'
     | '/nodes'
+    | '/notification-channels'
     | '/notify'
     | '/ops-system'
     | '/overview-alerts'
@@ -683,6 +695,7 @@ export interface FileRouteTypes {
     | '/metrics/'
     | '/network/'
     | '/nodes/'
+    | '/notification-channels/'
     | '/notify/'
     | '/ops-system/'
     | '/overview-alerts/'
@@ -742,6 +755,7 @@ export interface RootRouteChildren {
   MetricsIndexRoute: typeof MetricsIndexRoute
   NetworkIndexRoute: typeof NetworkIndexRoute
   NodesIndexRoute: typeof NodesIndexRoute
+  NotificationChannelsIndexRoute: typeof NotificationChannelsIndexRoute
   NotifyIndexRoute: typeof NotifyIndexRoute
   OpsSystemIndexRoute: typeof OpsSystemIndexRoute
   OverviewAlertsIndexRoute: typeof OverviewAlertsIndexRoute
@@ -957,6 +971,13 @@ declare module '@tanstack/react-router' {
       path: '/nodes'
       fullPath: '/nodes/'
       preLoaderRoute: typeof NodesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notification-channels/': {
+      id: '/notification-channels/'
+      path: '/notification-channels'
+      fullPath: '/notification-channels/'
+      preLoaderRoute: typeof NotificationChannelsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notify/': {
@@ -1217,6 +1238,7 @@ const rootRouteChildren: RootRouteChildren = {
   MetricsIndexRoute: MetricsIndexRoute,
   NetworkIndexRoute: NetworkIndexRoute,
   NodesIndexRoute: NodesIndexRoute,
+  NotificationChannelsIndexRoute: NotificationChannelsIndexRoute,
   NotifyIndexRoute: NotifyIndexRoute,
   OpsSystemIndexRoute: OpsSystemIndexRoute,
   OverviewAlertsIndexRoute: OverviewAlertsIndexRoute,
