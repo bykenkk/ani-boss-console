@@ -1,5 +1,5 @@
-import { Form, Modal, Spin, Input, InputNumber, Select } from "@arco-design/web-react";
-import { useRef } from "react";
+import { Form, Modal, Input, InputNumber, Switch } from "@arco-design/web-react";
+import { useEffect, useMemo, useRef } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import {
   managementKeys,
@@ -19,7 +19,7 @@ interface Props {
   onSuccess: () => void;
 }
 export function PermissionGroupEditModal(props: Props) {
-  const { record, onCancel } = props;
+  const { record } = props;
   const detail = useQuery({
     queryKey: managementKeys.detail("permission-groups", record?.id ?? 0),
     queryFn: ({ signal }) => getManagement("permission-groups", record!.id, signal),
@@ -31,35 +31,47 @@ export function PermissionGroupEditModal(props: Props) {
       },
     },
   });
-  if (!record || detail.isSuccess) {
-    return <PermissionGroupEditForm {...props} record={detail.data ?? record} />;
-  }
   return (
-    <Modal
-      visible
-      title={record ? "编辑权限分组" : "新建权限分组"}
-      okText="保存"
-      okButtonProps={{ disabled: true }}
-      onCancel={onCancel}
-      style={{ width: 680 }}
-    >
-      {detail.isPending && (
-        <div className="flex justify-center py-8">
-          <Spin />
-        </div>
-      )}
-    </Modal>
+    <PermissionGroupEditForm
+      key={record?.id ?? "create"}
+      {...props}
+      record={detail.data ?? record}
+      loading={!!record && detail.isPending}
+      disabled={!!record && !detail.data}
+    />
   );
 }
-function PermissionGroupEditForm({ record, defaults, onCancel, onSuccess }: Props) {
+interface PermissionGroupEditFormProps extends Props {
+  loading: boolean;
+  disabled: boolean;
+}
+
+function PermissionGroupEditForm({
+  record,
+  defaults,
+  onCancel,
+  onSuccess,
+  loading,
+  disabled,
+}: PermissionGroupEditFormProps) {
   const [form] = Form.useForm<EditValues>();
-  const initial: EditValues = {
-    ...(!record ? { parentId: 0, sortOrder: 0, status: "ON" } : {}),
-    ...record,
-    ...defaults,
-  };
+  const initial = useMemo(() => {
+    const values: EditValues = {
+      ...(!record ? { parentId: 0, sortOrder: 1, status: "ON" } : {}),
+      ...record,
+      ...defaults,
+    };
+    return values;
+  }, [record, defaults]);
 
   const changedFields = useRef(new Set<string>());
+  const detailInitialized = useRef(!disabled);
+  useEffect(() => {
+    if (disabled || detailInitialized.current) return;
+    form.setFieldsValue(initial);
+    changedFields.current.clear();
+    detailInitialized.current = true;
+  }, [disabled, form, initial]);
   const client = useQueryClient();
   const mutation = useMutation({
     mutationFn: async (submitted: EditValues) => {
@@ -69,10 +81,8 @@ function PermissionGroupEditForm({ record, defaults, onCancel, onSuccess }: Prop
       if (!record || changedFields.current.has("parentId"))
         values.parentId = submitted.parentId ?? 0;
       if (!record || changedFields.current.has("sortOrder"))
-        values.sortOrder = submitted.sortOrder ?? 0;
+        values.sortOrder = submitted.sortOrder ?? 1;
       if (!record || changedFields.current.has("status")) values.status = submitted.status ?? "";
-      if (!record || changedFields.current.has("description"))
-        values.description = submitted.description ?? "";
 
       if (record && Object.keys(values).length === 0) return;
       await saveManagement("permission-groups", { id: record?.id, values: values });
@@ -83,8 +93,9 @@ function PermissionGroupEditForm({ record, defaults, onCancel, onSuccess }: Prop
       onSuccess();
     },
   });
+  const busy = loading || mutation.isPending;
   const submit = async () => {
-    if (mutation.isPending) return;
+    if (disabled || busy) return;
     try {
       mutation.mutate(await validateForm<EditValues>(form));
     } catch {
@@ -99,54 +110,52 @@ function PermissionGroupEditForm({ record, defaults, onCancel, onSuccess }: Prop
       onOk={submit}
       okText="保存"
       confirmLoading={mutation.isPending}
-      cancelButtonProps={{ disabled: mutation.isPending }}
-      closable={!mutation.isPending}
-      escToExit={!mutation.isPending}
+      okButtonProps={{ disabled: disabled || loading }}
+      cancelButtonProps={{ disabled: busy }}
+      closable={!busy}
+      escToExit={!busy}
       style={{ width: 680 }}
     >
       <Form
         form={form}
-        disabled={mutation.isPending}
+        disabled={disabled || busy}
         layout="vertical"
         initialValues={initial}
         onValuesChange={(changed) => {
           Object.keys(changed).forEach((key) => changedFields.current.add(key));
         }}
       >
-        <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
-          <Form.Item field="name" label="名称" rules={[{ required: true, message: "请填写名称" }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item
-            field="module"
-            label="模块"
-            rules={[{ required: true, message: "请填写模块" }]}
-          >
-            <Input />
-          </Form.Item>
+        <Form.Item
+          field="name"
+          label="分组名称"
+          rules={[{ required: true, message: "请填写分组名称" }]}
+        >
+          <Input placeholder="请输入" allowClear />
+        </Form.Item>
+        <Form.Item field="module" label="模块" rules={[{ required: true, message: "请填写模块" }]}>
+          <Input placeholder="请输入" allowClear />
+        </Form.Item>
 
-          <Form.Item field="parentId" label="上级分组">
-            <PermissionGroupSelect includeRoot excludeSubtreeId={record?.id} />
-          </Form.Item>
-          <Form.Item field="sortOrder" label="排序">
-            <InputNumber min={0} precision={0} />
-          </Form.Item>
-          <Form.Item
-            field="status"
-            label="状态"
-            rules={[{ required: true, message: "请填写状态" }]}
-          >
-            <Select
-              options={[
-                { value: "ON", label: "启用" },
-                { value: "OFF", label: "禁用" },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item field="description" label="说明" className="md:col-span-2">
-            <Input.TextArea />
-          </Form.Item>
-        </div>
+        <Form.Item field="parentId" label="上级分组">
+          <PermissionGroupSelect includeRoot excludeSubtreeId={record?.id} />
+        </Form.Item>
+        <Form.Item
+          field="sortOrder"
+          label="排序"
+          rules={[{ required: true, message: "请填写排序" }]}
+        >
+          <InputNumber min={0} precision={0} placeholder="请输入" />
+        </Form.Item>
+        <Form.Item
+          field="status"
+          label="状态"
+          triggerPropName="checked"
+          formatter={(value) => value === "ON"}
+          normalize={(checked) => (checked ? "ON" : "OFF")}
+          rules={[{ required: true, message: "请填写状态" }]}
+        >
+          <Switch checkedText="启用" uncheckedText="禁用" />
+        </Form.Item>
       </Form>
     </Modal>
   );

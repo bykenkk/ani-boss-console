@@ -18,7 +18,7 @@ const columns: ListColumn<ManagedPlan>[] = [
   {
     key: "name",
     dataIndex: "name",
-    title: "名称",
+    title: "套餐名称",
     width: 200,
     ellipsis: true,
     render: (value) => String(value ?? "-"),
@@ -26,7 +26,7 @@ const columns: ListColumn<ManagedPlan>[] = [
   {
     key: "version",
     dataIndex: "version",
-    title: "版本",
+    title: "套餐版本",
     width: 160,
     ellipsis: true,
     render: (value: string | undefined) =>
@@ -39,7 +39,7 @@ const columns: ListColumn<ManagedPlan>[] = [
   {
     key: "expiryPolicy",
     dataIndex: "expiryPolicy",
-    title: "到期策略",
+    title: "到期处置策略",
     width: 160,
     ellipsis: true,
     render: (value: string | undefined) =>

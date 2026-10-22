@@ -17,8 +17,9 @@ import {
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
 import { UserEditModal } from "@/components/management/UserEditModal";
+import { UserCreateModal } from "@/components/management/UserCreateModal";
 import { TenantSelect } from "@/components/tenant/TenantSelect";
-import { RoleSelect } from "@/components/management/RoleSelect";
+import type { UserScope } from "@/components/management/UserEditForm";
 import { UserPasswordResetModal } from "@/components/management/UserPasswordResetModal";
 
 const columns: ListColumn<ManagedUser>[] = [
@@ -27,13 +28,14 @@ const columns: ListColumn<ManagedUser>[] = [
     dataIndex: "username",
     title: "用户名",
     width: 200,
+    fixed: "left",
     ellipsis: true,
     render: (value) => String(value ?? "-"),
   },
   {
     key: "realname",
     dataIndex: "realname",
-    title: "姓名",
+    title: "真实姓名",
     width: 200,
     ellipsis: true,
     render: (value) => String(value ?? "-"),
@@ -102,16 +104,18 @@ const columns: ListColumn<ManagedUser>[] = [
   },
 ];
 
-export function UsersPage({ scope = "all" }: { scope?: "all" | "platform" | "tenant" }) {
-  const title =
-    scope === "platform" ? "平台管理员" : scope === "tenant" ? "租户管理员" : "用户管理";
+interface UsersPageProps {
+  scope: UserScope;
+}
+
+export function UsersPage({ scope }: UsersPageProps) {
+  const title = scope === "platform" ? "平台管理员" : "租户管理员";
 
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>();
   const [tenantId, setTenantId] = useState<number>();
-  const [roleId, setRoleId] = useState<number>();
   const [passwordUser, setPasswordUser] = useState<ManagedUser>();
 
   const [editing, setEditing] = useState<ManagedUser | "create">();
@@ -130,13 +134,7 @@ export function UsersPage({ scope = "all" }: { scope?: "all" | "platform" | "ten
       ...(search ? { username__contains: search } : {}),
       ...(status ? { status } : {}),
       // 角色编码与 ID 同传按并集匹配，管理员范围不能叠加其他角色 ID。
-      ...(scope === "platform"
-        ? { role_code: "platform:admin" }
-        : scope === "tenant"
-          ? { role_code: "tenant:manager" }
-          : roleId !== undefined
-            ? { role_id: roleId }
-            : {}),
+      ...(scope === "platform" ? { role_code: "platform:admin" } : { role_code: "tenant:manager" }),
     },
   };
   const query = useQuery({
@@ -185,14 +183,12 @@ export function UsersPage({ scope = "all" }: { scope?: "all" | "platform" | "ten
           subtitle:
             scope === "platform"
               ? "维护平台账号资料、状态和角色分配，支持密码重置。"
-              : scope === "tenant"
-                ? "按租户查看账号，维护用户资料、状态和角色分配，支持密码重置。"
-                : "统一管理用户账号，按租户和角色查询，维护账号状态与角色分配。",
+              : "按租户查看账号，维护用户资料、状态和角色分配，支持密码重置。",
         }}
         toolbar={{
           actions: (
             <Button type="primary" onClick={() => setEditing("create")}>
-              新建用户
+              {scope === "platform" ? "新建平台管理员" : "新建租户管理员"}
             </Button>
           ),
           filters: (
@@ -230,21 +226,9 @@ export function UsersPage({ scope = "all" }: { scope?: "all" | "platform" | "ten
               />
               {scope !== "platform" && (
                 <TenantSelect
-                  includePlatform={scope !== "tenant"}
                   value={tenantId}
                   onChange={(value) => {
                     setTenantId(value as number | undefined);
-                    setRoleId(undefined);
-                    setPage(1);
-                  }}
-                />
-              )}
-              {scope === "all" && (
-                <RoleSelect
-                  tenantId={tenantId}
-                  value={roleId}
-                  onChange={(value) => {
-                    setRoleId(value as number | undefined);
                     setPage(1);
                   }}
                 />
@@ -272,18 +256,19 @@ export function UsersPage({ scope = "all" }: { scope?: "all" | "platform" | "ten
           }}
         />
       </ListPageFrame>
-      {editing && (
-        <UserEditModal
+      {editing === "create" && (
+        <UserCreateModal
           userScope={scope}
-          record={editing === "create" ? undefined : editing}
-          defaults={
-            editing === "create"
-              ? {
-                  ...(scope === "platform" ? { tenantId: 0 } : {}),
-                  ...(tenantId !== undefined ? { tenantId } : {}),
-                }
-              : undefined
-          }
+          defaultTenantId={tenantId}
+          onCancel={() => setEditing(undefined)}
+          onSuccess={() => setEditing(undefined)}
+        />
+      )}
+      {editing && editing !== "create" && (
+        <UserEditModal
+          key={editing.id}
+          userScope={scope}
+          record={editing}
           onCancel={() => setEditing(undefined)}
           onSuccess={() => setEditing(undefined)}
         />

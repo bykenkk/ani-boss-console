@@ -19,13 +19,12 @@ import { withId } from "@/lib/id";
 import { TenantEditModal } from "@/components/tenant/TenantEditModal";
 
 import { Link } from "@tanstack/react-router";
-import { TenantDetailsModal } from "@/components/tenant/TenantDetailsModal";
 
 const columns: ListColumn<ManagedTenant>[] = [
   {
     key: "name",
     dataIndex: "name",
-    title: "名称",
+    title: "租户名称",
     width: 200,
     ellipsis: true,
     render: (value) => String(value ?? "-"),
@@ -33,34 +32,7 @@ const columns: ListColumn<ManagedTenant>[] = [
   {
     key: "code",
     dataIndex: "code",
-    title: "编码",
-    width: 160,
-    ellipsis: true,
-    render: (value) => String(value ?? "-"),
-  },
-  {
-    key: "type",
-    dataIndex: "type",
-    title: "类型",
-    width: 160,
-    ellipsis: true,
-    render: (value: string | undefined) =>
-      (
-        ({
-          TRIAL: "试用",
-          PAID: "付费",
-          INTERNAL: "内部",
-          PARTNER: "合作伙伴",
-          CUSTOM: "定制",
-        }) as Record<string, string>
-      )[value ?? ""] ??
-      value ??
-      "-",
-  },
-  {
-    key: "adminUserName",
-    dataIndex: "adminUserName",
-    title: "管理员",
+    title: "租户编码",
     width: 160,
     ellipsis: true,
     render: (value) => String(value ?? "-"),
@@ -91,12 +63,61 @@ const columns: ListColumn<ManagedTenant>[] = [
     ),
   },
   {
-    key: "planId",
-    dataIndex: "planId",
-    title: "套餐",
+    key: "type",
+    dataIndex: "type",
+    title: "租户类型",
+    width: 160,
+    ellipsis: true,
+    render: (value: string | undefined) =>
+      (
+        ({
+          TRIAL: "试用",
+          PAID: "付费",
+          INTERNAL: "内部",
+          PARTNER: "合作伙伴",
+          CUSTOM: "定制",
+        }) as Record<string, string>
+      )[value ?? ""] ??
+      value ??
+      "-",
+  },
+  {
+    key: "adminUserName",
+    dataIndex: "adminUserName",
+    title: "管理员用户名",
     width: 160,
     ellipsis: true,
     render: (value) => String(value ?? "-"),
+  },
+  {
+    key: "auditStatus",
+    dataIndex: "auditStatus",
+    title: "审核状态",
+    width: 120,
+    ellipsis: true,
+    render: (value: string | undefined) => (
+      <StatusBadge
+        value={
+          (
+            {
+              PENDING: "待审核",
+              APPROVED: "已通过",
+              REJECTED: "已拒绝",
+              TENANT_AUDIT_STATUS_UNSPECIFIED: "未指定",
+            } as Record<string, string>
+          )[value ?? ""] ?? value
+        }
+        tone={
+          value === "APPROVED"
+            ? "success"
+            : value === "REJECTED"
+              ? "danger"
+              : value === "PENDING"
+                ? "warning"
+                : "default"
+        }
+      />
+    ),
   },
   {
     key: "memberCount",
@@ -119,8 +140,6 @@ export function TenantsPage() {
   const [pageSize, setPageSize] = useState(20);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>();
-
-  const [tenant, setTenant] = useState<ManagedTenant>();
 
   const [editing, setEditing] = useState<ManagedTenant | "create">();
   const client = useQueryClient();
@@ -156,8 +175,6 @@ export function TenantsPage() {
   });
 
   const rowActions: RowAction<ManagedTenant>[] = [
-    { key: "detail", label: "详情", onClick: setTenant },
-
     { key: "edit", label: "编辑", onClick: setEditing },
 
     {
@@ -253,8 +270,6 @@ export function TenantsPage() {
           onSuccess={() => setEditing(undefined)}
         />
       )}
-
-      {tenant && <TenantDetailsModal tenant={tenant} onCancel={() => setTenant(undefined)} />}
     </>
   );
 }

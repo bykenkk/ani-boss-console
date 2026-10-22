@@ -96,14 +96,14 @@ const settingsNavigation: readonly NavigationLeaf[] = [
   { label: "权限点管理", to: "/permissions", icon: <IconLock /> },
   { label: "API 管理", to: "/apis", icon: <IconLink /> },
   {
+    label: "角色管理",
+    to: "/platform-roles",
+    icon: <IconSafe />,
+  },
+  {
     label: "平台管理员",
     to: "/platform-admins",
     icon: <IconUserGroup />,
-  },
-  {
-    label: "平台角色",
-    to: "/platform-roles",
-    icon: <IconSafe />,
   },
   { label: "登录与 IdP（预留）", to: "/idp", icon: <IconLock /> },
   {

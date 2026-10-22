@@ -8,10 +8,9 @@ interface Props {
   value?: number;
   onChange?: (value: number | undefined) => void;
   disabled?: boolean;
-  includePlatform?: boolean;
 }
 
-export function TenantSelect({ value, onChange, disabled, includePlatform }: Props) {
+export function TenantSelect({ value, onChange, disabled }: Props) {
   const [search, setSearch] = useState("");
   const filters = { ...(search ? { name__contains: search } : {}) };
   const query = useQuery({
@@ -25,7 +24,6 @@ export function TenantSelect({ value, onChange, disabled, includePlatform }: Pro
     value: item.id,
     label: `${item.name ?? item.code ?? item.id}`,
   }));
-  if (includePlatform) options.unshift({ value: 0, label: "平台（全局）" });
   return (
     <Select
       aria-label="租户"

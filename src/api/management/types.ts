@@ -87,6 +87,7 @@ export interface ManagedApi extends ManagementRecord {
   path?: string;
   method?: string;
   module?: string;
+  moduleDescription?: string;
   businessModule?: string;
   scope?: "ADMIN" | "APP";
 }

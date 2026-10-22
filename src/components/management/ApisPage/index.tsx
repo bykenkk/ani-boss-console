@@ -21,10 +21,18 @@ import { ApiEditModal } from "@/components/management/ApiEditModal";
 
 const columns: ListColumn<ManagedApi>[] = [
   {
+    key: "description",
+    dataIndex: "description",
+    title: "API描述",
+    width: 200,
+    fixed: "left",
+    ellipsis: true,
+  },
+  {
     key: "path",
     dataIndex: "path",
-    title: "接口路径",
-    width: 300,
+    title: "API路径",
+    width: 240,
     ellipsis: true,
     render: (value) => String(value ?? "-"),
   },
@@ -32,7 +40,7 @@ const columns: ListColumn<ManagedApi>[] = [
     key: "method",
     dataIndex: "method",
     title: "请求方法",
-    width: 160,
+    width: 110,
     ellipsis: true,
     render: (value: string | undefined) =>
       (
@@ -58,21 +66,11 @@ const columns: ListColumn<ManagedApi>[] = [
     render: (value) => String(value ?? "-"),
   },
   {
-    key: "operation",
-    dataIndex: "operation",
-    title: "操作标识",
-    width: 160,
+    key: "moduleDescription",
+    dataIndex: "moduleDescription",
+    title: "模块描述",
+    width: 240,
     ellipsis: true,
-    render: (value) => String(value ?? "-"),
-  },
-  {
-    key: "scope",
-    dataIndex: "scope",
-    title: "作用域",
-    width: 160,
-    ellipsis: true,
-    render: (value: string | undefined) =>
-      (({ ADMIN: "管理后台", APP: "应用" }) as Record<string, string>)[value ?? ""] ?? value ?? "-",
   },
   {
     key: "status",

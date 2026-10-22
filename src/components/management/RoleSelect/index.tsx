@@ -29,7 +29,7 @@ export function RoleSelect({ value, onChange, multiple, tenantId, disabled }: Pr
   });
   const options = (query.data ?? []).map((item) => ({
     value: item.id,
-    label: `${item.name ?? item.code ?? item.id}${item.tenantName ? ` · ${item.tenantName}` : ""}`,
+    label: String(item.name ?? item.code ?? item.id),
   }));
 
   return (

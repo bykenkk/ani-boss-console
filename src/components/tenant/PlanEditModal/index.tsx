@@ -1,5 +1,5 @@
-import { Form, Modal, Spin, Input, Select, InputNumber } from "@arco-design/web-react";
-import { useRef } from "react";
+import { Form, Modal, Input, Select, InputNumber } from "@arco-design/web-react";
+import { useEffect, useMemo, useRef } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import {
   managementKeys,
@@ -18,7 +18,7 @@ interface Props {
   onSuccess: () => void;
 }
 export function PlanEditModal(props: Props) {
-  const { record, onCancel } = props;
+  const { record } = props;
   const detail = useQuery({
     queryKey: managementKeys.detail("plans", record?.id ?? 0),
     queryFn: ({ signal }) => getManagement("plans", record!.id, signal),
@@ -30,35 +30,47 @@ export function PlanEditModal(props: Props) {
       },
     },
   });
-  if (!record || detail.isSuccess) {
-    return <PlanEditForm {...props} record={detail.data ?? record} />;
-  }
   return (
-    <Modal
-      visible
-      title={record ? "编辑套餐" : "新建套餐"}
-      okText="保存"
-      okButtonProps={{ disabled: true }}
-      onCancel={onCancel}
-      style={{ width: 680 }}
-    >
-      {detail.isPending && (
-        <div className="flex justify-center py-8">
-          <Spin />
-        </div>
-      )}
-    </Modal>
+    <PlanEditForm
+      key={record?.id ?? "create"}
+      {...props}
+      record={detail.data ?? record}
+      loading={!!record && detail.isPending}
+      disabled={!!record && !detail.data}
+    />
   );
 }
-function PlanEditForm({ record, defaults, onCancel, onSuccess }: Props) {
+interface PlanEditFormProps extends Props {
+  loading: boolean;
+  disabled: boolean;
+}
+
+function PlanEditForm({
+  record,
+  defaults,
+  onCancel,
+  onSuccess,
+  loading,
+  disabled,
+}: PlanEditFormProps) {
   const [form] = Form.useForm<EditValues>();
-  const initial: EditValues = {
-    ...(!record ? { version: "STANDARD", expiryPolicy: "READONLY", dataRetentionDays: 30 } : {}),
-    ...record,
-    ...defaults,
-  };
+  const initial = useMemo(() => {
+    const values: EditValues = {
+      ...(!record ? { version: "STANDARD", expiryPolicy: "READONLY", dataRetentionDays: 30 } : {}),
+      ...record,
+      ...defaults,
+    };
+    return values;
+  }, [record, defaults]);
 
   const changedFields = useRef(new Set<string>());
+  const detailInitialized = useRef(!disabled);
+  useEffect(() => {
+    if (disabled || detailInitialized.current) return;
+    form.setFieldsValue(initial);
+    changedFields.current.clear();
+    detailInitialized.current = true;
+  }, [disabled, form, initial]);
   const client = useQueryClient();
   const mutation = useMutation({
     mutationFn: async (submitted: EditValues) => {
@@ -82,8 +94,9 @@ function PlanEditForm({ record, defaults, onCancel, onSuccess }: Props) {
       onSuccess();
     },
   });
+  const busy = loading || mutation.isPending;
   const submit = async () => {
-    if (mutation.isPending) return;
+    if (disabled || busy) return;
     try {
       mutation.mutate(await validateForm<EditValues>(form));
     } catch {
@@ -98,60 +111,63 @@ function PlanEditForm({ record, defaults, onCancel, onSuccess }: Props) {
       onOk={submit}
       okText="保存"
       confirmLoading={mutation.isPending}
-      cancelButtonProps={{ disabled: mutation.isPending }}
-      closable={!mutation.isPending}
-      escToExit={!mutation.isPending}
+      okButtonProps={{ disabled: disabled || loading }}
+      cancelButtonProps={{ disabled: busy }}
+      closable={!busy}
+      escToExit={!busy}
       style={{ width: 680 }}
     >
       <Form
         form={form}
-        disabled={mutation.isPending}
+        disabled={disabled || busy}
         layout="vertical"
         initialValues={initial}
         onValuesChange={(changed) => {
           Object.keys(changed).forEach((key) => changedFields.current.add(key));
         }}
       >
-        <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
-          <Form.Item field="name" label="名称" rules={[{ required: true, message: "请填写名称" }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item
-            field="version"
-            label="版本"
-            rules={[{ required: true, message: "请填写版本" }]}
-          >
-            <Select
-              options={[
-                { value: "FREE", label: "免费版" },
-                { value: "STANDARD", label: "标准版" },
-                { value: "ENTERPRISE", label: "企业版" },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item
-            field="expiryPolicy"
-            label="到期策略"
-            rules={[{ required: true, message: "请填写到期策略" }]}
-          >
-            <Select
-              options={[
-                { value: "READONLY", label: "只读" },
-                { value: "BLOCK_LOGIN", label: "禁止登录" },
-                { value: "FREEZE", label: "冻结" },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item field="dataRetentionDays" label="数据保留天数">
-            <InputNumber min={0} precision={0} />
-          </Form.Item>
-          <Form.Item field="description" label="说明" className="md:col-span-2">
-            <Input.TextArea />
-          </Form.Item>
-          <Form.Item field="remark" label="备注">
-            <Input />
-          </Form.Item>
-        </div>
+        <Form.Item
+          field="name"
+          label="套餐名称"
+          rules={[{ required: true, message: "请填写套餐名称" }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          field="version"
+          label="套餐版本"
+          rules={[{ required: true, message: "请填写套餐版本" }]}
+        >
+          <Select
+            options={[
+              { value: "FREE", label: "免费版" },
+              { value: "STANDARD", label: "标准版" },
+              { value: "ENTERPRISE", label: "企业版" },
+            ]}
+          />
+        </Form.Item>
+        <Form.Item
+          field="expiryPolicy"
+          label="到期处置策略"
+          rules={[{ required: true, message: "请填写到期处置策略" }]}
+        >
+          <Select
+            options={[
+              { value: "READONLY", label: "只读" },
+              { value: "BLOCK_LOGIN", label: "禁止登录" },
+              { value: "FREEZE", label: "冻结" },
+            ]}
+          />
+        </Form.Item>
+        <Form.Item field="dataRetentionDays" label="数据保留天数">
+          <InputNumber min={0} precision={0} />
+        </Form.Item>
+        <Form.Item field="description" label="描述">
+          <Input.TextArea />
+        </Form.Item>
+        <Form.Item field="remark" label="备注">
+          <Input />
+        </Form.Item>
       </Form>
     </Modal>
   );

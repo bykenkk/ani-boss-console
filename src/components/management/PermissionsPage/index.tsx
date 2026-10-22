@@ -22,7 +22,7 @@ const columns: ListColumn<ManagedPermission>[] = [
   {
     key: "name",
     dataIndex: "name",
-    title: "名称",
+    title: "权限名称",
     width: 200,
     ellipsis: true,
     render: (value) => String(value ?? "-"),
@@ -30,7 +30,7 @@ const columns: ListColumn<ManagedPermission>[] = [
   {
     key: "code",
     dataIndex: "code",
-    title: "编码",
+    title: "权限编码",
     width: 160,
     ellipsis: true,
     render: (value) => String(value ?? "-"),
@@ -38,7 +38,7 @@ const columns: ListColumn<ManagedPermission>[] = [
   {
     key: "groupName",
     dataIndex: "groupName",
-    title: "权限分组",
+    title: "所属分组",
     width: 160,
     ellipsis: true,
     render: (value) => String(value ?? "-"),

@@ -22,7 +22,7 @@ const columns: ListColumn<ManagedPermissionGroup>[] = [
   {
     key: "name",
     dataIndex: "name",
-    title: "名称",
+    title: "分组名称",
     width: 200,
     ellipsis: true,
     render: (value) => String(value ?? "-"),

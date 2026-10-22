@@ -17,13 +17,12 @@ import {
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
 import { RoleEditModal } from "@/components/management/RoleEditModal";
-import { TenantSelect } from "@/components/tenant/TenantSelect";
 
 const columns: ListColumn<ManagedRole>[] = [
   {
     key: "name",
     dataIndex: "name",
-    title: "名称",
+    title: "角色名称",
     width: 200,
     ellipsis: true,
     render: (value) => String(value ?? "-"),
@@ -31,39 +30,10 @@ const columns: ListColumn<ManagedRole>[] = [
   {
     key: "code",
     dataIndex: "code",
-    title: "编码",
+    title: "角色编码",
     width: 160,
     ellipsis: true,
     render: (value) => String(value ?? "-"),
-  },
-  {
-    key: "tenantName",
-    dataIndex: "tenantName",
-    title: "所属租户",
-    width: 160,
-    ellipsis: true,
-    render: (value) => String(value ?? "-"),
-  },
-  {
-    key: "type",
-    dataIndex: "type",
-    title: "角色类型",
-    width: 160,
-    ellipsis: true,
-    render: (value: string | undefined) =>
-      (
-        ({ SYSTEM: "系统角色", TEMPLATE: "角色模板", TENANT: "租户角色" }) as Record<string, string>
-      )[value ?? ""] ??
-      value ??
-      "-",
-  },
-  {
-    key: "isProtected",
-    dataIndex: "isProtected",
-    title: "受保护",
-    width: 160,
-    ellipsis: true,
-    render: (value: boolean | undefined) => (value ? "是" : "否"),
   },
   {
     key: "status",
@@ -85,6 +55,14 @@ const columns: ListColumn<ManagedRole>[] = [
     ),
   },
   {
+    key: "tenantName",
+    dataIndex: "tenantName",
+    title: "所属租户",
+    width: 160,
+    ellipsis: true,
+    render: (value, row) => (row.tenantId === 0 ? "-" : String(value ?? "-")),
+  },
+  {
     key: "createdAt",
     title: "创建时间",
     width: 180,
@@ -97,7 +75,6 @@ export function PlatformRolesPage() {
   const [pageSize, setPageSize] = useState(20);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>();
-  const [tenantId, setTenantId] = useState<number>();
 
   const [editing, setEditing] = useState<ManagedRole | "create">();
   const client = useQueryClient();
@@ -107,7 +84,6 @@ export function PlatformRolesPage() {
     filters: {
       ...(search ? { name__contains: search } : {}),
       ...(status ? { status } : {}),
-      ...(tenantId !== undefined ? { tenant_id: tenantId } : {}),
     },
   };
   const query = useQuery({
@@ -131,8 +107,6 @@ export function PlatformRolesPage() {
     },
   });
 
-  // FIXME: 当前编辑和删除入口未依据 isProtected 区分限制，可能向受保护角色展示不可执行的操作。
-  // 核实后端对受保护角色的编辑、权限分配和删除规则后，按实际允许范围限制入口。
   const rowActions: RowAction<ManagedRole>[] = [
     { key: "edit", label: "编辑", onClick: setEditing },
 
@@ -140,6 +114,7 @@ export function PlatformRolesPage() {
       key: "delete",
       label: "删除",
       intent: "danger",
+      disabled: (row) => !!row.isProtected,
       loading: (row) => removal.isPending && removal.variables === row.id,
       onClick: (row) => {
         Modal.confirm({
@@ -155,7 +130,7 @@ export function PlatformRolesPage() {
       <ListPageFrame
         header={{
           title: "角色管理",
-          subtitle: "管理角色类型、租户归属和权限点分配，查看角色状态与保护标识。",
+          subtitle: "统一管理系统角色、角色模板和租户角色，维护角色归属与权限配置。",
         }}
         toolbar={{
           actions: (
@@ -192,14 +167,6 @@ export function PlatformRolesPage() {
                   setPage(1);
                 }}
               />
-              <TenantSelect
-                includePlatform
-                value={tenantId}
-                onChange={(value) => {
-                  setTenantId(value as number | undefined);
-                  setPage(1);
-                }}
-              />
             </Space>
           ),
 
@@ -226,7 +193,6 @@ export function PlatformRolesPage() {
       {editing && (
         <RoleEditModal
           record={editing === "create" ? undefined : editing}
-          defaults={editing === "create" && tenantId !== undefined ? { tenantId } : undefined}
           onCancel={() => setEditing(undefined)}
           onSuccess={() => setEditing(undefined)}
         />

@@ -1,5 +1,5 @@
-import { Form, Modal, Spin, Input, Select, InputNumber } from "@arco-design/web-react";
-import { useRef, useState } from "react";
+import { Form, Modal, Input, Select, InputNumber, Switch } from "@arco-design/web-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import {
   managementKeys,
@@ -13,14 +13,14 @@ import { withId } from "@/lib/id";
 
 import { TenantSelect } from "@/components/tenant/TenantSelect";
 import { PermissionTreeSelect } from "../PermissionTreeSelect";
+
 interface Props {
   record?: ResourceRecords["roles"];
-  defaults?: EditValues;
   onCancel: () => void;
   onSuccess: () => void;
 }
 export function RoleEditModal(props: Props) {
-  const { record, onCancel } = props;
+  const { record } = props;
   const detail = useQuery({
     queryKey: managementKeys.detail("roles", record?.id ?? 0),
     queryFn: ({ signal }) => getManagement("roles", record!.id, signal),
@@ -32,56 +32,66 @@ export function RoleEditModal(props: Props) {
       },
     },
   });
-  if (!record || detail.isSuccess) {
-    return <RoleEditForm {...props} record={detail.data ?? record} />;
-  }
   return (
-    <Modal
-      visible
-      title={record ? "编辑角色" : "新建角色"}
-      okText="保存"
-      okButtonProps={{ disabled: true }}
-      onCancel={onCancel}
-      style={{ width: 680 }}
-    >
-      {detail.isPending && (
-        <div className="flex justify-center py-8">
-          <Spin />
-        </div>
-      )}
-    </Modal>
+    <RoleEditForm
+      key={record?.id ?? "create"}
+      {...props}
+      record={detail.data ?? record}
+      loading={!!record && detail.isPending}
+      disabled={!!record && !detail.data}
+    />
   );
 }
-function RoleEditForm({ record, defaults, onCancel, onSuccess }: Props) {
-  const [form] = Form.useForm<EditValues>();
-  const initial: EditValues = {
-    ...(!record
-      ? { type: "SYSTEM", tenantId: 0, status: "ON", sortOrder: 0, permissions: [] }
-      : {}),
-    ...record,
-    ...defaults,
-  };
+interface RoleEditFormProps extends Props {
+  loading: boolean;
+  disabled: boolean;
+}
 
+function RoleEditForm({ record, onCancel, onSuccess, loading, disabled }: RoleEditFormProps) {
+  const [form] = Form.useForm<EditValues>();
+  const initial = useMemo(() => {
+    const values: EditValues = {
+      ...(!record
+        ? {
+            type: "SYSTEM",
+            tenantId: 0,
+            status: "ON",
+            sortOrder: 1,
+            permissions: [],
+          }
+        : {}),
+      ...record,
+    };
+    return values;
+  }, [record]);
   const [roleType, setRoleType] = useState(String(initial.type ?? "SYSTEM"));
 
   const changedFields = useRef(new Set<string>());
+  const detailInitialized = useRef(!disabled);
+  useEffect(() => {
+    if (disabled || detailInitialized.current) return;
+    form.setFieldsValue(initial);
+    changedFields.current.clear();
+    setRoleType(String(initial.type ?? "SYSTEM"));
+    detailInitialized.current = true;
+  }, [disabled, form, initial]);
   const client = useQueryClient();
   const mutation = useMutation({
     mutationFn: async (submitted: EditValues) => {
-      const values: EditValues = {};
+      // 数据权限范围暂未开放配置，新建和编辑统一提交 ALL。
+      const values: EditValues = { dataScope: "ALL" };
       if (!record || changedFields.current.has("name")) values.name = submitted.name ?? "";
       if (!record || changedFields.current.has("code")) values.code = submitted.code ?? "";
       if (!record) values.type = submitted.type ?? "";
-      if (!record) values.tenantId = submitted.tenantId ?? 0;
+      if (!record) values.tenantId = submitted.type === "TENANT" ? (submitted.tenantId ?? 0) : 0;
       if (!record || changedFields.current.has("status")) values.status = submitted.status ?? "";
       if (!record || changedFields.current.has("sortOrder"))
-        values.sortOrder = submitted.sortOrder ?? 0;
+        values.sortOrder = submitted.sortOrder ?? 1;
       if (!record || changedFields.current.has("description"))
         values.description = submitted.description ?? "";
       if (!record || changedFields.current.has("permissions"))
         values.permissions = submitted.permissions ?? [];
 
-      if (record && Object.keys(values).length === 0) return;
       await saveManagement("roles", { id: record?.id, values: values });
     },
     meta: { feedback: { channel: "message", action: "保存角色" } },
@@ -90,8 +100,9 @@ function RoleEditForm({ record, defaults, onCancel, onSuccess }: Props) {
       onSuccess();
     },
   });
+  const busy = loading || mutation.isPending;
   const submit = async () => {
-    if (mutation.isPending) return;
+    if (disabled || busy) return;
     try {
       mutation.mutate(await validateForm<EditValues>(form));
     } catch {
@@ -106,84 +117,93 @@ function RoleEditForm({ record, defaults, onCancel, onSuccess }: Props) {
       onOk={submit}
       okText="保存"
       confirmLoading={mutation.isPending}
-      cancelButtonProps={{ disabled: mutation.isPending }}
-      closable={!mutation.isPending}
-      escToExit={!mutation.isPending}
+      okButtonProps={{ disabled: disabled || loading }}
+      cancelButtonProps={{ disabled: busy }}
+      closable={!busy}
+      escToExit={!busy}
       style={{ width: 680 }}
     >
       <Form
         form={form}
+        disabled={disabled || busy}
         layout="vertical"
         initialValues={initial}
         onValuesChange={(changed) => {
           Object.keys(changed).forEach((key) => changedFields.current.add(key));
-          if ("type" in changed) {
-            setRoleType(String(changed.type));
-            form.setFieldValue("tenantId", 0);
-          }
         }}
       >
-        <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
-          <Form.Item field="name" label="名称" rules={[{ required: true, message: "请填写名称" }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item field="code" label="编码" rules={[{ required: true, message: "请填写编码" }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item
-            field="type"
-            label="角色类型"
-            rules={[{ required: true, message: "请填写角色类型" }]}
-          >
-            <Select
-              options={[
-                { value: "SYSTEM", label: "系统角色" },
-                { value: "TEMPLATE", label: "角色模板" },
-                { value: "TENANT", label: "租户角色" },
-              ]}
-              disabled={!!record}
-            />
-          </Form.Item>
+        <Form.Item
+          field="name"
+          label="角色名称"
+          rules={[{ required: true, message: "请填写角色名称" }]}
+        >
+          <Input placeholder="请输入" allowClear />
+        </Form.Item>
+        <Form.Item
+          field="code"
+          label="角色编码"
+          rules={[{ required: true, message: "请填写角色编码" }]}
+        >
+          <Input placeholder="请输入" allowClear disabled={!!record?.isProtected} />
+        </Form.Item>
+        <Form.Item
+          field="type"
+          label="角色类型"
+          rules={[{ required: true, message: "请填写角色类型" }]}
+        >
+          <Select
+            onChange={(type) => {
+              setRoleType(type);
+              form.setFieldValue("tenantId", type === "TENANT" ? undefined : 0);
+            }}
+            options={[
+              { value: "SYSTEM", label: "系统角色" },
+              { value: "TEMPLATE", label: "角色模板" },
+              { value: "TENANT", label: "租户角色" },
+            ]}
+            disabled={!!record}
+          />
+        </Form.Item>
+        {roleType === "TENANT" && (
           <Form.Item
             field="tenantId"
             label="所属租户"
             rules={[
-              { required: true, message: "请填写所属租户" },
+              { required: true, message: "请选择所属租户" },
               {
                 validator: (value: unknown, callback: (message?: string) => void) => {
-                  if (roleType === "TENANT" && !value) callback("租户角色必须选择租户");
+                  if (!value) callback("租户角色必须选择租户");
                   else callback();
                 },
               },
             ]}
           >
-            <TenantSelect
-              includePlatform={roleType !== "TENANT"}
-              disabled={!!record || roleType !== "TENANT"}
-            />
+            <TenantSelect disabled={!!record} />
           </Form.Item>
-          <Form.Item
-            field="status"
-            label="状态"
-            rules={[{ required: true, message: "请填写状态" }]}
-          >
-            <Select
-              options={[
-                { value: "ON", label: "启用" },
-                { value: "OFF", label: "禁用" },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item field="sortOrder" label="排序">
-            <InputNumber min={0} precision={0} />
-          </Form.Item>
-          <Form.Item field="description" label="说明" className="md:col-span-2">
-            <Input.TextArea />
-          </Form.Item>
-          <Form.Item field="permissions" label="权限点" className="md:col-span-2">
-            <PermissionTreeSelect />
-          </Form.Item>
-        </div>
+        )}
+        <Form.Item
+          field="status"
+          label="状态"
+          triggerPropName="checked"
+          formatter={(value) => value === "ON"}
+          normalize={(checked) => (checked ? "ON" : "OFF")}
+          rules={[{ required: true, message: "请填写状态" }]}
+        >
+          <Switch checkedText="启用" uncheckedText="禁用" disabled={!!record?.isProtected} />
+        </Form.Item>
+        <Form.Item
+          field="sortOrder"
+          label="排序"
+          rules={[{ required: true, message: "请填写排序" }]}
+        >
+          <InputNumber min={0} precision={0} placeholder="请输入" />
+        </Form.Item>
+        <Form.Item field="description" label="描述">
+          <Input.TextArea placeholder="请输入" />
+        </Form.Item>
+        <Form.Item field="permissions" label="权限配置">
+          <PermissionTreeSelect />
+        </Form.Item>
       </Form>
     </Modal>
   );
