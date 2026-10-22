@@ -1,5 +1,4 @@
 import { Alert, Button, Form, Input, Select, Space } from "@arco-design/web-react";
-import { Link } from "@tanstack/react-router";
 import type { AvailableTenantPlan } from "@/api/tenant";
 
 interface TenantCreateFieldsProps {
@@ -77,12 +76,9 @@ export function TenantCreateFields({
           />
         </Form.Item>
         {plansReady && !plansPending && !plans.length && (
-          <Alert type="warning" content="暂无已发布的配额策略，请先发布策略，再返回继续开通。" />
+          <Alert type="warning" content="暂无可用配额策略，请联系平台管理员后刷新。" />
         )}
         <Space className="mt-3">
-          <Link to="/tenants-quotas" target="_blank" rel="noopener noreferrer">
-            前往配额策略
-          </Link>
           <Button loading={plansPending} onClick={onRefresh}>
             刷新可用策略
           </Button>

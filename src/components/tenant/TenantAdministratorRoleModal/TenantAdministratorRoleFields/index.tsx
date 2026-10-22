@@ -1,6 +1,6 @@
 import { Form, Select } from "@arco-design/web-react";
 import type { TenantRoleDefinition } from "@/api/tenant";
-import { tenantAdministratorRoleLabels } from "@/components/tenant/apiModel";
+import { tenantAdministratorRoleLabels } from "./labels";
 
 interface TenantAdministratorRoleFieldsProps {
   roles: TenantRoleDefinition[];

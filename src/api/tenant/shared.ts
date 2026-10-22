@@ -46,7 +46,3 @@ export function tenantPath(tenantId: string, suffix = "") {
 export function tenantAdministratorPath(tenantId: string, userId: string, suffix = "") {
   return tenantPath(tenantId, `/admins/${encodeURIComponent(userId)}${suffix}`);
 }
-
-export function tenantPlanPath(planId: string, suffix = "") {
-  return `/tenant-plans/${encodeURIComponent(planId)}${suffix}`;
-}

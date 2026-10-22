@@ -8,16 +8,17 @@ import {
   getTenantManagementErrorMessage,
   tenantManagementQueryKeys,
   updateTenantStatus,
+  type TenantStatus,
 } from "@/api/tenant";
 import {
   DetailPageFrame,
   type DetailInfoCard,
   type DetailTab,
+  type StatusBadgeTone,
   StatusBadge,
 } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
-import { tenantStatusMeta } from "../apiModel";
 import { TenantProfileModal } from "@/components/tenant/TenantProfileModal";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { TenantAuditRecords } from "./TenantAuditRecords";
@@ -29,6 +30,12 @@ import { TenantScopedAdministrators } from "./TenantScopedAdministrators";
 interface TenantDetailPageProps {
   tenantId: string;
 }
+
+const tenantStatusMeta: Record<TenantStatus, { label: string; tone: StatusBadgeTone }> = {
+  active: { label: "活跃", tone: "success" },
+  frozen: { label: "冻结", tone: "warning" },
+  disabled: { label: "禁用", tone: "default" },
+};
 
 async function runTenantOperation<T>(operation: () => Promise<T>): Promise<T> {
   try {

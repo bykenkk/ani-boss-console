@@ -61,8 +61,6 @@ import { Route as TenantsAdminsIndexRouteImport } from './routes/tenants-admins/
 import { Route as TenantsAdminsAdminIdRouteImport } from './routes/tenants-admins/$adminId'
 import { Route as TenantsBillingIndexRouteImport } from './routes/tenants-billing/index'
 import { Route as TenantsBillingTenantIdRouteImport } from './routes/tenants-billing/$tenantId'
-import { Route as TenantsQuotasIndexRouteImport } from './routes/tenants-quotas/index'
-import { Route as TenantsQuotasPlanCodeRouteImport } from './routes/tenants-quotas/$planCode'
 import { Route as TenantsIndexRouteImport } from './routes/tenants/index'
 import { Route as TenantsTenantIdRouteImport } from './routes/tenants/$tenantId'
 import { Route as TracesIndexRouteImport } from './routes/traces/index'
@@ -330,16 +328,6 @@ const TenantsBillingTenantIdRoute = TenantsBillingTenantIdRouteImport.update({
   path: '/tenants-billing/$tenantId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TenantsQuotasIndexRoute = TenantsQuotasIndexRouteImport.update({
-  id: '/tenants-quotas/',
-  path: '/tenants-quotas/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TenantsQuotasPlanCodeRoute = TenantsQuotasPlanCodeRouteImport.update({
-  id: '/tenants-quotas/$planCode',
-  path: '/tenants-quotas/$planCode',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const TenantsIndexRoute = TenantsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -367,7 +355,6 @@ export interface FileRoutesByFullPath {
   '/platform-admins/$userId': typeof PlatformAdminsUserIdRoute
   '/tenants-admins/$adminId': typeof TenantsAdminsAdminIdRoute
   '/tenants-billing/$tenantId': typeof TenantsBillingTenantIdRoute
-  '/tenants-quotas/$planCode': typeof TenantsQuotasPlanCodeRoute
   '/tenants/$tenantId': typeof TenantsTenantIdRoute
   '/alert-rules/': typeof AlertRulesIndexRoute
   '/apis/': typeof ApisIndexRoute
@@ -416,7 +403,6 @@ export interface FileRoutesByFullPath {
   '/tenant-usage-ranking/': typeof TenantUsageRankingIndexRoute
   '/tenants-admins/': typeof TenantsAdminsIndexRoute
   '/tenants-billing/': typeof TenantsBillingIndexRoute
-  '/tenants-quotas/': typeof TenantsQuotasIndexRoute
   '/tenants/': typeof TenantsIndexRoute
   '/traces/': typeof TracesIndexRoute
   '/webhook/': typeof WebhookIndexRoute
@@ -426,7 +412,6 @@ export interface FileRoutesByTo {
   '/platform-admins/$userId': typeof PlatformAdminsUserIdRoute
   '/tenants-admins/$adminId': typeof TenantsAdminsAdminIdRoute
   '/tenants-billing/$tenantId': typeof TenantsBillingTenantIdRoute
-  '/tenants-quotas/$planCode': typeof TenantsQuotasPlanCodeRoute
   '/tenants/$tenantId': typeof TenantsTenantIdRoute
   '/alert-rules': typeof AlertRulesIndexRoute
   '/apis': typeof ApisIndexRoute
@@ -475,7 +460,6 @@ export interface FileRoutesByTo {
   '/tenant-usage-ranking': typeof TenantUsageRankingIndexRoute
   '/tenants-admins': typeof TenantsAdminsIndexRoute
   '/tenants-billing': typeof TenantsBillingIndexRoute
-  '/tenants-quotas': typeof TenantsQuotasIndexRoute
   '/tenants': typeof TenantsIndexRoute
   '/traces': typeof TracesIndexRoute
   '/webhook': typeof WebhookIndexRoute
@@ -487,7 +471,6 @@ export interface FileRoutesById {
   '/platform-admins/$userId': typeof PlatformAdminsUserIdRoute
   '/tenants-admins/$adminId': typeof TenantsAdminsAdminIdRoute
   '/tenants-billing/$tenantId': typeof TenantsBillingTenantIdRoute
-  '/tenants-quotas/$planCode': typeof TenantsQuotasPlanCodeRoute
   '/tenants/$tenantId': typeof TenantsTenantIdRoute
   '/alert-rules/': typeof AlertRulesIndexRoute
   '/apis/': typeof ApisIndexRoute
@@ -536,7 +519,6 @@ export interface FileRoutesById {
   '/tenant-usage-ranking/': typeof TenantUsageRankingIndexRoute
   '/tenants-admins/': typeof TenantsAdminsIndexRoute
   '/tenants-billing/': typeof TenantsBillingIndexRoute
-  '/tenants-quotas/': typeof TenantsQuotasIndexRoute
   '/tenants/': typeof TenantsIndexRoute
   '/traces/': typeof TracesIndexRoute
   '/webhook/': typeof WebhookIndexRoute
@@ -549,7 +531,6 @@ export interface FileRouteTypes {
     | '/platform-admins/$userId'
     | '/tenants-admins/$adminId'
     | '/tenants-billing/$tenantId'
-    | '/tenants-quotas/$planCode'
     | '/tenants/$tenantId'
     | '/alert-rules/'
     | '/apis/'
@@ -598,7 +579,6 @@ export interface FileRouteTypes {
     | '/tenant-usage-ranking/'
     | '/tenants-admins/'
     | '/tenants-billing/'
-    | '/tenants-quotas/'
     | '/tenants/'
     | '/traces/'
     | '/webhook/'
@@ -608,7 +588,6 @@ export interface FileRouteTypes {
     | '/platform-admins/$userId'
     | '/tenants-admins/$adminId'
     | '/tenants-billing/$tenantId'
-    | '/tenants-quotas/$planCode'
     | '/tenants/$tenantId'
     | '/alert-rules'
     | '/apis'
@@ -657,7 +636,6 @@ export interface FileRouteTypes {
     | '/tenant-usage-ranking'
     | '/tenants-admins'
     | '/tenants-billing'
-    | '/tenants-quotas'
     | '/tenants'
     | '/traces'
     | '/webhook'
@@ -668,7 +646,6 @@ export interface FileRouteTypes {
     | '/platform-admins/$userId'
     | '/tenants-admins/$adminId'
     | '/tenants-billing/$tenantId'
-    | '/tenants-quotas/$planCode'
     | '/tenants/$tenantId'
     | '/alert-rules/'
     | '/apis/'
@@ -717,7 +694,6 @@ export interface FileRouteTypes {
     | '/tenant-usage-ranking/'
     | '/tenants-admins/'
     | '/tenants-billing/'
-    | '/tenants-quotas/'
     | '/tenants/'
     | '/traces/'
     | '/webhook/'
@@ -729,7 +705,6 @@ export interface RootRouteChildren {
   PlatformAdminsUserIdRoute: typeof PlatformAdminsUserIdRoute
   TenantsAdminsAdminIdRoute: typeof TenantsAdminsAdminIdRoute
   TenantsBillingTenantIdRoute: typeof TenantsBillingTenantIdRoute
-  TenantsQuotasPlanCodeRoute: typeof TenantsQuotasPlanCodeRoute
   AlertRulesIndexRoute: typeof AlertRulesIndexRoute
   ApisIndexRoute: typeof ApisIndexRoute
   AuditApiKeysIndexRoute: typeof AuditApiKeysIndexRoute
@@ -777,7 +752,6 @@ export interface RootRouteChildren {
   TenantUsageRankingIndexRoute: typeof TenantUsageRankingIndexRoute
   TenantsAdminsIndexRoute: typeof TenantsAdminsIndexRoute
   TenantsBillingIndexRoute: typeof TenantsBillingIndexRoute
-  TenantsQuotasIndexRoute: typeof TenantsQuotasIndexRoute
   TracesIndexRoute: typeof TracesIndexRoute
   WebhookIndexRoute: typeof WebhookIndexRoute
 }
@@ -1148,20 +1122,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TenantsBillingTenantIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tenants-quotas/': {
-      id: '/tenants-quotas/'
-      path: '/tenants-quotas'
-      fullPath: '/tenants-quotas/'
-      preLoaderRoute: typeof TenantsQuotasIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tenants-quotas/$planCode': {
-      id: '/tenants-quotas/$planCode'
-      path: '/tenants-quotas/$planCode'
-      fullPath: '/tenants-quotas/$planCode'
-      preLoaderRoute: typeof TenantsQuotasPlanCodeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/tenants/': {
       id: '/tenants/'
       path: '/'
@@ -1212,7 +1172,6 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformAdminsUserIdRoute: PlatformAdminsUserIdRoute,
   TenantsAdminsAdminIdRoute: TenantsAdminsAdminIdRoute,
   TenantsBillingTenantIdRoute: TenantsBillingTenantIdRoute,
-  TenantsQuotasPlanCodeRoute: TenantsQuotasPlanCodeRoute,
   AlertRulesIndexRoute: AlertRulesIndexRoute,
   ApisIndexRoute: ApisIndexRoute,
   AuditApiKeysIndexRoute: AuditApiKeysIndexRoute,
@@ -1260,7 +1219,6 @@ const rootRouteChildren: RootRouteChildren = {
   TenantUsageRankingIndexRoute: TenantUsageRankingIndexRoute,
   TenantsAdminsIndexRoute: TenantsAdminsIndexRoute,
   TenantsBillingIndexRoute: TenantsBillingIndexRoute,
-  TenantsQuotasIndexRoute: TenantsQuotasIndexRoute,
   TracesIndexRoute: TracesIndexRoute,
   WebhookIndexRoute: WebhookIndexRoute,
 }

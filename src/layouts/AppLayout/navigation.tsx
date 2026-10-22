@@ -41,7 +41,6 @@ export function isNavigationGroup(item: NavigationItem): item is NavigationGroup
 const tenantNavigation: readonly NavigationLeaf[] = [
   { label: "套餐管理", to: "/tenant-plans", icon: <IconSettings /> },
   { label: "租户列表", to: "/tenants", icon: <IconUserGroup /> },
-  { label: "配额策略", to: "/tenants-quotas", icon: <IconSettings /> },
   { label: "租户管理员", to: "/tenants-admins", icon: <IconUser /> },
   {
     label: "租户计费与用量",
@@ -133,7 +132,6 @@ const visibleAppRoutes = new Set<AppRoute>([
   "/apis",
   "/",
   "/tenants",
-  "/tenants-quotas",
   "/tenants-admins",
   "/gpu-clusters",
   "/gpu",

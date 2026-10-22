@@ -4,11 +4,17 @@ import { fetchTenantLifecycle, tenantManagementQueryKeys } from "@/api/tenant";
 import { DataTable } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
-import { tenantLifecycleActionLabels } from "../../apiModel";
 
 interface TenantLifecycleRecordsProps {
   tenantId: string;
 }
+
+const tenantLifecycleActionLabels = {
+  create: "租户开通",
+  freeze: "租户冻结",
+  unfreeze: "租户解冻",
+  disable: "租户禁用",
+} as const;
 
 export function TenantLifecycleRecords({ tenantId }: TenantLifecycleRecordsProps) {
   const cursor = useCursorPagination(tenantId);

@@ -11,7 +11,6 @@ export type AppRoute =
   | "/overview-kb"
   | "/overview-alerts"
   | "/tenants"
-  | "/tenants-quotas"
   | "/tenants-admins"
   | "/tenants-billing"
   | "/pool"

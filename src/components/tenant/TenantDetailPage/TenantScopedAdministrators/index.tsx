@@ -3,10 +3,11 @@ import { Button } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { fetchTenantScopedAdministrators, tenantManagementQueryKeys } from "@/api/tenant";
-import { DataTable, StatusBadge } from "@/components/common";
+import { DataTable } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
-import { tenantAdministratorRoleLabels, tenantAdministratorStatusMeta } from "../../apiModel";
+import { tenantAdministratorRoleLabels } from "@/components/tenant/TenantAdministratorRoleModal/TenantAdministratorRoleFields/labels";
+import { TenantAdministratorStatusBadge } from "@/components/tenant/TenantAdministratorStatusBadge";
 import { TenantAdministratorInviteModal } from "@/components/tenant/TenantAdministratorInviteModal";
 
 interface TenantScopedAdministratorsProps {
@@ -70,10 +71,7 @@ export function TenantScopedAdministrators({
             {
               title: "状态",
               width: 120,
-              render: (_, item) => {
-                const meta = tenantAdministratorStatusMeta[item.status];
-                return <StatusBadge tone={meta.tone} value={meta.label} />;
-              },
+              render: (_, item) => <TenantAdministratorStatusBadge status={item.status} />,
             },
             {
               title: "最近登录",

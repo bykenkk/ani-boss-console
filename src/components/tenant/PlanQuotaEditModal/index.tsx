@@ -1,50 +1,73 @@
-import { Form, Modal, Input } from "@arco-design/web-react";
-import { useRef } from "react";
+import { Form, Modal } from "@arco-design/web-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  managementKeys,
-  saveManagement,
-  type EditValues,
-  type ResourceRecords,
-} from "@/api/management";
+  createPlanQuota,
+  planKeys,
+  updatePlanQuota,
+  type PlanList,
+  type PlanQuota,
+  type QuotaDefinition,
+} from "@/api/plans";
+import { QuotaCodeSelect } from "@/components/tenant/QuotaCodeSelect";
+import { QuotaValueInput } from "@/components/tenant/QuotaValueInput";
+import { showMessage } from "@/lib/feedback";
 import { validateForm } from "@/lib/form";
 
-interface Props {
-  record?: ResourceRecords["plan-quotas"];
-  defaults?: EditValues;
+interface PlanQuotaEditModalProps {
+  record?: PlanQuota;
+  planId: number;
   onCancel: () => void;
   onSuccess: () => void;
 }
-export function PlanQuotaEditModal(props: Props) {
-  return <PlanQuotaEditForm {...props} />;
-}
-function PlanQuotaEditForm({ record, defaults, onCancel, onSuccess }: Props) {
-  const [form] = Form.useForm<EditValues>();
-  const initial: EditValues = { ...(!record ? {} : {}), ...record, ...defaults };
 
-  const changedFields = useRef(new Set<string>());
+interface PlanQuotaEditFormValues {
+  quotaCode: string;
+  quotaValue: string;
+}
+
+export function PlanQuotaEditModal({
+  record,
+  planId,
+  onCancel,
+  onSuccess,
+}: PlanQuotaEditModalProps) {
+  const [form] = Form.useForm<PlanQuotaEditFormValues>();
+  const quotaCode: string | undefined = Form.useWatch("quotaCode", form);
   const client = useQueryClient();
   const mutation = useMutation({
-    mutationFn: async (submitted: EditValues) => {
-      const values: EditValues = {};
-      if (!record || changedFields.current.has("quotaCode"))
-        values.quotaCode = submitted.quotaCode ?? "";
-      if (!record || changedFields.current.has("quotaValue"))
-        values.quotaValue = submitted.quotaValue ?? "";
-
-      if (record && Object.keys(values).length === 0) return;
-      await saveManagement("plan-quotas", { id: record?.id, values: { ...values, ...defaults } });
+    mutationFn: async (submitted: PlanQuotaEditFormValues) => {
+      if (!record) {
+        await createPlanQuota({
+          planId,
+          quotaCode: submitted.quotaCode,
+          quotaValue: submitted.quotaValue,
+        });
+        return;
+      }
+      await updatePlanQuota(record.id, {
+        ...(submitted.quotaCode !== record.quotaCode ? { quotaCode: submitted.quotaCode } : {}),
+        ...(submitted.quotaValue !== record.quotaValue ? { quotaValue: submitted.quotaValue } : {}),
+      });
     },
     meta: { feedback: { channel: "message", action: "保存套餐配额" } },
     onSuccess: async () => {
-      await client.invalidateQueries({ queryKey: managementKeys.all });
+      await client.invalidateQueries({ queryKey: planKeys.all });
       onSuccess();
     },
   });
   const submit = async () => {
     if (mutation.isPending) return;
     try {
-      mutation.mutate(await validateForm<EditValues>(form));
+      const submitted = await validateForm<PlanQuotaEditFormValues>(form);
+      if (
+        record &&
+        submitted.quotaCode === record.quotaCode &&
+        submitted.quotaValue === record.quotaValue
+      ) {
+        showMessage({ type: "info", content: "套餐配额未修改" });
+        return;
+      }
+      mutation.mutate(submitted);
     } catch {
       /* 统一校验入口已反馈 */
     }
@@ -66,39 +89,56 @@ function PlanQuotaEditForm({ record, defaults, onCancel, onSuccess }: Props) {
         form={form}
         disabled={mutation.isPending}
         layout="vertical"
-        initialValues={initial}
-        onValuesChange={(changed) => {
-          Object.keys(changed).forEach((key) => changedFields.current.add(key));
-        }}
+        initialValues={{ quotaCode: record?.quotaCode, quotaValue: record?.quotaValue }}
       >
-        <div className="grid grid-cols-1 gap-x-6 md:grid-cols-2">
-          <Form.Item
-            field="quotaCode"
-            label="配额编码"
-            rules={[{ required: true, message: "请填写配额编码" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            field="quotaValue"
-            label="配额值"
-            rules={[
-              { required: true, message: "请填写配额值" },
-              {
-                validator: (value: unknown, callback: (message?: string) => void) => {
-                  if (
-                    !/^\d+$/.test(String(value ?? "")) ||
-                    BigInt(String(value)) > 18446744073709551615n
-                  )
-                    callback("请输入 uint64 范围内的非负整数");
-                  else callback();
-                },
+        <Form.Item
+          field="quotaCode"
+          label="配额类型"
+          extra="选择已登记的配额；已有编码未列出时仍可修改配额值。"
+          rules={[
+            { required: true, message: "请选择配额类型" },
+            {
+              validator: (value: unknown, callback: (message?: string) => void) => {
+                const catalog = client.getQueryState<PlanList<QuotaDefinition>>(
+                  planKeys.quotaDefinitions,
+                );
+                if (record?.quotaCode && value === record.quotaCode) {
+                  callback();
+                } else if (catalog?.status !== "success") {
+                  callback("配额目录尚未就绪，请稍后重试");
+                } else if (!catalog.data?.items?.some((definition) => definition.code === value)) {
+                  callback("请选择当前目录中的配额类型");
+                } else {
+                  callback();
+                }
               },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-        </div>
+            },
+          ]}
+        >
+          <QuotaCodeSelect disabled={mutation.isPending} />
+        </Form.Item>
+        <Form.Item
+          field="quotaValue"
+          label="配额值"
+          rules={[
+            { required: true, message: "请填写配额值" },
+            {
+              validator: (value: unknown, callback: (message?: string) => void) => {
+                if (
+                  typeof value !== "string" ||
+                  !/^\d+$/.test(value) ||
+                  BigInt(value) > 9223372036854775807n
+                ) {
+                  callback("请输入 0～9223372036854775807 范围内的整数");
+                } else {
+                  callback();
+                }
+              },
+            },
+          ]}
+        >
+          <QuotaValueInput quotaCode={quotaCode} disabled={mutation.isPending} />
+        </Form.Item>
       </Form>
     </Modal>
   );

@@ -11,20 +11,13 @@ import {
   resendTenantAdministratorInvitation,
   tenantManagementQueryKeys,
   updateTenantAdministratorStatus,
+  type TenantAdministratorSource,
 } from "@/api/tenant";
-import {
-  DetailPageFrame,
-  type DetailInfoCard,
-  type DetailTab,
-  StatusBadge,
-} from "@/components/common";
+import { DetailPageFrame, type DetailInfoCard, type DetailTab } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
-import {
-  tenantAdministratorRoleLabels,
-  tenantAdministratorSourceLabels,
-  tenantAdministratorStatusMeta,
-} from "../apiModel";
+import { tenantAdministratorRoleLabels } from "@/components/tenant/TenantAdministratorRoleModal/TenantAdministratorRoleFields/labels";
+import { TenantAdministratorStatusBadge } from "@/components/tenant/TenantAdministratorStatusBadge";
 import { TenantAdministratorPasswordModal } from "@/components/tenant/TenantAdministratorPasswordModal";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { TenantAdministratorAudit } from "./TenantAdministratorAudit";
@@ -33,6 +26,11 @@ import { TenantAdministratorRole } from "./TenantAdministratorRole";
 interface TenantAdministratorDetailPageProps {
   administratorId: string;
 }
+
+const tenantAdministratorSourceLabels: Record<TenantAdministratorSource, string> = {
+  local: "本地",
+  third_party: "第三方",
+};
 
 async function runAdministratorOperation<T>(operation: () => Promise<T>): Promise<T> {
   try {
@@ -166,7 +164,6 @@ export function TenantAdministratorDetailPage({
     );
   }
 
-  const status = tenantAdministratorStatusMeta[administrator.status];
   const operationPending =
     resendMutation.isPending || statusMutation.isPending || deleteMutation.isPending;
   const confirmStatus = () => {
@@ -271,7 +268,7 @@ export function TenantAdministratorDetailPage({
         ]}
         title={administrator.displayName || administrator.username}
         subtitle={administrator.email}
-        status={<StatusBadge tone={status.tone} value={status.label} />}
+        status={<TenantAdministratorStatusBadge status={administrator.status} />}
         headerItems={[
           {
             label: "租户",

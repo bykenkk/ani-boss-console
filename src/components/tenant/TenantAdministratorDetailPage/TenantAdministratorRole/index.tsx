@@ -8,7 +8,7 @@ import {
 } from "@/api/tenant";
 import { DataTable } from "@/components/common";
 import { withId } from "@/lib/id";
-import { tenantAdministratorRoleLabels } from "../../apiModel";
+import { tenantAdministratorRoleLabels } from "@/components/tenant/TenantAdministratorRoleModal/TenantAdministratorRoleFields/labels";
 import { TenantAdministratorRoleModal } from "@/components/tenant/TenantAdministratorRoleModal";
 
 interface TenantAdministratorRoleProps {

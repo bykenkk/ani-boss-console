@@ -1,7 +1,6 @@
 import { ApiError } from "@/api/request";
 
 export * from "./administrators";
-export * from "./plans";
 export * from "./tenants";
 export * from "./types";
 
@@ -20,16 +19,6 @@ export const tenantManagementQueryKeys = {
   tenantAudit: (tenantId: string) => ["tenant-management", "tenants", tenantId, "audit"] as const,
   tenantScopedAdministrators: (tenantId: string) =>
     ["tenant-management", "tenants", tenantId, "administrators"] as const,
-  plans: ["tenant-management", "plans"] as const,
-  planList: (filters: object = {}) => ["tenant-management", "plans", "list", filters] as const,
-  planDetail: (planId: string) => ["tenant-management", "plans", "detail", planId] as const,
-  planLimits: (planId: string) => ["tenant-management", "plans", planId, "limits"] as const,
-  planBoundTenants: (planId: string) =>
-    ["tenant-management", "plans", planId, "bound-tenants"] as const,
-  planBindableTenants: (planId: string) =>
-    ["tenant-management", "plans", planId, "bindable-tenants"] as const,
-  planAudit: (planId: string) => ["tenant-management", "plans", planId, "audit"] as const,
-  quotaMeta: ["tenant-management", "quota-meta"] as const,
   administrators: ["tenant-management", "administrators"] as const,
   administratorList: (filters: object = {}) =>
     ["tenant-management", "administrators", "list", filters] as const,

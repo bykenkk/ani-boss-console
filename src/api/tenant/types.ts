@@ -1,5 +1,4 @@
 export type TenantStatus = "active" | "frozen" | "disabled";
-export type TenantPlanStatus = "draft" | "active" | "disabled";
 export type TenantAdministratorStatus = "active" | "disabled";
 export type TenantAdministratorSource = "local" | "third_party";
 export type TenantAdministratorRole = "tenant-admin" | "user" | "auditor";
@@ -118,72 +117,6 @@ export interface TenantAuditLogEntry {
   resource: string;
   result: "success" | "failure";
   userId: string | null;
-  details: Record<string, unknown> | null;
-  createdAt: string;
-}
-
-export interface TenantPlanListItem {
-  id: string;
-  code: string;
-  name: string;
-  description: string | null;
-  status: TenantPlanStatus;
-  tenantCount: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export type TenantPlanDetail = TenantPlanListItem;
-
-export interface TenantPlanListFilters {
-  status?: TenantPlanStatus;
-  search?: string;
-}
-
-export interface TenantQuotaMetaItem {
-  resourceType: string;
-  displayName: string;
-  unit: string;
-  defaultQuota: number;
-  isDiscrete: boolean;
-}
-
-export interface TenantPlanQuotaLimit {
-  resourceType: string;
-  displayName: string;
-  unit: string;
-  total: number;
-}
-
-export interface CreateTenantPlanInput {
-  code: string;
-  name: string;
-  description: string;
-  quotaLimits: Array<{ resourceType: string; total: number | null }>;
-}
-
-export interface UpdateTenantPlanInput {
-  planId: string;
-  name?: string;
-  description?: string;
-}
-
-export interface UpdateTenantPlanLimitsInput {
-  planId: string;
-  items: Array<{ resourceType: string; total: number | null }>;
-}
-
-export interface BoundTenant {
-  id: string;
-  name: string;
-  displayName: string;
-  status: TenantStatus;
-}
-
-export interface TenantPlanAuditLog {
-  id: string;
-  action: string;
-  result: "success" | "failure";
   details: Record<string, unknown> | null;
   createdAt: string;
 }

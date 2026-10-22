@@ -1,28 +1,28 @@
 import { useState } from "react";
 import { Select } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
-import { listManagementOptions, managementKeys } from "@/api/management";
+import { listPlanOptions, planKeys } from "@/api/plans";
 import { withId } from "@/lib/id";
 
-interface Props {
+interface PlanSelectProps {
   value?: number;
   onChange?: (value: number | undefined) => void;
   disabled?: boolean;
 }
 
-export function PlanSelect({ value, onChange, disabled }: Props) {
+export function PlanSelect({ value, onChange, disabled }: PlanSelectProps) {
   const [search, setSearch] = useState("");
-  const filters = { ...(search ? { name__contains: search } : {}) };
+  const input = { search };
   const query = useQuery({
-    queryKey: managementKeys.options("plans", filters),
-    queryFn: ({ signal }) => listManagementOptions("plans", filters, signal),
+    queryKey: planKeys.options(input),
+    queryFn: ({ signal }) => listPlanOptions(input, signal),
     meta: {
       errorNotification: { id: withId("management-options", "plans"), action: "关联选项加载" },
     },
   });
-  const options = (query.data ?? []).map((item) => ({
+  const options = (query.data?.items ?? []).map((item) => ({
     value: item.id,
-    label: `${item.name ?? item.code ?? item.id}`,
+    label: `${item.name ?? item.id}`,
   }));
 
   return (

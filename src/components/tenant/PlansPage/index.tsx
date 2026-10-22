@@ -1,20 +1,17 @@
-import { Button, Input, Modal, Space } from "@arco-design/web-react";
+import { Button, Input, Space } from "@arco-design/web-react";
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  deleteManagement,
-  listManagement,
-  managementKeys,
-  type ManagedPlan,
-} from "@/api/management";
+import { useQuery } from "@tanstack/react-query";
+import { listPlans, planKeys, type Plan } from "@/api/plans";
 import { ListDataTable, ListPageFrame, type ListColumn, type RowAction } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
 import { PlanEditModal } from "@/components/tenant/PlanEditModal";
 
-import { PlanQuotasModal } from "@/components/tenant/PlanQuotasModal";
+import { PlanQuotasDrawer } from "@/components/tenant/PlanQuotasDrawer";
+import { PlanDeleteModal } from "@/components/tenant/PlanDeleteModal";
+import { useListPagination } from "@/hooks/useListPagination";
 
-const columns: ListColumn<ManagedPlan>[] = [
+const columns: ListColumn<Plan>[] = [
   {
     key: "name",
     dataIndex: "name",
@@ -66,42 +63,18 @@ const columns: ListColumn<ManagedPlan>[] = [
 ];
 
 export function PlansPage() {
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20);
   const [search, setSearch] = useState("");
-
-  const [plan, setPlan] = useState<ManagedPlan>();
-  const [editing, setEditing] = useState<ManagedPlan | "create">();
-  const client = useQueryClient();
-  const input = {
-    page,
-    pageSize,
-    filters: {
-      ...(search ? { name__contains: search } : {}),
-    },
-  };
+  const { page, pageSize, setPage, setPageSize } = useListPagination(search);
+  const [plan, setPlan] = useState<Plan>();
+  const [deleting, setDeleting] = useState<Plan>();
+  const [editing, setEditing] = useState<Plan | "create">();
+  const input = { page, pageSize, search };
   const query = useQuery({
-    queryKey: managementKeys.list("plans", input),
-    queryFn: ({ signal }) => listManagement("plans", input, signal),
+    queryKey: planKeys.list(input),
+    queryFn: ({ signal }) => listPlans(input, signal),
     meta: { errorNotification: { id: withId("management-list", "plans"), action: "套餐管理加载" } },
   });
-  const refresh = () => client.invalidateQueries({ queryKey: managementKeys.all });
-  const removal = useMutation({
-    mutationFn: (id: number) => deleteManagement("plans", id),
-    meta: {
-      feedback: {
-        channel: "notification",
-        id: withId("management-delete", "plans"),
-        action: "删除套餐",
-      },
-    },
-    onSuccess: async () => {
-      if (query.data?.items.length === 1 && page > 1) setPage(page - 1);
-      await refresh();
-    },
-  });
-
-  const rowActions: RowAction<ManagedPlan>[] = [
+  const rowActions: RowAction<Plan>[] = [
     { key: "quotas", label: "配额", onClick: setPlan },
     { key: "edit", label: "编辑", onClick: setEditing },
 
@@ -109,14 +82,7 @@ export function PlansPage() {
       key: "delete",
       label: "删除",
       intent: "danger",
-      loading: (row) => removal.isPending && removal.variables === row.id,
-      onClick: (row) => {
-        Modal.confirm({
-          title: "删除套餐",
-          content: `确认删除“${row.name ?? row.id}”？关联配置可能受影响，此操作无法在页面撤销。`,
-          onOk: () => removal.mutateAsync(row.id),
-        });
-      },
+      onClick: setDeleting,
     },
   ];
   return (
@@ -150,7 +116,7 @@ export function PlansPage() {
             </Space>
           ),
 
-          refresh: { onClick: () => void query.refetch(), spinning: query.isFetching },
+          refresh: { onClick: () => query.refetch(), spinning: query.isFetching },
         }}
       >
         <ListDataTable
@@ -178,7 +144,17 @@ export function PlansPage() {
         />
       )}
 
-      {plan && <PlanQuotasModal plan={plan} onCancel={() => setPlan(undefined)} />}
+      {plan && <PlanQuotasDrawer plan={plan} onCancel={() => setPlan(undefined)} />}
+      {deleting && (
+        <PlanDeleteModal
+          plan={deleting}
+          onCancel={() => setDeleting(undefined)}
+          onSuccess={() => {
+            setDeleting(undefined);
+            if (query.data?.items?.length === 1 && page > 1) setPage(page - 1);
+          }}
+        />
+      )}
     </>
   );
 }

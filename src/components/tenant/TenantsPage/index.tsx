@@ -17,8 +17,7 @@ import {
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
 import { TenantEditModal } from "@/components/tenant/TenantEditModal";
-
-import { Link } from "@tanstack/react-router";
+import { TenantUsageModal } from "@/components/tenant/TenantUsageModal";
 
 const columns: ListColumn<ManagedTenant>[] = [
   {
@@ -142,6 +141,7 @@ export function TenantsPage() {
   const [status, setStatus] = useState<string>();
 
   const [editing, setEditing] = useState<ManagedTenant | "create">();
+  const [usageTenant, setUsageTenant] = useState<ManagedTenant>();
   const client = useQueryClient();
   const input = {
     page,
@@ -175,6 +175,7 @@ export function TenantsPage() {
   });
 
   const rowActions: RowAction<ManagedTenant>[] = [
+    { key: "usage", label: "用量与配额", onClick: setUsageTenant },
     { key: "edit", label: "编辑", onClick: setEditing },
 
     {
@@ -237,12 +238,6 @@ export function TenantsPage() {
               />
             </Space>
           ),
-          tools: (
-            <Link to="/tenants-quotas">
-              <Button>配额策略</Button>
-            </Link>
-          ),
-
           refresh: { onClick: () => void query.refetch(), spinning: query.isFetching },
         }}
       >
@@ -269,6 +264,9 @@ export function TenantsPage() {
           onCancel={() => setEditing(undefined)}
           onSuccess={() => setEditing(undefined)}
         />
+      )}
+      {usageTenant && (
+        <TenantUsageModal tenant={usageTenant} onCancel={() => setUsageTenant(undefined)} />
       )}
     </>
   );
