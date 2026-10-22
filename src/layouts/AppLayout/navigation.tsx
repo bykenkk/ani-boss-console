@@ -85,7 +85,9 @@ const meteringNavigation: readonly NavigationLeaf[] = [
 ];
 
 const auditNavigation: readonly NavigationLeaf[] = [
-  { label: "集群审计", to: "/audit", icon: <IconSafe /> },
+  { label: "登录审计", to: "/audit-login", icon: <IconUser /> },
+  { label: "API 审计", to: "/audit-api", icon: <IconLink /> },
+  { label: "操作审计", to: "/audit-operation", icon: <IconBook /> },
   { label: "API Key 审计", to: "/audit-api-keys", icon: <IconLock /> },
   { label: "推理调用审计", to: "/audit-inference", icon: <IconRobot /> },
   { label: "合规导出与取证", to: "/audit-export", icon: <IconExport /> },
@@ -136,7 +138,9 @@ const visibleAppRoutes = new Set<AppRoute>([
   "/logs",
   "/metering",
   "/tenant-usage-ranking",
-  "/audit",
+  "/audit-login",
+  "/audit-api",
+  "/audit-operation",
   "/platform-admins",
   "/platform-roles",
 ]);

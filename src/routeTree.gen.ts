@@ -14,9 +14,11 @@ import { Route as TenantsRouteImport } from './routes/tenants'
 import { Route as AlertRulesIndexRouteImport } from './routes/alert-rules/index'
 import { Route as ApisIndexRouteImport } from './routes/apis/index'
 import { Route as AuditApiKeysIndexRouteImport } from './routes/audit-api-keys/index'
+import { Route as AuditApiIndexRouteImport } from './routes/audit-api/index'
 import { Route as AuditExportIndexRouteImport } from './routes/audit-export/index'
 import { Route as AuditInferenceIndexRouteImport } from './routes/audit-inference/index'
-import { Route as AuditIndexRouteImport } from './routes/audit/index'
+import { Route as AuditLoginIndexRouteImport } from './routes/audit-login/index'
+import { Route as AuditOperationIndexRouteImport } from './routes/audit-operation/index'
 import { Route as ComputePresetsIndexRouteImport } from './routes/compute-presets/index'
 import { Route as GpuClustersIndexRouteImport } from './routes/gpu-clusters/index'
 import { Route as GpuQuotasIndexRouteImport } from './routes/gpu-quotas/index'
@@ -90,6 +92,11 @@ const AuditApiKeysIndexRoute = AuditApiKeysIndexRouteImport.update({
   path: '/audit-api-keys/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuditApiIndexRoute = AuditApiIndexRouteImport.update({
+  id: '/audit-api/',
+  path: '/audit-api/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuditExportIndexRoute = AuditExportIndexRouteImport.update({
   id: '/audit-export/',
   path: '/audit-export/',
@@ -100,9 +107,14 @@ const AuditInferenceIndexRoute = AuditInferenceIndexRouteImport.update({
   path: '/audit-inference/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuditIndexRoute = AuditIndexRouteImport.update({
-  id: '/audit/',
-  path: '/audit/',
+const AuditLoginIndexRoute = AuditLoginIndexRouteImport.update({
+  id: '/audit-login/',
+  path: '/audit-login/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuditOperationIndexRoute = AuditOperationIndexRouteImport.update({
+  id: '/audit-operation/',
+  path: '/audit-operation/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComputePresetsIndexRoute = ComputePresetsIndexRouteImport.update({
@@ -353,9 +365,11 @@ export interface FileRoutesByFullPath {
   '/alert-rules/': typeof AlertRulesIndexRoute
   '/apis/': typeof ApisIndexRoute
   '/audit-api-keys/': typeof AuditApiKeysIndexRoute
+  '/audit-api/': typeof AuditApiIndexRoute
   '/audit-export/': typeof AuditExportIndexRoute
   '/audit-inference/': typeof AuditInferenceIndexRoute
-  '/audit/': typeof AuditIndexRoute
+  '/audit-login/': typeof AuditLoginIndexRoute
+  '/audit-operation/': typeof AuditOperationIndexRoute
   '/compute-presets/': typeof ComputePresetsIndexRoute
   '/gpu-clusters/': typeof GpuClustersIndexRoute
   '/gpu-quotas/': typeof GpuQuotasIndexRoute
@@ -409,9 +423,11 @@ export interface FileRoutesByTo {
   '/alert-rules': typeof AlertRulesIndexRoute
   '/apis': typeof ApisIndexRoute
   '/audit-api-keys': typeof AuditApiKeysIndexRoute
+  '/audit-api': typeof AuditApiIndexRoute
   '/audit-export': typeof AuditExportIndexRoute
   '/audit-inference': typeof AuditInferenceIndexRoute
-  '/audit': typeof AuditIndexRoute
+  '/audit-login': typeof AuditLoginIndexRoute
+  '/audit-operation': typeof AuditOperationIndexRoute
   '/compute-presets': typeof ComputePresetsIndexRoute
   '/gpu-clusters': typeof GpuClustersIndexRoute
   '/gpu-quotas': typeof GpuQuotasIndexRoute
@@ -467,9 +483,11 @@ export interface FileRoutesById {
   '/alert-rules/': typeof AlertRulesIndexRoute
   '/apis/': typeof ApisIndexRoute
   '/audit-api-keys/': typeof AuditApiKeysIndexRoute
+  '/audit-api/': typeof AuditApiIndexRoute
   '/audit-export/': typeof AuditExportIndexRoute
   '/audit-inference/': typeof AuditInferenceIndexRoute
-  '/audit/': typeof AuditIndexRoute
+  '/audit-login/': typeof AuditLoginIndexRoute
+  '/audit-operation/': typeof AuditOperationIndexRoute
   '/compute-presets/': typeof ComputePresetsIndexRoute
   '/gpu-clusters/': typeof GpuClustersIndexRoute
   '/gpu-quotas/': typeof GpuQuotasIndexRoute
@@ -526,9 +544,11 @@ export interface FileRouteTypes {
     | '/alert-rules/'
     | '/apis/'
     | '/audit-api-keys/'
+    | '/audit-api/'
     | '/audit-export/'
     | '/audit-inference/'
-    | '/audit/'
+    | '/audit-login/'
+    | '/audit-operation/'
     | '/compute-presets/'
     | '/gpu-clusters/'
     | '/gpu-quotas/'
@@ -582,9 +602,11 @@ export interface FileRouteTypes {
     | '/alert-rules'
     | '/apis'
     | '/audit-api-keys'
+    | '/audit-api'
     | '/audit-export'
     | '/audit-inference'
-    | '/audit'
+    | '/audit-login'
+    | '/audit-operation'
     | '/compute-presets'
     | '/gpu-clusters'
     | '/gpu-quotas'
@@ -639,9 +661,11 @@ export interface FileRouteTypes {
     | '/alert-rules/'
     | '/apis/'
     | '/audit-api-keys/'
+    | '/audit-api/'
     | '/audit-export/'
     | '/audit-inference/'
-    | '/audit/'
+    | '/audit-login/'
+    | '/audit-operation/'
     | '/compute-presets/'
     | '/gpu-clusters/'
     | '/gpu-quotas/'
@@ -696,9 +720,11 @@ export interface RootRouteChildren {
   AlertRulesIndexRoute: typeof AlertRulesIndexRoute
   ApisIndexRoute: typeof ApisIndexRoute
   AuditApiKeysIndexRoute: typeof AuditApiKeysIndexRoute
+  AuditApiIndexRoute: typeof AuditApiIndexRoute
   AuditExportIndexRoute: typeof AuditExportIndexRoute
   AuditInferenceIndexRoute: typeof AuditInferenceIndexRoute
-  AuditIndexRoute: typeof AuditIndexRoute
+  AuditLoginIndexRoute: typeof AuditLoginIndexRoute
+  AuditOperationIndexRoute: typeof AuditOperationIndexRoute
   ComputePresetsIndexRoute: typeof ComputePresetsIndexRoute
   GpuClustersIndexRoute: typeof GpuClustersIndexRoute
   GpuQuotasIndexRoute: typeof GpuQuotasIndexRoute
@@ -779,6 +805,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuditApiKeysIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/audit-api/': {
+      id: '/audit-api/'
+      path: '/audit-api'
+      fullPath: '/audit-api/'
+      preLoaderRoute: typeof AuditApiIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/audit-export/': {
       id: '/audit-export/'
       path: '/audit-export'
@@ -793,11 +826,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuditInferenceIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/audit/': {
-      id: '/audit/'
-      path: '/audit'
-      fullPath: '/audit/'
-      preLoaderRoute: typeof AuditIndexRouteImport
+    '/audit-login/': {
+      id: '/audit-login/'
+      path: '/audit-login'
+      fullPath: '/audit-login/'
+      preLoaderRoute: typeof AuditLoginIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/audit-operation/': {
+      id: '/audit-operation/'
+      path: '/audit-operation'
+      fullPath: '/audit-operation/'
+      preLoaderRoute: typeof AuditOperationIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/compute-presets/': {
@@ -1155,9 +1195,11 @@ const rootRouteChildren: RootRouteChildren = {
   AlertRulesIndexRoute: AlertRulesIndexRoute,
   ApisIndexRoute: ApisIndexRoute,
   AuditApiKeysIndexRoute: AuditApiKeysIndexRoute,
+  AuditApiIndexRoute: AuditApiIndexRoute,
   AuditExportIndexRoute: AuditExportIndexRoute,
   AuditInferenceIndexRoute: AuditInferenceIndexRoute,
-  AuditIndexRoute: AuditIndexRoute,
+  AuditLoginIndexRoute: AuditLoginIndexRoute,
+  AuditOperationIndexRoute: AuditOperationIndexRoute,
   ComputePresetsIndexRoute: ComputePresetsIndexRoute,
   GpuClustersIndexRoute: GpuClustersIndexRoute,
   GpuQuotasIndexRoute: GpuQuotasIndexRoute,

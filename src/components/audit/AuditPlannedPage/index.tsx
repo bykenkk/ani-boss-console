@@ -16,8 +16,8 @@ export function AuditPlannedPage({ description, title }: AuditPlannedPageProps) 
         <div className="flex min-h-[360px] flex-col items-center justify-center gap-3 text-center">
           <Empty description="本期暂未开放" />
           <Typography.Text type="secondary">{description}</Typography.Text>
-          <Button type="primary" onClick={() => void navigate({ to: "/audit" })}>
-            返回平台审计日志
+          <Button type="primary" onClick={() => void navigate({ to: "/audit-operation" })}>
+            返回操作审计
           </Button>
         </div>
       </Card>
