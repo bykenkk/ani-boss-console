@@ -55,7 +55,9 @@ export function PlatformAdministratorPasswordModal({
       onOk={async () => mutation.mutate(await validateForm(form))}
     >
       <Form form={form} layout="vertical">
-        <PlatformAdministratorPasswordFields form={form} />
+        <PlatformAdministratorPasswordFields
+          getPassword={() => form.getFieldValue("newPassword")}
+        />
       </Form>
     </Modal>
   );

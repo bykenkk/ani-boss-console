@@ -92,7 +92,10 @@ export function PlatformAdministratorCreateModal({
           <Input />
         </Form.Item>
         <PlatformAdministratorRoleFields />
-        <PlatformAdministratorPasswordFields form={form} creating />
+        <PlatformAdministratorPasswordFields
+          getPassword={() => form.getFieldValue("password")}
+          creating
+        />
       </Form>
     </Modal>
   );

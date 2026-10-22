@@ -18,7 +18,10 @@ export function TenantPlanLimitFields({ limits }: TenantPlanLimitFieldsProps) {
             {
               validator: (value, callback) =>
                 callback(
-                  !Number.isFinite(value) || value < 0 || !Number.isInteger(value)
+                  typeof value !== "number" ||
+                    !Number.isFinite(value) ||
+                    value < 0 ||
+                    !Number.isInteger(value)
                     ? "请输入有效的非负整数"
                     : undefined,
                 ),

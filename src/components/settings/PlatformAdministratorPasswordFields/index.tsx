@@ -1,11 +1,11 @@
 import { Form, Input } from "@arco-design/web-react";
-import type { FormInstance } from "@arco-design/web-react";
+
 interface PlatformAdministratorPasswordFieldsProps {
-  form: FormInstance;
+  getPassword: () => string | undefined;
   creating?: boolean;
 }
 export function PlatformAdministratorPasswordFields({
-  form,
+  getPassword,
   creating = false,
 }: PlatformAdministratorPasswordFieldsProps) {
   const field = creating ? "password" : "newPassword";
@@ -39,7 +39,7 @@ export function PlatformAdministratorPasswordFields({
           { required: true, message: "请再次输入密码" },
           {
             validator: (value, callback) =>
-              callback(value === form.getFieldValue(field) ? undefined : "两次密码不一致"),
+              callback(value === getPassword() ? undefined : "两次密码不一致"),
           },
         ]}
       >
