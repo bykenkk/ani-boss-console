@@ -1,13 +1,11 @@
 import { Button, Input, Select } from "@arco-design/web-react";
 import { useState } from "react";
 import { ListDataTable, ResourceNameId, type ListColumn } from "@/components/common";
-import type { TenantListItem } from "@/api/tenant";
 import { formatUsage, type MeteringTenantRow } from "@/lib/metering";
 import { UsageChange, UsageShare } from "../../MeteringPresentation";
 import styles from "../../MeteringPresentation/index.module.less";
 interface MeteringTenantTableProps {
   rows: MeteringTenantRow[];
-  tenants: TenantListItem[];
   metricLabel: string;
   unit: string;
   periodLabel: string;
@@ -17,7 +15,6 @@ interface MeteringTenantTableProps {
 }
 export function MeteringTenantTable({
   rows,
-  tenants,
   metricLabel,
   unit,
   periodLabel,
@@ -29,14 +26,13 @@ export function MeteringTenantTable({
   const [order, setOrder] = useState("desc");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const names = new Map(tenants.map((tenant) => [tenant.id, tenant.displayName || tenant.name]));
   const total = rows.reduce((sum, row) => sum + row.current, 0);
   const rankedRows = [...rows]
     .filter((row) => row.current > 0 || row.previous > 0)
     .sort((left, right) => right.current - left.current)
     .map((row, index) => ({ ...row, rank: index + 1 }));
   const filtered = rankedRows.filter((row) =>
-    `${row.id} ${names.get(row.id) || ""}`.toLowerCase().includes(keyword.trim().toLowerCase()),
+    row.id.toLowerCase().includes(keyword.trim().toLowerCase()),
   );
   if (order === "asc") filtered.reverse();
   const columns: ListColumn<(typeof rankedRows)[number]>[] = [
@@ -48,13 +44,7 @@ export function MeteringTenantTable({
     {
       title: "租户",
       width: 200,
-      render: (_, row) => (
-        <ResourceNameId
-          name={names.get(row.id) || row.id}
-          id={row.id}
-          avatarText={names.get(row.id) || row.id}
-        />
-      ),
+      render: (_, row) => <ResourceNameId name={row.id} id={row.id} avatarText={row.id} />,
     },
     {
       title: `${periodLabel}用量`,
@@ -119,14 +109,14 @@ export function MeteringTenantTable({
                 ]}
               />
               <Input.Search
-                aria-label="搜索租户"
+                aria-label="搜索租户 ID"
                 allowClear
                 value={keyword}
                 onChange={(value) => {
                   setKeyword(value);
                   setPage(1);
                 }}
-                placeholder="搜索租户名称 / ID"
+                placeholder="搜索租户 ID"
               />
             </div>
           ),

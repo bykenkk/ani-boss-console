@@ -1,5 +1,4 @@
 import {
-  addDays,
   addMilliseconds,
   compareDesc,
   differenceInMilliseconds,
@@ -109,10 +108,6 @@ export function formatCurrentDateTime() {
   return formatDateTimeMinute(new Date());
 }
 
-export function formatCurrentDate() {
-  return formatDate(new Date());
-}
-
 export function formatCurrentMonth() {
   return formatValue(new Date(), "yyyy-MM", "-");
 }
@@ -123,28 +118,6 @@ export function formatShortYearMonth(value: DateValue, fallback = "-") {
 
 export function getCurrentTimestamp() {
   return getTime(new Date());
-}
-
-export function hasElapsed(
-  value: DateValue,
-  durationMs: number,
-  reference: DateValue = new Date(),
-) {
-  const start = toDate(value);
-  const end = toDate(reference);
-  if (!isValid(start) || !isValid(end)) return false;
-  return differenceInMilliseconds(end, start) >= durationMs;
-}
-
-export function addDaysToFutureDateTime(
-  value: DateValue,
-  days: number,
-  reference: DateValue = new Date(),
-) {
-  const candidate = toDate(value);
-  const current = toDate(reference);
-  const start = isValid(candidate) && !isBefore(candidate, current) ? candidate : current;
-  return formatDateTimeMinute(addDays(start, days));
 }
 
 export function compareDateValuesDesc(left: DateValue, right: DateValue) {

@@ -98,10 +98,8 @@ export async function saveManagement(
   );
 }
 export async function deleteManagement(resource: Resource, id: number): Promise<void> {
-  const queryId = resource === "plans" || resource === "plan-quotas";
-  await adminRequest(`/${resource}${queryId ? "" : `/${id}`}`, {
+  await adminRequest(`/${resource}/${id}`, {
     method: "DELETE",
-    params: queryId ? { id } : undefined,
   });
 }
 export async function createTenantWithAdministrator(
@@ -124,15 +122,4 @@ export async function resetManagementPassword(userId: number, password: string):
 }
 export async function syncManagementApis(): Promise<void> {
   await adminRequest("/apis/sync", { method: "POST" });
-}
-export interface TenantUsage {
-  tenantId?: number;
-  userCount?: string;
-  storageUsedBytes?: string;
-  apiCallCount?: string;
-  planName?: string;
-  quotas?: Array<{ quotaCode?: string; quotaType?: string; quotaValue?: string }>;
-}
-export function getManagedTenantUsage(id: number, signal?: AbortSignal): Promise<TenantUsage> {
-  return adminRequest(`/tenants/${id}/usage`, { method: "GET", signal });
 }

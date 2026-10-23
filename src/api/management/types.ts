@@ -1,12 +1,4 @@
-export type Resource =
-  | "tenants"
-  | "plans"
-  | "plan-quotas"
-  | "users"
-  | "roles"
-  | "permissions"
-  | "permission-groups"
-  | "apis";
+export type Resource = "tenants" | "users" | "roles" | "permissions" | "permission-groups" | "apis";
 export type EnabledStatus = "ON" | "OFF";
 export interface ManagementRecord {
   id: number;
@@ -30,18 +22,6 @@ export interface ManagedTenant extends ManagementRecord {
   subscriptionPlan?: string;
   memberCount?: number;
   auditStatus?: "PENDING" | "APPROVED" | "REJECTED";
-}
-export interface ManagedPlan extends ManagementRecord {
-  version?: "FREE" | "STANDARD" | "ENTERPRISE";
-  expiryPolicy?: "READONLY" | "BLOCK_LOGIN" | "FREEZE";
-  dataRetentionDays?: number;
-  remark?: string;
-}
-export interface ManagedPlanQuota extends ManagementRecord {
-  planId: number;
-  quotaCode: string;
-  quotaValue: string;
-  quotaType?: string;
 }
 export interface ManagedUser extends ManagementRecord {
   tenantId?: number;
@@ -93,8 +73,6 @@ export interface ManagedApi extends ManagementRecord {
 }
 export interface ResourceRecords {
   tenants: ManagedTenant;
-  plans: ManagedPlan;
-  "plan-quotas": ManagedPlanQuota;
   users: ManagedUser;
   roles: ManagedRole;
   permissions: ManagedPermission;

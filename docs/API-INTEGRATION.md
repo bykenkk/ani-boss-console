@@ -150,7 +150,7 @@ GitNexus 使用方式遵循 [AGENTS.md](../AGENTS.md#gitnexus)。
 
 - `src/hooks/useListPagination.ts` 用于正式 `page/pageSize` 接口，复用 `src/api/types.ts` 的 `PageParams`；筛选 scope 改变、修改每页条数或主动重置时回到第一页。表格总数直接取对应响应的 `total`，不通过游标预取模拟跳页。
 - `src/hooks/useCursorPagination.ts` 仅供尚未迁移至页码分页的 `cursor/limit` 或 `page_size/page_token` 接口过渡使用，保存已访问游标并提供公共表格的 `legacy-cursor` 配置。调用方按原契约映射字段，筛选 scope 和每页条数改变时清空游标链；每次只查询当前页，不显示总数、总页数或任意跳页。
-- 分页标记按[迁移标记与保留边界](#迁移标记与保留边界)选择 `TODO(pagination-migration)` 或 `FIXME(pagination-migration)`，说明当前分页契约、需要修正的问题或后续迁移条件。后端完成正式页码契约后，调用方改用 `PageParams` 与 `useListPagination`，使用真实 `items/total`；所有过渡调用迁完后，再移除游标 Hook、`CursorPageParams` 和表格 `legacy-cursor` 模式。不能仅改前端参数名称宣称迁移完成。
+- 分页标记按[迁移标记与保留边界](#迁移标记与保留边界)选择 `TODO(pagination-migration)` 或 `FIXME(pagination-migration)`，说明当前分页契约、需要修正的问题或后续迁移条件。后端完成正式页码契约后，调用方改用 `PageParams` 与 `useListPagination`，使用真实 `items/total`；所有过渡调用迁完后，再移除游标 Hook 和表格 `legacy-cursor` 模式。不能仅改前端参数名称宣称迁移完成。
 
 ## 页面接入
 

@@ -15,7 +15,6 @@ import { meteringDimensions, type MeteringDimension } from "../model";
 import { MeteringTenantTable } from "./MeteringTenantTable";
 import { TenantMeteringDrawer } from "./TenantMeteringDrawer";
 
-import { fetchTenants, tenantManagementQueryKeys } from "@/api/tenant";
 import styles from "../MeteringPresentation/index.module.less";
 
 function sumTenantItems(items: PlatformMeteringUsageItem[]) {
@@ -28,20 +27,7 @@ function sumTenantItems(items: PlatformMeteringUsageItem[]) {
 }
 
 export function TenantUsageRankingPage() {
-  const tenantsQuery = useQuery({
-    queryKey: [...tenantManagementQueryKeys.tenantList(), "options", { limit: 100 }],
-    // TODO(options-pagination): 租户名称暂取 ANI 首 100 项；服务端支持按计量租户 ID 查询后替换，未加载名称的记录继续展示 ID。
-    queryFn: ({ signal }) => fetchTenants({}, { limit: 100 }, signal),
-    select: (response) => response.items,
-    staleTime: 60_000,
-    meta: {
-      errorNotification: {
-        id: "metering-tenant-names",
-        action: "租户名称加载",
-        fallback: "请求失败，请稍后重试",
-      },
-    },
-  });
+  // TODO(tenant-name-integration): 已移除 ANI 租户名称查询，当前仅按计量租户 ID 展示和搜索；待对应的名称查询契约明确后接入，恢复名称展示与搜索。
   const [period, setPeriod] = useState<MeteringPeriod>("month");
   const periodLabel =
     period === "month" ? "本月" : period === "recent-seven-days" ? "近7日" : "上月";
@@ -155,13 +141,7 @@ export function TenantUsageRankingPage() {
             <Button
               icon={<IconRefresh />}
               loading={currentQuery.isFetching || previousQuery.isFetching}
-              onClick={() =>
-                void Promise.all([
-                  currentQuery.refetch(),
-                  previousQuery.refetch(),
-                  tenantsQuery.refetch(),
-                ])
-              }
+              onClick={() => Promise.all([currentQuery.refetch(), previousQuery.refetch()])}
             >
               刷新
             </Button>
@@ -181,7 +161,6 @@ export function TenantUsageRankingPage() {
 
       <MeteringTenantTable
         key={dimension + period}
-        tenants={tenantsQuery.data || []}
         periodLabel={periodLabel}
         previousLabel={previousLabel}
         rows={rows}

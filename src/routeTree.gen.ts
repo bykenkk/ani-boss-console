@@ -45,7 +45,6 @@ import { Route as OverviewKbIndexRouteImport } from './routes/overview-kb/index'
 import { Route as PermissionGroupsIndexRouteImport } from './routes/permission-groups/index'
 import { Route as PermissionsIndexRouteImport } from './routes/permissions/index'
 import { Route as PlatformAdminsIndexRouteImport } from './routes/platform-admins/index'
-import { Route as PlatformAdminsUserIdRouteImport } from './routes/platform-admins/$userId'
 import { Route as PlatformRolesIndexRouteImport } from './routes/platform-roles/index'
 import { Route as PoolIndexRouteImport } from './routes/pool/index'
 import { Route as RegistryGcIndexRouteImport } from './routes/registry-gc/index'
@@ -58,11 +57,9 @@ import { Route as StorageIndexRouteImport } from './routes/storage/index'
 import { Route as TenantPlansIndexRouteImport } from './routes/tenant-plans/index'
 import { Route as TenantUsageRankingIndexRouteImport } from './routes/tenant-usage-ranking/index'
 import { Route as TenantsAdminsIndexRouteImport } from './routes/tenants-admins/index'
-import { Route as TenantsAdminsAdminIdRouteImport } from './routes/tenants-admins/$adminId'
 import { Route as TenantsBillingIndexRouteImport } from './routes/tenants-billing/index'
 import { Route as TenantsBillingTenantIdRouteImport } from './routes/tenants-billing/$tenantId'
 import { Route as TenantsIndexRouteImport } from './routes/tenants/index'
-import { Route as TenantsTenantIdRouteImport } from './routes/tenants/$tenantId'
 import { Route as TracesIndexRouteImport } from './routes/traces/index'
 import { Route as WebhookIndexRouteImport } from './routes/webhook/index'
 
@@ -247,11 +244,6 @@ const PlatformAdminsIndexRoute = PlatformAdminsIndexRouteImport.update({
   path: '/platform-admins/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PlatformAdminsUserIdRoute = PlatformAdminsUserIdRouteImport.update({
-  id: '/platform-admins/$userId',
-  path: '/platform-admins/$userId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PlatformRolesIndexRoute = PlatformRolesIndexRouteImport.update({
   id: '/platform-roles/',
   path: '/platform-roles/',
@@ -313,11 +305,6 @@ const TenantsAdminsIndexRoute = TenantsAdminsIndexRouteImport.update({
   path: '/tenants-admins/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TenantsAdminsAdminIdRoute = TenantsAdminsAdminIdRouteImport.update({
-  id: '/tenants-admins/$adminId',
-  path: '/tenants-admins/$adminId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const TenantsBillingIndexRoute = TenantsBillingIndexRouteImport.update({
   id: '/tenants-billing/',
   path: '/tenants-billing/',
@@ -331,11 +318,6 @@ const TenantsBillingTenantIdRoute = TenantsBillingTenantIdRouteImport.update({
 const TenantsIndexRoute = TenantsIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => TenantsRoute,
-} as any)
-const TenantsTenantIdRoute = TenantsTenantIdRouteImport.update({
-  id: '/$tenantId',
-  path: '/$tenantId',
   getParentRoute: () => TenantsRoute,
 } as any)
 const TracesIndexRoute = TracesIndexRouteImport.update({
@@ -352,10 +334,7 @@ const WebhookIndexRoute = WebhookIndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/tenants': typeof TenantsRouteWithChildren
-  '/platform-admins/$userId': typeof PlatformAdminsUserIdRoute
-  '/tenants-admins/$adminId': typeof TenantsAdminsAdminIdRoute
   '/tenants-billing/$tenantId': typeof TenantsBillingTenantIdRoute
-  '/tenants/$tenantId': typeof TenantsTenantIdRoute
   '/alert-rules/': typeof AlertRulesIndexRoute
   '/apis/': typeof ApisIndexRoute
   '/audit-api-keys/': typeof AuditApiKeysIndexRoute
@@ -409,10 +388,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/platform-admins/$userId': typeof PlatformAdminsUserIdRoute
-  '/tenants-admins/$adminId': typeof TenantsAdminsAdminIdRoute
   '/tenants-billing/$tenantId': typeof TenantsBillingTenantIdRoute
-  '/tenants/$tenantId': typeof TenantsTenantIdRoute
   '/alert-rules': typeof AlertRulesIndexRoute
   '/apis': typeof ApisIndexRoute
   '/audit-api-keys': typeof AuditApiKeysIndexRoute
@@ -468,10 +444,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/tenants': typeof TenantsRouteWithChildren
-  '/platform-admins/$userId': typeof PlatformAdminsUserIdRoute
-  '/tenants-admins/$adminId': typeof TenantsAdminsAdminIdRoute
   '/tenants-billing/$tenantId': typeof TenantsBillingTenantIdRoute
-  '/tenants/$tenantId': typeof TenantsTenantIdRoute
   '/alert-rules/': typeof AlertRulesIndexRoute
   '/apis/': typeof ApisIndexRoute
   '/audit-api-keys/': typeof AuditApiKeysIndexRoute
@@ -528,10 +501,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/tenants'
-    | '/platform-admins/$userId'
-    | '/tenants-admins/$adminId'
     | '/tenants-billing/$tenantId'
-    | '/tenants/$tenantId'
     | '/alert-rules/'
     | '/apis/'
     | '/audit-api-keys/'
@@ -585,10 +555,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/platform-admins/$userId'
-    | '/tenants-admins/$adminId'
     | '/tenants-billing/$tenantId'
-    | '/tenants/$tenantId'
     | '/alert-rules'
     | '/apis'
     | '/audit-api-keys'
@@ -643,10 +610,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/tenants'
-    | '/platform-admins/$userId'
-    | '/tenants-admins/$adminId'
     | '/tenants-billing/$tenantId'
-    | '/tenants/$tenantId'
     | '/alert-rules/'
     | '/apis/'
     | '/audit-api-keys/'
@@ -702,8 +666,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   TenantsRoute: typeof TenantsRouteWithChildren
-  PlatformAdminsUserIdRoute: typeof PlatformAdminsUserIdRoute
-  TenantsAdminsAdminIdRoute: typeof TenantsAdminsAdminIdRoute
   TenantsBillingTenantIdRoute: typeof TenantsBillingTenantIdRoute
   AlertRulesIndexRoute: typeof AlertRulesIndexRoute
   ApisIndexRoute: typeof ApisIndexRoute
@@ -1010,13 +972,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlatformAdminsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/platform-admins/$userId': {
-      id: '/platform-admins/$userId'
-      path: '/platform-admins/$userId'
-      fullPath: '/platform-admins/$userId'
-      preLoaderRoute: typeof PlatformAdminsUserIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/platform-roles/': {
       id: '/platform-roles/'
       path: '/platform-roles'
@@ -1101,13 +1056,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TenantsAdminsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tenants-admins/$adminId': {
-      id: '/tenants-admins/$adminId'
-      path: '/tenants-admins/$adminId'
-      fullPath: '/tenants-admins/$adminId'
-      preLoaderRoute: typeof TenantsAdminsAdminIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/tenants-billing/': {
       id: '/tenants-billing/'
       path: '/tenants-billing'
@@ -1129,13 +1077,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TenantsIndexRouteImport
       parentRoute: typeof TenantsRoute
     }
-    '/tenants/$tenantId': {
-      id: '/tenants/$tenantId'
-      path: '/$tenantId'
-      fullPath: '/tenants/$tenantId'
-      preLoaderRoute: typeof TenantsTenantIdRouteImport
-      parentRoute: typeof TenantsRoute
-    }
     '/traces/': {
       id: '/traces/'
       path: '/traces'
@@ -1154,12 +1095,10 @@ declare module '@tanstack/react-router' {
 }
 
 interface TenantsRouteChildren {
-  TenantsTenantIdRoute: typeof TenantsTenantIdRoute
   TenantsIndexRoute: typeof TenantsIndexRoute
 }
 
 const TenantsRouteChildren: TenantsRouteChildren = {
-  TenantsTenantIdRoute: TenantsTenantIdRoute,
   TenantsIndexRoute: TenantsIndexRoute,
 }
 
@@ -1169,8 +1108,6 @@ const TenantsRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   TenantsRoute: TenantsRouteWithChildren,
-  PlatformAdminsUserIdRoute: PlatformAdminsUserIdRoute,
-  TenantsAdminsAdminIdRoute: TenantsAdminsAdminIdRoute,
   TenantsBillingTenantIdRoute: TenantsBillingTenantIdRoute,
   AlertRulesIndexRoute: AlertRulesIndexRoute,
   ApisIndexRoute: ApisIndexRoute,
