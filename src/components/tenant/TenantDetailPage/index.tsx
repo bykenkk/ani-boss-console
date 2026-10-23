@@ -20,7 +20,6 @@ import {
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
 import { TenantProfileModal } from "@/components/tenant/TenantProfileModal";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { TenantAuditRecords } from "./TenantAuditRecords";
 // import { TenantIdentitySettings } from "./TenantIdentitySettings";
 import { TenantLifecycleRecords } from "./TenantLifecycleRecords";
@@ -48,7 +47,6 @@ async function runTenantOperation<T>(operation: () => Promise<T>): Promise<T> {
 export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { canManage } = useCurrentUser();
   const [profileVisible, setProfileVisible] = useState(false);
   const detailQuery = useQuery({
     meta: {
@@ -168,13 +166,13 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
     {
       key: "identity",
       title: "认证与安全",
-      content: <TenantIdentitySettings tenantId={tenant.id} canManage={canManage("tenants")} />,
+      content: <TenantIdentitySettings tenantId={tenant.id} />,
     },
     */
     {
       key: "quota",
       title: "配额",
-      content: <TenantQuotaManagement tenantId={tenant.id} canManage={canManage("tenants")} />,
+      content: <TenantQuotaManagement tenantId={tenant.id} />,
     },
     {
       key: "administrators",
@@ -184,7 +182,6 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
           tenantId={tenant.id}
           tenantName={tenant.name}
           tenantDisplayName={tenant.displayName}
-          canManage={canManage("tenants")}
         />
       ),
     },
@@ -220,11 +217,7 @@ export function TenantDetailPage({ tenantId }: TenantDetailPageProps) {
         ]}
         actions={
           <Tooltip content="更多操作">
-            <Dropdown
-              trigger="click"
-              droplist={moreMenu}
-              disabled={!canManage("tenants") || operationPending}
-            >
+            <Dropdown trigger="click" droplist={moreMenu} disabled={operationPending}>
               <Button icon={<IconMoreVertical />} aria-label="更多操作" title="更多操作" />
             </Dropdown>
           </Tooltip>

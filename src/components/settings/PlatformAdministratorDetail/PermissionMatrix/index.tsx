@@ -62,15 +62,12 @@ const accessPresentation = {
   deny: { className: "text-gray-400", label: "✗" },
 } as const;
 
-export function PermissionMatrix({
-  currentRole,
-  canManage,
-  onChangeRole,
-}: {
+interface PermissionMatrixProps {
   currentRole: PlatformAdministratorRole;
-  canManage: boolean;
   onChangeRole: () => void;
-}) {
+}
+
+export function PermissionMatrix({ currentRole, onChangeRole }: PermissionMatrixProps) {
   return (
     <div className="space-y-4 py-2">
       <Alert
@@ -84,9 +81,7 @@ export function PermissionMatrix({
             当前角色：{platformAdministratorRoleLabels[currentRole]}
           </div>
         </div>
-        <Button disabled={!canManage} onClick={onChangeRole}>
-          修改角色
-        </Button>
+        <Button onClick={onChangeRole}>修改角色</Button>
       </div>
       <div className="space-y-2">
         {permissionRows.map((row) => (

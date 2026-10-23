@@ -1,13 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { currentUserQueryKey, fetchCurrentUser } from "@/api/auth";
-import { hasAnyRole } from "@/lib/access";
 import { useStore } from "zustand";
 import { authStore } from "@/stores/auth";
-
-const managementRoles = {
-  tenants: ["platform-admin", "platform-ops"],
-  platformAdministrators: ["platform-admin"],
-} as const;
 
 export function useCurrentUser() {
   const isAuthenticated = useStore(authStore, (state) => Boolean(state.tokens?.access_token));
@@ -34,7 +28,5 @@ export function useCurrentUser() {
     isError: query.isError,
     error: query.error,
     refetch: query.refetch,
-    canManage: (scope: keyof typeof managementRoles): boolean =>
-      hasAnyRole(user?.roles, managementRoles[scope]),
   };
 }

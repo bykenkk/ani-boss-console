@@ -16,7 +16,6 @@ interface TenantAdministratorRoleProps {
   administratorId: string;
   currentRole: TenantAdministratorRoleName;
   isInviting: boolean;
-  canManage: boolean;
 }
 
 export function TenantAdministratorRole({
@@ -24,7 +23,6 @@ export function TenantAdministratorRole({
   administratorId,
   currentRole,
   isInviting,
-  canManage,
 }: TenantAdministratorRoleProps) {
   const [modalVisible, setModalVisible] = useState(false);
   const rolesQuery = useQuery({
@@ -46,7 +44,7 @@ export function TenantAdministratorRole({
           当前角色：
           <Tag>{tenantAdministratorRoleLabels[currentRole]}</Tag>
         </div>
-        <Button disabled={!canManage || isInviting} onClick={() => setModalVisible(true)}>
+        <Button disabled={isInviting} onClick={() => setModalVisible(true)}>
           修改角色
         </Button>
       </div>

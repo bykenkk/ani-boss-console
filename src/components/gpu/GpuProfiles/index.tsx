@@ -17,7 +17,6 @@ import {
 } from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { withId } from "@/lib/id";
-import type { GpuAccess } from "../GpuResourcesPage/types";
 import { GpuCapacityModal } from "../GpuCapacityModal";
 const columns: ListColumn<GpuProfile>[] = [
   { title: "规格名称", dataIndex: "display_name", width: 200, ellipsis: true },
@@ -77,7 +76,11 @@ const columns: ListColumn<GpuProfile>[] = [
   },
   { title: "修订号", dataIndex: "revision", width: 100, ellipsis: true },
 ];
-export function GpuProfiles({ clusterId, access }: { clusterId: string; access: GpuAccess }) {
+interface GpuProfilesProps {
+  clusterId: string;
+}
+
+export function GpuProfiles({ clusterId }: GpuProfilesProps) {
   const cursor = useCursorPagination(clusterId);
   const client = useQueryClient();
   const [capacity, setCapacity] = useState<GpuProfile>();
@@ -85,7 +88,7 @@ export function GpuProfiles({ clusterId, access }: { clusterId: string; access: 
   const query = useQuery({
     queryKey: [...acceleratorKeys.all, "profiles", params],
     queryFn: ({ signal }) => listGpuProfiles(params, signal),
-    enabled: Boolean(clusterId) && access.can("accelerator:profile:admin-list"),
+    enabled: Boolean(clusterId),
     meta: { errorNotification: { id: withId("gpu-profiles", clusterId), action: "GPU 规格加载" } },
   });
   const refresh = () => client.invalidateQueries({ queryKey: acceleratorKeys.all });
@@ -140,14 +143,12 @@ export function GpuProfiles({ clusterId, access }: { clusterId: string; access: 
             {
               key: "capacity",
               label: "查看容量",
-              visible: () => access.can("accelerator:capacity:admin-get"),
               onClick: setCapacity,
             },
             {
               key: "state",
               label: (profile) => (profile.state === "PROFILE_ACTIVE" ? "停用" : "启用"),
               widthLabel: "停用",
-              visible: () => access.can("accelerator:profile:set-state"),
               disabled: (profile) =>
                 profile.state === "PROFILE_DELETED" ||
                 stateMutation.isPending ||
@@ -171,7 +172,6 @@ export function GpuProfiles({ clusterId, access }: { clusterId: string; access: 
               key: "delete",
               label: "删除",
               intent: "danger",
-              visible: () => access.can("accelerator:profile:delete"),
               disabled: (profile) =>
                 profile.state === "PROFILE_DELETED" ||
                 stateMutation.isPending ||

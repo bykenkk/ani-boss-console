@@ -8,7 +8,6 @@ import {
 } from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { withId } from "@/lib/id";
-import type { GpuAccess } from "../GpuResourcesPage/types";
 const columns: ListColumn<GpuBinding>[] = [
   {
     title: "绑定 ID",
@@ -57,7 +56,11 @@ const columns: ListColumn<GpuBinding>[] = [
   },
   { title: "所属服务", dataIndex: "owner_service", width: 180, ellipsis: true },
 ];
-export function GpuBindings({ clusterId, access }: { clusterId: string; access: GpuAccess }) {
+interface GpuBindingsProps {
+  clusterId: string;
+}
+
+export function GpuBindings({ clusterId }: GpuBindingsProps) {
   const cursor = useCursorPagination(clusterId);
   const params = {
     cluster_id: clusterId,
@@ -67,7 +70,7 @@ export function GpuBindings({ clusterId, access }: { clusterId: string; access: 
   const query = useQuery({
     queryKey: [...acceleratorKeys.all, "bindings", params],
     queryFn: ({ signal }) => listGpuBindings(params, signal),
-    enabled: Boolean(clusterId) && access.can("accelerator:binding:admin-list"),
+    enabled: Boolean(clusterId),
     meta: {
       errorNotification: {
         id: withId("gpu-bindings", clusterId),

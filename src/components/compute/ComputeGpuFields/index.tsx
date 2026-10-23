@@ -8,21 +8,20 @@ import {
   type ComputePresetInput,
 } from "@/api/compute-presets";
 import { withId } from "@/lib/id";
-export function ComputeGpuFields({ canRead }: { canRead: boolean }) {
+export function ComputeGpuFields() {
   const { form } = Form.useFormContext();
   const [clusterId, setClusterId] = useState<string>();
   const [profile, setProfile] = useState<GpuProfile>();
   const clusters = useQuery({
     queryKey: [...acceleratorKeys.all, "clusters", "options"],
     queryFn: ({ signal }) => listGpuClusterOptions(signal),
-    enabled: canRead,
     meta: { errorNotification: { id: "gpu-cluster-options", action: "GPU 集群选项加载" } },
   });
   const currentClusterId = clusterId ?? clusters.data?.items?.[0]?.cluster_id;
   const profiles = useQuery({
     queryKey: [...acceleratorKeys.all, "profiles", "options", currentClusterId],
     queryFn: ({ signal }) => listComputeGpuProfileOptions(currentClusterId!, signal),
-    enabled: canRead && Boolean(currentClusterId),
+    enabled: Boolean(currentClusterId),
     meta: {
       errorNotification: {
         id: withId("compute-gpu-profile-options", currentClusterId ?? ""),
@@ -40,7 +39,6 @@ export function ComputeGpuFields({ canRead }: { canRead: boolean }) {
           placeholder="请选择集群"
           value={currentClusterId}
           loading={clusters.isFetching}
-          disabled={!canRead}
           filterOption={false}
           options={(clusters.data?.items ?? []).map((item) => ({
             label: item.display_name,
@@ -80,13 +78,12 @@ export function ComputeGpuFields({ canRead }: { canRead: boolean }) {
               }
             : undefined;
         }}
-        extra={!canRead ? "需要集群列表和 GPU 规格查看权限" : undefined}
       >
         <Select
           aria-label="GPU 规格"
           placeholder="请选择 GPU 规格"
           loading={profiles.isFetching}
-          disabled={!canRead || !currentClusterId}
+          disabled={!currentClusterId}
           filterOption={false}
           options={(profiles.data?.items ?? []).map((item) => ({
             label:

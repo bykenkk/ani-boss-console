@@ -10,7 +10,6 @@ import {
   type ComputePreset,
   type ComputePresetListParams,
 } from "@/api/compute-presets";
-import { fetchPermissionCodes } from "@/api/auth/permissions";
 import {
   ListDataTable,
   ListPageFrame,
@@ -98,17 +97,10 @@ export function ComputePresetsPage() {
   const [filters, setFilters] = useState<Omit<ComputePresetListParams, "page" | "pageSize">>({});
   const [editing, setEditing] = useState<ComputePreset | "create">();
   const pagination = useListPagination(JSON.stringify(filters));
-  const permissions = useQuery({
-    queryKey: ["auth", "permission-codes"],
-    queryFn: ({ signal }) => fetchPermissionCodes(signal),
-    meta: { errorNotification: { id: "permission-codes", action: "当前权限加载" } },
-  });
-  const can = (code: string) => permissions.data?.codes?.includes(code) === true;
   const params = { ...filters, page: pagination.page, pageSize: pagination.pageSize };
   const query = useQuery({
     queryKey: [...computePresetKeys.all, params],
     queryFn: ({ signal }) => listComputePresets(params, signal),
-    enabled: can("compute:preset:admin:list"),
     meta: { errorNotification: { id: "compute-presets", action: "计算规格加载" } },
   });
   const refresh = () => client.invalidateQueries({ queryKey: computePresetKeys.all });
@@ -149,7 +141,6 @@ export function ComputePresetsPage() {
     {
       key: "edit",
       label: "编辑",
-      visible: () => can("compute:preset:admin:update"),
       disabled: () => busy,
       onClick: setEditing,
     },
@@ -157,7 +148,6 @@ export function ComputePresetsPage() {
       key: "enabled",
       label: (row) => (row.enabled ? "停用" : "启用"),
       widthLabel: "停用",
-      visible: () => can("compute:preset:admin:update"),
       disabled: () => busy,
       onClick: (row) => {
         Modal.confirm({
@@ -171,7 +161,6 @@ export function ComputePresetsPage() {
       key: "delete",
       label: "删除",
       intent: "danger",
-      visible: () => can("compute:preset:admin:delete"),
       disabled: () => busy,
       onClick: (row) => {
         Modal.confirm({
@@ -187,11 +176,11 @@ export function ComputePresetsPage() {
       <ListPageFrame
         header={{ title: "计算规格" }}
         toolbar={{
-          actions: can("compute:preset:admin:create") ? (
+          actions: (
             <Button type="primary" onClick={() => setEditing("create")}>
               创建计算规格
             </Button>
-          ) : null,
+          ),
           filters: (
             <Space>
               <Input.Search
@@ -262,10 +251,7 @@ export function ComputePresetsPage() {
             </Space>
           ),
           refresh: {
-            onClick: () => {
-              void refresh();
-              void permissions.refetch();
-            },
+            onClick: refresh,
             spinning: query.isFetching,
           },
         }}
@@ -276,7 +262,7 @@ export function ComputePresetsPage() {
           emptyText="暂无计算规格"
           columns={columns}
           data={query.data?.items ?? []}
-          loading={permissions.isPending || query.isFetching}
+          loading={query.isFetching}
           rowActions={rowActions}
           pagination={{
             page: pagination.page,
@@ -290,7 +276,6 @@ export function ComputePresetsPage() {
       {editing ? (
         <ComputePresetEditModal
           record={editing === "create" ? undefined : editing}
-          canReadGpu={can("accelerator:cluster:list") && can("accelerator:profile:admin-list")}
           onCancel={() => setEditing(undefined)}
         />
       ) : null}

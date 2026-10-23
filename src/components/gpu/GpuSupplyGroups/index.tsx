@@ -13,7 +13,6 @@ import {
 } from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { withId } from "@/lib/id";
-import type { GpuAccess } from "../GpuResourcesPage/types";
 const columns: ListColumn<GpuSupplyGroup>[] = [
   { title: "供给组名称", dataIndex: "display_name", width: 200, ellipsis: true },
   { title: "供给组 ID", dataIndex: "group_id", width: 220, ellipsis: true },
@@ -64,7 +63,11 @@ const columns: ListColumn<GpuSupplyGroup>[] = [
     ),
   },
 ];
-export function GpuSupplyGroups({ pool, access }: { pool: GpuPool; access: GpuAccess }) {
+interface GpuSupplyGroupsProps {
+  pool: GpuPool;
+}
+
+export function GpuSupplyGroups({ pool }: GpuSupplyGroupsProps) {
   const cursor = useCursorPagination(JSON.stringify([pool.cluster_id, pool.pool_id]));
   const params = {
     cluster_id: pool.cluster_id,
@@ -75,10 +78,7 @@ export function GpuSupplyGroups({ pool, access }: { pool: GpuPool; access: GpuAc
   const query = useQuery({
     queryKey: [...acceleratorKeys.all, "groups", params],
     queryFn: ({ signal }) => listGpuSupplyGroups(params, signal),
-    enabled:
-      Boolean(pool.cluster_id) &&
-      Boolean(pool.pool_id) &&
-      access.can("accelerator:supply-group:list"),
+    enabled: Boolean(pool.cluster_id) && Boolean(pool.pool_id),
     meta: {
       errorNotification: { id: withId("gpu-groups", pool.pool_id), action: "GPU 供给组加载" },
     },

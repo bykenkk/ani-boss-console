@@ -11,7 +11,6 @@ import {
   getPlatformAdministratorErrorMessage,
   platformAdministratorQueryKeys,
 } from "@/api/platform-admins";
-import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { DetailPageFrame, type DetailInfoCard, type DetailTab } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
@@ -38,7 +37,6 @@ async function runAdministratorOperation<T>(operation: () => Promise<T>): Promis
 export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDetailProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { canManage } = useCurrentUser();
   const [roleVisible, setRoleVisible] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
 
@@ -194,7 +192,6 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
       content: (
         <PermissionMatrix
           currentRole={detail.role}
-          canManage={canManage("platformAdministrators") && !operationPending}
           onChangeRole={() => setRoleVisible(true)}
         />
       ),
@@ -226,11 +223,7 @@ export function PlatformAdministratorDetail({ userId }: PlatformAdministratorDet
         ]}
         actions={
           <Tooltip content="更多操作">
-            <Dropdown
-              trigger="click"
-              droplist={moreMenu}
-              disabled={!canManage("platformAdministrators") || operationPending}
-            >
+            <Dropdown trigger="click" droplist={moreMenu} disabled={operationPending}>
               <Button icon={<IconMoreVertical />} aria-label="更多操作" title="更多操作" />
             </Dropdown>
           </Tooltip>

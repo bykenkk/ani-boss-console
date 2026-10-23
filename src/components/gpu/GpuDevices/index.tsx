@@ -8,7 +8,6 @@ import {
 } from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { withId } from "@/lib/id";
-import type { GpuAccess } from "../GpuResourcesPage/types";
 const columns: ListColumn<GpuDevice>[] = [
   { title: "物理设备 ID", dataIndex: "device_id", width: 220, ellipsis: true },
   { title: "GPU UUID", dataIndex: "vendor_device_id", width: 260, ellipsis: true },
@@ -29,7 +28,11 @@ const columns: ListColumn<GpuDevice>[] = [
     render: (_, device) => <StatusBadge value={device.health} />,
   },
 ];
-export function GpuDevices({ clusterId, access }: { clusterId: string; access: GpuAccess }) {
+interface GpuDevicesProps {
+  clusterId: string;
+}
+
+export function GpuDevices({ clusterId }: GpuDevicesProps) {
   const cursor = useCursorPagination(clusterId);
   const params = {
     cluster_id: clusterId,
@@ -39,7 +42,7 @@ export function GpuDevices({ clusterId, access }: { clusterId: string; access: G
   const query = useQuery({
     queryKey: [...acceleratorKeys.all, "devices", params],
     queryFn: ({ signal }) => listGpuDevices(params, signal),
-    enabled: Boolean(clusterId) && access.can("accelerator:device:list"),
+    enabled: Boolean(clusterId),
     meta: {
       errorNotification: {
         id: withId("gpu-devices", clusterId),

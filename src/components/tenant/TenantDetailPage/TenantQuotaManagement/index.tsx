@@ -8,7 +8,6 @@ import { TenantQuotaRequestModal } from "@/components/tenant/TenantQuotaRequestM
 
 interface TenantQuotaManagementProps {
   tenantId: string;
-  canManage: boolean;
 }
 
 const quotaColumns: ListColumn<TenantQuotaItem>[] = [
@@ -54,7 +53,7 @@ const quotaColumns: ListColumn<TenantQuotaItem>[] = [
   },
 ];
 
-export function TenantQuotaManagement({ tenantId, canManage }: TenantQuotaManagementProps) {
+export function TenantQuotaManagement({ tenantId }: TenantQuotaManagementProps) {
   const [quotaTarget, setQuotaTarget] = useState<TenantQuotaItem | null>(null);
   const quotaQuery = useQuery({
     meta: {
@@ -82,7 +81,6 @@ export function TenantQuotaManagement({ tenantId, canManage }: TenantQuotaManage
             {
               key: "adjust",
               label: "配额调整",
-              disabled: () => !canManage,
               onClick: setQuotaTarget,
             },
           ]}

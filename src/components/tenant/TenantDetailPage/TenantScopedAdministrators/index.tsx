@@ -14,14 +14,12 @@ interface TenantScopedAdministratorsProps {
   tenantId: string;
   tenantName: string;
   tenantDisplayName: string;
-  canManage: boolean;
 }
 
 export function TenantScopedAdministrators({
   tenantId,
   tenantName,
   tenantDisplayName,
-  canManage,
 }: TenantScopedAdministratorsProps) {
   const [inviteVisible, setInviteVisible] = useState(false);
   const cursor = useCursorPagination(tenantId);
@@ -42,7 +40,7 @@ export function TenantScopedAdministrators({
     <>
       <div className="space-y-4">
         <div className="flex justify-end">
-          <Button type="primary" disabled={!canManage} onClick={() => setInviteVisible(true)}>
+          <Button type="primary" onClick={() => setInviteVisible(true)}>
             邀请管理员
           </Button>
         </div>

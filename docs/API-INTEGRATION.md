@@ -154,6 +154,7 @@ GitNexus 使用方式遵循 [AGENTS.md](../AGENTS.md#gitnexus)。
 
 ## 页面接入
 
+- 当前阶段统一暂缓接入前端权限控制，后续统一实现；不请求当前账号权限码，也不按权限码或当前账号角色限制页面查询、入口、操作与表单。登录认证、业务状态约束及服务端错误反馈继续沿用现有流程。
 - 查询和 mutation 通过 TanStack Query 调用领域 API 函数；mutation 只提交无 key DTO。反馈渠道、meta、稳定 ID、请求状态展示及错误呈现统一遵循 [UI 开发约定](./UI-CONVENTIONS.md)。
 - 成功后由页面按资源关系失效或刷新查询缓存，API 模块不直接操作 Query Client。
 - 页面、路由和组件中不得出现 `coreRequest`、`servicesRequest`、Axios 平台请求或幂等 key 生成逻辑；这些能力分别收敛在公共请求层和业务 API 模块。

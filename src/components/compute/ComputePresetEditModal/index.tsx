@@ -23,15 +23,12 @@ const positiveInt64 = {
     );
   },
 };
-export function ComputePresetEditModal({
-  record,
-  canReadGpu,
-  onCancel,
-}: {
+interface ComputePresetEditModalProps {
   record?: ComputePreset;
-  canReadGpu: boolean;
   onCancel: () => void;
-}) {
+}
+
+export function ComputePresetEditModal({ record, onCancel }: ComputePresetEditModalProps) {
   const [form] = Form.useForm<ComputePresetInput>();
   const [step, setStep] = useState(1);
   const [summary, setSummary] = useState<ComputePresetInput>();
@@ -214,7 +211,7 @@ export function ComputePresetEditModal({
           </div>
           {computeType === "gpu" ? (
             replaceGpu ? (
-              <ComputeGpuFields canRead={canReadGpu} />
+              <ComputeGpuFields />
             ) : (
               <>
                 <Form.Item
@@ -231,7 +228,6 @@ export function ComputePresetEditModal({
                 </Form.Item>
                 <Button
                   className="mb-4"
-                  disabled={!canReadGpu}
                   onClick={() => {
                     setReplaceGpu(true);
                     form.setFieldsValue({ gpu: undefined });

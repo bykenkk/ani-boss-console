@@ -16,7 +16,6 @@ import { TenantSsoModal } from "@/components/tenant/TenantSsoModal";
 
 interface TenantIdentitySettingsProps {
   tenantId: string;
-  canManage: boolean;
 }
 
 async function runTenantIdentityOperation<T>(operation: () => Promise<T>): Promise<T> {
@@ -27,7 +26,7 @@ async function runTenantIdentityOperation<T>(operation: () => Promise<T>): Promi
   }
 }
 
-export function TenantIdentitySettings({ tenantId, canManage }: TenantIdentitySettingsProps) {
+export function TenantIdentitySettings({ tenantId }: TenantIdentitySettingsProps) {
   const queryClient = useQueryClient();
   const [ssoVisible, setSsoVisible] = useState(false);
   const authQuery = useQuery({
@@ -109,18 +108,18 @@ export function TenantIdentitySettings({ tenantId, canManage }: TenantIdentitySe
           ]}
         />
         <Space wrap>
-          <Button disabled={!canManage || operationPending} onClick={() => setSsoVisible(true)}>
+          <Button disabled={operationPending} onClick={() => setSsoVisible(true)}>
             配置 SSO
           </Button>
           <Button
-            disabled={!canManage || operationPending}
+            disabled={operationPending}
             onClick={() => mfaMutation.mutate(!auth?.mfaRequired)}
           >
             {auth?.mfaRequired ? "关闭强制 MFA" : "开启强制 MFA"}
           </Button>
           <Button
             loading={ssoTestMutation.isPending}
-            disabled={!canManage || !auth?.ssoEnabled}
+            disabled={!auth?.ssoEnabled}
             onClick={() => ssoTestMutation.mutate()}
           >
             测试 SSO
