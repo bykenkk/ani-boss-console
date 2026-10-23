@@ -70,29 +70,14 @@ export async function saveManagement(
 ): Promise<void> {
   const { password, ...values } = input.values;
   let data: EditValues = values;
-  // FIXME(permission-update-mask): 权限更新暂以详情预读、全量合并并省略 mask 避免关联被清空，仍存在并发覆盖窗口。
-  // TODO(permission-update-mask): Governance 按原始 mask 快照关联、仅替换选中关联的修复部署并验证后，
-  // 移除 permissions 的详情预读与全量合并，改为仅提交已编辑字段；users 的租户与角色补齐逻辑单独保留。
-  if (input.id !== undefined && (resource === "permissions" || resource === "users")) {
+  if (input.id !== undefined && resource === "users") {
     const current = await getManagement(resource, input.id);
-    // PermissionRepo 无条件替换 menuIds/apiIds；UserService 校验 tenantId 和完整角色集。
-    data =
-      resource === "permissions"
-        ? {
-            ...current,
-            menuIds: (current as ResourceRecords["permissions"]).menuIds ?? [],
-            apiIds: (current as ResourceRecords["permissions"]).apiIds ?? [],
-            ...values,
-          }
-        : {
-            tenantId: (current as ResourceRecords["users"]).tenantId ?? 0,
-            roleIds:
-              (current as ResourceRecords["users"]).roleIds ??
-              ((current as ResourceRecords["users"]).roleId
-                ? [(current as ResourceRecords["users"]).roleId!]
-                : []),
-            ...values,
-          };
+    // UserService 校验 tenantId 和完整角色集。
+    data = {
+      tenantId: current.tenantId ?? 0,
+      roleIds: current.roleIds ?? (current.roleId ? [current.roleId] : []),
+      ...values,
+    };
   }
   // 当前这些管理写接口没有幂等 key 契约。
   const body =
@@ -101,9 +86,8 @@ export async function saveManagement(
       : {
           id: input.id,
           data,
-          // TODO(permission-update-mask): 上方权限兼容逻辑移除时，同步恢复 permissions 的 updateMask。
-          // 联调验证只改普通字段保留关联、修改关联按提交值替换、显式空数组清空；通过后再移除兼容标记。
-          ...(resource === "permissions" ? {} : { updateMask: Object.keys(values).join(",") }),
+          // TODO(permission-update-verification): 后端修复部署并允许联调后，验证权限普通字段更新保留关联、关联替换及显式空数组清空。
+          updateMask: Object.keys(values).join(","),
         };
   await adminRequest<void, typeof body>(
     `/${resource}${input.id === undefined ? "" : `/${input.id}`}`,
