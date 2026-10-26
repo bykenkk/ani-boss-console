@@ -30,6 +30,7 @@ import { Route as HealthIndexRouteImport } from './routes/health/index'
 import { Route as IdpIndexRouteImport } from './routes/idp/index'
 import { Route as IncidentsIndexRouteImport } from './routes/incidents/index'
 import { Route as JobsIndexRouteImport } from './routes/jobs/index'
+import { Route as Layer2NetworksIndexRouteImport } from './routes/layer2-networks/index'
 import { Route as LoginIndexRouteImport } from './routes/login/index'
 import { Route as LogsIndexRouteImport } from './routes/logs/index'
 import { Route as MeteringIndexRouteImport } from './routes/metering/index'
@@ -47,6 +48,7 @@ import { Route as PermissionsIndexRouteImport } from './routes/permissions/index
 import { Route as PlatformAdminsIndexRouteImport } from './routes/platform-admins/index'
 import { Route as PlatformRolesIndexRouteImport } from './routes/platform-roles/index'
 import { Route as PoolIndexRouteImport } from './routes/pool/index'
+import { Route as PublicNetworksIndexRouteImport } from './routes/public-networks/index'
 import { Route as RegistryGcIndexRouteImport } from './routes/registry-gc/index'
 import { Route as RegistryQuotaIndexRouteImport } from './routes/registry-quota/index'
 import { Route as RegistryVulnerabilitiesIndexRouteImport } from './routes/registry-vulnerabilities/index'
@@ -61,6 +63,7 @@ import { Route as TenantsBillingIndexRouteImport } from './routes/tenants-billin
 import { Route as TenantsBillingTenantIdRouteImport } from './routes/tenants-billing/$tenantId'
 import { Route as TenantsIndexRouteImport } from './routes/tenants/index'
 import { Route as TracesIndexRouteImport } from './routes/traces/index'
+import { Route as VirtualSwitchesIndexRouteImport } from './routes/virtual-switches/index'
 import { Route as WebhookIndexRouteImport } from './routes/webhook/index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -168,6 +171,11 @@ const JobsIndexRoute = JobsIndexRouteImport.update({
   path: '/jobs/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Layer2NetworksIndexRoute = Layer2NetworksIndexRouteImport.update({
+  id: '/layer2-networks/',
+  path: '/layer2-networks/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginIndexRoute = LoginIndexRouteImport.update({
   id: '/login/',
   path: '/login/',
@@ -254,6 +262,11 @@ const PoolIndexRoute = PoolIndexRouteImport.update({
   path: '/pool/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PublicNetworksIndexRoute = PublicNetworksIndexRouteImport.update({
+  id: '/public-networks/',
+  path: '/public-networks/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegistryGcIndexRoute = RegistryGcIndexRouteImport.update({
   id: '/registry-gc/',
   path: '/registry-gc/',
@@ -325,6 +338,11 @@ const TracesIndexRoute = TracesIndexRouteImport.update({
   path: '/traces/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VirtualSwitchesIndexRoute = VirtualSwitchesIndexRouteImport.update({
+  id: '/virtual-switches/',
+  path: '/virtual-switches/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WebhookIndexRoute = WebhookIndexRouteImport.update({
   id: '/webhook/',
   path: '/webhook/',
@@ -354,6 +372,7 @@ export interface FileRoutesByFullPath {
   '/idp/': typeof IdpIndexRoute
   '/incidents/': typeof IncidentsIndexRoute
   '/jobs/': typeof JobsIndexRoute
+  '/layer2-networks/': typeof Layer2NetworksIndexRoute
   '/login/': typeof LoginIndexRoute
   '/logs/': typeof LogsIndexRoute
   '/metering/': typeof MeteringIndexRoute
@@ -371,6 +390,7 @@ export interface FileRoutesByFullPath {
   '/platform-admins/': typeof PlatformAdminsIndexRoute
   '/platform-roles/': typeof PlatformRolesIndexRoute
   '/pool/': typeof PoolIndexRoute
+  '/public-networks/': typeof PublicNetworksIndexRoute
   '/registry-gc/': typeof RegistryGcIndexRoute
   '/registry-quota/': typeof RegistryQuotaIndexRoute
   '/registry-vulnerabilities/': typeof RegistryVulnerabilitiesIndexRoute
@@ -384,6 +404,7 @@ export interface FileRoutesByFullPath {
   '/tenants-billing/': typeof TenantsBillingIndexRoute
   '/tenants/': typeof TenantsIndexRoute
   '/traces/': typeof TracesIndexRoute
+  '/virtual-switches/': typeof VirtualSwitchesIndexRoute
   '/webhook/': typeof WebhookIndexRoute
 }
 export interface FileRoutesByTo {
@@ -408,6 +429,7 @@ export interface FileRoutesByTo {
   '/idp': typeof IdpIndexRoute
   '/incidents': typeof IncidentsIndexRoute
   '/jobs': typeof JobsIndexRoute
+  '/layer2-networks': typeof Layer2NetworksIndexRoute
   '/login': typeof LoginIndexRoute
   '/logs': typeof LogsIndexRoute
   '/metering': typeof MeteringIndexRoute
@@ -425,6 +447,7 @@ export interface FileRoutesByTo {
   '/platform-admins': typeof PlatformAdminsIndexRoute
   '/platform-roles': typeof PlatformRolesIndexRoute
   '/pool': typeof PoolIndexRoute
+  '/public-networks': typeof PublicNetworksIndexRoute
   '/registry-gc': typeof RegistryGcIndexRoute
   '/registry-quota': typeof RegistryQuotaIndexRoute
   '/registry-vulnerabilities': typeof RegistryVulnerabilitiesIndexRoute
@@ -438,6 +461,7 @@ export interface FileRoutesByTo {
   '/tenants-billing': typeof TenantsBillingIndexRoute
   '/tenants': typeof TenantsIndexRoute
   '/traces': typeof TracesIndexRoute
+  '/virtual-switches': typeof VirtualSwitchesIndexRoute
   '/webhook': typeof WebhookIndexRoute
 }
 export interface FileRoutesById {
@@ -464,6 +488,7 @@ export interface FileRoutesById {
   '/idp/': typeof IdpIndexRoute
   '/incidents/': typeof IncidentsIndexRoute
   '/jobs/': typeof JobsIndexRoute
+  '/layer2-networks/': typeof Layer2NetworksIndexRoute
   '/login/': typeof LoginIndexRoute
   '/logs/': typeof LogsIndexRoute
   '/metering/': typeof MeteringIndexRoute
@@ -481,6 +506,7 @@ export interface FileRoutesById {
   '/platform-admins/': typeof PlatformAdminsIndexRoute
   '/platform-roles/': typeof PlatformRolesIndexRoute
   '/pool/': typeof PoolIndexRoute
+  '/public-networks/': typeof PublicNetworksIndexRoute
   '/registry-gc/': typeof RegistryGcIndexRoute
   '/registry-quota/': typeof RegistryQuotaIndexRoute
   '/registry-vulnerabilities/': typeof RegistryVulnerabilitiesIndexRoute
@@ -494,6 +520,7 @@ export interface FileRoutesById {
   '/tenants-billing/': typeof TenantsBillingIndexRoute
   '/tenants/': typeof TenantsIndexRoute
   '/traces/': typeof TracesIndexRoute
+  '/virtual-switches/': typeof VirtualSwitchesIndexRoute
   '/webhook/': typeof WebhookIndexRoute
 }
 export interface FileRouteTypes {
@@ -521,6 +548,7 @@ export interface FileRouteTypes {
     | '/idp/'
     | '/incidents/'
     | '/jobs/'
+    | '/layer2-networks/'
     | '/login/'
     | '/logs/'
     | '/metering/'
@@ -538,6 +566,7 @@ export interface FileRouteTypes {
     | '/platform-admins/'
     | '/platform-roles/'
     | '/pool/'
+    | '/public-networks/'
     | '/registry-gc/'
     | '/registry-quota/'
     | '/registry-vulnerabilities/'
@@ -551,6 +580,7 @@ export interface FileRouteTypes {
     | '/tenants-billing/'
     | '/tenants/'
     | '/traces/'
+    | '/virtual-switches/'
     | '/webhook/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -575,6 +605,7 @@ export interface FileRouteTypes {
     | '/idp'
     | '/incidents'
     | '/jobs'
+    | '/layer2-networks'
     | '/login'
     | '/logs'
     | '/metering'
@@ -592,6 +623,7 @@ export interface FileRouteTypes {
     | '/platform-admins'
     | '/platform-roles'
     | '/pool'
+    | '/public-networks'
     | '/registry-gc'
     | '/registry-quota'
     | '/registry-vulnerabilities'
@@ -605,6 +637,7 @@ export interface FileRouteTypes {
     | '/tenants-billing'
     | '/tenants'
     | '/traces'
+    | '/virtual-switches'
     | '/webhook'
   id:
     | '__root__'
@@ -630,6 +663,7 @@ export interface FileRouteTypes {
     | '/idp/'
     | '/incidents/'
     | '/jobs/'
+    | '/layer2-networks/'
     | '/login/'
     | '/logs/'
     | '/metering/'
@@ -647,6 +681,7 @@ export interface FileRouteTypes {
     | '/platform-admins/'
     | '/platform-roles/'
     | '/pool/'
+    | '/public-networks/'
     | '/registry-gc/'
     | '/registry-quota/'
     | '/registry-vulnerabilities/'
@@ -660,6 +695,7 @@ export interface FileRouteTypes {
     | '/tenants-billing/'
     | '/tenants/'
     | '/traces/'
+    | '/virtual-switches/'
     | '/webhook/'
   fileRoutesById: FileRoutesById
 }
@@ -686,6 +722,7 @@ export interface RootRouteChildren {
   IdpIndexRoute: typeof IdpIndexRoute
   IncidentsIndexRoute: typeof IncidentsIndexRoute
   JobsIndexRoute: typeof JobsIndexRoute
+  Layer2NetworksIndexRoute: typeof Layer2NetworksIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
   LogsIndexRoute: typeof LogsIndexRoute
   MeteringIndexRoute: typeof MeteringIndexRoute
@@ -703,6 +740,7 @@ export interface RootRouteChildren {
   PlatformAdminsIndexRoute: typeof PlatformAdminsIndexRoute
   PlatformRolesIndexRoute: typeof PlatformRolesIndexRoute
   PoolIndexRoute: typeof PoolIndexRoute
+  PublicNetworksIndexRoute: typeof PublicNetworksIndexRoute
   RegistryGcIndexRoute: typeof RegistryGcIndexRoute
   RegistryQuotaIndexRoute: typeof RegistryQuotaIndexRoute
   RegistryVulnerabilitiesIndexRoute: typeof RegistryVulnerabilitiesIndexRoute
@@ -715,6 +753,7 @@ export interface RootRouteChildren {
   TenantsAdminsIndexRoute: typeof TenantsAdminsIndexRoute
   TenantsBillingIndexRoute: typeof TenantsBillingIndexRoute
   TracesIndexRoute: typeof TracesIndexRoute
+  VirtualSwitchesIndexRoute: typeof VirtualSwitchesIndexRoute
   WebhookIndexRoute: typeof WebhookIndexRoute
 }
 
@@ -867,6 +906,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JobsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/layer2-networks/': {
+      id: '/layer2-networks/'
+      path: '/layer2-networks'
+      fullPath: '/layer2-networks/'
+      preLoaderRoute: typeof Layer2NetworksIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login/': {
       id: '/login/'
       path: '/login'
@@ -986,6 +1032,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PoolIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/public-networks/': {
+      id: '/public-networks/'
+      path: '/public-networks'
+      fullPath: '/public-networks/'
+      preLoaderRoute: typeof PublicNetworksIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/registry-gc/': {
       id: '/registry-gc/'
       path: '/registry-gc'
@@ -1084,6 +1137,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TracesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/virtual-switches/': {
+      id: '/virtual-switches/'
+      path: '/virtual-switches'
+      fullPath: '/virtual-switches/'
+      preLoaderRoute: typeof VirtualSwitchesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/webhook/': {
       id: '/webhook/'
       path: '/webhook'
@@ -1128,6 +1188,7 @@ const rootRouteChildren: RootRouteChildren = {
   IdpIndexRoute: IdpIndexRoute,
   IncidentsIndexRoute: IncidentsIndexRoute,
   JobsIndexRoute: JobsIndexRoute,
+  Layer2NetworksIndexRoute: Layer2NetworksIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
   LogsIndexRoute: LogsIndexRoute,
   MeteringIndexRoute: MeteringIndexRoute,
@@ -1145,6 +1206,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlatformAdminsIndexRoute: PlatformAdminsIndexRoute,
   PlatformRolesIndexRoute: PlatformRolesIndexRoute,
   PoolIndexRoute: PoolIndexRoute,
+  PublicNetworksIndexRoute: PublicNetworksIndexRoute,
   RegistryGcIndexRoute: RegistryGcIndexRoute,
   RegistryQuotaIndexRoute: RegistryQuotaIndexRoute,
   RegistryVulnerabilitiesIndexRoute: RegistryVulnerabilitiesIndexRoute,
@@ -1157,6 +1219,7 @@ const rootRouteChildren: RootRouteChildren = {
   TenantsAdminsIndexRoute: TenantsAdminsIndexRoute,
   TenantsBillingIndexRoute: TenantsBillingIndexRoute,
   TracesIndexRoute: TracesIndexRoute,
+  VirtualSwitchesIndexRoute: VirtualSwitchesIndexRoute,
   WebhookIndexRoute: WebhookIndexRoute,
 }
 export const routeTree = rootRouteImport
