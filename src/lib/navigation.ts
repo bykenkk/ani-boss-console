@@ -25,6 +25,7 @@ export type AppRoute =
   | "/virtual-switches"
   | "/layer2-networks"
   | "/public-networks"
+  | "/eips"
   | "/registry-quota"
   | "/registry-vulnerabilities"
   | "/registry-gc"

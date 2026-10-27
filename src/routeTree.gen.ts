@@ -20,6 +20,7 @@ import { Route as AuditInferenceIndexRouteImport } from './routes/audit-inferenc
 import { Route as AuditLoginIndexRouteImport } from './routes/audit-login/index'
 import { Route as AuditOperationIndexRouteImport } from './routes/audit-operation/index'
 import { Route as ComputePresetsIndexRouteImport } from './routes/compute-presets/index'
+import { Route as EipsIndexRouteImport } from './routes/eips/index'
 import { Route as GpuClustersIndexRouteImport } from './routes/gpu-clusters/index'
 import { Route as GpuQuotasIndexRouteImport } from './routes/gpu-quotas/index'
 import { Route as GpuIndexRouteImport } from './routes/gpu/index'
@@ -119,6 +120,11 @@ const AuditOperationIndexRoute = AuditOperationIndexRouteImport.update({
 const ComputePresetsIndexRoute = ComputePresetsIndexRouteImport.update({
   id: '/compute-presets/',
   path: '/compute-presets/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EipsIndexRoute = EipsIndexRouteImport.update({
+  id: '/eips/',
+  path: '/eips/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GpuClustersIndexRoute = GpuClustersIndexRouteImport.update({
@@ -362,6 +368,7 @@ export interface FileRoutesByFullPath {
   '/audit-login/': typeof AuditLoginIndexRoute
   '/audit-operation/': typeof AuditOperationIndexRoute
   '/compute-presets/': typeof ComputePresetsIndexRoute
+  '/eips/': typeof EipsIndexRoute
   '/gpu-clusters/': typeof GpuClustersIndexRoute
   '/gpu-quotas/': typeof GpuQuotasIndexRoute
   '/gpu/': typeof GpuIndexRoute
@@ -419,6 +426,7 @@ export interface FileRoutesByTo {
   '/audit-login': typeof AuditLoginIndexRoute
   '/audit-operation': typeof AuditOperationIndexRoute
   '/compute-presets': typeof ComputePresetsIndexRoute
+  '/eips': typeof EipsIndexRoute
   '/gpu-clusters': typeof GpuClustersIndexRoute
   '/gpu-quotas': typeof GpuQuotasIndexRoute
   '/gpu': typeof GpuIndexRoute
@@ -478,6 +486,7 @@ export interface FileRoutesById {
   '/audit-login/': typeof AuditLoginIndexRoute
   '/audit-operation/': typeof AuditOperationIndexRoute
   '/compute-presets/': typeof ComputePresetsIndexRoute
+  '/eips/': typeof EipsIndexRoute
   '/gpu-clusters/': typeof GpuClustersIndexRoute
   '/gpu-quotas/': typeof GpuQuotasIndexRoute
   '/gpu/': typeof GpuIndexRoute
@@ -538,6 +547,7 @@ export interface FileRouteTypes {
     | '/audit-login/'
     | '/audit-operation/'
     | '/compute-presets/'
+    | '/eips/'
     | '/gpu-clusters/'
     | '/gpu-quotas/'
     | '/gpu/'
@@ -595,6 +605,7 @@ export interface FileRouteTypes {
     | '/audit-login'
     | '/audit-operation'
     | '/compute-presets'
+    | '/eips'
     | '/gpu-clusters'
     | '/gpu-quotas'
     | '/gpu'
@@ -653,6 +664,7 @@ export interface FileRouteTypes {
     | '/audit-login/'
     | '/audit-operation/'
     | '/compute-presets/'
+    | '/eips/'
     | '/gpu-clusters/'
     | '/gpu-quotas/'
     | '/gpu/'
@@ -712,6 +724,7 @@ export interface RootRouteChildren {
   AuditLoginIndexRoute: typeof AuditLoginIndexRoute
   AuditOperationIndexRoute: typeof AuditOperationIndexRoute
   ComputePresetsIndexRoute: typeof ComputePresetsIndexRoute
+  EipsIndexRoute: typeof EipsIndexRoute
   GpuClustersIndexRoute: typeof GpuClustersIndexRoute
   GpuQuotasIndexRoute: typeof GpuQuotasIndexRoute
   GpuIndexRoute: typeof GpuIndexRoute
@@ -834,6 +847,13 @@ declare module '@tanstack/react-router' {
       path: '/compute-presets'
       fullPath: '/compute-presets/'
       preLoaderRoute: typeof ComputePresetsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/eips/': {
+      id: '/eips/'
+      path: '/eips'
+      fullPath: '/eips/'
+      preLoaderRoute: typeof EipsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/gpu-clusters/': {
@@ -1178,6 +1198,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuditLoginIndexRoute: AuditLoginIndexRoute,
   AuditOperationIndexRoute: AuditOperationIndexRoute,
   ComputePresetsIndexRoute: ComputePresetsIndexRoute,
+  EipsIndexRoute: EipsIndexRoute,
   GpuClustersIndexRoute: GpuClustersIndexRoute,
   GpuQuotasIndexRoute: GpuQuotasIndexRoute,
   GpuIndexRoute: GpuIndexRoute,
