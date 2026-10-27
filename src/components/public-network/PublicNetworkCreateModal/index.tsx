@@ -5,22 +5,19 @@ import { createPublicNetwork, platformNetworkKeys } from "@/api/platform-network
 import { ModalSteps } from "@/components/common";
 import { validateForm } from "@/lib/form";
 import { PublicNetworkAddressFields } from "./PublicNetworkAddressFields";
+import { buildAddressPool } from "./address-pool";
+import {
+  buildPublicNetworkInput,
+  getAddressPoolInput,
+  type PublicNetworkCreateFormValues,
+} from "./form";
 interface PublicNetworkCreateModalProps {
   onCancel: () => void;
   onSuccess: () => void;
 }
-interface PublicNetworkCreateFormValues {
-  name: string;
-  description?: string;
-  vlanId: string;
-  cidr: string;
-  upstreamGateway: string;
-  ovnGateway: string;
-  excludedIps?: string;
-}
 const stepFields: Array<Array<keyof PublicNetworkCreateFormValues>> = [
   ["name", "description"],
-  ["vlanId", "cidr", "upstreamGateway", "ovnGateway", "excludedIps"],
+  ["vlanId", "cidr", "allocationStart", "allocationEnd", "upstreamGateway", "ovnGateway"],
 ];
 export function PublicNetworkCreateModal({ onCancel, onSuccess }: PublicNetworkCreateModalProps) {
   const [form] = Form.useForm<PublicNetworkCreateFormValues>();
@@ -34,7 +31,6 @@ export function PublicNetworkCreateModal({ onCancel, onSuccess }: PublicNetworkC
     meta: {
       feedback: {
         channel: "message",
-        id: "public-network-create",
         action: "创建公有网络",
         successText: "创建已提交",
       },
@@ -58,20 +54,7 @@ export function PublicNetworkCreateModal({ onCancel, onSuccess }: PublicNetworkC
         setStep(step + 1);
       } else {
         const values = await validateForm({ validate: () => form.validate() });
-        await mutation.mutateAsync({
-          name: values.name.trim(),
-          description: values.description?.trim(),
-          mode: "underlay",
-          vlan_network_id: values.vlanId,
-          cidr: values.cidr.trim(),
-          ovn_gateway_ip: values.ovnGateway.trim(),
-          upstream_gateway_ip: values.upstreamGateway.trim(),
-          excluded_ips:
-            values.excludedIps
-              ?.split(",")
-              .map((x) => x.trim())
-              .filter(Boolean) ?? [],
-        });
+        await mutation.mutateAsync(buildPublicNetworkInput(values));
       }
     } catch {
       /* 表单和请求错误由公共反馈处理。 */
@@ -111,6 +94,7 @@ export function PublicNetworkCreateModal({ onCancel, onSuccess }: PublicNetworkC
         layout="vertical"
         disabled={submitting}
         onSubmitCapture={(event) => {
+          if (event.target !== event.currentTarget) return;
           event.preventDefault();
           event.stopPropagation();
           advance();
@@ -129,7 +113,7 @@ export function PublicNetworkCreateModal({ onCancel, onSuccess }: PublicNetworkC
           </Form.Item>
         </div>
         <div hidden={step !== 2}>
-          <PublicNetworkAddressFields />
+          <PublicNetworkAddressFields form={form} disabled={submitting} />
         </div>
       </Form>
       {step === 3 && summary && (
@@ -140,10 +124,18 @@ export function PublicNetworkCreateModal({ onCancel, onSuccess }: PublicNetworkC
             { label: "名称", value: summary.name },
             { label: "网络模式", value: "Underlay" },
             { label: "二层网络 ID", value: summary.vlanId },
+            { label: "出口网关", value: "由平台自动创建和管理" },
             { label: "IPv4 CIDR", value: summary.cidr },
-            { label: "交换机网关", value: summary.upstreamGateway },
-            { label: "云平台网关", value: summary.ovnGateway },
-            { label: "排除地址", value: summary.excludedIps || "-" },
+            {
+              label: "可用 IP 范围",
+              value: `${summary.allocationStart}～${summary.allocationEnd}`,
+            },
+            { label: "上游网关", value: summary.upstreamGateway },
+            { label: "云平台网关 IP（OVN）", value: summary.ovnGateway },
+            {
+              label: "可分配 IP 数（已预留网关）",
+              value: buildAddressPool(getAddressPoolInput(summary)).allocatableCount,
+            },
           ]}
         />
       )}
