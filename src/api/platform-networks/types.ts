@@ -84,23 +84,3 @@ export interface CreatePublicNetworkInput {
   upstream_gateway_ip: string;
   excluded_ips: string[];
 }
-export interface NodeInterface {
-  node_name: string;
-  node_uid: string;
-  name: string;
-  kind: string;
-  mac: string;
-  mtu: number;
-  link_up: boolean;
-  carrier: boolean;
-  addresses: string[];
-  master: string;
-  ovs_managed: boolean;
-  kc_managed: boolean;
-  default_route: boolean;
-  management: boolean;
-  selectable: boolean;
-  unavailable_reasons: string[];
-  observed_at?: string;
-  vlan_network_ids: string[];
-}

@@ -1,8 +1,9 @@
-import { Button, Descriptions, Form, Input, Modal, Space, Steps } from "@arco-design/web-react";
+import { Button, Descriptions, Form, Input, Modal, Space } from "@arco-design/web-react";
 import { useRef, useState } from "react";
 import { validateForm } from "@/lib/form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createLayer2Network, platformNetworkKeys } from "@/api/platform-networks";
+import { ModalSteps } from "@/components/common";
 import { Layer2ConfigurationFields } from "./Layer2ConfigurationFields";
 
 interface Layer2NetworkCreateModalProps {
@@ -118,11 +119,7 @@ export function Layer2NetworkCreateModal({ onCancel, onSuccess }: Layer2NetworkC
         </Space>
       }
     >
-      <Steps current={step} size="small" className="mb-6">
-        {steps.map((label) => (
-          <Steps.Step key={label} title={label} />
-        ))}
-      </Steps>
+      <ModalSteps current={step} titles={steps} />
       <Form
         form={form}
         disabled={mutation.isPending}

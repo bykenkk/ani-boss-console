@@ -1,6 +1,7 @@
-import { Button, Form, Modal, Space, Steps, Tooltip } from "@arco-design/web-react";
+import { Button, Form, Modal, Space, Tooltip } from "@arco-design/web-react";
 import { useRef, useState } from "react";
 import { validateForm } from "@/lib/form";
+import { ModalSteps } from "@/components/common";
 import { networkDemoNotice, networkWriteUnavailable } from "../constants";
 import type { NetworkKind } from "../model";
 import { NetworkDnsFields } from "../NetworkDnsFields";
@@ -109,11 +110,7 @@ export function NetworkCreateModal({ kind, onCancel }: NetworkCreateModalProps) 
         </Space>
       }
     >
-      <Steps current={step} size="small" className="mb-6">
-        {steps.map((label) => (
-          <Steps.Step key={label} title={label} />
-        ))}
-      </Steps>
+      <ModalSteps current={step} titles={steps} />
       <p className="mb-6 text-[var(--color-text-3)]">{networkDemoNotice}</p>
       <Form
         form={form}

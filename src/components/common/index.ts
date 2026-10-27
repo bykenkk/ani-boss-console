@@ -15,6 +15,7 @@ export type {
   DetailTab,
 } from "./DetailPageFrame";
 export { ListDataTable } from "./ListDataTable";
+export { ModalSteps } from "./ModalSteps";
 export type { ListDataTableProps } from "./ListDataTable";
 export { ListPageFrame } from "./ListPageFrame";
 export type {

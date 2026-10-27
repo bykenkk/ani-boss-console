@@ -1,7 +1,8 @@
-import { Button, Descriptions, Form, Input, Modal, Space, Steps } from "@arco-design/web-react";
+import { Button, Descriptions, Form, Input, Modal, Space } from "@arco-design/web-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { createPublicNetwork, platformNetworkKeys } from "@/api/platform-networks";
+import { ModalSteps } from "@/components/common";
 import { validateForm } from "@/lib/form";
 import { PublicNetworkAddressFields } from "./PublicNetworkAddressFields";
 interface PublicNetworkCreateModalProps {
@@ -104,11 +105,7 @@ export function PublicNetworkCreateModal({ onCancel, onSuccess }: PublicNetworkC
         </Space>
       }
     >
-      <Steps current={step} size="small" className="mb-6">
-        {["基本信息", "地址池配置", "确认配置"].map((label) => (
-          <Steps.Step key={label} title={label} />
-        ))}
-      </Steps>
+      <ModalSteps current={step} titles={["基本信息", "地址池配置", "确认配置"]} />
       <Form
         form={form}
         layout="vertical"

@@ -4,7 +4,6 @@ import { createIdempotencyScope } from "@/lib/idempotency";
 import type {
   CreateLayer2NetworkInput,
   CreatePublicNetworkInput,
-  NodeInterface,
   PlatformNetworkKind,
   PlatformNetworkList,
   PlatformNetworkListParams,
@@ -40,12 +39,6 @@ export async function createPublicNetwork(input: CreatePublicNetworkInput): Prom
 }
 export async function deletePlatformNetwork(kind: PlatformNetworkKind, id: string): Promise<void> {
   await adminRequest(`/networks/${kind}/${encodeURIComponent(id)}`, { method: "DELETE" });
-}
-export function listNodeInterfaces(
-  params: { cluster_id: string; virtual_switch_id?: string },
-  signal?: AbortSignal,
-): Promise<{ items: NodeInterface[]; inventory_fingerprint: string; total: string }> {
-  return adminRequest("/networks/node-interfaces", { params, signal });
 }
 const verificationScope = createIdempotencyScope("public-pool-verification", ["POST"]);
 const allocationScope = createIdempotencyScope("public-pool-allocation", ["PATCH"]);

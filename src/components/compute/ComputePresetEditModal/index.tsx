@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Button, Form, Input, Modal, Radio, Space, Steps, Switch } from "@arco-design/web-react";
+import { Button, Form, Input, Modal, Radio, Space, Switch } from "@arco-design/web-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   createComputePreset,
@@ -11,6 +11,7 @@ import {
   type ComputeGpuReference,
 } from "@/api/compute-presets";
 import { validateForm } from "@/lib/form";
+import { ModalSteps } from "@/components/common";
 import { showMessage } from "@/lib/feedback";
 import { ComputeGpuFields } from "../ComputeGpuFields";
 import { ComputePresetSummary } from "../ComputePresetSummary";
@@ -129,11 +130,7 @@ export function ComputePresetEditModal({ record, onCancel }: ComputePresetEditMo
         </Space>
       }
     >
-      <Steps current={step} size="small" className="mb-6">
-        {["基本信息", "规格参数", "摘要信息"].map((title) => (
-          <Steps.Step key={title} title={title} />
-        ))}
-      </Steps>
+      <ModalSteps current={step} titles={["基本信息", "规格参数", "摘要信息"]} />
       <Form
         form={form}
         layout="vertical"

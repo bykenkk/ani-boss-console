@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { acceleratorKeys, listGpuClusterOptions } from "@/api/accelerator";
 import type { Layer2NetworkCreateFormValues } from "..";
 import { NetworkResourceSelect } from "@/components/network/NetworkResourceSelect";
-import { NodeInterfaceInventory } from "../NodeInterfaceInventory";
 interface Layer2ConfigurationFieldsProps {
   form: FormInstance<Layer2NetworkCreateFormValues>;
   onClusterNameChange: (name: string) => void;
@@ -50,20 +49,10 @@ export function Layer2ConfigurationFields({
         <NetworkResourceSelect kind="virtual-switch" />
       </Form.Item>
       <Form.Item
-        noStyle
-        shouldUpdate={(previous, current) =>
-          previous.clusterId !== current.clusterId || previous.switchId !== current.switchId
-        }
-      >
-        {(values) => (
-          <NodeInterfaceInventory clusterId={values.clusterId ?? ""} switchId={values.switchId} />
-        )}
-      </Form.Item>
-      <Form.Item
         field="nic"
         label="网卡名称"
         rules={[{ required: true, match: /\S/, message: "请输入网卡名称" }]}
-        extra="根据上方清单填写集群内一致且可用的网卡名称，实际准入由服务端核验。"
+        extra="填写集群内一致且可用的网卡名称，实际准入由服务端核验。"
       >
         <Input placeholder="例如 bond0、eno2" />
       </Form.Item>
@@ -75,14 +64,14 @@ export function Layer2ConfigurationFields({
           {
             validator: (value, callback) =>
               callback(
-                Number.isInteger(value) && value >= 1 && value <= 4094
+                Number.isInteger(value) && value >= 0 && value <= 4094
                   ? undefined
-                  : "VLAN ID 必须为 1–4094 的整数",
+                  : "VLAN ID 必须为 0–4094 的整数",
               ),
           },
         ]}
       >
-        <InputNumber min={1} max={4094} placeholder="1–4094" className="w-full!" />
+        <InputNumber min={0} max={4094} placeholder="0–4094" className="w-full!" />
       </Form.Item>
     </>
   );
