@@ -8,9 +8,10 @@ import type {
   PlatformNetworkList,
   PlatformNetworkListParams,
   PublicPoolAllocationInput,
-  PublicPoolVerificationInput,
+  SetDefaultPublicPoolInput,
 } from "./types";
 export * from "./types";
+export * from "./default-egress";
 export const platformNetworkKeys = {
   all: (kind: PlatformNetworkKind) => ["platform-networks", kind] as const,
   list: (kind: PlatformNetworkKind, params: PlatformNetworkListParams) =>
@@ -40,25 +41,8 @@ export async function createPublicNetwork(input: CreatePublicNetworkInput): Prom
 export async function deletePlatformNetwork(kind: PlatformNetworkKind, id: string): Promise<void> {
   await adminRequest(`/networks/${kind}/${encodeURIComponent(id)}`, { method: "DELETE" });
 }
-const verificationScope = createIdempotencyScope("public-pool-verification", ["POST"]);
 const allocationScope = createIdempotencyScope("public-pool-allocation", ["PATCH"]);
-// TODO(underlay-integration): 联调验证真实证据准入、版本冲突及分配启停条件。
-export async function recordPublicPoolVerification(
-  id: string,
-  input: PublicPoolVerificationInput,
-): Promise<void> {
-  await runIdempotentRequest(
-    verificationScope,
-    input,
-    async (data) => {
-      await adminRequest(`/networks/public-address-pools/${encodeURIComponent(id)}/verification`, {
-        method: "POST",
-        data: { data },
-      });
-    },
-    [id],
-  );
-}
+const defaultPoolScope = createIdempotencyScope("public-pool-default", ["POST"]);
 export async function setPublicPoolAllocation(
   id: string,
   input: PublicPoolAllocationInput,
@@ -69,6 +53,22 @@ export async function setPublicPoolAllocation(
     async (data) => {
       await adminRequest(`/networks/public-address-pools/${encodeURIComponent(id)}/allocation`, {
         method: "PATCH",
+        data: { data },
+      });
+    },
+    [id],
+  );
+}
+export async function setDefaultPublicPool(
+  id: string,
+  input: SetDefaultPublicPoolInput,
+): Promise<void> {
+  await runIdempotentRequest(
+    defaultPoolScope,
+    input,
+    async (data) => {
+      await adminRequest(`/networks/public-address-pools/${encodeURIComponent(id)}/default`, {
+        method: "POST",
         data: { data },
       });
     },

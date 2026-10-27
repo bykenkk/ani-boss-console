@@ -1,16 +1,15 @@
 import { usePlatformNetworkDelete } from "./usePlatformNetworkDelete";
-import { useState } from "react";
 import { Modal } from "@arco-design/web-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   platformNetworkKeys,
+  setDefaultPublicPool,
   setPublicPoolAllocation,
   type PlatformNetwork,
 } from "@/api/platform-networks";
 import type { RowAction } from "@/components/common";
 export function usePublicNetworkActions(onDeleted: () => void) {
   const remove = usePlatformNetworkDelete("public-address-pools", onDeleted);
-  const [verification, setVerification] = useState<PlatformNetwork>();
   const queryClient = useQueryClient();
   const allocation = useMutation({
     mutationFn: ({ item, enabled }: { item: PlatformNetwork; enabled: boolean }) =>
@@ -29,10 +28,43 @@ export function usePublicNetworkActions(onDeleted: () => void) {
       });
     },
   });
+  const defaultPool = useMutation({
+    mutationFn: (item: PlatformNetwork) =>
+      setDefaultPublicPool(item.id, { expected_version: item.version }),
+    meta: {
+      feedback: {
+        channel: "notification",
+        id: "public-pool-default",
+        action: "设置默认公网池",
+        successText: "默认公网池已更新",
+      },
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: platformNetworkKeys.all("public-address-pools"),
+      });
+    },
+  });
   const disabled = (item: PlatformNetwork) =>
-    allocation.isPending || Boolean(remove.disabled?.(item));
+    allocation.isPending || defaultPool.isPending || Boolean(remove.disabled?.(item));
+  const defaultDisabled = (item: PlatformNetwork) =>
+    disabled(item) || !item.pool || item.pool.is_default;
   const actions: RowAction<PlatformNetwork>[] = [
-    { key: "verification", label: "记录验证", disabled, onClick: setVerification },
+    {
+      key: "default",
+      label: (item) => (item.pool?.is_default ? "当前默认" : "设为默认"),
+      widthLabel: "设为默认",
+      disabled: defaultDisabled,
+      loading: (item) => defaultPool.isPending && defaultPool.variables?.id === item.id,
+      onClick: (item) => {
+        if (defaultDisabled(item)) return;
+        Modal.confirm({
+          title: "设为默认公网池",
+          content: `将「${item.name}」设为默认公网池？后续租户新建 EIP 将使用该地址池。`,
+          onOk: () => defaultPool.mutateAsync(item),
+        });
+      },
+    },
     {
       key: "allocation",
       label: (item) => (item.pool?.allocation_enabled ? "关闭分配" : "开启分配"),
@@ -51,5 +83,5 @@ export function usePublicNetworkActions(onDeleted: () => void) {
     },
     { ...remove, disabled },
   ];
-  return { actions, verification, closeVerification: () => setVerification(undefined) };
+  return { actions };
 }

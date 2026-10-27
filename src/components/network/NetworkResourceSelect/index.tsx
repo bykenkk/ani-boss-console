@@ -5,7 +5,7 @@ import { listVirtualSwitches } from "@/api/virtual-switches";
 import { withFirst100 } from "@/api/pagination";
 import { listPlatformNetworks } from "@/api/platform-networks";
 interface NetworkResourceSelectProps {
-  kind: "virtual-switch" | "vlan";
+  kind: "virtual-switch" | "vlan" | "public-pool";
   value?: string;
   onChange?: (value: string) => void;
   disabled?: boolean;
@@ -26,8 +26,12 @@ export function NetworkResourceSelect({
         kind === "virtual-switch"
           ? await listSwitchOptions({ name: name || undefined }, signal)
           : await listPlatformNetworks(
-              "vlan-networks",
-              { name: name || undefined, limit: 100 },
+              kind === "vlan" ? "vlan-networks" : "public-address-pools",
+              {
+                name: name || undefined,
+                state: kind === "public-pool" ? "available" : undefined,
+                limit: 100,
+              },
               signal,
             );
       return result.items;

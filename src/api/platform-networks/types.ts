@@ -1,4 +1,4 @@
-export type PlatformNetworkKind = "vlan-networks" | "public-address-pools";
+export type PlatformNetworkKind = "vlan-networks" | "public-address-pools" | "egress-gateways";
 export interface PlatformNetworkListParams {
   name?: string;
   state?: string;
@@ -28,6 +28,7 @@ export interface PlatformNetwork {
   observed_at?: string;
   observation_stale: boolean;
   last_operation_id: string;
+  gateway?: Record<string, never>;
   vlan?: {
     device_id: string;
     vlan_id: number;
@@ -58,13 +59,40 @@ export interface PlatformNetworkList {
   next_cursor: string;
   total: string;
 }
-export interface PublicPoolVerificationInput {
-  expected_version: string;
-  verification: PublicPoolVerification;
-}
 export interface PublicPoolAllocationInput {
   expected_version: string;
   enabled: boolean;
+}
+export interface SetDefaultPublicPoolInput {
+  expected_version: string;
+}
+export interface DefaultVPCEgress {
+  id: string;
+  name: string;
+  pool_id: string;
+  eip_id: string;
+  state: string;
+  reason: string;
+  address: string;
+  version: string;
+  last_operation_id: string;
+  operation_state: string;
+  phase: string;
+  pending_unknown: boolean;
+  pending_action: string;
+  desired_enabled: boolean;
+  applied_enabled?: boolean;
+  observation_stale: boolean;
+  observed_at?: string;
+  default_vpc_namespace: string;
+  default_vpc_name: string;
+  default_vpc_uid: string;
+  cluster_id: string;
+  cluster_uid: string;
+}
+export interface CreateDefaultVPCEgressInput {
+  name: string;
+  pool_id: string;
 }
 export interface CreateLayer2NetworkInput {
   name: string;
@@ -78,6 +106,8 @@ export interface CreatePublicNetworkInput {
   name: string;
   description?: string;
   mode: "underlay";
+  // Omit to let Resource create and manage a dedicated gateway for this pool.
+  gateway_id?: string;
   vlan_network_id: string;
   cidr: string;
   ovn_gateway_ip: string;

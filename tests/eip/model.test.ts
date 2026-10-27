@@ -39,3 +39,18 @@ test("load balancer and SNAT claims block release even if legacy binding_state i
   }
   assert.equal(eipBindingLabel(freeEIP), "未绑定");
 });
+test("platform default outlet addresses belong to the system lifecycle", () => {
+  const item = {
+    ...freeEIP,
+    managed_by: "system",
+    resource_tenant_id: "",
+    tenant_id: 0,
+    binding_target: {
+      kind: "platform_default_egress",
+      id: "dve_11111111111111111111111111111111",
+      state: "available",
+    },
+  };
+  assert.equal(eipBindingLabel(item), "平台组件出网");
+  assert.ok(eipReleaseBlockReason(item));
+});

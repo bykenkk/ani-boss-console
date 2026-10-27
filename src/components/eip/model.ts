@@ -9,7 +9,11 @@ export function eipReleaseBlockReason(item: EIP): string | undefined {
 }
 export function eipBindingLabel(item: EIP): string {
   if (item.binding_target) {
-    const labels: Record<string, string> = { vpc_snat: "VPC 出口", load_balancer: "负载均衡" };
+    const labels: Record<string, string> = {
+      vpc_snat: "VPC 出口",
+      load_balancer: "负载均衡",
+      platform_default_egress: "平台组件出网",
+    };
     const kind = labels[item.binding_target.kind];
     return kind ?? item.binding_target.kind;
   }

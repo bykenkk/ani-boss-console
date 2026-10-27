@@ -6,12 +6,12 @@ import {
   platformNetworkKeys,
   type PlatformNetwork,
 } from "@/api/platform-networks";
-import { ListDataTable, ListPageFrame, type ListColumn } from "@/components/common";
+import { ListDataTable, ListPageFrame, StatusBadge, type ListColumn } from "@/components/common";
 import { PlatformNetworkStatus } from "@/components/network/PlatformNetworkStatus";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { usePublicNetworkActions } from "@/hooks/usePublicNetworkActions";
 import { PublicNetworkCreateModal } from "../PublicNetworkCreateModal";
-import { PublicPoolVerificationModal } from "../PublicPoolVerificationModal";
+import { PlatformEgressModal } from "../PlatformEgressModal";
 const kind = "public-address-pools";
 const columns: ListColumn<PlatformNetwork>[] = [
   { key: "name", title: "名称", dataIndex: "name", width: 200, fixed: "left", ellipsis: true },
@@ -23,6 +23,20 @@ const columns: ListColumn<PlatformNetwork>[] = [
   },
   { key: "cidr", title: "IPv4 CIDR", dataIndex: "pool.cidr", width: 180 },
   { key: "mode", title: "模式", dataIndex: "pool.mode", width: 120 },
+  {
+    key: "default",
+    title: "默认公网池",
+    width: 120,
+    render: (_, item) =>
+      item.pool ? (
+        <StatusBadge
+          value={item.pool.is_default ? "是" : "否"}
+          tone={item.pool.is_default ? "success" : "default"}
+        />
+      ) : (
+        "-"
+      ),
+  },
   {
     key: "allocation",
     title: "地址分配",
@@ -40,6 +54,7 @@ const columns: ListColumn<PlatformNetwork>[] = [
 export function PublicNetworksPage() {
   const [keyword, setKeyword] = useState("");
   const [creating, setCreating] = useState(false);
+  const [configuringEgress, setConfiguringEgress] = useState(false);
   // TODO(pagination-migration): 后端完成页码契约后改用 useListPagination。
   const paging = useCursorPagination(keyword);
   const params = { name: keyword || undefined, cursor: paging.cursor, limit: paging.limit };
@@ -48,18 +63,19 @@ export function PublicNetworksPage() {
     queryFn: ({ signal }) => listPlatformNetworks(kind, params, signal),
     meta: { errorNotification: { id: "public-address-pools-list", action: "公有网络列表加载" } },
   });
-  const { actions, verification, closeVerification } = usePublicNetworkActions(
-    paging.resetPagination,
-  );
+  const { actions } = usePublicNetworkActions(paging.resetPagination);
   return (
     <>
       <ListPageFrame
         header={{ title: "公有网络", subtitle: "管理公有网络配置与资源关联。" }}
         toolbar={{
           actions: (
-            <Button type="primary" onClick={() => setCreating(true)}>
-              创建公有网络
-            </Button>
+            <Space>
+              <Button onClick={() => setConfiguringEgress(true)}>平台组件出网</Button>
+              <Button type="primary" onClick={() => setCreating(true)}>
+                创建公有网络
+              </Button>
+            </Space>
           ),
           filters: (
             <Space>
@@ -95,13 +111,6 @@ export function PublicNetworksPage() {
           pagination={paging.getPagination(query.data?.next_cursor, query.isFetching)}
         />
       </ListPageFrame>
-      {verification && (
-        <PublicPoolVerificationModal
-          resource={verification}
-          onCancel={closeVerification}
-          onSuccess={closeVerification}
-        />
-      )}
       {creating && (
         <PublicNetworkCreateModal
           onCancel={() => setCreating(false)}
@@ -111,6 +120,7 @@ export function PublicNetworksPage() {
           }}
         />
       )}
+      {configuringEgress && <PlatformEgressModal onCancel={() => setConfiguringEgress(false)} />}
     </>
   );
 }

@@ -52,7 +52,10 @@ export function EIPsPage() {
       title: "所属租户",
       width: 200,
       ellipsis: true,
-      render: (_, item) => item.tenant_name || item.resource_tenant_id,
+      render: (_, item) =>
+        item.managed_by === "system" && !item.resource_tenant_id
+          ? "平台系统"
+          : item.tenant_name || item.resource_tenant_id,
     },
     {
       key: "state",

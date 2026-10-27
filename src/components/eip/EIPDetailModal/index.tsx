@@ -28,7 +28,13 @@ export function EIPDetailModal({ id, onCancel }: EIPDetailModalProps) {
             { label: "EIP ID", value: id },
             { label: "IP 地址", value: item?.address || "-" },
             { label: "状态", value: item ? <PlatformNetworkStatus state={item.state} /> : "-" },
-            { label: "所属租户", value: item?.tenant_name || item?.resource_tenant_id || "-" },
+            {
+              label: "所属租户",
+              value:
+                item?.managed_by === "system" && !item.resource_tenant_id
+                  ? "平台系统"
+                  : item?.tenant_name || item?.resource_tenant_id || "-",
+            },
             { label: "租户 ID", value: item?.tenant_id || "-" },
             { label: "地址池", value: item?.pool_name || "-" },
             { label: "地址池 ID", value: item?.pool_id || "-" },
