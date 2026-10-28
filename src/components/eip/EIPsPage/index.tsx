@@ -11,7 +11,7 @@ import {
 } from "@/components/common";
 import { PlatformNetworkStatus } from "@/components/network/PlatformNetworkStatus";
 import { useListPagination } from "@/hooks/useListPagination";
-import { useEIPRelease } from "@/hooks/useEIPRelease";
+import { useEIPActions } from "@/hooks/useEIPActions";
 import { formatDateTime } from "@/lib/date";
 import { EIPFilters } from "../EIPFilters";
 import { EIPDetailModal } from "../EIPDetailModal";
@@ -28,7 +28,7 @@ export function EIPsPage() {
     queryFn: ({ signal }) => listEIPs(params, signal),
     meta: { errorNotification: { id: "eip-list", action: "EIP 列表加载" } },
   });
-  const release = useEIPRelease();
+  const { actions } = useEIPActions(pagination.resetPagination);
   const columns: ListColumn<EIP>[] = [
     {
       key: "name",
@@ -128,7 +128,7 @@ export function EIPsPage() {
           columns={columns}
           data={query.data?.items ?? []}
           loading={query.isLoading}
-          rowActions={[release]}
+          rowActions={actions}
           pagination={{
             page: pagination.page,
             pageSize: pagination.pageSize,
