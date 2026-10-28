@@ -1,79 +1,80 @@
 import { Progress, Tooltip } from "@arco-design/web-react";
-import { ResourceNameId, ListDataTable, type ListColumn } from "@/components/common";
-import type { TenantGpuAllocation } from "@/api/gpu-inventory";
+import type { TenantQuotaSummary } from "@/api/quota";
+import {
+  ResourceNameId,
+  ListDataTable,
+  StatusBadge,
+  type ListColumn,
+  type ListPagination,
+} from "@/components/common";
+import { formatQuotaUnits, quotaInteger, type GpuQuotaCode } from "../quota";
 
 interface TenantGpuAllocationTableProps {
-  data: TenantGpuAllocation[];
+  data: TenantQuotaSummary[];
+  quotaCode: GpuQuotaCode;
   loading: boolean;
-  emptyText?: string;
-  onEditQuota: (tenant: TenantGpuAllocation) => void;
-  onEditReservation: (tenant: TenantGpuAllocation) => void;
+  pagination: ListPagination;
 }
 
 export function TenantGpuAllocationTable({
   data,
+  quotaCode,
   loading,
-  emptyText = "暂无租户 GPU 分配数据",
-  onEditQuota,
-  onEditReservation,
+  pagination,
 }: TenantGpuAllocationTableProps) {
-  const columns: ListColumn<TenantGpuAllocation>[] = [
+  const account = (tenant: TenantQuotaSummary) =>
+    tenant.accounts?.find((a) => a.quotaCode === quotaCode);
+  const unit = quotaCode === "gpu.physical.count" ? "张" : "GiB";
+  const columns: ListColumn<TenantQuotaSummary>[] = [
     {
+      key: "name",
       title: "租户",
       width: 200,
       render: (_, tenant) => (
         <ResourceNameId
-          avatarText={tenant.tenantName}
-          name={tenant.tenantName}
-          id={tenant.tenantId}
+          avatarText={tenant.tenantName || tenant.tenantCode}
+          name={tenant.tenantName || tenant.tenantCode}
+          id={String(tenant.tenantId)}
         />
       ),
     },
+    { title: "所属套餐", dataIndex: "planName", width: 160, ellipsis: true },
     {
-      title: "配额上限",
-      dataIndex: "quotaTotal",
-      width: 80,
-      ellipsis: true,
+      title: `配额上限（${unit}）`,
+      width: 160,
+      render: (_, tenant) =>
+        account(tenant)?.configured === false
+          ? "未配置"
+          : formatQuotaUnits(account(tenant)?.limit, quotaCode),
     },
     {
-      title: "资源预留",
-      dataIndex: "allocatedGpuCount",
-      width: 80,
-      ellipsis: true,
+      title: `配额占用（${unit}）`,
+      width: 160,
+      render: (_, tenant) => formatQuotaUnits(account(tenant)?.occupied, quotaCode),
     },
     {
-      title: "已用",
-      dataIndex: "used",
-      width: 80,
-      ellipsis: true,
+      title: `剩余配额（${unit}）`,
+      width: 160,
+      render: (_, tenant) =>
+        account(tenant)?.configured === false
+          ? "未配置"
+          : formatQuotaUnits(account(tenant)?.available, quotaCode),
     },
     {
-      title: "处理中",
-      dataIndex: "reserved",
-      width: 80,
-      ellipsis: true,
-    },
-    {
-      title: "可创建",
-      dataIndex: "available",
-      width: 80,
-      ellipsis: true,
-    },
-    {
-      title: "使用率",
+      title: "配额占用率",
       width: 180,
       render: (_, tenant) => {
-        if (tenant.quotaTotal <= 0) return "-";
-        const percent = ((tenant.used + tenant.reserved) / tenant.quotaTotal) * 100;
+        const current = account(tenant);
+        const limit = quotaInteger(current?.limit);
+        const occupied = quotaInteger(current?.occupied);
+        if (current?.configured !== true || limit === undefined || occupied === undefined)
+          return "-";
+        if (limit === 0n) return occupied > 0n ? "超限" : "-";
+        const percent = Number((occupied * 1000n) / limit) / 10;
         return (
-          <Tooltip content="（已用 + 处理中）/ 配额上限；资源预留单独展示">
+          <Tooltip content="配额占用 / 配额上限；不代表 GPU 实际利用率">
             <div className="flex items-center gap-2">
-              <Progress
-                percent={Math.max(0, Math.min(100, percent))}
-                showText={false}
-                strokeWidth={6}
-                color="#2b5ce6"
-              />
+              <Progress percent={Math.min(100, percent)} showText={false} strokeWidth={6} />
               <strong className="shrink-0 whitespace-nowrap text-xs tabular-nums">
                 {percent.toFixed(1)}%
               </strong>
@@ -82,29 +83,36 @@ export function TenantGpuAllocationTable({
         );
       },
     },
+    {
+      title: "配置状态",
+      width: 120,
+      render: (_, tenant) => {
+        const current = account(tenant);
+        return (
+          <StatusBadge
+            value={
+              current?.configured === undefined
+                ? "未知"
+                : current.configured === false
+                  ? "未配置"
+                  : current.overLimit
+                    ? "超限"
+                    : "已配置"
+            }
+            tone={current?.overLimit ? "danger" : current?.configured ? "success" : "default"}
+          />
+        );
+      },
+    },
   ];
-
   return (
     <ListDataTable
-      tableLabel="租户 GPU 分配台账"
-      rowKey="tenantId"
+      tableLabel="租户 GPU 配额"
+      rowKey={(tenant) => String(tenant.tenantId)}
       columns={columns}
-      rowActions={[
-        {
-          key: "edit-reservation",
-          label: "调整资源预留",
-          onClick: onEditReservation,
-        },
-        {
-          key: "edit-quota",
-          label: "调整配额上限",
-          onClick: onEditQuota,
-        },
-      ]}
       data={data}
       loading={loading}
-      pagination="client"
-      emptyText={emptyText}
+      pagination={pagination}
     />
   );
 }

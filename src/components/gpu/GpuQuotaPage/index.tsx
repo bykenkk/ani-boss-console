@@ -1,115 +1,95 @@
-import { SummaryStrip } from "@/components/common";
+import { Space } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import {
-  fetchTenantGpuAllocations,
-  gpuResourcePoolQueryKeys,
-  type TenantGpuAllocation,
-} from "@/api/gpu-inventory";
-import { ListPageFrame } from "@/components/common";
-import { EditGpuQuotaModal } from "../EditGpuQuotaModal";
-import { EditGpuReservationModal } from "../EditGpuReservationModal";
+import { listTenantQuotaSummaries, quotaKeys } from "@/api/quota";
+import { ListPageFrame, SummaryStrip } from "@/components/common";
+import { TenantSelect } from "@/components/tenant/TenantSelect";
+import { useListPagination } from "@/hooks/useListPagination";
+import { withId } from "@/lib/id";
+import { formatQuotaUnits, type GpuQuotaCode } from "../quota";
 import { TenantGpuAllocationTable } from "../TenantGpuAllocationTable";
 
 export function GpuQuotaPage() {
-  const [keyword, setKeyword] = useState("");
-  const [quotaTarget, setQuotaTarget] = useState<TenantGpuAllocation | null>(null);
-  const [reservationTarget, setReservationTarget] = useState<TenantGpuAllocation | null>(null);
-  const tenantsQuery = useQuery({
+  const [quotaCode, setQuotaCode] = useState<GpuQuotaCode>("gpu.physical.count");
+  const [tenantId, setTenantId] = useState<number>();
+  const pagination = useListPagination(`${quotaCode}/${tenantId ?? "all"}`);
+  const params = { page: pagination.page, pageSize: pagination.pageSize, tenantId, quotaCode };
+  const query = useQuery({
+    queryKey: quotaKeys.summaries(params),
+    queryFn: ({ signal }) => listTenantQuotaSummaries(params, signal),
     meta: {
       errorNotification: {
-        id: "tenant-gpu-allocations",
-        action: "租户 GPU 台账加载",
-        fallback: "请求失败，请稍后重试",
+        id: withId("tenant-quota-summaries", quotaCode),
+        action: "租户 GPU 配额加载",
       },
     },
-    queryKey: gpuResourcePoolQueryKeys.tenants,
-    queryFn: fetchTenantGpuAllocations,
   });
-
-  const tenants = tenantsQuery.data || [];
-  const query = keyword.trim().toLowerCase();
-  const filteredTenants = query
-    ? tenants.filter((tenant) =>
-        `${tenant.tenantName} ${tenant.tenantId}`.toLowerCase().includes(query),
-      )
-    : tenants;
+  const summary = query.data?.summary;
+  const totals = summary?.accounts.find((account) => account.quotaCode === quotaCode);
+  const unit = quotaCode === "gpu.physical.count" ? "张" : "GiB";
+  const scope = tenantId === undefined ? "全平台；不随翻页变化" : "当前租户";
 
   return (
-    <>
-      <ListPageFrame
-        summary={
-          <SummaryStrip
-            pending={tenantsQuery.isPending}
-            items={[
-              {
-                label: "已配置配额租户",
-                value: tenants.filter((t) => t.quotaTotal > 0).length,
-                unit: "个",
-                note: "当前租户台账",
-              },
-              {
-                label: "配额上限合计",
-                value: tenants.reduce((n, t) => n + t.quotaTotal, 0),
-                unit: "卡",
-              },
-              {
-                label: "资源预留",
-                value: tenants.reduce((n, t) => n + t.allocatedGpuCount, 0),
-                unit: "卡",
-                note: "预留占坑不产生用量",
-              },
-              { label: "已用", value: tenants.reduce((n, t) => n + t.used, 0), unit: "卡" },
-            ]}
-          />
-        }
-        header={{
-          title: "GPU 配额",
-          subtitle: "按租户查看 GPU 资源配额上限、预留与可用量。",
-          actions: [
+    <ListPageFrame
+      summary={
+        <SummaryStrip
+          pending={query.isLoading}
+          items={[
             {
-              key: "refresh",
-              label: "刷新",
-              variant: "secondary",
-              disabled: tenantsQuery.isFetching,
-              onClick: () => void tenantsQuery.refetch(),
+              label: "已配置配额租户",
+              value: formatQuotaUnits(summary?.configuredTenantCount),
+              unit: "个",
+              note: scope,
             },
-          ],
-        }}
-        toolbar={{
-          search: {
-            fields: [{ value: "tenant", label: "租户" }],
-            field: "tenant",
-            value: keyword,
-            placeholder: "搜索租户名称或 ID",
-            onFieldChange: () => undefined,
-            onChange: setKeyword,
+            { label: "配额上限合计", value: formatQuotaUnits(totals?.limit, quotaCode), unit },
+            { label: "配额占用合计", value: formatQuotaUnits(totals?.occupied, quotaCode), unit },
+            { label: "剩余配额合计", value: formatQuotaUnits(totals?.available, quotaCode), unit },
+          ]}
+        />
+      }
+      header={{
+        title: "GPU 配额",
+        subtitle:
+          "按租户查看整卡与共享显存配额。占用包含已受理的资源请求；剩余配额不代表实际可创建容量。",
+        actions: [
+          {
+            key: "refresh",
+            label: "刷新",
+            variant: "secondary",
+            disabled: query.isFetching,
+            onClick: () => query.refetch(),
           },
+        ],
+      }}
+      tabs={{
+        items: [
+          { value: "gpu.physical.count", label: "整卡" },
+          { value: "gpu.shared_memory_mib", label: "共享显存" },
+        ],
+        value: quotaCode,
+        onChange: setQuotaCode,
+        ariaLabel: "GPU 配额类型",
+      }}
+      toolbar={{
+        filters: (
+          <Space>
+            <TenantSelect value={tenantId} onChange={setTenantId} />
+          </Space>
+        ),
+      }}
+    >
+      <TenantGpuAllocationTable
+        data={query.data?.items ?? []}
+        quotaCode={quotaCode}
+        loading={query.isLoading}
+        pagination={{
+          page: pagination.page,
+          pageSize: pagination.pageSize,
+          total: Number(query.data?.total ?? 0),
+          onPageChange: pagination.setPage,
+          onPageSizeChange: pagination.setPageSize,
         }}
-      >
-        <TenantGpuAllocationTable
-          data={filteredTenants}
-          loading={tenantsQuery.isPending}
-          emptyText={keyword.trim() ? "没有符合搜索条件的租户" : undefined}
-          onEditQuota={setQuotaTarget}
-          onEditReservation={setReservationTarget}
-        />
-      </ListPageFrame>
-
-      {quotaTarget ? (
-        <EditGpuQuotaModal
-          tenant={quotaTarget}
-          onCancel={() => setQuotaTarget(null)}
-          onSuccess={() => setQuotaTarget(null)}
-        />
-      ) : null}
-      {reservationTarget ? (
-        <EditGpuReservationModal
-          tenant={reservationTarget}
-          onCancel={() => setReservationTarget(null)}
-          onSuccess={() => setReservationTarget(null)}
-        />
-      ) : null}
-    </>
+      />
+    </ListPageFrame>
   );
 }

@@ -60,23 +60,3 @@ export interface GpuInventoryEventSnapshot {
   items: GpuInventoryEvent[];
   profile: ApiRuntimeProfile;
 }
-
-export interface TenantGpuAllocation {
-  tenantId: string;
-  tenantName: string;
-  quotaTotal: number;
-  allocatedGpuCount: number;
-  used: number;
-  reserved: number;
-  available: number;
-}
-
-export interface UpdateTenantGpuQuotaInput {
-  tenantId: string;
-  total: number;
-}
-
-export interface UpdateTenantGpuReservationInput {
-  tenantId: string;
-  allocatedGpuCount: number;
-}

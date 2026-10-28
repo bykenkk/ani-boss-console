@@ -110,6 +110,7 @@ export interface TenantUsage {
 }
 
 export interface QuotaAccount {
+  configured?: boolean;
   quotaCode?: string;
   unit?: string;
   limit?: string;
