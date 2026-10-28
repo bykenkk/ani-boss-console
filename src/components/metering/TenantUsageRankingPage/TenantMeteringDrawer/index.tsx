@@ -126,6 +126,7 @@ export function TenantMeteringDrawer({
         <MeteringTrend
           labels={points.map((point) => formatMonthDayTime(point.timestamp))}
           values={points.map((point) => point.value ?? null)}
+          knownValues={points.map((point) => point.knownValue ?? null)}
           label={current.label}
           unit={current.unit}
         />

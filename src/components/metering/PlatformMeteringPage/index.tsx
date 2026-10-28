@@ -146,10 +146,11 @@ export function PlatformMeteringPage() {
           </span>
         </div>
         <div className={styles.chart}>
-          <div className={styles.chartNote}>缺失观测保留为空；仅展示完整观测的趋势点</div>
+          <div className={styles.chartNote}>缺失观测保留为空；虚线表示已知部分，不代表完整用量</div>
           <MeteringTrend
             labels={(usage?.points ?? []).map((point) => formatMonthDayTime(point.timestamp))}
             values={(usage?.points ?? []).map((point) => point.value ?? null)}
+            knownValues={(usage?.points ?? []).map((point) => point.knownValue ?? null)}
             label={current.label}
             unit={current.unit}
           />
