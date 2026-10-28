@@ -1,18 +1,40 @@
-import type { EChartsOption } from "echarts";
+import type { EChartsOption, LineSeriesOption } from "echarts";
 import ReactECharts from "echarts-for-react";
 
 interface MeteringTrendProps {
   labels: string[];
   values: (number | null)[];
+  knownValues?: (number | null)[];
   label: string;
   unit: string;
 }
 
-export function MeteringTrend({ labels, values, label, unit }: MeteringTrendProps) {
+export function MeteringTrend({ labels, values, knownValues, label, unit }: MeteringTrendProps) {
+  const partialValues = values.map((value, index) =>
+    value === null ? (knownValues?.[index] ?? null) : null,
+  );
+  const hasPartialValues = partialValues.some((value) => value !== null);
+  const partialLabel = label + "（已知部分）";
+  const partialSeries: LineSeriesOption[] = hasPartialValues
+    ? [
+        {
+          name: partialLabel,
+          type: "line",
+          smooth: false,
+          connectNulls: false,
+          symbol: "circle",
+          symbolSize: 6,
+          itemStyle: { color: "#fff", borderColor: "#e6862b", borderWidth: 2 },
+          lineStyle: { width: 2, color: "#e6862b", type: "dashed" },
+          data: partialValues,
+        },
+      ]
+    : [];
   const option: EChartsOption = {
     animationDuration: 400,
     color: ["#2b5ce6"],
-    grid: { top: 24, right: 24, bottom: 28, left: 58 },
+    grid: { top: 24, right: 24, bottom: hasPartialValues ? 52 : 28, left: 58 },
+    legend: hasPartialValues ? { bottom: 0, data: [label, partialLabel] } : undefined,
     tooltip: {
       trigger: "axis",
       valueFormatter: (value) => (value === null || value === undefined ? "-" : `${value} ${unit}`),
@@ -57,6 +79,7 @@ export function MeteringTrend({ labels, values, label, unit }: MeteringTrendProp
           },
         },
       },
+      ...partialSeries,
     ],
   };
 
