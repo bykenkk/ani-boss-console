@@ -120,6 +120,15 @@ export function getCurrentTimestamp() {
   return getTime(new Date());
 }
 
+export function getResourceUsageRange(hours: number, reference: DateValue = new Date()) {
+  const end = toDate(reference);
+  end.setMilliseconds(0);
+  return {
+    start: subHours(end, hours).toISOString(),
+    end: end.toISOString(),
+  };
+}
+
 export function compareDateValuesDesc(left: DateValue, right: DateValue) {
   const leftDate = toDate(left);
   const rightDate = toDate(right);

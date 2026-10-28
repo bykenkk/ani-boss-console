@@ -1,43 +1,40 @@
-import type { PlatformMeteringResourceType } from "@/api/platform";
+import type { ResourceUsageMetric } from "@/api/resource-usage";
 
-export type MeteringDimension = "gpu" | "cpu" | "memory";
+export type MeteringDimension = ResourceUsageMetric;
+export type ResourceUsagePeriod = "24h" | "7d" | "30d";
 
-export interface MeteringDimensionOption {
-  key: MeteringDimension;
-  label: string;
-  cardLabel: string;
-  cardUnit: string;
-  unit: string;
-  description: string;
-  resourceType: PlatformMeteringResourceType;
-}
+export const usagePeriodOptions = [
+  { value: "24h", label: "近24小时" },
+  { value: "7d", label: "近7天" },
+  { value: "30d", label: "近30天" },
+];
 
-export const meteringDimensions: MeteringDimensionOption[] = [
+export const usagePeriodHours: Record<ResourceUsagePeriod, number> = {
+  "24h": 24,
+  "7d": 24 * 7,
+  "30d": 24 * 30,
+};
+
+export const meteringDimensions = [
   {
     key: "gpu",
-    label: "GPU-Hours",
     cardLabel: "GPU",
-    cardUnit: "GPU·时",
-    unit: "GPU-Hours",
-    description: "GPU 卡数与实际占用时长的折算用量。",
-    resourceType: "instance_gpu_seconds",
+    label: "实际显存",
+    unit: "GiB",
+    description: "受管租户业务工作负载的实际显存合计，不代表已分配显存。",
   },
   {
     key: "cpu",
-    label: "CPU-Hours",
     cardLabel: "CPU",
-    cardUnit: "CPU·时",
-    unit: "CPU-Hours",
-    description: "云主机与容器 CPU 核数乘以运行时长。",
-    resourceType: "instance_cpu_seconds",
+    label: "实际使用核数",
+    unit: "核",
+    description: "受管租户业务工作负载的实际 CPU 使用核数合计。",
   },
   {
     key: "memory",
-    label: "Memory",
     cardLabel: "内存",
-    cardUnit: "GiB·时",
-    unit: "GiB-Hours",
-    description: "各类实例内存规格乘以运行时长。",
-    resourceType: "instance_memory_gib_seconds",
+    label: "工作集内存",
+    unit: "GiB",
+    description: "受管租户业务工作负载的工作集内存合计。",
   },
-];
+] as const;

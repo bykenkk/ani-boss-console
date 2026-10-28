@@ -3,7 +3,7 @@ import ReactECharts from "echarts-for-react";
 
 interface MeteringTrendProps {
   labels: string[];
-  values: number[];
+  values: (number | null)[];
   label: string;
   unit: string;
 }
@@ -15,7 +15,7 @@ export function MeteringTrend({ labels, values, label, unit }: MeteringTrendProp
     grid: { top: 24, right: 24, bottom: 28, left: 58 },
     tooltip: {
       trigger: "axis",
-      valueFormatter: (value) => `${value} ${unit}`,
+      valueFormatter: (value) => (value === null || value === undefined ? "-" : `${value} ${unit}`),
     },
     xAxis: {
       type: "category",
@@ -37,6 +37,7 @@ export function MeteringTrend({ labels, values, label, unit }: MeteringTrendProp
         name: label,
         type: "line",
         smooth: false,
+        connectNulls: false,
         symbol: "circle",
         symbolSize: 8,
         itemStyle: { color: "#fff", borderColor: "#2b5ce6", borderWidth: 2 },

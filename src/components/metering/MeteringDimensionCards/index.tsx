@@ -1,33 +1,28 @@
 import clsx from "clsx";
 import { IconThunderbolt, IconSettings, IconStorage } from "@arco-design/web-react/icon";
-import type { PlatformMeteringResourceType } from "@/api/platform";
-import { formatUsage } from "@/lib/metering";
-import { UsageChange } from "../MeteringPresentation";
+import type { MetricUsage } from "@/api/resource-usage";
+import { UsageQuality, UsageValue } from "../MeteringPresentation";
 import styles from "../MeteringPresentation/index.module.less";
 import { meteringDimensions, type MeteringDimension } from "../model";
+
 interface MeteringDimensionCardsProps {
   dimension: MeteringDimension;
-  totals: readonly {
-    resourceType: PlatformMeteringResourceType;
-    value?: number;
-    previous?: number;
-  }[];
-  previousLabel?: string;
+  metrics: readonly MetricUsage[];
   onChange: (dimension: MeteringDimension) => void;
 }
+
 const icons = { gpu: IconThunderbolt, cpu: IconSettings, memory: IconStorage };
-const descriptions = { gpu: "显卡占用折算用量", cpu: "核数 × 占用时长", memory: "GiB × 占用时长" };
+
 export function MeteringDimensionCards({
   dimension,
-  totals,
-  previousLabel = "上月",
+  metrics,
   onChange,
 }: MeteringDimensionCardsProps) {
   return (
-    <div className={styles.cards} role="group" aria-label="计量维度">
+    <div className={styles.cards} role="group" aria-label="资源使用维度">
       {meteringDimensions.map((item) => {
         const selected = item.key === dimension;
-        const total = totals.find((value) => value.resourceType === item.resourceType);
+        const usage = metrics.find((value) => value.metric === item.key);
         const Icon = icons[item.key];
         return (
           <button
@@ -43,21 +38,15 @@ export function MeteringDimensionCards({
               </span>
               <span>
                 <span className={styles.label}>{item.cardLabel}</span>
-                <span className={styles.subtitle}>{descriptions[item.key]}</span>
+                <span className={styles.subtitle}>平均{item.label}</span>
               </span>
               {selected && <span className={styles.selectedLabel}>当前维度</span>}
             </span>
             <span className={styles.value}>
-              {total?.value === undefined ? "-" : formatUsage(total.value)}
-              <small className={styles.unit}>{item.cardUnit}</small>
+              <UsageValue value={usage?.mean} knownValue={usage?.knownMean} unit={item.unit} />
             </span>
             <span className={styles.foot} style={{ display: "block" }}>
-              较{previousLabel}{" "}
-              <UsageChange
-                current={total?.value}
-                previous={total?.previous}
-                previousLabel={previousLabel}
-              />
+              <UsageQuality quality={usage?.quality} />
             </span>
           </button>
         );
