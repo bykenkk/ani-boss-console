@@ -1,5 +1,3 @@
-import type { PageParams } from "@/api/types";
-
 export type ResourceUsageMetric = "gpu" | "cpu" | "memory";
 export type ResourceUsageOrder = "asc" | "desc";
 
@@ -9,7 +7,9 @@ export interface ResourceUsageParams {
   metric: ResourceUsageMetric;
 }
 
-export interface ResourceUsageRankingParams extends ResourceUsageParams, PageParams {
+export interface ResourceUsageRankingParams extends ResourceUsageParams {
+  page?: number;
+  pageSize?: number;
   keyword?: string;
   order?: ResourceUsageOrder;
 }

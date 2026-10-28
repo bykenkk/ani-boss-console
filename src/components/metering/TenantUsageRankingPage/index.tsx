@@ -9,7 +9,6 @@ import {
   type ResourceUsageTenantRow,
 } from "@/api/resource-usage";
 import { ResourcePageFrame } from "@/components/common";
-import { useListPagination } from "@/hooks/useListPagination";
 import { getCurrentTimestamp, getResourceUsageRange } from "@/lib/date";
 import { MeteringDimensionCards } from "../MeteringDimensionCards";
 import {
@@ -29,6 +28,8 @@ export function TenantUsageRankingPage() {
   const [reference, setReference] = useState(getCurrentTimestamp);
   const [keyword, setKeyword] = useState("");
   const [order, setOrder] = useState<ResourceUsageOrder>("desc");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
   const [detailTenant, setDetailTenant] = useState<ResourceUsageTenantRow>();
   function refreshRangeIfStale() {
     const now = getCurrentTimestamp();
@@ -38,15 +39,14 @@ export function TenantUsageRankingPage() {
     () => getResourceUsageRange(usagePeriodHours[period], reference),
     [period, reference],
   );
-  const pagination = useListPagination(JSON.stringify({ period, dimension, keyword, order }));
   const current = meteringDimensions.find((item) => item.key === dimension)!;
   const params = {
     ...range,
     metric: dimension,
     keyword: keyword || undefined,
     order,
-    page: pagination.page,
-    pageSize: pagination.pageSize,
+    page,
+    pageSize,
   };
   const rankingQuery = useQuery({
     queryKey: resourceUsageKeys.tenants(params),
@@ -78,6 +78,7 @@ export function TenantUsageRankingPage() {
               options={usagePeriodOptions}
               onChange={(value) => {
                 setPeriod(value as ResourceUsagePeriod);
+                setPage(1);
                 setReference(getCurrentTimestamp());
                 setDetailTenant(undefined);
               }}
@@ -103,6 +104,7 @@ export function TenantUsageRankingPage() {
           refreshRangeIfStale();
           setDetailTenant(undefined);
           setDimension(key);
+          setPage(1);
         }}
       />
       <MeteringTenantTable
@@ -116,21 +118,24 @@ export function TenantUsageRankingPage() {
         onKeywordChange={(value) => {
           refreshRangeIfStale();
           setKeyword(value);
+          setPage(1);
         }}
         onOrderChange={(value) => {
           refreshRangeIfStale();
           setOrder(value);
+          setPage(1);
         }}
         pagination={{
-          page: pagination.page,
-          pageSize: pagination.pageSize,
+          page,
+          pageSize,
           setPage: (page) => {
             refreshRangeIfStale();
-            pagination.setPage(page);
+            setPage(page);
           },
           setPageSize: (pageSize) => {
             refreshRangeIfStale();
-            pagination.setPageSize(pageSize);
+            setPageSize(pageSize);
+            setPage(1);
           },
         }}
         loading={rankingQuery.isPending}
