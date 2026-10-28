@@ -125,6 +125,15 @@ export function getCurrentTimestamp() {
   return getTime(new Date());
 }
 
+export function getResourceUsageRange(hours: number, reference: DateValue = new Date()) {
+  const end = toDate(reference);
+  end.setMilliseconds(0);
+  return {
+    start: subHours(end, hours).toISOString(),
+    end: end.toISOString(),
+  };
+}
+
 export function hasElapsed(
   value: DateValue,
   durationMs: number,

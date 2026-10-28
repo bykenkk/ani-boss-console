@@ -1,43 +1,86 @@
-import { Progress } from "@arco-design/web-react";
-import { getChangeRate } from "@/lib/metering";
+import { Progress, Tooltip } from "@arco-design/web-react";
+import type { ResourceUsageQuality } from "@/api/resource-usage";
+import { StatusBadge, type StatusBadgeTone } from "@/components/common";
+import { formatDateTimeMinute } from "@/lib/date";
+import { formatUsage } from "@/lib/metering";
 import styles from "./index.module.less";
 
-export function UsageShare({ value, total }: { value: number; total: number }) {
-  const percent = total > 0 ? (value / total) * 100 : 0;
+interface UsageShareProps {
+  share?: number | null;
+}
+
+export function UsageShare({ share }: UsageShareProps) {
+  if (share === undefined || share === null) return <span>-</span>;
+  const percent = share * 100;
   return (
     <div className={styles.share}>
-      <Progress
-        percent={Math.max(0, Math.min(100, percent))}
-        showText={false}
-        strokeWidth={6}
-        color="#2b5ce6"
-      />
-      <strong>{percent > 0 && percent < 0.01 ? "<0.01" : Number(percent.toFixed(2))}%</strong>
+      <Progress percent={percent} showText={false} strokeWidth={6} color="#2b5ce6" />
+      <strong>{percent > 0 && percent < 0.01 ? "<0.01" : formatUsage(percent)}%</strong>
     </div>
   );
 }
 
-export function UsageChange({
-  current,
-  previous,
-  previousLabel = "上期",
-}: {
-  current?: number;
-  previous?: number;
-  previousLabel?: string;
-}) {
-  if (current === undefined || previous === undefined) return <span>-</span>;
-  if (previous === 0)
-    return (
-      <span className={current > 0 ? styles.chip : styles.hint}>
-        {current > 0 ? "新增" : `${previousLabel}无用量`}
-      </span>
-    );
-  const rate = getChangeRate(current, previous)!;
+interface UsageValueProps {
+  value?: number | null;
+  knownValue?: number | null;
+  unit?: string;
+}
+
+export function UsageValue({ value, knownValue, unit }: UsageValueProps) {
+  const complete = value !== undefined && value !== null;
   return (
-    <span style={{ color: rate > 0 ? "#e6862b" : rate < 0 ? "#22a06b" : "#9aa3b5" }}>
-      {rate > 0 ? "+" : ""}
-      {rate.toFixed(1)}%
+    <span>
+      {complete ? formatUsage(value) : "-"}
+      {complete && unit && <small className={styles.unit}>{unit}</small>}
+      {!complete && knownValue !== undefined && knownValue !== null && (
+        <span className="mt-1 block text-xs font-normal text-gray-500">
+          已知部分 {formatUsage(knownValue)} {unit}
+        </span>
+      )}
     </span>
+  );
+}
+
+const qualityLabels: Record<ResourceUsageQuality["status"], string> = {
+  OK: "完整",
+  PARTIAL: "部分数据",
+  NO_DATA: "无数据",
+  UNAVAILABLE: "暂不可用",
+};
+
+const qualityTones: Record<ResourceUsageQuality["status"], StatusBadgeTone> = {
+  OK: "success",
+  PARTIAL: "warning",
+  NO_DATA: "default",
+  UNAVAILABLE: "danger",
+};
+
+interface UsageQualityProps {
+  quality?: ResourceUsageQuality;
+}
+
+export function UsageQuality({ quality }: UsageQualityProps) {
+  if (!quality) return <span>-</span>;
+  return (
+    <Tooltip
+      content={
+        <div>
+          <div>
+            观测点：{quality.observedPoints} / {quality.expectedPoints}
+          </div>
+          {quality.coverage !== undefined && quality.coverage !== null && (
+            <div>覆盖率：{formatUsage(quality.coverage * 100)}%</div>
+          )}
+          {quality.availableFrom && (
+            <div>可用起点：{formatDateTimeMinute(quality.availableFrom)}</div>
+          )}
+          {quality.reasons?.length > 0 && <div>{quality.reasons.join("、")}</div>}
+        </div>
+      }
+    >
+      <span>
+        <StatusBadge value={qualityLabels[quality.status]} tone={qualityTones[quality.status]} />
+      </span>
+    </Tooltip>
   );
 }
