@@ -1,51 +1,43 @@
-import { Button, Card, Tabs } from "@arco-design/web-react";
-import { useQuery } from "@tanstack/react-query";
-import { fetchGpuOccupancy, gpuResourcePoolQueryKeys } from "@/api/gpu-inventory";
-import { fetchPlatformCapacity, platformQueryKeys } from "@/api/platform";
-import { ResourcePageFrame } from "@/components/common";
+import { Alert, Button, Card } from "@arco-design/web-react";
 import { IconRefresh } from "@arco-design/web-react/icon";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { acceleratorKeys } from "@/api/accelerator";
+import { gpuMonitoringKeys } from "@/api/gpu-monitoring";
+import { listManagement, managementKeys } from "@/api/management";
+import { ResourcePageFrame } from "@/components/common";
+import { usePlatformGpuOverview } from "@/hooks/usePlatformGpuOverview";
 import { PlatformCapacitySummary } from "../PlatformCapacitySummary";
 import { ResourceUsageSummary } from "../ResourceUsageSummary";
 import { GpuDeviceList } from "./GpuDeviceList";
-import { GpuEventList } from "./GpuEventList";
 
 export function PlatformOverviewPage() {
-  const capacityQuery = useQuery({
-    meta: {
-      errorNotification: {
-        id: "platform-capacity",
-        action: "平台容量加载",
-        fallback: "请求失败，请稍后重试",
-      },
-    },
-    queryKey: platformQueryKeys.capacity,
-    queryFn: fetchPlatformCapacity,
+  const client = useQueryClient();
+  const { clusters, overview, loading, refreshing } = usePlatformGpuOverview();
+  const tenantParams = { page: 1, pageSize: 1, filters: { status: "ON" } };
+  const tenants = useQuery({
+    queryKey: managementKeys.list("tenants", tenantParams),
+    queryFn: ({ signal }) => listManagement("tenants", tenantParams, signal),
+    meta: { errorNotification: { id: "enabled-tenant-count", action: "启用租户数加载" } },
   });
-  const occupancyQuery = useQuery({
-    meta: {
-      errorNotification: {
-        id: "gpu-occupancy",
-        action: "GPU 资源池汇总加载",
-        fallback: "请求失败，请稍后重试",
-      },
-    },
-    queryKey: gpuResourcePoolQueryKeys.occupancy,
-    queryFn: fetchGpuOccupancy,
-  });
-  const capacity = capacityQuery.data;
-  const occupancy = occupancyQuery.data;
-
   return (
     <ResourcePageFrame
       className="h-auto! min-h-(--app-content-available-height)"
       header={{
         title: "平台概览",
-        subtitle: "GPU 库存、租户与容量的一屏总览。当前数据用于资源运营观察。",
+        subtitle: "平台 GPU 设备、资源承诺和启用租户的一屏总览。",
         extra: (
           <Button
             icon={<IconRefresh />}
-            loading={capacityQuery.isFetching || occupancyQuery.isFetching}
-            onClick={() => void Promise.all([capacityQuery.refetch(), occupancyQuery.refetch()])}
+            loading={refreshing || tenants.isFetching}
+            onClick={() =>
+              Promise.all([
+                client.invalidateQueries({ queryKey: acceleratorKeys.all }),
+                client.invalidateQueries({ queryKey: gpuMonitoringKeys.all }),
+                client.invalidateQueries({
+                  queryKey: managementKeys.list("tenants", tenantParams),
+                }),
+              ])
+            }
           >
             刷新
           </Button>
@@ -53,24 +45,17 @@ export function PlatformOverviewPage() {
       }}
     >
       <section className="grid grid-cols-[minmax(0,2fr)_minmax(340px,1fr)] gap-4 max-[1100px]:grid-cols-1">
-        <ResourceUsageSummary
-          gpuTotal={capacity?.summary.gpuTotal}
-          occupancy={occupancy}
-          tenantCount={capacity?.summary.tenantCount}
-          loading={capacityQuery.isPending || occupancyQuery.isPending}
-        />
-        <PlatformCapacitySummary region={capacity?.regions[0]} loading={capacityQuery.isPending} />
+        <ResourceUsageSummary overview={overview} tenantCount={tenants.data?.total} />
+        <PlatformCapacitySummary models={overview.models} loading={loading} />
       </section>
-
-      <Card className="min-h-105 flex-1 rounded-lg [&_.arco-card-body]:p-0">
-        <Tabs defaultActiveTab="devices" type="line">
-          <Tabs.TabPane key="devices" title="设备列表">
-            <GpuDeviceList />
-          </Tabs.TabPane>
-          <Tabs.TabPane key="events" title="联动事件">
-            <GpuEventList />
-          </Tabs.TabPane>
-        </Tabs>
+      {!loading && overview.incomplete ? (
+        <Alert
+          type="info"
+          content="部分 GPU 容量或观测不完整，相应统计显示未知。未配置规格或清单未完整覆盖时，不计为零。"
+        />
+      ) : null}
+      <Card>
+        <GpuDeviceList clusters={clusters} allocations={overview.allocations} />
       </Card>
     </ResourcePageFrame>
   );

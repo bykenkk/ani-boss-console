@@ -1,140 +1,62 @@
-import { Empty, Progress } from "@arco-design/web-react";
-import {
-  IconApps,
-  IconDown,
-  IconSettings,
-  IconStorage,
-  IconThunderbolt,
-  IconUserGroup,
-} from "@arco-design/web-react/icon";
-import clsx from "clsx";
-import type { ReactNode } from "react";
-import type { PlatformCapacityRegion } from "@/api/platform";
-import styles from "./index.module.less";
+import { Card, Empty } from "@arco-design/web-react";
+import { formatGpuAmount, type ModelGpuCapacity } from "../gpu-capacity";
 
 interface PlatformCapacitySummaryProps {
-  region?: PlatformCapacityRegion;
+  models: ModelGpuCapacity[];
   loading: boolean;
 }
 
-interface CapacityMetricProps {
-  label: string;
-  value: string;
-  unit?: string;
-  hint: string;
-  icon: ReactNode;
-  tone: "cpu" | "memory" | "nodes" | "tenants";
-}
-
-function formatValue(value: number | undefined) {
-  return value === undefined ? "-" : value.toLocaleString("zh-CN");
-}
-
-function regionTitle(region?: PlatformCapacityRegion) {
-  if (!region) return "默认区域";
-  return region.displayName || region.name || region.code;
-}
-
-function CapacityMetric({ label, value, unit, hint, icon, tone }: CapacityMetricProps) {
+export function PlatformCapacitySummary({ models, loading }: PlatformCapacitySummaryProps) {
   return (
-    <div className={clsx(styles.metric, styles[tone])}>
-      <span className={styles.metricIcon} aria-hidden="true">
-        {icon}
-      </span>
-      <div className={styles.metricContent}>
-        <span className={styles.metricLabel}>{label}</span>
-        <div className={styles.metricValueRow}>
-          <strong className={styles.metricValue}>{value}</strong>
-          {unit ? <span className={styles.metricUnit}>{unit}</span> : null}
-        </div>
-        <span className={styles.metricHint}>{hint}</span>
-      </div>
-    </div>
-  );
-}
-
-export function PlatformCapacitySummary({ region, loading }: PlatformCapacitySummaryProps) {
-  const gpuTotal = region?.capacity.gpuTotal ?? 0;
-  const gpuFree = region?.capacity.gpuFree ?? 0;
-  const gpuProgress = gpuTotal > 0 ? (gpuFree / gpuTotal) * 100 : 0;
-
-  return (
-    <div className={styles.card}>
-      <div className={styles.header}>
-        <span className={styles.title}>资源容量</span>
-        <span className={styles.regionName} aria-label={`当前区域：${regionTitle(region)}`}>
-          <span>{regionTitle(region)}</span>
-          <IconDown aria-hidden="true" />
-        </span>
-      </div>
-      <div className={styles.body}>
-        {loading ? (
-          <div className={styles.state}>正在加载平台容量…</div>
-        ) : !region ? (
-          <div className={styles.state}>
-            <Empty description="暂无平台容量数据" />
-          </div>
-        ) : (
-          <div className={styles.capacityGrid}>
-            <section className={styles.gpuMetric} aria-label="GPU 容量">
-              <div className={styles.gpuSummary}>
-                <span className={styles.gpuIcon} aria-hidden="true">
-                  <IconThunderbolt />
-                </span>
-                <div className={styles.gpuContent}>
-                  <span className={styles.gpuLabel}>GPU 空闲 / 总量</span>
-                  <div className={styles.gpuValueRow}>
-                    <strong>{formatValue(gpuFree)}</strong>
-                    <span>/ {formatValue(gpuTotal)} 卡</span>
-                  </div>
-                </div>
+    <Card className="h-full">
+      <h3 className="m-0 mb-3 text-base font-semibold">GPU 资源容量</h3>
+      <p className="mb-4 text-xs text-[var(--color-text-3)]">
+        按集群、型号统计，展示未分配 / 总量。
+      </p>
+      {models.length ? (
+        <div className="flex max-h-96 flex-col gap-4 overflow-auto">
+          {models.map((model) => (
+            <section
+              key={model.key}
+              className="border-b border-[var(--color-border-2)] pb-3 last:border-0"
+            >
+              <div className="font-medium">{model.clusterName}</div>
+              <div className="my-1 break-words text-xs text-[var(--color-text-3)]">
+                {model.modelKey}
               </div>
-              <Progress
-                percent={Math.max(0, Math.min(100, gpuProgress))}
-                showText={false}
-                strokeWidth={5}
-                color="#2b5ce6"
-              />
-              <span className={styles.gpuHint}>
-                当前空闲 {formatValue(gpuFree)} 卡，
-                {gpuFree > 0 ? "可供租户分配" : "全部已被租户占用"}
-              </span>
+              <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-3 gap-y-2 text-xs">
+                <dt>整卡</dt>
+                <dd className="m-0 text-right">
+                  {formatGpuAmount(model.wholeFree)} / {formatGpuAmount(model.wholeTotal)} 张未分配
+                </dd>
+                <dt>共享显存</dt>
+                <dd className="m-0 text-right">
+                  {formatGpuAmount(
+                    model.sharedFreeMiB === undefined ? undefined : model.sharedFreeMiB / 1024,
+                  )}{" "}
+                  /{" "}
+                  {formatGpuAmount(
+                    model.sharedTotalMiB === undefined ? undefined : model.sharedTotalMiB / 1024,
+                  )}{" "}
+                  GiB 未分配
+                </dd>
+              </dl>
+              {model.closedGroups > 0 ? (
+                <div className="mt-2 text-xs text-[var(--color-text-3)]">
+                  {model.closedGroups} 个供给组已关闭接单
+                </div>
+              ) : null}
             </section>
-
-            <CapacityMetric
-              label="CPU 总量"
-              value={formatValue(region.capacity.cpuCores)}
-              unit="核"
-              hint="allocatable"
-              icon={<IconSettings />}
-              tone="cpu"
-            />
-            <CapacityMetric
-              label="内存总量"
-              value={formatValue(region.capacity.memoryGiB)}
-              unit="GiB"
-              hint="allocatable"
-              icon={<IconStorage />}
-              tone="memory"
-            />
-            <CapacityMetric
-              label="节点 / 可用区"
-              value={formatValue(region.capacity.nodes)}
-              unit="节点"
-              hint={`AZ ${region.azs.join("、") || "未划分"}`}
-              icon={<IconApps />}
-              tone="nodes"
-            />
-            <CapacityMetric
-              label="租户数"
-              value={formatValue(region.tenantCount)}
-              hint="已接入租户"
-              icon={<IconUserGroup />}
-              tone="tenants"
-            />
-          </div>
-        )}
-      </div>
-    </div>
+          ))}
+        </div>
+      ) : loading ? (
+        <div className="py-10 text-center text-[var(--color-text-3)]">正在加载 GPU 容量…</div>
+      ) : (
+        <Empty description="暂无 GPU 容量数据" />
+      )}
+      <p className="mb-0 mt-4 text-xs text-[var(--color-text-3)]">
+        未分配容量仍受接单状态、单卡余量及切片槽位限制。
+      </p>
+    </Card>
   );
 }

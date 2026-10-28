@@ -7,112 +7,100 @@ import {
   IconThunderbolt,
   IconUserGroup,
 } from "@arco-design/web-react/icon";
-import type { ReactNode } from "react";
-import type { GpuOccupancy } from "@/api/gpu-inventory";
+import { formatGpuAmount, type PlatformGpuOverview } from "../gpu-capacity";
 
 interface ResourceUsageSummaryProps {
-  gpuTotal?: number;
-  occupancy?: GpuOccupancy;
-  tenantCount?: number;
-  loading: boolean;
+  overview: PlatformGpuOverview;
+  tenantCount?: string;
 }
 
-interface ResourceMetric {
-  label: string;
-  value: ReactNode;
-  hint: string;
-  icon: ReactNode;
-}
-
-function formatValue(value: number | undefined, loading: boolean) {
-  return loading || value === undefined ? "-" : value.toLocaleString("zh-CN");
-}
-
-export function ResourceUsageSummary({
-  gpuTotal,
-  occupancy,
-  tenantCount,
-  loading,
-}: ResourceUsageSummaryProps) {
-  const abnormalCount = occupancy
-    ? occupancy.fault + occupancy.maintenanceCount + occupancy.unavailableCount
-    : undefined;
-  const metrics: ResourceMetric[] = [
+export function ResourceUsageSummary({ overview, tenantCount }: ResourceUsageSummaryProps) {
+  const { health } = overview;
+  const metrics = [
     {
-      label: "GPU 库存总量",
-      value: formatValue(gpuTotal ?? occupancy?.total, loading),
-      hint: "全部设备合计",
+      label: "物理 GPU 总量",
+      value: formatGpuAmount(overview.physicalCount),
+      unit: "张",
+      hint: "平台已纳管设备，按设备去重",
       icon: <IconThunderbolt />,
     },
     {
-      label: "物理卡 / 逻辑卡",
-      value:
-        loading || !occupancy ? (
-          "- / -"
-        ) : (
-          <>
-            {occupancy.physicalCardCount ?? 0}
-            <small>/ {occupancy.logicalCardCount ?? 0}</small>
-          </>
-        ),
-      hint: "含 vGPU 切分",
+      label: "共享显存总量",
+      value: formatGpuAmount(
+        overview.sharedTotalMiB === undefined ? undefined : overview.sharedTotalMiB / 1024,
+      ),
+      unit: "GiB",
+      hint: "共享供给的显存分配预算",
       icon: <IconStorage />,
     },
     {
-      label: "空闲未分配",
-      value: formatValue(occupancy?.available, loading),
-      hint: "可切分 / 可用",
+      label: "未分配资源",
+      value: (
+        <div className="flex flex-col gap-1 text-base">
+          <span>整卡 {formatGpuAmount(overview.wholeFree)} 张</span>
+          <span>
+            共享显存{" "}
+            {formatGpuAmount(
+              overview.sharedFreeMiB === undefined ? undefined : overview.sharedFreeMiB / 1024,
+            )}{" "}
+            GiB
+          </span>
+        </div>
+      ),
+      hint: "未分配不代表任意规格都能创建",
       icon: <IconArchive />,
     },
     {
-      label: "已占用",
-      value: formatValue(occupancy?.inUse, loading),
-      hint: `覆盖 ${occupancy?.tenantCount ?? 0} 个租户`,
+      label: "已分配资源",
+      value: (
+        <div className="flex flex-col gap-1 text-base">
+          <span>整卡 {formatGpuAmount(overview.wholeAllocated)} 张</span>
+          <span>
+            共享显存{" "}
+            {formatGpuAmount(
+              overview.sharedAllocatedMiB === undefined
+                ? undefined
+                : overview.sharedAllocatedMiB / 1024,
+            )}{" "}
+            GiB
+          </span>
+        </div>
+      ),
+      hint: "已承诺资源，与实际使用量分开",
       icon: <IconApps />,
     },
     {
-      label: "异常",
-      value: formatValue(abnormalCount, loading),
-      hint: occupancy
-        ? `维护 ${occupancy.maintenanceCount} · 不可用 ${occupancy.unavailableCount} · 故障 ${occupancy.fault}`
-        : "维护 0 · 不可用 0 · 故障 0",
+      label: "设备健康",
+      value: (
+        <div className="flex flex-col gap-1 text-base">
+          <span>
+            健康 {formatGpuAmount(health?.healthy)} · 不健康 {formatGpuAmount(health?.unhealthy)}
+          </span>
+          <span>观测未知 {formatGpuAmount(health?.unknown)}</span>
+        </div>
+      ),
+      hint: "以设备健康和观测完整性判断",
       icon: <IconExclamationCircle />,
     },
     {
-      label: "租户数",
-      value: formatValue(tenantCount, loading),
-      hint: "状态可用的租户",
+      label: "启用租户数",
+      value: tenantCount === undefined ? "未知" : Number(tenantCount).toLocaleString("zh-CN"),
+      unit: "个",
+      hint: "平台状态为启用的租户",
       icon: <IconUserGroup />,
     },
   ];
-
   return (
-    <div className="grid grid-cols-3 gap-4 max-[1100px]:grid-cols-2">
-      {metrics.map((metric, index) => (
+    <div className="grid grid-cols-3 gap-4 max-[1400px]:grid-cols-2 max-[600px]:grid-cols-1">
+      {metrics.map((metric, i) => (
         <MetricCard
           key={metric.label}
           label={metric.label}
           value={metric.value}
+          unit={metric.unit}
+          subtitle={metric.hint}
           icon={metric.icon}
-          unit={index === 1 ? undefined : index === 5 ? "个" : "卡"}
-          subtitle={index === 4 ? "不参与调度" : metric.hint}
-          tone={(["blue", "blue", "green", "amber", "red", "purple"] as const)[index]}
-          percent={
-            !loading && occupancy && (index === 2 || index === 3)
-              ? occupancy.total > 0
-                ? ((index === 2 ? occupancy.available : occupancy.inUse) / occupancy.total) * 100
-                : 0
-              : undefined
-          }
-          foot={
-            index === 2
-              ? "物理卡口径 · 未分配"
-              : index === 3
-                ? "节点级占用映射"
-                : index === 4
-                  ? metric.hint
-                  : undefined
-          }
+          tone={(["blue", "blue", "green", "amber", "red", "purple"] as const)[i]}
         />
       ))}
     </div>
