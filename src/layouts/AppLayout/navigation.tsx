@@ -59,13 +59,16 @@ const infrastructureNavigation: readonly NavigationLeaf[] = [
   { label: "存储基础设施", to: "/storage" },
   { label: "租户存储配额", to: "/storage-quotas" },
   { label: "网络基础设施", to: "/network" },
+  { label: "镜像配额", to: "/registry-quota" },
+  { label: "漏洞扫描", to: "/registry-vulnerabilities" },
+  { label: "垃圾回收", to: "/registry-gc" },
+];
+
+const networkNavigation: readonly NavigationLeaf[] = [
   { label: "虚拟交换机", to: "/virtual-switches" },
   { label: "二层网络", to: "/layer2-networks" },
   { label: "公有网络", to: "/public-networks" },
   { label: "EIP 管理", to: "/eips" },
-  { label: "镜像配额", to: "/registry-quota" },
-  { label: "漏洞扫描", to: "/registry-vulnerabilities" },
-  { label: "垃圾回收", to: "/registry-gc" },
 ];
 
 const observabilityNavigation: readonly NavigationLeaf[] = [
@@ -179,6 +182,12 @@ const completeAppNavigation: readonly NavigationItem[] = [
     label: "资源池管理",
     icon: <IconCloud />,
     children: infrastructureNavigation,
+  },
+  {
+    key: "network-management",
+    label: "网络管理",
+    icon: <IconLink />,
+    children: networkNavigation,
   },
   {
     key: "tenant-management",
