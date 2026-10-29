@@ -3,145 +3,92 @@ import { IconRefresh } from "@arco-design/web-react/icon";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import {
-  fetchPlatformMeteringUsage,
-  platformQueryKeys,
-  type PlatformMeteringUsageItem,
-} from "@/api/platform";
+  listResourceUsageTenants,
+  resourceUsageKeys,
+  type ResourceUsageOrder,
+  type ResourceUsageTenantRow,
+} from "@/api/resource-usage";
 import { ResourcePageFrame } from "@/components/common";
-import { getUtcMeteringRanges, type MeteringPeriod } from "@/lib/date";
-import { toGpuHours, type MeteringTenantRow } from "@/lib/metering";
+import { useListPagination } from "@/hooks/useListPagination";
+import { getCurrentTimestamp, getResourceUsageRange } from "@/lib/date";
 import { MeteringDimensionCards } from "../MeteringDimensionCards";
-import { meteringDimensions, type MeteringDimension } from "../model";
+import {
+  meteringDimensions,
+  usagePeriodHours,
+  usagePeriodOptions,
+  type MeteringDimension,
+  type ResourceUsagePeriod,
+} from "../model";
 import { MeteringTenantTable } from "./MeteringTenantTable";
 import { TenantMeteringDrawer } from "./TenantMeteringDrawer";
-
 import styles from "../MeteringPresentation/index.module.less";
 
-function sumTenantItems(items: PlatformMeteringUsageItem[]) {
-  const result = new Map<string, number>();
-  items.forEach((item) => {
-    if (!item.tenantId) return;
-    result.set(item.tenantId, (result.get(item.tenantId) || 0) + toGpuHours(item.totalQuantity));
-  });
-  return result;
-}
-
 export function TenantUsageRankingPage() {
-  // TODO(tenant-name-integration): 已移除 ANI 租户名称查询，当前仅按计量租户 ID 展示和搜索；待对应的名称查询契约明确后接入，恢复名称展示与搜索。
-  const [period, setPeriod] = useState<MeteringPeriod>("month");
-  const periodLabel =
-    period === "month" ? "本月" : period === "recent-seven-days" ? "近7日" : "上月";
-  const previousLabel =
-    period === "month" ? "上月同期" : period === "recent-seven-days" ? "前7日" : "上上月";
+  const [period, setPeriod] = useState<ResourceUsagePeriod>("24h");
   const [dimension, setDimension] = useState<MeteringDimension>("gpu");
-  const [detailTenantId, setDetailTenantId] = useState<string>();
-  const ranges = useMemo(() => getUtcMeteringRanges(period), [period]);
-  const current =
-    meteringDimensions.find((item) => item.key === dimension) ?? meteringDimensions[0];
-  const currentParams = {
-    startTime: ranges.currentStart,
-    endTime: ranges.currentEnd,
-    groupBy: "tenant_id" as const,
-  };
-  const previousParams = {
-    startTime: ranges.previousStart,
-    endTime: ranges.previousEnd,
-    groupBy: "tenant_id" as const,
-  };
-  const currentQuery = useQuery({
-    queryKey: platformQueryKeys.meteringUsage(currentParams),
-    queryFn: () => fetchPlatformMeteringUsage(currentParams),
-    staleTime: 60_000,
-    meta: {
-      errorNotification: {
-        id: "platform-metering-current",
-        action: "计量维度总量加载",
-        fallback: "请求失败，请稍后重试",
-      },
-    },
-  });
-  const previousQuery = useQuery({
-    queryKey: platformQueryKeys.meteringUsage(previousParams),
-    queryFn: () => fetchPlatformMeteringUsage(previousParams),
-    staleTime: 60_000,
-    meta: {
-      errorNotification: {
-        id: "platform-metering-previous",
-        action: "上期计量数据加载",
-        fallback: "请求失败，请稍后重试",
-      },
-    },
-  });
-  const totals = meteringDimensions.map((item) => ({
-    resourceType: item.resourceType,
-    previous: previousQuery.data
-      ? toGpuHours(
-          previousQuery.data.items
-            .filter((usage) => usage.resourceType === item.resourceType)
-            .reduce((sum, usage) => sum + usage.totalQuantity, 0),
-        )
-      : undefined,
-    value: currentQuery.data
-      ? toGpuHours(
-          currentQuery.data.items
-            .filter((usage) => usage.resourceType === item.resourceType)
-            .reduce((total, usage) => total + usage.totalQuantity, 0),
-        )
-      : undefined,
-  }));
-  const currentItems =
-    currentQuery.data?.items.filter((item) => item.resourceType === current.resourceType) ?? [];
-  const currentTenants = sumTenantItems(currentItems);
-  const previousTenants = sumTenantItems(
-    previousQuery.data?.items.filter((item) => item.resourceType === current.resourceType) ?? [],
+  const [reference, setReference] = useState(getCurrentTimestamp);
+  const [keyword, setKeyword] = useState("");
+  const [order, setOrder] = useState<ResourceUsageOrder>("desc");
+  const [detailTenant, setDetailTenant] = useState<ResourceUsageTenantRow>();
+  function refreshRangeIfStale() {
+    const now = getCurrentTimestamp();
+    if (now - reference > 30_000) setReference(now);
+  }
+  const range = useMemo(
+    () => getResourceUsageRange(usagePeriodHours[period], reference),
+    [period, reference],
   );
-  const rows: MeteringTenantRow[] =
-    !currentQuery.data || !previousQuery.data
-      ? []
-      : Array.from(new Set([...currentTenants.keys(), ...previousTenants.keys()])).map(
-          (id): MeteringTenantRow => {
-            const currentUsage = currentTenants.get(id) || 0;
-            const previousUsage = previousTenants.get(id) || 0;
-            return {
-              id,
-              current: currentUsage,
-              previous: previousUsage,
-              trend:
-                currentUsage > previousUsage
-                  ? "up"
-                  : currentUsage < previousUsage
-                    ? "down"
-                    : "flat",
-            };
-          },
-        );
+  const pagination = useListPagination(JSON.stringify({ period, dimension, keyword, order }));
+  const current = meteringDimensions.find((item) => item.key === dimension)!;
+  const params = {
+    ...range,
+    metric: dimension,
+    keyword: keyword || undefined,
+    order,
+    page: pagination.page,
+    pageSize: pagination.pageSize,
+  };
+  const rankingQuery = useQuery({
+    queryKey: resourceUsageKeys.tenants(params),
+    queryFn: ({ signal }) => listResourceUsageTenants(params, signal),
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    meta: {
+      errorNotification: {
+        id: "resource-usage-tenants",
+        action: "租户资源使用排行加载",
+        fallback: "请求失败，请稍后重试",
+      },
+    },
+  });
 
   return (
     <ResourcePageFrame
       className={styles.page}
       header={{
         title: "租户用量排行",
-        subtitle: "按所选周期累计用量排序，切换维度查看各租户计量数据。",
+        subtitle: "按所选周期平均实际用量排序；顶部展示全平台统计，搜索和翻页不改变合计。",
         extra: (
           <div className={styles.periods}>
             <Radio.Group
               aria-label="统计周期"
               type="button"
               value={period}
+              options={usagePeriodOptions}
               onChange={(value) => {
-                setPeriod(value as MeteringPeriod);
-                setDetailTenantId(undefined);
+                setPeriod(value as ResourceUsagePeriod);
+                setReference(getCurrentTimestamp());
+                setDetailTenant(undefined);
               }}
-              options={[
-                { value: "month", label: "本月" },
-                { value: "recent-seven-days", label: "近7日" },
-                { value: "previous-month", label: "上月" },
-              ]}
             />
             <Button
               icon={<IconRefresh />}
-              loading={currentQuery.isFetching || previousQuery.isFetching}
-              onClick={() => Promise.all([currentQuery.refetch(), previousQuery.refetch()])}
+              loading={rankingQuery.isFetching}
+              onClick={() => {
+                setReference(getCurrentTimestamp());
+                setDetailTenant(undefined);
+              }}
             >
               刷新
             </Button>
@@ -151,36 +98,57 @@ export function TenantUsageRankingPage() {
     >
       <MeteringDimensionCards
         dimension={dimension}
-        totals={totals}
-        previousLabel={previousLabel}
+        metrics={rankingQuery.data?.metrics ?? []}
         onChange={(key) => {
-          setDetailTenantId(undefined);
+          refreshRangeIfStale();
+          setDetailTenant(undefined);
           setDimension(key);
         }}
       />
-
       <MeteringTenantTable
-        key={dimension + period}
-        periodLabel={periodLabel}
-        previousLabel={previousLabel}
-        rows={rows}
+        rows={rankingQuery.data?.items ?? []}
+        total={rankingQuery.data?.total}
+        stepSeconds={rankingQuery.data?.stepSeconds}
         metricLabel={current.cardLabel}
-        unit={current.cardUnit}
-        loading={currentQuery.isPending || previousQuery.isPending}
-        onViewDetail={setDetailTenantId}
-      />
-
-      <TenantMeteringDrawer
-        key={`${current.key}-${detailTenantId || "closed"}`}
-        visible={Boolean(detailTenantId)}
-        tenantId={detailTenantId}
-        resourceType={current.resourceType}
-        metricLabel={current.label}
         unit={current.unit}
-        startTime={ranges.currentStart}
-        endTime={ranges.currentEnd}
-        onCancel={() => setDetailTenantId(undefined)}
+        keyword={keyword}
+        order={order}
+        onKeywordChange={(value) => {
+          refreshRangeIfStale();
+          setKeyword(value);
+        }}
+        onOrderChange={(value) => {
+          refreshRangeIfStale();
+          setOrder(value);
+        }}
+        pagination={{
+          page: pagination.page,
+          pageSize: pagination.pageSize,
+          setPage: (page) => {
+            refreshRangeIfStale();
+            pagination.setPage(page);
+          },
+          setPageSize: (pageSize) => {
+            refreshRangeIfStale();
+            pagination.setPageSize(pageSize);
+          },
+        }}
+        loading={rankingQuery.isPending}
+        onViewDetail={(tenant) => {
+          refreshRangeIfStale();
+          setDetailTenant(tenant);
+        }}
       />
+      {detailTenant && (
+        <TenantMeteringDrawer
+          tenantId={detailTenant.tenantId}
+          tenantName={detailTenant.tenantName}
+          metric={dimension}
+          start={range.start}
+          end={range.end}
+          onCancel={() => setDetailTenant(undefined)}
+        />
+      )}
     </ResourcePageFrame>
   );
 }

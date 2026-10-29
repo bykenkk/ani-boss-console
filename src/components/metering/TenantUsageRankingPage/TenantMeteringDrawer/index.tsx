@@ -1,140 +1,145 @@
-import { Drawer, Empty, Tabs } from "@arco-design/web-react";
+import { Drawer, Empty } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
 import {
-  fetchPlatformMeteringUsage,
-  platformQueryKeys,
-  type PlatformMeteringGroupBy,
-  type PlatformMeteringResourceType,
-  type PlatformMeteringUsageParams,
-} from "@/api/platform";
-import { DataTable, type ListColumn } from "@/components/common";
-import { formatDate, formatDateHour, formatUtcDate } from "@/lib/date";
+  getResourceUsageTenant,
+  resourceUsageKeys,
+  type ResourceUsageMetric,
+  type ResourceUsagePoint,
+} from "@/api/resource-usage";
+import { DataTable, SummaryStrip, type ListColumn } from "@/components/common";
+import { formatDateTimeMinute, formatMonthDayTime } from "@/lib/date";
 import { withId } from "@/lib/id";
+import { UsageQuality, UsageValue } from "../../MeteringPresentation";
 import { MeteringTrend } from "../../MeteringTrend";
-import { formatUsage, toGpuHours } from "@/lib/metering";
-
-type DetailGroupBy = Extract<PlatformMeteringGroupBy, "day" | "hour">;
+import { meteringDimensions } from "../../model";
 
 interface TenantMeteringDrawerProps {
-  visible: boolean;
-  tenantId?: string;
-  resourceType: PlatformMeteringResourceType;
-  metricLabel: string;
-  unit: string;
-  startTime: string;
-  endTime: string;
+  tenantId: number;
+  tenantName: string;
+  metric: ResourceUsageMetric;
+  start: string;
+  end: string;
   onCancel: () => void;
 }
 
-interface TenantMeteringDetailRow {
-  id: string;
-  period: string;
-  usage: number;
-}
-
-function formatPeriod(period: string, groupBy: DetailGroupBy) {
-  return groupBy === "hour" ? formatDateHour(period) : formatDate(period);
-}
-
 export function TenantMeteringDrawer({
-  visible,
   tenantId,
-  resourceType,
-  metricLabel,
-  unit,
-  startTime,
-  endTime,
+  tenantName,
+  metric,
+  start,
+  end,
   onCancel,
 }: TenantMeteringDrawerProps) {
-  const [groupBy, setGroupBy] = useState<DetailGroupBy>("day");
-  const params = useMemo<PlatformMeteringUsageParams | undefined>(() => {
-    if (!tenantId) return undefined;
-    return { startTime, endTime, resourceType, groupBy, tenantId };
-  }, [endTime, groupBy, resourceType, startTime, tenantId]);
-
+  const params = { start, end, metric };
+  const current = meteringDimensions.find((item) => item.key === metric)!;
   const detailQuery = useQuery({
+    queryKey: resourceUsageKeys.tenant(tenantId, params),
+    queryFn: ({ signal }) => getResourceUsageTenant(tenantId, params, signal),
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
     meta: {
       errorNotification: {
-        id: withId("platform-metering-tenant", tenantId, resourceType, groupBy),
-        action: `${metricLabel}租户明细加载`,
+        id: withId("resource-usage-tenant", tenantId, metric),
+        action: "租户资源使用明细加载",
         fallback: "请求失败，请稍后重试",
       },
     },
-    queryKey: params
-      ? platformQueryKeys.meteringUsage(params)
-      : (["platform", "metering-usage", "tenant-detail-disabled"] as const),
-    enabled: visible && Boolean(params),
-    queryFn: () => {
-      if (!params) throw new Error("缺少租户计量查询参数");
-      return fetchPlatformMeteringUsage(params);
-    },
-    staleTime: 60_000,
   });
-
-  const rows = useMemo<TenantMeteringDetailRow[]>(
-    () =>
-      (detailQuery.data?.items || []).map((item, index) => ({
-        id: `${item.period || "unknown"}-${index}`,
-        period: item.period ? formatPeriod(item.period, groupBy) : "-",
-        usage: toGpuHours(item.totalQuantity),
-      })),
-    [detailQuery.data?.items, groupBy],
-  );
-
-  const columns: ListColumn<TenantMeteringDetailRow>[] = [
+  const detail = detailQuery.data;
+  const usage = detail?.metrics.find((item) => item.metric === metric);
+  const points = usage?.points ?? [];
+  const columns: ListColumn<ResourceUsagePoint>[] = [
     {
-      title: groupBy === "day" ? "日期" : "小时",
-      dataIndex: "period",
-      width: 220,
+      title: "观测区间开始",
+      dataIndex: "timestamp",
+      width: 180,
+      render: (value) => formatDateTimeMinute(value),
     },
     {
-      title: `用量（${unit}）`,
-      dataIndex: "usage",
-      width: 220,
-      render: (_, row) => formatUsage(row.usage),
+      title: "观测区间结束",
+      dataIndex: "end",
+      width: 180,
+      render: (value) => formatDateTimeMinute(value),
+    },
+    {
+      title: "平均值（" + current.unit + "）",
+      width: 180,
+      render: (_, row) => (
+        <UsageValue value={row.value} knownValue={row.knownValue} unit={current.unit} />
+      ),
+    },
+    {
+      title: "采样峰值（" + current.unit + "）",
+      width: 160,
+      render: (_, row) => <UsageValue value={row.peak} unit={current.unit} />,
     },
   ];
 
   return (
     <Drawer
-      width={760}
-      title={`${metricLabel} · 租户用量明细`}
-      visible={visible}
+      width={800}
+      title={current.cardLabel + " · 租户使用明细"}
+      visible
       onCancel={onCancel}
       footer={null}
-      unmountOnExit
     >
       <div className="space-y-4">
         <div>
-          <div className="text-xs text-gray-500">租户 ID</div>
-          <div className="mt-1 break-all font-mono text-sm text-gray-900">{tenantId || "-"}</div>
+          <div className="text-sm font-medium">{detail?.tenantName ?? tenantName}</div>
+          <div className="mt-1 font-mono text-xs text-gray-500">租户 ID：{tenantId}</div>
           <div className="mt-2 text-xs text-gray-500">
-            查询范围：{formatUtcDate(startTime)} 至 {formatUtcDate(endTime)}（UTC）
+            查询范围：{formatDateTimeMinute(detail?.start ?? start)} 至{" "}
+            {formatDateTimeMinute(detail?.end ?? end)}
           </div>
         </div>
-
-        <Tabs activeTab={groupBy} onChange={(key) => setGroupBy(key as DetailGroupBy)}>
-          <Tabs.TabPane key="day" title="按天" />
-          <Tabs.TabPane key="hour" title="按小时" />
-        </Tabs>
-
-        <MeteringTrend
-          labels={rows.map((row) => row.period)}
-          values={rows.map((row) => Number(row.usage.toFixed(2)))}
-          label={`${metricLabel} 租户明细`}
-          unit={unit}
+        <SummaryStrip
+          pending={detailQuery.isPending}
+          items={[
+            {
+              label: "平均" + current.label,
+              value: (
+                <UsageValue value={usage?.mean} knownValue={usage?.knownMean} unit={current.unit} />
+              ),
+            },
+            {
+              label: "周期采样峰值",
+              value: (
+                <UsageValue value={usage?.peak} knownValue={usage?.knownPeak} unit={current.unit} />
+              ),
+              note: detail
+                ? "按 " +
+                  detail.stepSeconds +
+                  " 秒采样网格计算" +
+                  (usage?.peakAt ? "；出现在 " + formatDateTimeMinute(usage.peakAt) : "")
+                : undefined,
+            },
+            {
+              label: "数据完整性",
+              value: <UsageQuality quality={usage?.quality} />,
+              note: detail?.dataCutoff
+                ? "数据截止 " + formatDateTimeMinute(detail.dataCutoff)
+                : undefined,
+            },
+          ]}
         />
-
+        <MeteringTrend
+          labels={points.map((point) => formatMonthDayTime(point.timestamp))}
+          values={points.map((point) => point.value ?? null)}
+          knownValues={points.map((point) => point.knownValue ?? null)}
+          label={current.label}
+          unit={current.unit}
+        />
         <DataTable
-          rowKey="id"
+          header={{ title: "观测明细", description: "缺失观测不补零；部分数据单独标明已知部分。" }}
+          rowKey="timestamp"
           columns={columns}
-          data={rows}
+          data={points}
           loading={detailQuery.isPending}
           pagination={false}
-          scroll={{ x: 520, y: 360 }}
-          tableLabel={`${metricLabel} 租户计量明细`}
-          noDataElement={<Empty description={`当前时间范围内暂无 ${metricLabel} 明细`} />}
+          scroll={{ x: 700, y: 360 }}
+          tableLabel={current.cardLabel + " 租户使用明细"}
+          noDataElement={<Empty description="当前时间范围内暂无观测明细" />}
         />
       </div>
     </Drawer>

@@ -1,145 +1,143 @@
-import { Button, Input, Select } from "@arco-design/web-react";
-import { useState } from "react";
+import { Button, Input, Select, Space } from "@arco-design/web-react";
+import type { ResourceUsageOrder, ResourceUsageTenantRow } from "@/api/resource-usage";
 import { ListDataTable, ResourceNameId, type ListColumn } from "@/components/common";
-import { formatUsage, type MeteringTenantRow } from "@/lib/metering";
-import { UsageChange, UsageShare } from "../../MeteringPresentation";
+import { UsageQuality, UsageShare, UsageValue } from "../../MeteringPresentation";
 import styles from "../../MeteringPresentation/index.module.less";
+
 interface MeteringTenantTableProps {
-  rows: MeteringTenantRow[];
+  rows: ResourceUsageTenantRow[];
+  total?: string;
+  stepSeconds?: number;
   metricLabel: string;
   unit: string;
-  periodLabel: string;
-  previousLabel: string;
+  keyword: string;
+  order: ResourceUsageOrder;
+  onKeywordChange: (keyword: string) => void;
+  onOrderChange: (order: ResourceUsageOrder) => void;
+  pagination: {
+    page: number;
+    pageSize: number;
+    setPage: (page: number) => void;
+    setPageSize: (pageSize: number) => void;
+  };
   loading: boolean;
-  onViewDetail: (tenantId: string) => void;
+  onViewDetail: (tenant: ResourceUsageTenantRow) => void;
 }
+
 export function MeteringTenantTable({
   rows,
+  total,
+  stepSeconds,
   metricLabel,
   unit,
-  periodLabel,
-  previousLabel,
+  keyword,
+  order,
+  onKeywordChange,
+  onOrderChange,
+  pagination,
   loading,
   onViewDetail,
 }: MeteringTenantTableProps) {
-  const [keyword, setKeyword] = useState("");
-  const [order, setOrder] = useState("desc");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
-  const total = rows.reduce((sum, row) => sum + row.current, 0);
-  const rankedRows = [...rows]
-    .filter((row) => row.current > 0 || row.previous > 0)
-    .sort((left, right) => right.current - left.current)
-    .map((row, index) => ({ ...row, rank: index + 1 }));
-  const filtered = rankedRows.filter((row) =>
-    row.id.toLowerCase().includes(keyword.trim().toLowerCase()),
-  );
-  if (order === "asc") filtered.reverse();
-  const columns: ListColumn<(typeof rankedRows)[number]>[] = [
+  const columns: ListColumn<ResourceUsageTenantRow>[] = [
     {
       title: "排名",
-      width: 65,
-      render: (_, row) => <span className={styles.rank}>{row.rank}</span>,
+      dataIndex: "rank",
+      width: 70,
+      render: (value) => (value == null ? "-" : <span className={styles.rank}>{value}</span>),
     },
     {
-      title: "租户",
+      title: "租户名称 / ID",
       width: 200,
-      render: (_, row) => <ResourceNameId name={row.id} id={row.id} avatarText={row.id} />,
+      ellipsis: true,
+      render: (_, row) => (
+        <ResourceNameId
+          name={row.tenantName}
+          id={String(row.tenantId)}
+          avatarText={row.tenantName}
+        />
+      ),
     },
     {
-      title: `${periodLabel}用量`,
-      width: 155,
+      title: "周期平均值（" + unit + "）",
+      width: 180,
       render: (_, row) => (
-        <strong>
-          {formatUsage(row.current)}
-          <small className={styles.unit}>{unit}</small>
-        </strong>
+        <UsageValue value={row.usage.mean} knownValue={row.usage.knownMean} unit={unit} />
+      ),
+    },
+    {
+      title: "周期采样峰值（" + unit + "）",
+      width: 180,
+      render: (_, row) => (
+        <UsageValue value={row.usage.peak} knownValue={row.usage.knownPeak} unit={unit} />
       ),
     },
     {
       title: "占比",
       width: 185,
-      render: (_, row) => <UsageShare value={row.current} total={total} />,
+      render: (_, row) => <UsageShare share={row.share} />,
     },
     {
-      title: previousLabel,
-      width: 155,
-      render: (_, row) => (
-        <span>
-          {formatUsage(row.previous)}
-          <small className={styles.unit}>{unit}</small>
-        </span>
-      ),
-    },
-    {
-      title: "环比",
-      width: 90,
-      render: (_, row) => <UsageChange current={row.current} previous={row.previous} />,
+      title: "数据完整性",
+      width: 120,
+      render: (_, row) => <UsageQuality quality={row.usage.quality} />,
     },
     {
       title: "操作",
       width: 110,
       fixed: "right",
       render: (_, row) => (
-        <Button type="text" size="small" onClick={() => onViewDetail(row.id)}>
+        <Button type="text" size="small" onClick={() => onViewDetail(row)}>
           查看明细
         </Button>
       ),
     },
   ];
+
   return (
     <section className={styles.panel}>
       <ListDataTable
         header={{
-          title: "租户排行",
-          description: `按${periodLabel} ${metricLabel} 用量${order === "desc" ? "降" : "升"}序 · 共 ${rows.filter((row) => row.current > 0).length} 个租户产生用量`,
+          title: "",
+          description: metricLabel + " · 按周期平均实际用量排序；观测不完整时不参与排名",
           className: styles.panelHead,
           extra: (
-            <div className={styles.tools}>
+            <Space wrap>
               <Select
                 aria-label="排行排序"
                 value={order}
-                onChange={(value) => {
-                  setOrder(value);
-                  setPage(1);
-                }}
+                onChange={onOrderChange}
                 options={[
-                  { value: "desc", label: "用量从高到低" },
-                  { value: "asc", label: "用量从低到高" },
+                  { value: "desc", label: "平均用量从高到低" },
+                  { value: "asc", label: "平均用量从低到高" },
                 ]}
               />
               <Input.Search
-                aria-label="搜索租户 ID"
+                aria-label="搜索租户名称或 ID"
                 allowClear
                 value={keyword}
-                onChange={(value) => {
-                  setKeyword(value);
-                  setPage(1);
-                }}
-                placeholder="搜索租户 ID"
+                onChange={onKeywordChange}
+                placeholder="搜索租户名称或 ID"
               />
-            </div>
+            </Space>
           ),
         }}
-        rowKey="id"
+        rowKey={(row) => String(row.tenantId)}
         columns={columns}
-        data={filtered}
+        data={rows}
         loading={loading}
         pagination={{
-          page,
-          pageSize,
-          total: filtered.length,
-          onPageChange: setPage,
-          onPageSizeChange: (value) => {
-            setPageSize(value);
-            setPage(1);
-          },
+          page: pagination.page,
+          pageSize: pagination.pageSize,
+          total: Number(total ?? "0"),
+          onPageChange: pagination.setPage,
+          onPageSizeChange: pagination.setPageSize,
         }}
-        scroll={{ x: 1010 }}
-        emptyText={`当前筛选范围内暂无 ${metricLabel} 计量数据`}
+        scroll={{ x: 1045 }}
+        emptyText={"当前筛选范围内暂无 " + metricLabel + " 使用统计"}
       />
       <div className={styles.tableFoot}>
-        按资源实际占用时长折算 · 上期用量为 0 且本期有用量时，环比显示「新增」
+        占比以同周期全平台租户平均实际用量为分母，不随搜索或分页变化；数据不完整时显示未知。
+        {stepSeconds !== undefined && "周期峰值按 " + stepSeconds + " 秒采样网格计算。"}
       </div>
     </section>
   );
