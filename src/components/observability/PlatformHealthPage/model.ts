@@ -16,7 +16,7 @@ const healthStates = [
   { key: "running", label: "运行中", color: "#22a06b", hint: "副本已全部就绪" },
   { key: "degraded", label: "降级", color: "#e6862b", hint: "副本未全部就绪" },
   { key: "stopped", label: "已停止", color: "#e5484d", hint: "期望副本为 0" },
-  { key: "other", label: "其他状态", color: "#9aa3b5", hint: "需进一步确认组件状态" },
+  { key: "other", label: "观测异常", color: "#9aa3b5", hint: "暂时无法获取组件状态" },
 ] as const;
 
 export function summarizeComponentHealth(components: PlatformComponent[]) {

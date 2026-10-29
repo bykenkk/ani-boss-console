@@ -2,12 +2,11 @@ import { coreRequest } from "@/api/request";
 import type {
   PlatformCapacity,
   PlatformComponent,
-  PlatformComponentLog,
   PlatformComponents,
+  PlatformComponentsResponse,
   PlatformMeteringUsage,
   PlatformMeteringUsageParams,
   PlatformRuntimeProfile,
-  PlatformServiceScrapeStatus,
   StreamPlatformComponentLogsOptions,
 } from "./types";
 
@@ -61,35 +60,6 @@ interface PlatformMeteringUsageResponse {
   dev_profile: DevProfileResponse;
 }
 
-interface PlatformComponentsResponse {
-  observed_at: string;
-  groups: Array<{
-    name: string;
-    components: Array<{
-      name: string;
-      kind: string;
-      namespace: string;
-      group: string;
-      status: string;
-      desired_replicas: number;
-      ready_replicas: number;
-      version: string;
-      scrape_status: PlatformServiceScrapeStatus | null;
-      reason: string | null;
-    }>;
-  }>;
-  dev_profile: DevProfileResponse;
-}
-
-interface PlatformComponentLogResponse {
-  container: string;
-  level: string;
-  message: string;
-  pod: string;
-  stream: string;
-  timestamp: string;
-}
-
 export const platformQueryKeys = {
   capacity: ["platform", "capacity"] as const,
   components: ["platform", "components"] as const,
@@ -112,47 +82,6 @@ function mapPlatformComponent(
     scrapeStatus: component.scrape_status,
     reason: component.reason,
   };
-}
-
-function mapPlatformComponentLog(log: PlatformComponentLogResponse): PlatformComponentLog {
-  return {
-    container: log.container,
-    level: log.level,
-    message: log.message,
-    pod: log.pod,
-    stream: log.stream,
-    timestamp: log.timestamp,
-  };
-}
-
-function parseSseBlock(
-  block: string,
-  onConnected: (() => void) | undefined,
-  onLog: (log: PlatformComponentLog) => void,
-) {
-  if (block.startsWith(":")) {
-    if (block.slice(1).trim() === "connected") onConnected?.();
-    return false;
-  }
-
-  const lines = block.split(/\r?\n/);
-  const event =
-    lines
-      .find((line) => line.startsWith("event:"))
-      ?.slice(6)
-      .trim() || "message";
-  const data = lines
-    .filter((line) => line.startsWith("data:"))
-    .map((line) => line.slice(5).trimStart())
-    .join("\n");
-
-  if (event === "log" && data) {
-    onLog(mapPlatformComponentLog(JSON.parse(data) as PlatformComponentLogResponse));
-  }
-  if (event === "error") {
-    throw new Error(data || "日志流异常断开");
-  }
-  return event === "done";
 }
 
 function mapRuntimeProfile(profile: DevProfileResponse): PlatformRuntimeProfile {
@@ -197,8 +126,11 @@ export async function fetchPlatformCapacity(): Promise<PlatformCapacity> {
   };
 }
 
-export async function fetchPlatformComponents(): Promise<PlatformComponents> {
-  const response = await coreRequest<PlatformComponentsResponse>("/platform/components");
+// TODO: 在测试环境核对降级快照、平台身份与定时刷新，静态契约核对不替代联调。
+export async function fetchPlatformComponents(signal?: AbortSignal): Promise<PlatformComponents> {
+  const response = await coreRequest<PlatformComponentsResponse>("/platform/components", {
+    signal,
+  });
 
   return {
     observedAt: response.observed_at,
@@ -215,10 +147,9 @@ export async function streamPlatformComponentLogs({
   limit,
   intervalSeconds,
   signal,
-  onConnected,
-  onLog,
-}: StreamPlatformComponentLogsOptions): Promise<void> {
-  const stream = await coreRequest<ReadableStream<Uint8Array>>(
+}: StreamPlatformComponentLogsOptions): Promise<ReadableStream<Uint8Array>> {
+  // TODO: 日志入口仍使用字符串 code 的旧错误体；后端统一后重新核对。联调需覆盖 8 秒结束和 429。
+  return coreRequest<ReadableStream<Uint8Array>>(
     `/platform/components/${encodeURIComponent(component)}/logs/stream`,
     {
       method: "GET",
@@ -229,24 +160,6 @@ export async function streamPlatformComponentLogs({
       signal,
     },
   );
-
-  const reader = stream.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-
-  while (true) {
-    const { value, done } = await reader.read();
-    buffer += decoder.decode(value, { stream: !done });
-    const blocks = buffer.split(/\r?\n\r?\n/);
-    buffer = blocks.pop() || "";
-    for (const block of blocks) {
-      if (parseSseBlock(block, onConnected, onLog)) return;
-    }
-    if (done) {
-      if (buffer.trim()) parseSseBlock(buffer, onConnected, onLog);
-      return;
-    }
-  }
 }
 
 export async function fetchPlatformMeteringUsage(
@@ -279,6 +192,7 @@ export type {
   PlatformCapacity,
   PlatformCapacityRegion,
   PlatformComponent,
+  PlatformComponentStatus,
   PlatformComponentGroup,
   PlatformComponentLog,
   PlatformComponents,

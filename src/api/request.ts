@@ -1,5 +1,6 @@
 import axios, {
   AxiosHeaders,
+  type AxiosError,
   type AxiosInstance,
   type AxiosRequestConfig,
   type AxiosResponse,
@@ -50,6 +51,7 @@ export class ApiError extends Error {
   readonly reason?: string;
   readonly requestId?: string;
   readonly request_id?: string;
+  readonly retryAfterMs?: number;
   readonly details?: Record<string, unknown>;
   readonly config?: AxiosRequestConfig;
   readonly response?: AxiosResponse<unknown>;
@@ -61,6 +63,7 @@ export class ApiError extends Error {
       code?: string | number;
       reason?: string;
       requestId?: string;
+      retryAfterMs?: number;
       details?: Record<string, unknown>;
       config?: AxiosRequestConfig;
       response?: AxiosResponse<unknown>;
@@ -74,6 +77,7 @@ export class ApiError extends Error {
     this.reason = options.reason;
     this.requestId = options.requestId;
     this.request_id = options.requestId;
+    this.retryAfterMs = options.retryAfterMs;
     this.details = options.details;
     this.config = options.config;
     this.response = options.response;
@@ -143,17 +147,15 @@ export function toApiError(error: unknown): ApiError {
     error.message ||
     (error.response ? `HTTP ${error.response.status}` : "网络请求失败");
   const metadata = payloadRecord(payload?.metadata);
-  const responseHeaders = error.response?.headers;
-  const headerRequestId =
-    responseHeaders instanceof AxiosHeaders
-      ? responseHeaders.get("X-Request-ID")
-      : Object.entries(responseHeaders ?? {}).find(
-          ([name]) => name.toLowerCase() === "x-request-id",
-        )?.[1];
+  const responseHeaders = AxiosHeaders.from(error.response?.headers ?? {});
+  const headerRequestId = responseHeaders.get("X-Request-ID");
+  const retryAfter = responseHeaders.get("Retry-After");
+  const retryAfterSeconds =
+    typeof retryAfter === "string" && /^\d+$/.test(retryAfter) ? Number(retryAfter) : undefined;
   const requestId =
+    (typeof headerRequestId === "string" && headerRequestId) ||
     (typeof payload?.request_id === "string" && payload.request_id) ||
     (typeof metadata?.request_id === "string" && metadata.request_id) ||
-    (typeof headerRequestId === "string" && headerRequestId) ||
     undefined;
   const details =
     payload?.details && typeof payload.details === "object"
@@ -168,11 +170,47 @@ export function toApiError(error: unknown): ApiError {
         : error.code,
     reason: typeof payload?.reason === "string" ? payload.reason : undefined,
     requestId,
+    retryAfterMs:
+      retryAfterSeconds !== undefined && Number.isFinite(retryAfterSeconds)
+        ? retryAfterSeconds * 1000
+        : undefined,
     details,
     config: error.config,
     response: error.response,
     cause: error,
   });
+}
+
+async function readStreamErrorBody(error: AxiosError): Promise<void> {
+  const response = error.response;
+  if (
+    error.config?.responseType !== "stream" ||
+    typeof ReadableStream === "undefined" ||
+    !(response?.data instanceof ReadableStream)
+  )
+    return;
+
+  // fetch adapter 对非 2xx 也返回流；先读错误 JSON，再进入统一错误模型和 401 重试。
+  const reader = response.data.getReader();
+  const decoder = new TextDecoder();
+  let text = "";
+  let bytes = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      bytes += value.byteLength;
+      if (bytes > 64 * 1024) return;
+      text += decoder.decode(value, { stream: true });
+    }
+    text += decoder.decode();
+    response.data = JSON.parse(text) as unknown;
+  } catch {
+    // 非 JSON 或中断时仍保留原 HTTP 状态、响应头和 Axios 上下文。
+  } finally {
+    await reader.cancel().catch(() => undefined);
+    reader.releaseLock();
+  }
 }
 
 function assertActiveSession(signal: AbortSignal): void {
@@ -274,6 +312,7 @@ function installAuthInterceptors(instance: AxiosInstance): void {
     async (error: unknown) => {
       if (axios.isCancel(error)) throw error;
       if (!axios.isAxiosError(error)) throw toApiError(error);
+      await readStreamErrorBody(error);
       const config = error.config as AniRequestConfig | undefined;
       if (error.response?.status !== 401 || !config || config.aniAuth === "public") {
         throw toApiError(error);

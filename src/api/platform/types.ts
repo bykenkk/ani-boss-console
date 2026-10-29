@@ -37,6 +37,8 @@ export interface PlatformCapacity {
 }
 
 export type PlatformServiceScrapeStatus = "reachable" | "unreachable" | "unknown";
+export type PlatformComponentStatus = "running" | "degraded" | "stopped" | "unknown";
+export type PlatformComponentGroupName = "service" | "dependency" | "platform";
 
 export type PlatformMeteringResourceType =
   | "instance_gpu_seconds"
@@ -70,17 +72,17 @@ export interface PlatformComponent {
   name: string;
   kind: string;
   namespace: string;
-  group: string;
-  status: string;
-  desiredReplicas: number;
-  readyReplicas: number;
-  version: string;
+  group: PlatformComponentGroupName;
+  status: PlatformComponentStatus;
+  desiredReplicas: number | null;
+  readyReplicas: number | null;
+  version: string | null;
   scrapeStatus: PlatformServiceScrapeStatus | null;
   reason: string | null;
 }
 
 export interface PlatformComponentGroup {
-  name: string;
+  name: PlatformComponentGroupName;
   components: PlatformComponent[];
 }
 
@@ -88,6 +90,31 @@ export interface PlatformComponents {
   observedAt: string;
   groups: PlatformComponentGroup[];
   profile: PlatformRuntimeProfile;
+}
+
+export interface PlatformComponentsResponse {
+  observed_at: string;
+  groups: Array<{
+    name: PlatformComponentGroupName;
+    components: Array<{
+      name: string;
+      kind: string;
+      namespace: string;
+      group: PlatformComponentGroupName;
+      status: PlatformComponentStatus;
+      desired_replicas: number | null;
+      ready_replicas: number | null;
+      version: string | null;
+      scrape_status: PlatformServiceScrapeStatus | null;
+      reason: string | null;
+    }>;
+  }>;
+  dev_profile: {
+    mode: string;
+    provider: string;
+    real_provider: boolean;
+    reason: string;
+  };
 }
 
 export interface PlatformComponentLog {
@@ -104,6 +131,4 @@ export interface StreamPlatformComponentLogsOptions {
   limit: number;
   intervalSeconds: number;
   signal?: AbortSignal;
-  onConnected?: () => void;
-  onLog: (log: PlatformComponentLog) => void;
 }

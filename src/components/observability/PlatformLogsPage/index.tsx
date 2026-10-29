@@ -1,11 +1,10 @@
 import { SummaryStrip } from "@/components/common";
 import { Button, Input, Select, Space } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import clsx from "clsx";
 import {
   fetchPlatformComponents,
-  streamPlatformComponentLogs,
   platformQueryKeys,
   type PlatformComponentLog,
 } from "@/api/platform";
@@ -18,15 +17,9 @@ import {
   type StatusBadgeTone,
 } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
-import { ApiError } from "@/api/request";
-import { closeNotification, showNotification } from "@/lib/feedback";
-import { withId } from "@/lib/id";
-
-type LogConnectionState = "idle" | "connecting" | "connected" | "reconnecting" | "failed";
-
-function getLogIdentity(log: PlatformComponentLog) {
-  return [log.timestamp, log.pod, log.container, log.stream, log.message].join("\u0000");
-}
+import { usePlatformComponentLogs } from "@/hooks/usePlatformComponentLogs";
+import { getLogIdentity, type LogConnectionState } from "./log-stream";
+import { PlatformLogRawDrawer } from "./PlatformLogRawDrawer";
 
 interface PlatformLogsPageProps {
   initialComponent?: string;
@@ -44,6 +37,7 @@ const levelMeta: Record<string, { label: string; className: string }> = {
   warn: { label: "warn", className: "bg-orange-50 text-orange-700" },
   info: { label: "info", className: "bg-blue-50 text-blue-700" },
   debug: { label: "debug", className: "bg-gray-100 text-gray-600" },
+  unknown: { label: "unknown", className: "bg-gray-100 text-gray-600" },
 };
 
 const connectionMeta: Record<LogConnectionState, { label: string; tone: StatusBadgeTone }> = {
@@ -71,9 +65,7 @@ function parseLog(log: PlatformComponentLog): DisplayLog {
     nested = undefined;
   }
 
-  const nestedLevel = typeof nested?.level === "string" ? nested.level.toLowerCase() : undefined;
-  const displayLevel =
-    nestedLevel && levelMeta[nestedLevel] ? nestedLevel : log.level.toLowerCase();
+  const displayLevel = log.level.toLowerCase();
   const nestedMessage = typeof nested?.msg === "string" ? nested.msg : undefined;
   const nestedError = typeof nested?.err === "string" ? nested.err : undefined;
   const displayMessage = [nestedMessage || log.message, nestedError].filter(Boolean).join(" · ");
@@ -81,7 +73,7 @@ function parseLog(log: PlatformComponentLog): DisplayLog {
 
   return {
     ...log,
-    id: [log.timestamp, log.pod, log.container, log.stream, log.message].join("\u0000"),
+    id: getLogIdentity(log),
     displayLevel,
     displayMessage,
     requestId: typeof requestIdValue === "string" ? requestIdValue : "-",
@@ -93,9 +85,10 @@ function formatTimestamp(value: string) {
 }
 
 export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
-  const [componentOverride, setComponentOverride] = useState<string>();
+  const [selection, setSelection] = useState<{ initialComponent?: string; value: string }>();
   const [level, setLevel] = useState("all");
   const [keyword, setKeyword] = useState("");
+  const [selectedLog, setSelectedLog] = useState<PlatformComponentLog>();
   const componentsQuery = useQuery({
     meta: {
       errorNotification: {
@@ -105,7 +98,8 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
       },
     },
     queryKey: platformQueryKeys.components,
-    queryFn: fetchPlatformComponents,
+    queryFn: ({ signal }) => fetchPlatformComponents(signal),
+    refetchInterval: 10_000,
   });
   const componentOptions = useMemo(
     () =>
@@ -118,103 +112,22 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
     [componentsQuery.data],
   );
 
-  const component = componentOverride ?? initialComponent ?? componentOptions[0]?.value ?? "";
-
-  const [logState, setLogState] = useState<{
-    component: string;
-    logs: PlatformComponentLog[];
-  }>({ component: "", logs: [] });
-  const [streamConnection, setConnection] = useState<{
-    component: string;
-    state: LogConnectionState;
-  }>({ component: "", state: "idle" });
-  const [restartKey, setRestartKey] = useState(0);
-
-  useEffect(() => {
-    if (!component) return;
-
-    const controller = new AbortController();
-    const seen = new Set<string>();
-    let reconnectTimer: ReturnType<typeof setTimeout> | undefined;
-    let cancelled = false;
-    const feedbackId = withId("platform-component-logs", component);
-
-    const connect = async (isReconnect: boolean) => {
-      setConnection({ component, state: isReconnect ? "reconnecting" : "connecting" });
-      try {
-        await streamPlatformComponentLogs({
-          component,
-          limit: 100,
-          intervalSeconds: 2,
-          signal: controller.signal,
-          onConnected: () => {
-            if (cancelled) return;
-            closeNotification(feedbackId);
-            setConnection({ component, state: "connected" });
-          },
-          onLog: (log) => {
-            if (cancelled) return;
-            const identity = getLogIdentity(log);
-            if (seen.has(identity)) return;
-            seen.add(identity);
-            setLogState((current) => ({
-              component,
-              logs: [...(current.component === component ? current.logs : []), log].slice(-500),
-            }));
-          },
-        });
-        if (cancelled) return;
-        setConnection({ component, state: "reconnecting" });
-        reconnectTimer = setTimeout(() => void connect(true), 1_000);
-      } catch (streamError) {
-        if (cancelled || controller.signal.aborted) return;
-        showNotification({
-          id: feedbackId,
-          state: "error",
-          action: "组件日志流连接",
-          content: { error: streamError, fallback: "组件日志流连接失败" },
-        });
-        if (streamError instanceof ApiError && streamError.status === 404) {
-          setConnection({ component, state: "failed" });
-          return;
-        }
-        setConnection({ component, state: "reconnecting" });
-        reconnectTimer = setTimeout(() => void connect(true), 2_000);
-      }
-    };
-
-    void connect(false);
-    return () => {
-      cancelled = true;
-      controller.abort();
-      closeNotification(feedbackId);
-      if (reconnectTimer) clearTimeout(reconnectTimer);
-    };
-  }, [component, restartKey]);
-
-  const restart = useCallback(() => {
-    setLogState({ component, logs: [] });
-    setRestartKey((current) => current + 1);
-  }, [component]);
-  const clear = useCallback(() => setLogState({ component, logs: [] }), [component]);
-
-  const logs = useMemo(
-    () => (logState.component === component ? logState.logs : []),
-    [component, logState],
-  );
-  const connectionState = !component
-    ? "idle"
-    : streamConnection.component === component
-      ? streamConnection.state
-      : "connecting";
+  const requestedComponent =
+    (selection?.initialComponent === initialComponent ? selection?.value : undefined) ??
+    initialComponent;
+  const component = requestedComponent
+    ? (componentOptions.find((option) => option.value === requestedComponent)?.value ?? "")
+    : (componentOptions[0]?.value ?? "");
+  const { logs, connectionState, restart, clear } = usePlatformComponentLogs(component);
 
   const displayLogs = useMemo(() => logs.map(parseLog).reverse(), [logs]);
   const filteredLogs = useMemo(() => {
+    // TODO: 后端提供日志检索后迁移服务端筛选；目前仅检索当前内存窗口，不代表完整历史。
     const query = keyword.trim().toLowerCase();
     return displayLogs.filter((log) => {
       const matchesKeyword =
         !query ||
-        `${log.displayMessage} ${log.requestId} ${log.pod} ${log.container}`
+        `${log.message} ${log.displayMessage} ${log.requestId} ${log.pod} ${log.container}`
           .toLowerCase()
           .includes(query);
       return (level === "all" || log.displayLevel === level) && matchesKeyword;
@@ -254,14 +167,7 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
       width: 90,
       render: (value) => String(value || "-"),
     },
-    {
-      title: "request_id",
-      dataIndex: "requestId",
-      width: 190,
-      ellipsis: true,
-      render: (value) => <code className="text-xs">{String(value || "-")}</code>,
-    },
-    { title: "摘要", dataIndex: "displayMessage", width: 520, ellipsis: true },
+    { title: "日志原文", dataIndex: "message", width: 360, ellipsis: true },
   ];
   const connection = connectionMeta[connectionState];
 
@@ -308,9 +214,10 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
             <Select
               value={component || undefined}
               loading={componentsQuery.isPending}
-              onChange={setComponentOverride}
+              onChange={(value) => setSelection({ initialComponent, value })}
               placeholder="选择组件"
               options={componentOptions}
+              filterOption={false}
             />
             <Select
               value={level}
@@ -321,13 +228,14 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
                 { label: "warn", value: "warn" },
                 { label: "info", value: "info" },
                 { label: "debug", value: "debug" },
+                { label: "unknown", value: "unknown" },
               ]}
             />
             <Input.Search
               allowClear
               value={keyword}
               onChange={setKeyword}
-              placeholder="搜索 request_id、Pod、容器或摘要"
+              placeholder="在当前窗口搜索 Pod、容器或日志"
             />
           </Space>
         ),
@@ -336,7 +244,11 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
             清空
           </Button>
         ),
-        tools: <span className="text-xs text-gray-500">显示 {filteredLogs.length} 条</span>,
+        tools: (
+          <span className="text-xs text-gray-500">
+            当前窗口显示 {filteredLogs.length} 条 · 仅保留最近日志（最多 500 条）
+          </span>
+        ),
       }}
     >
       <ListDataTable
@@ -344,9 +256,17 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
         columns={columns}
         data={filteredLogs}
         pagination="client"
-        scroll={{ x: 1310 }}
+        rowActions={[
+          { key: "view-raw-log", label: "查看日志原文", onClick: (log) => setSelectedLog(log) },
+        ]}
         emptyText={component ? "暂无组件日志" : "请选择组件查看实时日志"}
       />
+      {selectedLog && (
+        <PlatformLogRawDrawer
+          message={selectedLog.message}
+          onClose={() => setSelectedLog(undefined)}
+        />
+      )}
     </ListPageFrame>
   );
 }

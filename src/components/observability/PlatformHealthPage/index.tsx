@@ -1,4 +1,4 @@
-import { Button, Card, Space, Tag } from "@arco-design/web-react";
+import { Button, Card, Space, Tag, Tooltip } from "@arco-design/web-react";
 import { IconClockCircle, IconRefresh } from "@arco-design/web-react/icon";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -18,7 +18,7 @@ import { HealthSummary } from "./HealthSummary";
 import { groupColors, groupNames, summarizeComponentHealth } from "./model";
 
 function componentStatusTone(status: string): StatusBadgeTone {
-  if (status === "running") return "info";
+  if (status === "running") return "success";
   if (status === "degraded") return "warning";
   return "default";
 }
@@ -38,7 +38,8 @@ export function PlatformHealthPage() {
       },
     },
     queryKey: platformQueryKeys.components,
-    queryFn: fetchPlatformComponents,
+    queryFn: ({ signal }) => fetchPlatformComponents(signal),
+    refetchInterval: 10_000,
   });
 
   const groups = componentsQuery.data?.groups || [];
@@ -60,11 +61,14 @@ export function PlatformHealthPage() {
       title: "状态",
       width: 120,
       render: (_, component) => (
-        <StatusBadge
-          value={component.status}
-          tone={componentStatusTone(component.status)}
-          processing={component.status === "running"}
-        />
+        <Tooltip content={component.reason || component.status}>
+          <span>
+            <StatusBadge
+              value={component.status === "unknown" ? "观测异常" : component.status}
+              tone={componentStatusTone(component.status)}
+            />
+          </span>
+        </Tooltip>
       ),
     },
     {
@@ -81,21 +85,49 @@ export function PlatformHealthPage() {
     },
     {
       title: "版本",
+      dataIndex: "version",
       width: 160,
       ellipsis: true,
-      render: (_, component) => component.version || "-",
     },
     {
       title: "就绪副本",
       width: 80,
       ellipsis: true,
-      render: (_, component) => `${component.readyReplicas} / ${component.desiredReplicas}`,
+      render: (_, component) =>
+        `${component.readyReplicas ?? "-"} / ${component.desiredReplicas ?? "-"}`,
     },
     {
       title: "资源类型",
+      dataIndex: "kind",
       width: 130,
       ellipsis: true,
-      render: (_, component) => component.kind || "-",
+    },
+    {
+      title: "指标抓取",
+      width: 160,
+      render: (_, component) =>
+        component.group === "service" && component.scrapeStatus ? (
+          <Tooltip content="仅表示指标抓取是否可达，不代表组件运行状态">
+            <span>
+              <StatusBadge
+                value={
+                  { reachable: "指标可达", unreachable: "指标不可达", unknown: "暂无观测数据" }[
+                    component.scrapeStatus
+                  ]
+                }
+                tone={
+                  component.scrapeStatus === "reachable"
+                    ? "success"
+                    : component.scrapeStatus === "unreachable"
+                      ? "warning"
+                      : "default"
+                }
+              />
+            </span>
+          </Tooltip>
+        ) : (
+          "-"
+        ),
     },
   ];
 
@@ -114,7 +146,7 @@ export function PlatformHealthPage() {
             <Button
               icon={<IconRefresh />}
               loading={componentsQuery.isFetching}
-              onClick={() => void componentsQuery.refetch()}
+              onClick={() => componentsQuery.refetch()}
             >
               刷新
             </Button>
@@ -122,6 +154,14 @@ export function PlatformHealthPage() {
         ),
       }}
     >
+      {componentsQuery.data?.profile.realProvider === false ? (
+        <div role="status" className="text-sm text-(--color-text-2)">
+          部分组件观测异常，数据可能不完整。
+          {componentsQuery.data.profile.reason ? (
+            <span> {componentsQuery.data.profile.reason}</span>
+          ) : null}
+        </div>
+      ) : null}
       <HealthSummary summary={summary} hasData={hasData} pending={componentsQuery.isPending} />
 
       <section className="grid grid-cols-[1.5fr_1fr] gap-4 max-[980px]:grid-cols-1">
@@ -137,7 +177,7 @@ export function PlatformHealthPage() {
         <DataTable
           header={{
             title: "组件健康明细",
-            description: "故障和降级组件优先展示；本页只读，不提供重启或扩缩容操作。",
+            description: "按服务、依赖和平台分组顺序展示，每 10 秒刷新；本页只读。",
             extra: <span className="text-xs text-gray-500">共 {total} 个组件</span>,
           }}
           rowKey={(component) => `${component.group}:${component.namespace}:${component.name}`}
@@ -147,19 +187,16 @@ export function PlatformHealthPage() {
               key: "logs",
               label: "查看日志",
               onClick: (component) =>
-                void navigate({
+                navigate({
                   to: "/logs",
                   search: { component: component.name },
                 }),
             },
           ]}
-          data={[...components].sort((left, right) => {
-            const rank: Record<string, number> = { stopped: 0, degraded: 1, running: 3 };
-            return (rank[left.status] ?? 2) - (rank[right.status] ?? 2);
-          })}
+          data={components}
           loading={componentsQuery.isPending}
-          pagination="client"
-          scroll={{ x: 1190 }}
+          pagination={false}
+          scroll={{ x: 1350 }}
           noDataElement="暂无组件状态数据"
         />
       </Card>
