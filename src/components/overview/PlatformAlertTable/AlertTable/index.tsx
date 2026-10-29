@@ -8,10 +8,9 @@ import { LevelTag } from "../../LevelTag";
 interface AlertTableProps {
   rows: AlertItem[];
   extra?: ReactNode;
-  onUpdate: (id: number, status: AlertItem["status"]) => void;
 }
 
-export function AlertTable({ rows, onUpdate, extra }: AlertTableProps) {
+export function AlertTable({ rows, extra }: AlertTableProps) {
   return (
     <DataTable
       header={{ title: "平台告警", extra }}
@@ -24,13 +23,17 @@ export function AlertTable({ rows, onUpdate, extra }: AlertTableProps) {
           key: "handle",
           label: "处理",
           visible: (item) => item.status === "待处理",
-          onClick: (item) => onUpdate(item.id, "已处理"),
+          disabled: () => true,
+          tooltip: "平台告警功能未接入",
+          onClick: () => {},
         },
         {
           key: "ignore",
           label: "忽略",
           visible: (item) => item.status === "待处理",
-          onClick: (item) => onUpdate(item.id, "已忽略"),
+          disabled: () => true,
+          tooltip: "平台告警功能未接入",
+          onClick: () => {},
         },
       ]}
       columns={[
@@ -70,7 +73,7 @@ export function AlertTable({ rows, onUpdate, extra }: AlertTableProps) {
         {
           title: "时间",
           dataIndex: "time",
-          width: 120,
+          width: 180,
           render: (value: string) => formatMonthDayTime(value),
         },
         {

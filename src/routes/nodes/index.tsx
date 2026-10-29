@@ -11,8 +11,7 @@ import {
   StatusBadge,
 } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
-import { formatCurrentDateTime, formatDateTimeMinute } from "@/lib/date";
-import { showMessage } from "@/lib/feedback";
+import { formatDateTimeMinute } from "@/lib/date";
 
 type NodeStatus = "Ready" | "NotReady";
 
@@ -97,7 +96,8 @@ const initialNodes: InfrastructureNode[] = [
 
 export const Route = createFileRoute("/nodes/")({
   component: function NodeStatusRoute() {
-    const [nodes, setNodes] = useState(initialNodes);
+    // TODO(nodes-integration): 接入节点接口后替换演示数据，并开放状态刷新操作。
+    const nodes = initialNodes;
     const [region, setRegion] = useState("all");
     const [pool, setPool] = useState("all");
     const [status, setStatus] = useState<"all" | NodeStatus>("all");
@@ -119,26 +119,18 @@ export const Route = createFileRoute("/nodes/")({
       );
     }, [keyword, nodes, pool, region, status]);
 
-    const refreshNodes = () => {
-      const heartbeat = formatCurrentDateTime();
-      setNodes((current) =>
-        current.map((node) => (node.status === "Ready" ? { ...node, heartbeat } : node)),
-      );
-      showMessage({ type: "success", content: "节点状态已刷新" });
-    };
-
     const columns: ListColumn<InfrastructureNode>[] = [
       {
         title: "节点 / ID",
         dataIndex: "name",
-        width: 190,
+        width: 200,
         fixed: "left",
         render: (_, node) => <ResourceNameId name={node.name} id={node.id} />,
       },
       {
         title: "状态",
         dataIndex: "status",
-        width: 140,
+        width: 120,
         render: (value: NodeStatus) => (
           <StatusBadge value={value} tone={value === "Ready" ? "success" : "danger"} />
         ),
@@ -171,7 +163,7 @@ export const Route = createFileRoute("/nodes/")({
       {
         title: "最后心跳",
         dataIndex: "heartbeat",
-        width: 160,
+        width: 180,
         render: (value: string) => formatDateTimeMinute(value),
       },
     ];
@@ -182,7 +174,7 @@ export const Route = createFileRoute("/nodes/")({
           title: "节点状态",
           subtitle: "查看计算节点健康状态、资源规格、调度能力和最后心跳。",
           extra: (
-            <Button type="primary" icon={<IconRefresh />} onClick={refreshNodes}>
+            <Button type="primary" disabled icon={<IconRefresh />}>
               刷新状态
             </Button>
           ),

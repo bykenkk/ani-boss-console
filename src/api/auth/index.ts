@@ -1,47 +1,60 @@
-import { runIdempotentRequest } from "@/api/idempotency";
-import { coreRequest } from "@/api/request";
-import { getAccessTokenJti } from "@/stores/auth";
-import { createIdempotencyScope } from "@/lib/idempotency";
-import type { AuthTokens, LogoutResponse, PlatformLoginInput } from "./types";
+import {
+  AUTH_APPLICATION,
+  coreRequest,
+  initializeCsrfToken,
+  pauseSessionRefresh,
+  resumeSessionRefresh,
+} from "@/api/request";
+import { clearAuthSession, getAccessTokenJti, setAuthSession } from "@/stores/auth";
+import { normalizeAuthTokens } from "./tokens";
+import type { AuthTokenResponse, AuthTokens, LogoutResponse, PlatformLoginInput } from "./types";
 
-type PlatformLoginRequest = PlatformLoginInput & { idempotency_key: string };
-type LogoutRequest = { jti: string; idempotency_key: string };
-
-const loginScope = createIdempotencyScope("platform-login", ["POST"]);
-const logoutScope = createIdempotencyScope("platform-logout", ["POST"]);
+type LogoutRequest = { application: "boss"; jti?: string };
 
 export async function loginPlatform(input: PlatformLoginInput): Promise<AuthTokens> {
-  const submitData = {
-    username: input.username.trim(),
-    password: input.password,
-  };
-  const tokens = await runIdempotentRequest(loginScope, submitData, (data: PlatformLoginRequest) =>
-    coreRequest<AuthTokens, PlatformLoginRequest>("/auth/platform/password/login", {
-      method: "POST",
-      auth: "public",
-      data,
-    }),
-  );
-  if (!tokens?.access_token || !tokens.refresh_token) {
-    throw new Error("登录响应缺少令牌");
+  await pauseSessionRefresh();
+  let sessionCreated = false;
+  try {
+    const response = await coreRequest<AuthTokenResponse, PlatformLoginInput>(
+      "/auth/platform/password/login",
+      {
+        method: "POST",
+        auth: "public",
+        timeout: 15_000,
+        data: { username: input.username.trim(), password: input.password },
+      },
+    );
+    const tokens = normalizeAuthTokens(response);
+    setAuthSession(tokens);
+    sessionCreated = true;
+    await initializeCsrfToken();
+    return tokens;
+  } catch (error) {
+    if (sessionCreated) clearAuthSession();
+    else resumeSessionRefresh();
+    throw error;
   }
-  return tokens;
 }
 
-export function logoutPlatform(): Promise<LogoutResponse> {
+export async function logoutPlatform(): Promise<LogoutResponse> {
   const jti = getAccessTokenJti();
-  if (!jti) return Promise.resolve({ status: "local-only" });
-
-  return runIdempotentRequest(
-    logoutScope,
-    { jti },
-    (data: LogoutRequest) =>
-      coreRequest<LogoutResponse, LogoutRequest>("/auth/logout", {
-        method: "POST",
-        data,
-      }),
-    [jti],
-  );
+  await pauseSessionRefresh();
+  try {
+    const response = await coreRequest<LogoutResponse, LogoutRequest>("/auth/logout", {
+      method: "POST",
+      auth: "public",
+      timeout: 15_000,
+      data: { application: AUTH_APPLICATION, ...(jti ? { jti } : {}) },
+    });
+    clearAuthSession();
+    return response;
+  } catch (error) {
+    resumeSessionRefresh();
+    throw error;
+  }
 }
 
 export type { AuthTokens, LogoutResponse, PlatformLoginInput } from "./types";
+
+export { currentUserQueryKey, fetchCurrentUser } from "./profile";
+export type { CurrentUser } from "./types";

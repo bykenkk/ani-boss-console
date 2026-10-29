@@ -154,7 +154,7 @@ export function NetworkInfrastructurePage() {
     {
       title: "组件",
       dataIndex: "name",
-      width: 220,
+      width: 200,
       fixed: "left",
       render: (_, component) => <ResourceNameId name={component.name} id={component.type} />,
     },
@@ -182,12 +182,12 @@ export function NetworkInfrastructurePage() {
     {
       title: "最后心跳",
       dataIndex: "heartbeat",
-      width: 165,
+      width: 180,
       render: (value: string) => formatDateTimeMinute(value),
     },
     {
       title: "最近事件",
-      width: 280,
+      width: 180,
       render: (_, component) => {
         const event = component.events[0];
         return event ? (
@@ -213,7 +213,7 @@ export function NetworkInfrastructurePage() {
     {
       title: "地址池",
       dataIndex: "name",
-      width: 190,
+      width: 200,
       render: (_, pool) => <ResourceNameId name={pool.name} id={pool.id} />,
     },
     { title: "CIDR", dataIndex: "cidr", width: 160 },

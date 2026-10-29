@@ -46,7 +46,7 @@ const columns: ListColumn<StoragePlatformEvent>[] = [
   {
     title: "时间",
     dataIndex: "at",
-    width: 170,
+    width: 180,
     render: (value: string) => formatDateTimeMinute(value),
   },
   {
@@ -64,7 +64,7 @@ const columns: ListColumn<StoragePlatformEvent>[] = [
       </span>
     ),
   },
-  { title: "事件", dataIndex: "message" },
+  { title: "事件", width: 240, dataIndex: "message" },
 ];
 
 export function RecentStorageEvents() {

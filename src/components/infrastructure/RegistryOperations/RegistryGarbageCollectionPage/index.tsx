@@ -5,6 +5,7 @@ import {
   ResourcePageFrame,
   TableSectionFrame,
   type ListColumn,
+  StatusBadge,
 } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
 import { formatDateTimeMinute } from "@/lib/date";
@@ -41,7 +42,7 @@ export function RegistryGarbageCollectionPage() {
     {
       title: "最后引用时间",
       dataIndex: "lastReferencedAt",
-      width: 165,
+      width: 180,
       render: (value: string) => formatDateTimeMinute(value),
     },
   ];
@@ -53,7 +54,14 @@ export function RegistryGarbageCollectionPage() {
       width: 170,
       render: (_, run) => <ResourceNameId name={run.id} id="镜像仓库 GC" />,
     },
-    { title: "状态", dataIndex: "status", width: 110 },
+    {
+      title: "状态",
+      dataIndex: "status",
+      width: 120,
+      render: (value) => (
+        <StatusBadge value={value} tone={value === "成功" ? "success" : "warning"} />
+      ),
+    },
     {
       title: "已回收",
       dataIndex: "reclaimedGi",
@@ -64,10 +72,10 @@ export function RegistryGarbageCollectionPage() {
     {
       title: "开始时间",
       dataIndex: "startedAt",
-      width: 165,
+      width: 180,
       render: (value: string) => formatDateTimeMinute(value),
     },
-    { title: "耗时", dataIndex: "duration", width: 120 },
+    { title: "耗时", dataIndex: "duration", width: 180 },
   ];
 
   return (

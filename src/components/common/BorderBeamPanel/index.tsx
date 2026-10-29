@@ -1,11 +1,21 @@
 import clsx from "clsx";
 import * as React from "react";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
-import { useVisibilityPause } from "@/hooks/useVisibilityPause";
 import styles from "./index.module.css";
 
 /* Border beam motion adapted from Motiq's MIT-licensed Border Beam Panel. */
 const PARKED_ANGLE = 40;
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
+function subscribeToReducedMotion(onStoreChange: () => void): () => void {
+  if (typeof window.matchMedia !== "function") return () => {};
+  const mediaQuery = window.matchMedia(REDUCED_MOTION_QUERY);
+  mediaQuery.addEventListener("change", onStoreChange);
+  return () => mediaQuery.removeEventListener("change", onStoreChange);
+}
+
+function getReducedMotionSnapshot(): boolean {
+  return typeof window.matchMedia === "function" && window.matchMedia(REDUCED_MOTION_QUERY).matches;
+}
 
 type BorderBeamElement = "article" | "div" | "section";
 
@@ -74,8 +84,33 @@ export function BorderBeamPanel({
   ...props
 }: BorderBeamPanelProps) {
   const rootRef = React.useRef<HTMLElement | null>(null);
-  const systemReduced = useReducedMotion();
-  const visible = useVisibilityPause(rootRef);
+  const systemReduced = React.useSyncExternalStore(
+    subscribeToReducedMotion,
+    getReducedMotionSnapshot,
+    () => false,
+  );
+  const [onScreen, setOnScreen] = React.useState(true);
+  const [tabVisible, setTabVisible] = React.useState(true);
+
+  React.useEffect(() => {
+    const element = rootRef.current;
+    if (!element || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => setOnScreen(entries.some((entry) => entry.isIntersecting)),
+      { threshold: 0.05 },
+    );
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [rootRef]);
+
+  React.useEffect(() => {
+    const handleVisibilityChange = () => setTabVisible(document.visibilityState !== "hidden");
+    handleVisibilityChange();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
+  const visible = onScreen && tabVisible;
   const staticMode = reducedMotion === true || systemReduced;
   const paused = pauseWhenHidden && !visible;
   const animate = !staticMode && !paused;

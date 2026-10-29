@@ -6,7 +6,7 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 import { isAuthenticated } from "@/stores/auth";
-import { AppLayout } from "@/components/layouts/AppLayout";
+import { AppLayout } from "@/layouts/AppLayout";
 
 export interface RouterContext {
   queryClient: QueryClient;

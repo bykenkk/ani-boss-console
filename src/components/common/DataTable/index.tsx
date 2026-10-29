@@ -8,6 +8,7 @@ import {
 } from "./layout";
 import { ConfiguredDataTableRowActions } from "./RowActions";
 import type { RowAction } from "./types";
+import { CursorPagination } from "./CursorPagination";
 
 export { DataTableRowActionButton, DataTableRowActions } from "./RowActions";
 export type { RowAction, RowActionIntent } from "./types";
@@ -18,11 +19,15 @@ export type ListColumn<T> = TableColumnProps<T>;
 export type ListPagination = {
   page: number;
   pageSize: number;
-  total: number;
+  disabled?: boolean;
   pageSizeOptions?: number[];
   onPageChange: (page: number) => void;
   onPageSizeChange: (pageSize: number) => void;
-};
+} & (
+  | { mode?: "total"; total: number }
+  // TODO(pagination-migration): 对应后端页码契约完成且所有过渡调用方迁移至正式分页并验证后，移除临时游标模式。
+  | { mode: "legacy-cursor"; hasNextPage: boolean }
+);
 
 export type DataTableProps<T> = {
   className?: string;
@@ -86,7 +91,7 @@ export function DataTable<T>({
     ? resolveDataTableScroll(resolvedColumns, scroll)
     : { x: "max-content" as const, ...scroll };
   const tablePagination =
-    pagination === false
+    pagination === false || (pagination !== "client" && pagination.mode === "legacy-cursor")
       ? false
       : pagination === "client"
         ? {
@@ -125,7 +130,7 @@ export function DataTable<T>({
         pagination={tablePagination}
         tableLayoutFixed
         onChange={
-          pagination === false || pagination === "client"
+          pagination === false || pagination === "client" || pagination.mode === "legacy-cursor"
             ? undefined
             : (nextPagination, _sorter, _filters, extra) => {
                 if (extra.action !== "paginate") return;
@@ -143,6 +148,9 @@ export function DataTable<T>({
         scroll={resolvedScroll}
         rowSelection={rowSelection}
       />
+      {pagination !== false && pagination !== "client" && pagination.mode === "legacy-cursor" ? (
+        <CursorPagination pagination={pagination} />
+      ) : null}
     </>
   );
 }

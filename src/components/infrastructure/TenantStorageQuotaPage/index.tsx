@@ -166,7 +166,7 @@ export function TenantStorageQuotaPage() {
     {
       title: "租户 / ID",
       dataIndex: "displayName",
-      width: 190,
+      width: 200,
       fixed: "left",
       render: (_, tenant) => <ResourceNameId name={tenant.displayName} id={tenant.name} />,
     },
@@ -220,6 +220,7 @@ export function TenantStorageQuotaPage() {
     },
     {
       title: "待扩容申请",
+      ellipsis: true,
       width: 240,
       render: (_, tenant) =>
         tenant.pendingExpand ? (
@@ -228,7 +229,7 @@ export function TenantStorageQuotaPage() {
               {tenant.pendingExpand.kind}：{tenant.pendingExpand.current} →{" "}
               {tenant.pendingExpand.requested}
             </div>
-            <div className="truncate text-gray-500">{tenant.pendingExpand.reason}</div>
+            <div className="text-gray-500">{tenant.pendingExpand.reason}</div>
           </div>
         ) : (
           <span className="text-gray-400">-</span>

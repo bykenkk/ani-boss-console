@@ -11,10 +11,11 @@ export type QueryErrorNotificationMeta = {
 type MutationFeedbackBase = {
   action: string;
   successText?: string;
+  successDescription?: string;
   errorFallback?: string;
 };
 
-export type MutationFeedbackMeta =
+export type MutationFeedbackOptions =
   | (MutationFeedbackBase & {
       channel: "message";
     })
@@ -22,6 +23,10 @@ export type MutationFeedbackMeta =
       channel: "notification";
       id: string;
     });
+
+export type MutationFeedbackMeta =
+  | MutationFeedbackOptions
+  | ((variables: unknown) => MutationFeedbackOptions);
 
 declare module "@tanstack/react-query" {
   interface Register {

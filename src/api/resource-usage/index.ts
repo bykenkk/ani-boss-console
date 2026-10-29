@@ -1,4 +1,4 @@
-import { coreRequest } from "@/api/request";
+import { adminRequest } from "@/api/request";
 import type {
   ResourceUsageOverview,
   ResourceUsageParams,
@@ -17,14 +17,14 @@ export const resourceUsageKeys = {
 };
 
 export function getResourceUsageOverview(params: ResourceUsageParams, signal?: AbortSignal) {
-  return coreRequest<ResourceUsageOverview>("/admin/resource-usage/overview", {
+  return adminRequest<ResourceUsageOverview>("/resource-usage/overview", {
     params: { ...params },
     signal,
   });
 }
 
 export function listResourceUsageTenants(params: ResourceUsageRankingParams, signal?: AbortSignal) {
-  return coreRequest<ResourceUsageRanking>("/admin/resource-usage/tenants", {
+  return adminRequest<ResourceUsageRanking>("/resource-usage/tenants", {
     params: { ...params },
     signal,
   });
@@ -35,7 +35,7 @@ export function getResourceUsageTenant(
   params: ResourceUsageParams,
   signal?: AbortSignal,
 ) {
-  return coreRequest<ResourceUsageTenantDetail>(`/admin/resource-usage/tenants/${tenantId}`, {
+  return adminRequest<ResourceUsageTenantDetail>(`/resource-usage/tenants/${tenantId}`, {
     params: { ...params },
     signal,
   });

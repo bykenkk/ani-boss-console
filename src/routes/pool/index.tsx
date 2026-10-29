@@ -1,7 +1,7 @@
-import { Button, Modal, Progress, Switch } from "@arco-design/web-react";
+import { Button, Progress, Switch } from "@arco-design/web-react";
 import { IconRefresh } from "@arco-design/web-react/icon";
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   ListDataTable,
   ResourceNameId,
@@ -12,8 +12,7 @@ import {
   type StatusBadgeTone,
 } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
-import { formatCurrentDateTime, formatDateTimeMinute } from "@/lib/date";
-import { showMessage } from "@/lib/feedback";
+import { formatDateTimeMinute } from "@/lib/date";
 
 type RegionStatus = "enabled" | "disabled" | "planning";
 
@@ -103,7 +102,8 @@ const statusMeta: Record<RegionStatus, { label: string; tone: StatusBadgeTone }>
 
 export const Route = createFileRoute("/pool/")({
   component: function PlatformResourcePoolOverviewRoute() {
-    const [regions, setRegions] = useState(initialRegions);
+    // TODO(region-integration): 接入区域接口后替换演示数据，并开放容量刷新、区域启停和租户开通配置。
+    const regions = initialRegions;
 
     const summary = useMemo(
       () => ({
@@ -115,84 +115,11 @@ export const Route = createFileRoute("/pool/")({
       [regions],
     );
 
-    const updateRegion = (
-      regionId: string,
-      updater: (region: PlatformRegion) => PlatformRegion,
-    ) => {
-      setRegions((current) =>
-        current.map((region) => (region.id === regionId ? updater(region) : region)),
-      );
-    };
-
-    const refreshRegion = (region: PlatformRegion) => {
-      updateRegion(region.id, (current) => ({
-        ...current,
-        updatedAt: formatCurrentDateTime(),
-      }));
-      showMessage({ type: "success", content: `${region.name}容量已刷新` });
-    };
-
-    const confirmTenantAccess = (region: PlatformRegion, open: boolean) => {
-      if (open && region.status !== "enabled") {
-        showMessage({ type: "warning", content: "仅已启用区域可开放租户开通" });
-        return;
-      }
-      Modal.confirm({
-        title: `${open ? "开放" : "关闭"}${region.name}的租户开通？`,
-        content: open
-          ? "开放后，新租户开通向导可以选择该区域。"
-          : "关闭后不会影响存量租户，但新租户无法选择该区域。",
-        okText: "确认",
-        cancelText: "取消",
-        onOk: () => {
-          updateRegion(region.id, (current) => ({
-            ...current,
-            openForTenant: open,
-            updatedAt: formatCurrentDateTime(),
-          }));
-          showMessage({
-            type: "success",
-            content: open ? "已开放租户开通" : "已关闭租户开通",
-          });
-        },
-      });
-    };
-
-    const confirmStatusChange = (region: PlatformRegion) => {
-      const enable = region.status !== "enabled";
-      Modal.confirm({
-        title: `${enable ? "启用" : "停用"}区域“${region.name}”？`,
-        content: enable
-          ? "启用后可以继续维护容量，并可单独开放租户开通。"
-          : region.tenantCount > 0
-            ? `该区域仍归属 ${region.tenantCount} 个租户。停用不会迁移存量租户，但会同步关闭新租户开通。`
-            : "停用后将同步关闭新租户开通。",
-        okText: enable ? "确认启用" : "确认停用",
-        cancelText: "取消",
-        okButtonProps: enable ? undefined : { status: "danger" },
-        onOk: () => {
-          updateRegion(region.id, (current) => ({
-            ...current,
-            status: enable ? "enabled" : "disabled",
-            openForTenant: enable ? current.openForTenant : false,
-            updatedAt: formatCurrentDateTime(),
-          }));
-          showMessage({ type: "success", content: enable ? "区域已启用" : "区域已停用" });
-        },
-      });
-    };
-
-    const refreshAll = () => {
-      const updatedAt = formatCurrentDateTime();
-      setRegions((current) => current.map((region) => ({ ...region, updatedAt })));
-      showMessage({ type: "success", content: "全部区域容量已刷新" });
-    };
-
     const columns: ListColumn<PlatformRegion>[] = [
       {
         title: "区域 / 编码",
         dataIndex: "name",
-        width: 180,
+        width: 200,
         render: (_, region) => <ResourceNameId name={region.name} id={region.code} />,
       },
       {
@@ -208,13 +135,7 @@ export const Route = createFileRoute("/pool/")({
         dataIndex: "openForTenant",
         width: 130,
         render: (_, region) => (
-          <Switch
-            checked={region.openForTenant}
-            disabled={region.status !== "enabled"}
-            checkedText="开放"
-            uncheckedText="关闭"
-            onChange={(open) => confirmTenantAccess(region, open)}
-          />
+          <Switch checked={region.openForTenant} disabled checkedText="开放" uncheckedText="关闭" />
         ),
       },
       {
@@ -262,7 +183,7 @@ export const Route = createFileRoute("/pool/")({
       {
         title: "更新时间",
         dataIndex: "updatedAt",
-        width: 160,
+        width: 180,
         render: (value: string) => formatDateTimeMinute(value),
       },
     ];
@@ -273,7 +194,7 @@ export const Route = createFileRoute("/pool/")({
           title: "平台资源池总览",
           subtitle: "维护区域主数据与平台容量，控制租户开通时可选择的区域。",
           extra: (
-            <Button type="primary" icon={<IconRefresh />} onClick={refreshAll}>
+            <Button type="primary" disabled icon={<IconRefresh />}>
               刷新全部容量
             </Button>
           ),
@@ -307,13 +228,15 @@ export const Route = createFileRoute("/pool/")({
               {
                 key: "refresh",
                 label: "刷新容量",
-                onClick: refreshRegion,
+                disabled: () => true,
+                onClick: () => {},
               },
               {
                 key: "status",
                 label: (region) => (region.status === "enabled" ? "停用" : "启用"),
                 widthLabel: "停用",
-                onClick: confirmStatusChange,
+                disabled: () => true,
+                onClick: () => {},
               },
             ]}
             data={regions}

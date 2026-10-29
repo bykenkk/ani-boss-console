@@ -53,7 +53,7 @@ export function RegistryQuotaPage() {
     {
       title: "租户",
       dataIndex: "name",
-      width: 220,
+      width: 200,
       fixed: "left",
       render: (_, quota) => <ResourceNameId name={quota.name} id={quota.code} />,
     },

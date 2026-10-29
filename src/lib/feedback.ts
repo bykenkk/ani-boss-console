@@ -23,6 +23,7 @@ type NotificationOptions = {
   id: string;
   state: FeedbackNotificationState;
   action: string;
+  title?: string;
   content?: FeedbackContent;
 };
 
@@ -52,14 +53,14 @@ export function showMessage({ type, content, id, duration }: MessageOptions): vo
   });
 }
 
-export function showNotification({ id, state, action, content }: NotificationOptions): void {
+export function showNotification({ id, state, action, title, content }: NotificationOptions): void {
   const method = state === "loading" ? "info" : state;
   const suffix =
     state === "loading" ? "中" : state === "success" ? "成功" : state === "error" ? "失败" : "";
 
   Notification[method]({
     id,
-    title: suffix ? `${action}${suffix}` : action,
+    title: title ?? (suffix ? `${action}${suffix}` : action),
     content: content === undefined ? undefined : resolveContent(content),
     duration: state === "loading" ? 0 : 5000,
     closable: true,

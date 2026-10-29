@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PlatformAdministratorsPage } from "@/components/settings/PlatformAdministratorsPage";
+import { UsersPage } from "@/components/management/UsersPage";
 
 export const Route = createFileRoute("/platform-admins/")({
-  component: PlatformAdministratorsPage,
+  component: () => <UsersPage scope="platform" />,
 });
