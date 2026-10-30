@@ -61,12 +61,9 @@ export function buildAddressPool(values: PublicAddressPoolInput): {
   if (ovnGatewayIp === upstreamGatewayIp) {
     throw new AddressPoolValidationError("ovnGatewayIp", "云平台网关不能与上游网关相同");
   }
-  if (ovnGatewayIp < allocationStart || ovnGatewayIp > allocationEnd) {
-    throw new AddressPoolValidationError("ovnGatewayIp", "云平台网关必须从可用 IP 范围中预留");
-  }
-
   const gatewayCount =
-    1 + Number(upstreamGatewayIp >= allocationStart && upstreamGatewayIp <= allocationEnd);
+    Number(ovnGatewayIp >= allocationStart && ovnGatewayIp <= allocationEnd) +
+    Number(upstreamGatewayIp >= allocationStart && upstreamGatewayIp <= allocationEnd);
   const allocatableCount = allocationEnd - allocationStart + 1 - gatewayCount;
   if (allocatableCount === 0) {
     throw new AddressPoolValidationError("allocationEnd", "预留网关后，至少需要一个可分配 IP");

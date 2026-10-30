@@ -21,7 +21,7 @@ const addressFields = [
     poolField: "allocationStart",
     label: "可用起始 IP",
     placeholder: "例如 10.10.20.201",
-    extra: "仅使用此起止范围内的地址，包含下方云平台网关的预留地址。",
+    extra: "仅使用此起止范围内的地址；范围内的网关地址会自动预留。",
   },
   {
     field: "allocationEnd",
@@ -40,8 +40,8 @@ const addressFields = [
     field: "ovnGateway",
     poolField: "ovnGatewayIp",
     label: "云平台网关 IP（OVN）",
-    placeholder: "从可用 IP 范围中预留一个地址",
-    extra: "此地址用于云平台虚拟网关，不再分配给实例，且不能与上游网关相同。",
+    placeholder: "填写 CIDR 内的可用主机地址",
+    extra: "此地址可位于可用 IP 范围之外，不分配给实例，且不能与上游网关相同。",
   },
 ] as const;
 
