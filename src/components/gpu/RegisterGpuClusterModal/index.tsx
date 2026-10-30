@@ -29,14 +29,18 @@ export function RegisterGpuClusterModal({ onCancel }: { onCancel: () => void }) 
       onOk={async () => mutation.mutate(await validateForm<RegisterGpuClusterInput>(form))}
     >
       <Form form={form} layout="vertical">
-        <Form.Item field="display_name" label="集群名称" rules={[{ required: true, match: /\S/ }]}>
+        <Form.Item
+          field="display_name"
+          label="集群名称"
+          rules={[{ required: true, match: /\S/, message: "请输入集群名称" }]}
+        >
           <Input />
         </Form.Item>
         <Form.Item
           field="connection_ref"
           label="受管连接引用"
           extra="填写平台提供的连接引用"
-          rules={[{ required: true, match: /\S/ }]}
+          rules={[{ required: true, match: /\S/, message: "请输入受管连接引用" }]}
         >
           <Input />
         </Form.Item>

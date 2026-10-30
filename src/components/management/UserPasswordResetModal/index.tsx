@@ -35,14 +35,18 @@ export function UserPasswordResetModal({
     >
       <p>保存后该用户需要重新登录。</p>
       <Form form={form} layout="vertical">
-        <Form.Item field="password" label="新密码" rules={[{ required: true }]}>
+        <Form.Item
+          field="password"
+          label="新密码"
+          rules={[{ required: true, message: "请输入新密码" }]}
+        >
           <Input.Password autoComplete="new-password" />
         </Form.Item>
         <Form.Item
           field="confirmation"
           label="确认新密码"
           rules={[
-            { required: true },
+            { required: true, message: "请再次输入新密码" },
             {
               validator: (value, callback) => {
                 if (value !== form.getFieldValue("password")) callback("两次密码不一致");

@@ -100,11 +100,8 @@ export function ComputeGpuFields() {
         field="gpu.devices_per_instance"
         label="每实例 GPU 数量"
         rules={[
-          { required: true, type: "number", min: 1, max: maxDevices },
-          {
-            validator: (value, callback) =>
-              callback(value !== undefined && !Number.isInteger(value) ? "请输入整数" : undefined),
-          },
+          { required: true, message: "请输入每实例 GPU 数量" },
+          { type: "number", min: 1, max: maxDevices },
         ]}
         extra={
           profile?.spec.mode === "SHARED_FIXED"

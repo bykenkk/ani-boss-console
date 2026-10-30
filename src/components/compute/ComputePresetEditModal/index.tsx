@@ -163,10 +163,18 @@ export function ComputePresetEditModal({ record, onCancel }: ComputePresetEditMo
         }
       >
         <div hidden={step !== 1}>
-          <Form.Item field="code" label="规格编码" rules={[{ required: true, match: /\S/ }]}>
+          <Form.Item
+            field="code"
+            label="规格编码"
+            rules={[{ required: true, match: /\S/, message: "请输入规格编码" }]}
+          >
             <Input disabled={Boolean(record)} />
           </Form.Item>
-          <Form.Item field="name" label="规格名称" rules={[{ required: true, match: /\S/ }]}>
+          <Form.Item
+            field="name"
+            label="规格名称"
+            rules={[{ required: true, match: /\S/, message: "请输入规格名称" }]}
+          >
             <Input />
           </Form.Item>
           <Form.Item field="description" label="描述">
@@ -177,7 +185,11 @@ export function ComputePresetEditModal({ record, onCancel }: ComputePresetEditMo
           </Form.Item>
         </div>
         <div hidden={step !== 2}>
-          <Form.Item field="compute_type" label="规格类型" rules={[{ required: true }]}>
+          <Form.Item
+            field="compute_type"
+            label="规格类型"
+            rules={[{ required: true, message: "请选择规格类型" }]}
+          >
             <Radio.Group
               type="button"
               options={[
@@ -197,12 +209,16 @@ export function ComputePresetEditModal({ record, onCancel }: ComputePresetEditMo
             <Form.Item
               field="cpu_millis"
               label="CPU"
-              rules={[{ required: true }, positiveInt64]}
+              rules={[{ required: true, message: "请输入 CPU 毫核数" }, positiveInt64]}
               extra="1000 毫核 = 1 核"
             >
               <Input suffix="毫核" />
             </Form.Item>
-            <Form.Item field="memory_mib" label="内存" rules={[{ required: true }, positiveInt64]}>
+            <Form.Item
+              field="memory_mib"
+              label="内存"
+              rules={[{ required: true, message: "请输入内存容量" }, positiveInt64]}
+            >
               <Input suffix="MiB" />
             </Form.Item>
           </div>

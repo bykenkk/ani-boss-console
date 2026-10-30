@@ -111,7 +111,7 @@ export function NetworkCreateModal({ kind, onCancel }: NetworkCreateModalProps) 
       }
     >
       <ModalSteps current={step} titles={steps} />
-      <p className="mb-6 text-[var(--color-text-3)]">{networkDemoNotice}</p>
+      <p className="mb-6 text-(--color-text-3)">{networkDemoNotice}</p>
       <Form
         form={form}
         onSubmitCapture={(event) => {
