@@ -1,4 +1,8 @@
-export type PlatformNetworkKind = "vlan-networks" | "public-address-pools" | "egress-gateways";
+export type PlatformNetworkKind =
+  | "vlan-networks"
+  | "public-address-pools"
+  | "intranet-address-pools"
+  | "egress-gateways";
 export interface PlatformNetworkListParams {
   name?: string;
   state?: string;
@@ -52,6 +56,19 @@ export interface PlatformNetwork {
     topology_fingerprint: string;
     observed_provider_images: string[];
     scope: string;
+  };
+  intranet_pool?: {
+    cidr: string;
+    ovn_gateway_ip: string;
+    excluded_ips: string[];
+    default_vpc_name: string;
+    default_vpc_uid: string;
+    intranet_networks: string[];
+    allocation_enabled: boolean;
+    is_default: boolean;
+    config_revision: string;
+    scope: string;
+    new_vpcs_enabled: boolean;
   };
 }
 export interface PlatformNetworkList {
@@ -113,4 +130,26 @@ export interface CreatePublicNetworkInput {
   ovn_gateway_ip: string;
   upstream_gateway_ip: string;
   excluded_ips: string[];
+}
+export interface IntranetPoolDefaults {
+  default_vpc_name: string;
+  default_vpc_uid: string;
+  intranet_networks: string[];
+}
+export interface CreateBasicNetworkInput {
+  name: string;
+  description?: string;
+  cidr: string;
+  ovn_gateway_ip: string;
+  excluded_ips: string[];
+  default_vpc_name: string;
+  default_vpc_uid: string;
+  intranet_networks: string[];
+}
+export interface BasicNetworkAllocationInput {
+  expected_version: string;
+  enabled: boolean;
+}
+export interface SetDefaultBasicNetworkInput {
+  expected_version: string;
 }

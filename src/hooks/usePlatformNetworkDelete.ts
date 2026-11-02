@@ -9,7 +9,12 @@ import {
 import type { RowAction } from "@/components/common";
 export function usePlatformNetworkDelete(kind: PlatformNetworkKind, onDeleted: () => void) {
   const queryClient = useQueryClient();
-  const title = kind === "vlan-networks" ? "删除二层网络" : "删除公有网络";
+  const title =
+    kind === "vlan-networks"
+      ? "删除二层网络"
+      : kind === "intranet-address-pools"
+        ? "删除基础网络"
+        : "删除公有网络";
   const remove = useMutation({
     mutationFn: (item: PlatformNetwork) => deletePlatformNetwork(kind, item.id),
     meta: {

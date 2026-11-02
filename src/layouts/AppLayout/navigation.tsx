@@ -67,6 +67,7 @@ const infrastructureNavigation: readonly NavigationLeaf[] = [
 const networkNavigation: readonly NavigationLeaf[] = [
   { label: "虚拟交换机", to: "/virtual-switches" },
   { label: "二层网络", to: "/layer2-networks" },
+  { label: "基础网络", to: "/basic-networks" },
   { label: "公有网络", to: "/public-networks" },
   { label: "EIP 管理", to: "/eips" },
 ];
@@ -145,6 +146,7 @@ const visibleAppRoutes = new Set<AppRoute>([
   "/compute-presets",
   "/virtual-switches",
   "/layer2-networks",
+  "/basic-networks",
   "/public-networks",
   "/eips",
   "/gpu-quotas",

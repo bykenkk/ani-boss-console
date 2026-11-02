@@ -12,6 +12,7 @@ import type {
 } from "./types";
 export * from "./types";
 export * from "./default-egress";
+export * from "./basic-networks";
 export const platformNetworkKeys = {
   all: (kind: PlatformNetworkKind) => ["platform-networks", kind] as const,
   list: (kind: PlatformNetworkKind, params: PlatformNetworkListParams) =>

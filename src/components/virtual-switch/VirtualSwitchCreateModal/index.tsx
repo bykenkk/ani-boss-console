@@ -22,7 +22,6 @@ export function VirtualSwitchCreateModal({ onCancel, onSuccess }: VirtualSwitchC
     meta: {
       feedback: {
         channel: "message",
-        id: "virtual-switch-create",
         action: "创建虚拟交换机",
         successText: "创建已提交",
       },

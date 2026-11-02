@@ -39,7 +39,6 @@ export function Layer2NetworkCreateModal({ onCancel, onSuccess }: Layer2NetworkC
     meta: {
       feedback: {
         channel: "message",
-        id: "layer2-network-create",
         action: "创建二层网络",
         successText: "创建已提交",
       },
