@@ -38,7 +38,7 @@ export function parseNetmask(value: string): number | undefined {
   return Number.isInteger(Math.log2(size)) ? size : undefined;
 }
 
-export function getNetworkSegmentErrors(values: NetworkSegmentValues) {
+export function getNetworkSegmentErrors(values: Partial<NetworkSegmentValues>) {
   const errors: Partial<Record<keyof NetworkSegmentValues, string>> = {};
   let subnet: { start: number; end: number } | undefined;
   let pool: { start: number; end: number } | undefined;

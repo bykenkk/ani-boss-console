@@ -147,7 +147,9 @@ export function toApiError(error: unknown): ApiError {
     error.message ||
     (error.response ? `HTTP ${error.response.status}` : "网络请求失败");
   const metadata = payloadRecord(payload?.metadata);
-  const responseHeaders = AxiosHeaders.from(error.response?.headers ?? {});
+  const responseHeaders = AxiosHeaders.from(
+    (error.response?.headers ?? {}) as Parameters<typeof AxiosHeaders.from>[0],
+  );
   const headerRequestId = responseHeaders.get("X-Request-ID");
   const retryAfter = responseHeaders.get("Retry-After");
   const retryAfterSeconds =

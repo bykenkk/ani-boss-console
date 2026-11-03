@@ -19,6 +19,7 @@ import { Route as AuditExportIndexRouteImport } from './routes/audit-export/inde
 import { Route as AuditInferenceIndexRouteImport } from './routes/audit-inference/index'
 import { Route as AuditLoginIndexRouteImport } from './routes/audit-login/index'
 import { Route as AuditOperationIndexRouteImport } from './routes/audit-operation/index'
+import { Route as BasicNetworksIndexRouteImport } from './routes/basic-networks/index'
 import { Route as ComputePresetsIndexRouteImport } from './routes/compute-presets/index'
 import { Route as EipsIndexRouteImport } from './routes/eips/index'
 import { Route as GpuClustersIndexRouteImport } from './routes/gpu-clusters/index'
@@ -115,6 +116,11 @@ const AuditLoginIndexRoute = AuditLoginIndexRouteImport.update({
 const AuditOperationIndexRoute = AuditOperationIndexRouteImport.update({
   id: '/audit-operation/',
   path: '/audit-operation/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BasicNetworksIndexRoute = BasicNetworksIndexRouteImport.update({
+  id: '/basic-networks/',
+  path: '/basic-networks/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComputePresetsIndexRoute = ComputePresetsIndexRouteImport.update({
@@ -367,6 +373,7 @@ export interface FileRoutesByFullPath {
   '/audit-inference/': typeof AuditInferenceIndexRoute
   '/audit-login/': typeof AuditLoginIndexRoute
   '/audit-operation/': typeof AuditOperationIndexRoute
+  '/basic-networks/': typeof BasicNetworksIndexRoute
   '/compute-presets/': typeof ComputePresetsIndexRoute
   '/eips/': typeof EipsIndexRoute
   '/gpu-clusters/': typeof GpuClustersIndexRoute
@@ -425,6 +432,7 @@ export interface FileRoutesByTo {
   '/audit-inference': typeof AuditInferenceIndexRoute
   '/audit-login': typeof AuditLoginIndexRoute
   '/audit-operation': typeof AuditOperationIndexRoute
+  '/basic-networks': typeof BasicNetworksIndexRoute
   '/compute-presets': typeof ComputePresetsIndexRoute
   '/eips': typeof EipsIndexRoute
   '/gpu-clusters': typeof GpuClustersIndexRoute
@@ -485,6 +493,7 @@ export interface FileRoutesById {
   '/audit-inference/': typeof AuditInferenceIndexRoute
   '/audit-login/': typeof AuditLoginIndexRoute
   '/audit-operation/': typeof AuditOperationIndexRoute
+  '/basic-networks/': typeof BasicNetworksIndexRoute
   '/compute-presets/': typeof ComputePresetsIndexRoute
   '/eips/': typeof EipsIndexRoute
   '/gpu-clusters/': typeof GpuClustersIndexRoute
@@ -546,6 +555,7 @@ export interface FileRouteTypes {
     | '/audit-inference/'
     | '/audit-login/'
     | '/audit-operation/'
+    | '/basic-networks/'
     | '/compute-presets/'
     | '/eips/'
     | '/gpu-clusters/'
@@ -604,6 +614,7 @@ export interface FileRouteTypes {
     | '/audit-inference'
     | '/audit-login'
     | '/audit-operation'
+    | '/basic-networks'
     | '/compute-presets'
     | '/eips'
     | '/gpu-clusters'
@@ -663,6 +674,7 @@ export interface FileRouteTypes {
     | '/audit-inference/'
     | '/audit-login/'
     | '/audit-operation/'
+    | '/basic-networks/'
     | '/compute-presets/'
     | '/eips/'
     | '/gpu-clusters/'
@@ -723,6 +735,7 @@ export interface RootRouteChildren {
   AuditInferenceIndexRoute: typeof AuditInferenceIndexRoute
   AuditLoginIndexRoute: typeof AuditLoginIndexRoute
   AuditOperationIndexRoute: typeof AuditOperationIndexRoute
+  BasicNetworksIndexRoute: typeof BasicNetworksIndexRoute
   ComputePresetsIndexRoute: typeof ComputePresetsIndexRoute
   EipsIndexRoute: typeof EipsIndexRoute
   GpuClustersIndexRoute: typeof GpuClustersIndexRoute
@@ -840,6 +853,13 @@ declare module '@tanstack/react-router' {
       path: '/audit-operation'
       fullPath: '/audit-operation/'
       preLoaderRoute: typeof AuditOperationIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/basic-networks/': {
+      id: '/basic-networks/'
+      path: '/basic-networks'
+      fullPath: '/basic-networks/'
+      preLoaderRoute: typeof BasicNetworksIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/compute-presets/': {
@@ -1197,6 +1217,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuditInferenceIndexRoute: AuditInferenceIndexRoute,
   AuditLoginIndexRoute: AuditLoginIndexRoute,
   AuditOperationIndexRoute: AuditOperationIndexRoute,
+  BasicNetworksIndexRoute: BasicNetworksIndexRoute,
   ComputePresetsIndexRoute: ComputePresetsIndexRoute,
   EipsIndexRoute: EipsIndexRoute,
   GpuClustersIndexRoute: GpuClustersIndexRoute,
