@@ -27,7 +27,7 @@ const columns: ListColumn<QuotaAccount>[] = [
     width: 120,
     render: (_, row) => (
       <StatusBadge
-        value={row.overLimit === undefined ? undefined : row.overLimit ? "超限" : "未超限"}
+        value={row.overLimit ? "超限" : "未超限"}
         tone={row.overLimit ? "danger" : "success"}
       />
     ),

@@ -67,27 +67,37 @@ export interface QuotaDefinition {
   enforcement?: QuotaEnforcement;
 }
 
-export type PlanModuleCode =
-  | "DASHBOARD"
-  | "OPM"
-  | "SYSTEM"
-  | "DICT"
-  | "TENANT"
-  | "PERMISSION"
-  | "LOG"
-  | "INTERNAL_MESSAGE"
-  | "TASK"
-  | "MODEL"
-  | "NETWORK"
-  | "ACCELERATOR"
-  | "IMAGE"
-  | "INFERENCE"
-  | "INSTANCE";
+export const planModuleCodes = [
+  "DASHBOARD",
+  "OPM",
+  "SYSTEM",
+  "DICT",
+  "TENANT",
+  "PERMISSION",
+  "LOG",
+  "INTERNAL_MESSAGE",
+  "TASK",
+  "MODEL",
+  "MODELDEV",
+  "NETWORK",
+  "ACCELERATOR",
+  "IMAGE",
+  "INFERENCE",
+  "INSTANCE",
+  "SANDBOX",
+  "VIRTUAL_MACHINE",
+  "STORAGE",
+] as const;
+
+export type PlanModuleCode = (typeof planModuleCodes)[number];
+
+/** 读取与表单回填保留后端新增值；创建与更新仍只接受已知模块。 */
+export type PlanModuleValue = PlanModuleCode | (string & {});
 
 export interface PlanModule {
   id: number;
   planId?: number;
-  module?: PlanModuleCode;
+  module?: PlanModuleValue;
 }
 
 export interface CreatePlanModuleInput {

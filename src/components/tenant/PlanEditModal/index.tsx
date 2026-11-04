@@ -10,7 +10,7 @@ import {
   getPlanModulesForEditing,
   savePlanModules,
   type Plan,
-  type PlanModuleCode,
+  type PlanModuleValue,
   type UpdatePlanInput,
 } from "@/api/plans";
 import { validateForm } from "@/lib/form";
@@ -30,7 +30,7 @@ interface PlanEditFormValues {
   dataRetentionDays?: number;
   description?: string;
   remark?: string;
-  modules?: PlanModuleCode[];
+  modules?: PlanModuleValue[];
 }
 
 interface PlanSaveCheckpoint {

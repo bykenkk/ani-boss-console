@@ -1,27 +1,36 @@
 import { Select } from "@arco-design/web-react";
-import type { PlanModuleCode } from "@/api/plans";
+import { planModuleCodes, type PlanModuleCode, type PlanModuleValue } from "@/api/plans";
 
-const planModuleOptions: Array<{ value: PlanModuleCode; label: string }> = [
-  { value: "DASHBOARD", label: "仪表盘" },
-  { value: "OPM", label: "组织人员管理" },
-  { value: "SYSTEM", label: "系统管理" },
-  { value: "DICT", label: "数据字典" },
-  { value: "TENANT", label: "租户管理" },
-  { value: "PERMISSION", label: "权限管理" },
-  { value: "LOG", label: "日志审计" },
-  { value: "INTERNAL_MESSAGE", label: "内部消息" },
-  { value: "TASK", label: "任务管理" },
-  { value: "MODEL", label: "模型目录" },
-  { value: "NETWORK", label: "网络资源" },
-  { value: "ACCELERATOR", label: "GPU 资源" },
-  { value: "IMAGE", label: "容器镜像" },
-  { value: "INFERENCE", label: "推理服务" },
-  { value: "INSTANCE", label: "GPU 容器实例" },
-];
+const planModuleLabels: Record<PlanModuleCode, string> = {
+  DASHBOARD: "仪表盘",
+  OPM: "组织人员管理",
+  SYSTEM: "系统管理",
+  DICT: "数据字典",
+  TENANT: "租户管理",
+  PERMISSION: "权限管理",
+  LOG: "日志审计",
+  INTERNAL_MESSAGE: "内部消息",
+  TASK: "任务管理",
+  MODEL: "模型仓库",
+  MODELDEV: "模型开发",
+  NETWORK: "网络资源",
+  ACCELERATOR: "GPU 资源",
+  IMAGE: "容器镜像",
+  INFERENCE: "推理服务",
+  INSTANCE: "GPU 容器实例",
+  SANDBOX: "沙箱",
+  VIRTUAL_MACHINE: "虚拟机",
+  STORAGE: "存储",
+};
+
+const planModuleOptions = planModuleCodes.map((value) => ({
+  value,
+  label: planModuleLabels[value],
+}));
 
 interface PlanModuleSelectProps {
-  value?: PlanModuleCode[];
-  onChange?: (value: PlanModuleCode[] | undefined) => void;
+  value?: PlanModuleValue[];
+  onChange?: (value: PlanModuleValue[] | undefined) => void;
   disabled?: boolean;
 }
 

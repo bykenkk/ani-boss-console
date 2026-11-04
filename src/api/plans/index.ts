@@ -1,5 +1,6 @@
 import { adminRequest, ApiError } from "@/api/request";
 import { withFirst100 } from "@/api/pagination";
+import { planModuleCodes } from "./types";
 import type { PageParams } from "@/api/types";
 import type {
   CreatePlanInput,
@@ -9,7 +10,7 @@ import type {
   PlanList,
   PlanListInput,
   PlanModule,
-  PlanModuleCode,
+  PlanModuleValue,
   PlanQuota,
   QuotaDefinition,
   TenantQuotaAccounts,
@@ -223,16 +224,18 @@ export async function getPlanModulesForEditing(
 // 暂在每次提交前读取当前关联，逐条保存差量，失败保留已完成结果，下次提交重新查询后续写。
 // 此编排不能保证并发下的原子性；待后端补齐组合创建、套餐 ID 返回及模块原子替换后移除。
 // TODO(api-verification): 联调确认部分失败、网络中断后重试及重复关联的增删结果。
-export async function savePlanModules(planId: number, modules: PlanModuleCode[]): Promise<void> {
+export async function savePlanModules(planId: number, modules: PlanModuleValue[]): Promise<void> {
   const current = await getPlanModulesForEditing(planId);
   const selected = new Set(modules);
+  const editable = new Set<string>(planModuleCodes);
   for (const item of current) {
-    if (item.module && selected.has(item.module)) continue;
+    // 候选外关联不参与差量删除，避免前端版本落后或表单丢值时静默收回租户能力。
+    if (item.module && (!editable.has(item.module) || selected.has(item.module))) continue;
     await deletePlanModule(item.id);
   }
   const existing = new Set(current.map((item) => item.module));
-  for (const module of selected) {
-    if (existing.has(module)) continue;
+  for (const module of planModuleCodes) {
+    if (!selected.has(module) || existing.has(module)) continue;
     await createPlanModule({ planId, module });
   }
 }
