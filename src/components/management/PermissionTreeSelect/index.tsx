@@ -27,8 +27,6 @@ export function PermissionTreeSelect({ value = [], onChange }: Props) {
       errorNotification: { id: "role-permissions", action: "权限点加载" },
     },
   });
-  // FIXME(group-tree-pagination): 分组仍依赖 noPaging 的服务端组树结果；后端提供不丢父节点的选项契约后迁移。
-  // TODO(options-pagination): 权限点暂取服务端首 100 项，未加载的已有权限继续保留；后端选项契约完善后移除固定分页。
   const items = permissions.data ?? [];
   const treeData =
     groups.data && permissions.data ? buildRolePermissionTree(groups.data.items, items) : [];

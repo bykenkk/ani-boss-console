@@ -16,7 +16,6 @@ export function ApiTreeSelect({ value = [], onChange }: Props) {
       errorNotification: { id: "permission-apis", action: "关联 API 加载" },
     },
   });
-  // TODO(options-pagination): API 选项暂取服务端首 100 项；后端选项契约完善后迁移，未加载的已有关联仍保留。
   const items = query.data ?? [];
   const treeData = buildPermissionApiTree(items);
 

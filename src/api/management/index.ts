@@ -1,5 +1,4 @@
 import { adminRequest } from "@/api/request";
-import { withFirst100 } from "@/api/pagination";
 import { encryptManagementPassword } from "./password";
 import type {
   EditValues,
@@ -28,8 +27,8 @@ export async function listManagement<R extends Resource>(
     method: "GET",
     signal,
     params: {
-      page: input.page ?? 1,
-      pageSize: input.pageSize ?? 20,
+      page: input.noPaging ? undefined : (input.page ?? 1),
+      pageSize: input.noPaging ? undefined : (input.pageSize ?? 20),
       noPaging: input.noPaging,
       query: JSON.stringify(input.filters ?? {}),
       orderBy: "id desc",
@@ -49,14 +48,7 @@ export async function listManagementOptions<R extends Resource>(
   filters: ManagementListInput["filters"] = {},
   signal?: AbortSignal,
 ): Promise<ResourceRecords[R][]> {
-  // TODO(options-pagination): 普通选项仅取服务端首 100 项；后端选项查询能力完善后移除固定分页策略。
-  // FIXME(group-tree-pagination): 权限分组接口先分页后组树，直接截断可能丢失父节点；保留原树查询，待后端提供独立选项契约后迁移。
-  const { items } =
-    resource === "permission-groups"
-      ? await listManagement(resource, { noPaging: true, filters }, signal)
-      : await withFirst100((params: ManagementListInput, requestSignal?: AbortSignal) =>
-          listManagement(resource, params, requestSignal),
-        )({ filters }, signal);
+  const { items } = await listManagement(resource, { noPaging: true, filters }, signal);
   if (resource !== "permission-groups") return items;
   const flatten = (
     nodes: ResourceRecords["permission-groups"][],
