@@ -1,14 +1,15 @@
-import { KaiwuEntryButton } from "./KaiwuEntryButton";
+// import { KaiwuEntryButton } from "./KaiwuEntryButton";
 import { logoutPlatform } from "@/api/auth";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { formatDateTime } from "@/lib/date";
 import type { AppBreadcrumbItem } from "@/lib/navigation";
-import { Breadcrumb, Button, Dropdown, Input, Modal, Tooltip } from "@arco-design/web-react";
+import { Breadcrumb, Button, Dropdown, Modal, Tooltip } from "@arco-design/web-react";
+// import { Input } from "@arco-design/web-react";
 import {
   IconCalendar,
   IconExport,
   IconLeft,
-  IconSearch,
+  // IconSearch,
   IconTag,
   IconUser,
 } from "@arco-design/web-react/icon";
@@ -135,14 +136,16 @@ export function TopNav({ breadcrumbs, onBack }: TopNavProps) {
           </Breadcrumb>
         </div>
         <div className="topnav-right">
-          <Input
+          {/* TODO(feature-visibility): 后续开放全局搜索时恢复搜索框及相关导入。 */}
+          {/* <Input
             className="topnav-search"
             prefix={<IconSearch />}
             placeholder="请输入内容"
             aria-label="全局搜索"
-          />
-          <KaiwuEntryButton />
-          <span className="topnav-user-divider" aria-hidden="true" />
+          /> */}
+          {/* TODO(feature-visibility): 后续开放开物入口时恢复按钮、分隔线及相关导入。 */}
+          {/* <KaiwuEntryButton />
+          <span className="topnav-user-divider" aria-hidden="true" /> */}
           <Dropdown
             droplist={userMenu}
             trigger="hover"
