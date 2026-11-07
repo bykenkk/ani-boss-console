@@ -2,27 +2,42 @@ import { useCallback, useState } from "react";
 import type { ListPagination } from "@/components/common";
 /**
  * TODO(pagination-migration): 对应后端页码契约完成后，将调用方迁移至 useListPagination；
- * 所有过渡调用方迁移并验证后，删除本 Hook 及 legacy-cursor 模式。
+ * 所有过渡调用方迁移并验证后，删除 legacy-cursor 模式；正式 cursor 协议继续复用本 Hook。
  * 仅记录已访问游标，不构造 offset/token，不预取或汇总其他分页；调用方原样适配字段名称。
  */
-export function useCursorPagination(scope: string, initialPageSize = 20) {
+export function useCursorPagination(
+  scope: string,
+  initialPageSize = 20,
+  mode: "legacy-cursor" | "cursor" = "legacy-cursor",
+) {
   const [state, setState] = useState({
     scope,
     page: 1,
     pageSize: initialPageSize,
+    initialPageSize,
     cursors: [undefined] as (string | undefined)[],
   });
   const current =
-    state.scope === scope ? state : { ...state, scope, page: 1, cursors: [undefined] };
-  if (state.scope !== scope) setState(current);
+    state.scope === scope && state.initialPageSize === initialPageSize
+      ? state
+      : {
+          ...state,
+          scope,
+          initialPageSize,
+          pageSize: state.initialPageSize === initialPageSize ? state.pageSize : initialPageSize,
+          page: 1,
+          cursors: [undefined],
+        };
+  if (state.scope !== scope || state.initialPageSize !== initialPageSize) setState(current);
   const resetPagination = useCallback(
     () => setState((value) => ({ ...value, page: 1, cursors: [undefined] })),
     [],
   );
   const getPagination = (nextCursor?: string, disabled = false): ListPagination => ({
-    mode: "legacy-cursor",
+    mode,
     page: current.page,
     pageSize: current.pageSize,
+    pageSizeOptions: mode === "cursor" ? [20, 50, 100, 200] : undefined,
     hasNextPage: Boolean(nextCursor),
     disabled,
     onPageChange: (page) => {
