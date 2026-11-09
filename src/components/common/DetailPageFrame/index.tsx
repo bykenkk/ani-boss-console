@@ -24,6 +24,7 @@ export interface DetailTab {
   key: string;
   title: ReactNode;
   content: ReactNode;
+  destroyOnHide?: boolean;
 }
 
 interface DetailPageFrameProps {
@@ -136,7 +137,7 @@ export function DetailPageFrame({
               type="line"
             >
               {tabs.map((tab) => (
-                <Tabs.TabPane key={tab.key} title={tab.title}>
+                <Tabs.TabPane key={tab.key} title={tab.title} destroyOnHide={tab.destroyOnHide}>
                   {tab.content}
                 </Tabs.TabPane>
               ))}

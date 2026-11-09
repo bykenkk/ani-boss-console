@@ -117,6 +117,11 @@ let refreshTimer: ReturnType<typeof setTimeout> | undefined;
 let sessionController = new AbortController();
 let authPaused = false;
 
+// A normal access-token refresh keeps this signal; session clear/switch cancels it.
+export function getAuthSessionSignal(): AbortSignal {
+  return sessionController.signal;
+}
+
 function redirectToLogin(): void {
   if (typeof window === "undefined") return;
   const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;

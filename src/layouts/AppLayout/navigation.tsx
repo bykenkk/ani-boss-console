@@ -133,6 +133,9 @@ const integrationNavigation: readonly NavigationLeaf[] = [
 ];
 
 const visibleAppRoutes = new Set<AppRoute>([
+  "/cluster-operations",
+  "/cluster-operations/resources",
+  "/cluster-operations/resources/detail",
   "/notification-channels",
   "/tenant-plans",
   "/permissions",
@@ -184,6 +187,15 @@ const completeAppNavigation: readonly NavigationItem[] = [
     label: "资源池管理",
     icon: <IconCloud />,
     children: infrastructureNavigation,
+  },
+  {
+    key: "cluster-operations",
+    label: "集群运维",
+    icon: <IconCloud />,
+    children: [
+      { label: "集群概览", to: "/cluster-operations", icon: <IconDashboard /> },
+      { label: "资源管理", to: "/cluster-operations/resources", icon: <IconApps /> },
+    ],
   },
   {
     key: "network-management",

@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ClusterOperationsRouteImport } from './routes/cluster-operations'
 import { Route as TenantsRouteImport } from './routes/tenants'
 import { Route as AlertRulesIndexRouteImport } from './routes/alert-rules/index'
 import { Route as ApisIndexRouteImport } from './routes/apis/index'
@@ -20,6 +21,8 @@ import { Route as AuditInferenceIndexRouteImport } from './routes/audit-inferenc
 import { Route as AuditLoginIndexRouteImport } from './routes/audit-login/index'
 import { Route as AuditOperationIndexRouteImport } from './routes/audit-operation/index'
 import { Route as BasicNetworksIndexRouteImport } from './routes/basic-networks/index'
+import { Route as ClusterOperationsIndexRouteImport } from './routes/cluster-operations/index'
+import { Route as ClusterOperationsResourcesRouteImport } from './routes/cluster-operations/resources'
 import { Route as ComputePresetsIndexRouteImport } from './routes/compute-presets/index'
 import { Route as EipsIndexRouteImport } from './routes/eips/index'
 import { Route as GpuClustersIndexRouteImport } from './routes/gpu-clusters/index'
@@ -67,10 +70,17 @@ import { Route as TenantsIndexRouteImport } from './routes/tenants/index'
 import { Route as TracesIndexRouteImport } from './routes/traces/index'
 import { Route as VirtualSwitchesIndexRouteImport } from './routes/virtual-switches/index'
 import { Route as WebhookIndexRouteImport } from './routes/webhook/index'
+import { Route as ClusterOperationsResourcesIndexRouteImport } from './routes/cluster-operations/resources/index'
+import { Route as ClusterOperationsResourcesDetailRouteImport } from './routes/cluster-operations/resources/detail'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClusterOperationsRoute = ClusterOperationsRouteImport.update({
+  id: '/cluster-operations',
+  path: '/cluster-operations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TenantsRoute = TenantsRouteImport.update({
@@ -123,6 +133,17 @@ const BasicNetworksIndexRoute = BasicNetworksIndexRouteImport.update({
   path: '/basic-networks/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClusterOperationsIndexRoute = ClusterOperationsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClusterOperationsRoute,
+} as any)
+const ClusterOperationsResourcesRoute =
+  ClusterOperationsResourcesRouteImport.update({
+    id: '/resources',
+    path: '/resources',
+    getParentRoute: () => ClusterOperationsRoute,
+  } as any)
 const ComputePresetsIndexRoute = ComputePresetsIndexRouteImport.update({
   id: '/compute-presets/',
   path: '/compute-presets/',
@@ -360,10 +381,24 @@ const WebhookIndexRoute = WebhookIndexRouteImport.update({
   path: '/webhook/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClusterOperationsResourcesIndexRoute =
+  ClusterOperationsResourcesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => ClusterOperationsResourcesRoute,
+  } as any)
+const ClusterOperationsResourcesDetailRoute =
+  ClusterOperationsResourcesDetailRouteImport.update({
+    id: '/detail',
+    path: '/detail',
+    getParentRoute: () => ClusterOperationsResourcesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/cluster-operations': typeof ClusterOperationsRouteWithChildren
   '/tenants': typeof TenantsRouteWithChildren
+  '/cluster-operations/resources': typeof ClusterOperationsResourcesRouteWithChildren
   '/tenants-billing/$tenantId': typeof TenantsBillingTenantIdRoute
   '/alert-rules/': typeof AlertRulesIndexRoute
   '/apis/': typeof ApisIndexRoute
@@ -374,6 +409,7 @@ export interface FileRoutesByFullPath {
   '/audit-login/': typeof AuditLoginIndexRoute
   '/audit-operation/': typeof AuditOperationIndexRoute
   '/basic-networks/': typeof BasicNetworksIndexRoute
+  '/cluster-operations/': typeof ClusterOperationsIndexRoute
   '/compute-presets/': typeof ComputePresetsIndexRoute
   '/eips/': typeof EipsIndexRoute
   '/gpu-clusters/': typeof GpuClustersIndexRoute
@@ -420,6 +456,8 @@ export interface FileRoutesByFullPath {
   '/traces/': typeof TracesIndexRoute
   '/virtual-switches/': typeof VirtualSwitchesIndexRoute
   '/webhook/': typeof WebhookIndexRoute
+  '/cluster-operations/resources/detail': typeof ClusterOperationsResourcesDetailRoute
+  '/cluster-operations/resources/': typeof ClusterOperationsResourcesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -433,6 +471,7 @@ export interface FileRoutesByTo {
   '/audit-login': typeof AuditLoginIndexRoute
   '/audit-operation': typeof AuditOperationIndexRoute
   '/basic-networks': typeof BasicNetworksIndexRoute
+  '/cluster-operations': typeof ClusterOperationsIndexRoute
   '/compute-presets': typeof ComputePresetsIndexRoute
   '/eips': typeof EipsIndexRoute
   '/gpu-clusters': typeof GpuClustersIndexRoute
@@ -479,11 +518,15 @@ export interface FileRoutesByTo {
   '/traces': typeof TracesIndexRoute
   '/virtual-switches': typeof VirtualSwitchesIndexRoute
   '/webhook': typeof WebhookIndexRoute
+  '/cluster-operations/resources/detail': typeof ClusterOperationsResourcesDetailRoute
+  '/cluster-operations/resources': typeof ClusterOperationsResourcesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/cluster-operations': typeof ClusterOperationsRouteWithChildren
   '/tenants': typeof TenantsRouteWithChildren
+  '/cluster-operations/resources': typeof ClusterOperationsResourcesRouteWithChildren
   '/tenants-billing/$tenantId': typeof TenantsBillingTenantIdRoute
   '/alert-rules/': typeof AlertRulesIndexRoute
   '/apis/': typeof ApisIndexRoute
@@ -494,6 +537,7 @@ export interface FileRoutesById {
   '/audit-login/': typeof AuditLoginIndexRoute
   '/audit-operation/': typeof AuditOperationIndexRoute
   '/basic-networks/': typeof BasicNetworksIndexRoute
+  '/cluster-operations/': typeof ClusterOperationsIndexRoute
   '/compute-presets/': typeof ComputePresetsIndexRoute
   '/eips/': typeof EipsIndexRoute
   '/gpu-clusters/': typeof GpuClustersIndexRoute
@@ -540,12 +584,16 @@ export interface FileRoutesById {
   '/traces/': typeof TracesIndexRoute
   '/virtual-switches/': typeof VirtualSwitchesIndexRoute
   '/webhook/': typeof WebhookIndexRoute
+  '/cluster-operations/resources/detail': typeof ClusterOperationsResourcesDetailRoute
+  '/cluster-operations/resources/': typeof ClusterOperationsResourcesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/cluster-operations'
     | '/tenants'
+    | '/cluster-operations/resources'
     | '/tenants-billing/$tenantId'
     | '/alert-rules/'
     | '/apis/'
@@ -556,6 +604,7 @@ export interface FileRouteTypes {
     | '/audit-login/'
     | '/audit-operation/'
     | '/basic-networks/'
+    | '/cluster-operations/'
     | '/compute-presets/'
     | '/eips/'
     | '/gpu-clusters/'
@@ -602,6 +651,8 @@ export interface FileRouteTypes {
     | '/traces/'
     | '/virtual-switches/'
     | '/webhook/'
+    | '/cluster-operations/resources/detail'
+    | '/cluster-operations/resources/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -615,6 +666,7 @@ export interface FileRouteTypes {
     | '/audit-login'
     | '/audit-operation'
     | '/basic-networks'
+    | '/cluster-operations'
     | '/compute-presets'
     | '/eips'
     | '/gpu-clusters'
@@ -661,10 +713,14 @@ export interface FileRouteTypes {
     | '/traces'
     | '/virtual-switches'
     | '/webhook'
+    | '/cluster-operations/resources/detail'
+    | '/cluster-operations/resources'
   id:
     | '__root__'
     | '/'
+    | '/cluster-operations'
     | '/tenants'
+    | '/cluster-operations/resources'
     | '/tenants-billing/$tenantId'
     | '/alert-rules/'
     | '/apis/'
@@ -675,6 +731,7 @@ export interface FileRouteTypes {
     | '/audit-login/'
     | '/audit-operation/'
     | '/basic-networks/'
+    | '/cluster-operations/'
     | '/compute-presets/'
     | '/eips/'
     | '/gpu-clusters/'
@@ -721,10 +778,13 @@ export interface FileRouteTypes {
     | '/traces/'
     | '/virtual-switches/'
     | '/webhook/'
+    | '/cluster-operations/resources/detail'
+    | '/cluster-operations/resources/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ClusterOperationsRoute: typeof ClusterOperationsRouteWithChildren
   TenantsRoute: typeof TenantsRouteWithChildren
   TenantsBillingTenantIdRoute: typeof TenantsBillingTenantIdRoute
   AlertRulesIndexRoute: typeof AlertRulesIndexRoute
@@ -790,6 +850,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cluster-operations': {
+      id: '/cluster-operations'
+      path: '/cluster-operations'
+      fullPath: '/cluster-operations'
+      preLoaderRoute: typeof ClusterOperationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tenants': {
@@ -861,6 +928,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/basic-networks/'
       preLoaderRoute: typeof BasicNetworksIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/cluster-operations/': {
+      id: '/cluster-operations/'
+      path: '/'
+      fullPath: '/cluster-operations/'
+      preLoaderRoute: typeof ClusterOperationsIndexRouteImport
+      parentRoute: typeof ClusterOperationsRoute
+    }
+    '/cluster-operations/resources': {
+      id: '/cluster-operations/resources'
+      path: '/resources'
+      fullPath: '/cluster-operations/resources'
+      preLoaderRoute: typeof ClusterOperationsResourcesRouteImport
+      parentRoute: typeof ClusterOperationsRoute
     }
     '/compute-presets/': {
       id: '/compute-presets/'
@@ -1191,8 +1272,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WebhookIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cluster-operations/resources/': {
+      id: '/cluster-operations/resources/'
+      path: '/'
+      fullPath: '/cluster-operations/resources/'
+      preLoaderRoute: typeof ClusterOperationsResourcesIndexRouteImport
+      parentRoute: typeof ClusterOperationsResourcesRoute
+    }
+    '/cluster-operations/resources/detail': {
+      id: '/cluster-operations/resources/detail'
+      path: '/detail'
+      fullPath: '/cluster-operations/resources/detail'
+      preLoaderRoute: typeof ClusterOperationsResourcesDetailRouteImport
+      parentRoute: typeof ClusterOperationsResourcesRoute
+    }
   }
 }
+
+interface ClusterOperationsResourcesRouteChildren {
+  ClusterOperationsResourcesDetailRoute: typeof ClusterOperationsResourcesDetailRoute
+  ClusterOperationsResourcesIndexRoute: typeof ClusterOperationsResourcesIndexRoute
+}
+
+const ClusterOperationsResourcesRouteChildren: ClusterOperationsResourcesRouteChildren =
+  {
+    ClusterOperationsResourcesDetailRoute:
+      ClusterOperationsResourcesDetailRoute,
+    ClusterOperationsResourcesIndexRoute: ClusterOperationsResourcesIndexRoute,
+  }
+
+const ClusterOperationsResourcesRouteWithChildren =
+  ClusterOperationsResourcesRoute._addFileChildren(
+    ClusterOperationsResourcesRouteChildren,
+  )
+
+interface ClusterOperationsRouteChildren {
+  ClusterOperationsResourcesRoute: typeof ClusterOperationsResourcesRouteWithChildren
+  ClusterOperationsIndexRoute: typeof ClusterOperationsIndexRoute
+}
+
+const ClusterOperationsRouteChildren: ClusterOperationsRouteChildren = {
+  ClusterOperationsResourcesRoute: ClusterOperationsResourcesRouteWithChildren,
+  ClusterOperationsIndexRoute: ClusterOperationsIndexRoute,
+}
+
+const ClusterOperationsRouteWithChildren =
+  ClusterOperationsRoute._addFileChildren(ClusterOperationsRouteChildren)
 
 interface TenantsRouteChildren {
   TenantsIndexRoute: typeof TenantsIndexRoute
@@ -1207,6 +1332,7 @@ const TenantsRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ClusterOperationsRoute: ClusterOperationsRouteWithChildren,
   TenantsRoute: TenantsRouteWithChildren,
   TenantsBillingTenantIdRoute: TenantsBillingTenantIdRoute,
   AlertRulesIndexRoute: AlertRulesIndexRoute,
