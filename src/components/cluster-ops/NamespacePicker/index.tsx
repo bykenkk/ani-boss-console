@@ -22,7 +22,8 @@ export function NamespacePicker({
   const scope = JSON.stringify([clusterId, exact]);
   const [expiredScope, setExpiredScope] = useState<string>();
   const expired = expiredScope === scope;
-  const paging = useCursorPagination(scope, 50, "cursor");
+  // TODO(pagination-migration): 当前 Namespace 候选按 page_size/continue_token 加载；后端支持 page/pageSize 和 items/total 后改用 useListPagination。
+  const paging = useCursorPagination(scope, 50);
   const params = {
     group: "",
     version: "v1",

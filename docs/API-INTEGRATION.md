@@ -35,8 +35,6 @@ GitNexus 使用方式遵循 [AGENTS.md](../AGENTS.md#gitnexus)。
 
 #### 列表分页核对
 
-集群运维资源列表的正式游标例外见[集群运维局部合同](#集群运维局部合同)。
-
 | 项目 | 必须满足的规则 |
 |------|----------------|
 | 请求参数 | 使用 `page`、`pageSize` 分页；`page` 从 `1` 开始，默认 `1`；`pageSize` 默认 `20`，范围为 `1` 到 `100` 的整数。两个参数分别使用独立默认值，页码上限、筛选与排序参数按具体接口声明核对。 |
@@ -161,8 +159,6 @@ GitNexus 使用方式遵循 [AGENTS.md](../AGENTS.md#gitnexus)。
 
 ### 公共分页状态与迁移
 
-集群运维使用正式 `cursor` 模式；该局部合同不属于待迁移的旧游标接口，见[集群运维局部合同](#集群运维局部合同)。
-
 公共分页状态参考 `ani-console` 的职责划分，查询函数、缓存键和反馈仍由页面或领域组件维护：
 
 - `src/hooks/useListPagination.ts` 用于正式 `page/pageSize` 接口，复用 `src/api/types.ts` 的 `PageParams`；筛选 scope 改变、修改每页条数或主动重置时回到第一页。表格总数直接取对应响应的 `total`，不通过游标预取模拟跳页。
@@ -173,7 +169,6 @@ GitNexus 使用方式遵循 [AGENTS.md](../AGENTS.md#gitnexus)。
 
 集群运维以 [Gov 集群运维 HTTP 合同](https://github.com/zhangzhe-ctrl/ani-governance/blob/codex/clusterops-integration-20261108/docs/contracts/cluster-operations-http.md) 为权威来源，其他领域的约定保持各自范围。
 
-- 本域资源列表正式使用 Kubernetes 原生 cursor，不要求 `total`、总页数或任意跳页，不遍历分页补造全集。复用 `useCursorPagination` 和公共表格的 `mode: "cursor"`；旧调用继续默认 `legacy-cursor`。
 - 本域写入 API 保留类型化 Mutation、Delete、Scale 响应，用于区分 dry-run、删除受理与已不存在、期望和观察副本数。真实变更成功后刷新查询，不从写入响应伪造资源 Ready；其他领域默认 `Promise<void>` 的约定不变。
 
 ## 页面接入

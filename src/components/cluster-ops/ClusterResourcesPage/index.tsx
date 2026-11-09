@@ -96,7 +96,8 @@ export function ClusterResourcesPage({ search, onSearchChange }: ClusterResource
     search.field_selector,
     search.page_size,
   ]);
-  const paging = useCursorPagination(scope, search.page_size ?? 50, "cursor");
+  // TODO(pagination-migration): 当前资源列表按 page_size/continue_token 翻页；后端支持 page/pageSize 和 items/total 后改用 useListPagination，并迁移路由中的 page_size。
+  const paging = useCursorPagination(scope, search.page_size ?? 50);
   const expired = expiredScope === scope;
   const params = {
     group: search.group ?? "",
@@ -255,10 +256,13 @@ export function ClusterResourcesPage({ search, onSearchChange }: ClusterResource
           data={resources.data?.items ?? []}
           rowKey={(doc) => JSON.stringify(doc.ref)}
           loading={resources.isFetching}
-          pagination={paging.getPagination(
-            resources.data?.next_continue_token,
-            resources.isFetching || expired,
-          )}
+          pagination={{
+            ...paging.getPagination(
+              resources.data?.next_continue_token,
+              resources.isFetching || expired,
+            ),
+            pageSizeOptions: [20, 50, 100, 200],
+          }}
         />
       </ListPageFrame>
       {create && descriptor ? (

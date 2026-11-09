@@ -59,6 +59,7 @@ export interface ClusterOpsListClustersResponse {
 export interface ClusterOpsListResourceTypesResponse {
   items: ClusterOpsResourceDescriptor[];
 }
+// TODO(pagination-migration): 当前仅返回游标和列表版本；后端提供真实 total 后改用 items/total 页码响应。
 export interface ClusterOpsListResourcesResponse {
   items: ClusterOpsResourceDocument[];
   next_continue_token: string;
@@ -84,6 +85,7 @@ export interface ClusterOpsScaleWorkloadResponse {
   observed_replicas: number;
   dry_run: boolean;
 }
+// TODO(pagination-migration): 当前保留 page_size/continue_token；后端支持 page/pageSize 后复用公共 PageParams。
 export interface ClusterOpsListResourcesParams extends ClusterOpsResourceTypeRef {
   namespace?: string;
   all_namespaces?: boolean;

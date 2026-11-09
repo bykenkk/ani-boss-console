@@ -45,7 +45,8 @@ function MatchingResources({
   const scope = JSON.stringify([clusterId, namespace, type, selector]);
   const [expiredScope, setExpiredScope] = useState<string>();
   const expired = expiredScope === scope;
-  const paging = useCursorPagination(scope, 50, "cursor");
+  // TODO(pagination-migration): 当前关联资源按 page_size/continue_token 翻页；后端支持 page/pageSize 和 items/total 后改用 useListPagination。
+  const paging = useCursorPagination(scope, 50);
   const params = {
     ...type,
     namespace,
@@ -104,10 +105,10 @@ function MatchingResources({
       data={query.data?.items ?? []}
       rowKey="uid"
       loading={query.isFetching}
-      pagination={paging.getPagination(
-        query.data?.next_continue_token,
-        query.isFetching || expired,
-      )}
+      pagination={{
+        ...paging.getPagination(query.data?.next_continue_token, query.isFetching || expired),
+        pageSizeOptions: [20, 50, 100, 200],
+      }}
     />
   );
 }

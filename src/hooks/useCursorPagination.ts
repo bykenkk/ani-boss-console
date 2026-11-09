@@ -2,14 +2,10 @@ import { useCallback, useState } from "react";
 import type { ListPagination } from "@/components/common";
 /**
  * TODO(pagination-migration): 对应后端页码契约完成后，将调用方迁移至 useListPagination；
- * 所有过渡调用方迁移并验证后，删除 legacy-cursor 模式；正式 cursor 协议继续复用本 Hook。
+ * 所有过渡调用方迁移并验证后，删除本 Hook 及 legacy-cursor 模式。
  * 仅记录已访问游标，不构造 offset/token，不预取或汇总其他分页；调用方原样适配字段名称。
  */
-export function useCursorPagination(
-  scope: string,
-  initialPageSize = 20,
-  mode: "legacy-cursor" | "cursor" = "legacy-cursor",
-) {
+export function useCursorPagination(scope: string, initialPageSize = 20) {
   const [state, setState] = useState({
     scope,
     page: 1,
@@ -34,10 +30,9 @@ export function useCursorPagination(
     [],
   );
   const getPagination = (nextCursor?: string, disabled = false): ListPagination => ({
-    mode,
+    mode: "legacy-cursor",
     page: current.page,
     pageSize: current.pageSize,
-    pageSizeOptions: mode === "cursor" ? [20, 50, 100, 200] : undefined,
     hasNextPage: Boolean(nextCursor),
     disabled,
     onPageChange: (page) => {
