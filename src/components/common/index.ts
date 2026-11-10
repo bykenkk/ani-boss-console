@@ -27,6 +27,7 @@ export type {
   ListPageToolbarConfig,
 } from "./ListPageFrame";
 export { PagePlaceholder } from "./PagePlaceholder";
+export { PageLoadingPlaceholder } from "./PageLoadingPlaceholder";
 export { ResourcePageFrame } from "./ResourcePageFrame";
 export { ResourceIdentity } from "./ResourceIdentity";
 export type {

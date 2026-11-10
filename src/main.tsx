@@ -8,6 +8,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { routeTree } from "./routeTree.gen";
 import { closeNotification, showMessage, showNotification } from "@/lib/feedback";
+import { PageLoadingPlaceholder } from "@/components/common";
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -109,7 +110,14 @@ const COMPONENT_CONFIG = {
   },
 } satisfies ConfigProviderProps["componentConfig"];
 
-const router = createRouter({ routeTree, trailingSlash: "never", context: { queryClient } });
+const router = createRouter({
+  routeTree,
+  trailingSlash: "never",
+  context: { queryClient },
+  defaultPendingComponent: PageLoadingPlaceholder,
+  defaultPendingMs: 150,
+  defaultPendingMinMs: 200,
+});
 
 declare module "@tanstack/react-router" {
   interface Register {
