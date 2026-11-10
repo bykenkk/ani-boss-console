@@ -8,7 +8,13 @@ import {
   type ComputePresetInput,
 } from "@/api/compute-presets";
 import { withId } from "@/lib/id";
-export function ComputeGpuFields() {
+import { gpuAllocationLabels } from "../ComputePresetSummary/gpu";
+
+interface ComputeGpuFieldsProps {
+  onProfileChange: (profile: GpuProfile | undefined) => void;
+}
+
+export function ComputeGpuFields({ onProfileChange }: ComputeGpuFieldsProps) {
   const { form } = Form.useFormContext();
   const [clusterId, setClusterId] = useState<string>();
   const [profile, setProfile] = useState<GpuProfile>();
@@ -29,8 +35,10 @@ export function ComputeGpuFields() {
       },
     },
   });
-  const maxDevices =
-    profile?.spec.mode === "SHARED_FIXED" ? 1 : profile?.spec.max_devices_per_replica;
+  const singleUnit =
+    profile?.spec.allocation_type === "DYNAMIC_SHARED" ||
+    profile?.spec.allocation_type === "FIXED_PARTITION";
+  const maxDevices = singleUnit ? 1 : profile?.spec.max_devices_per_replica;
   return (
     <>
       <Form.Item label="GPU 集群">
@@ -47,6 +55,7 @@ export function ComputeGpuFields() {
           onChange={(id: string) => {
             setClusterId(id);
             setProfile(undefined);
+            onProfileChange(undefined);
             form.setFieldValue("gpu", undefined);
           }}
         />
@@ -70,6 +79,7 @@ export function ComputeGpuFields() {
             (item) => item.profile_id + "/" + item.profile_version === key,
           );
           setProfile(selected);
+          onProfileChange(selected);
           return selected
             ? {
                 profile_id: selected.profile_id,
@@ -90,6 +100,8 @@ export function ComputeGpuFields() {
               item.display_name +
               " · v" +
               item.profile_version +
+              " · " +
+              (gpuAllocationLabels[item.spec.allocation_type] ?? "-") +
               (item.state === "PROFILE_ACTIVE" ? "" : "（不可选）"),
             value: item.profile_id + "/" + item.profile_version,
             disabled: item.state !== "PROFILE_ACTIVE" || item.spec.max_devices_per_replica < 1,
@@ -98,25 +110,25 @@ export function ComputeGpuFields() {
       </Form.Item>
       <Form.Item
         field="gpu.devices_per_instance"
-        label="每实例 GPU 数量"
+        label="每实例设备 / 分片数量"
         rules={[
-          { required: true, message: "请输入每实例 GPU 数量" },
+          { required: true, message: "请输入每实例设备 / 分片数量" },
           { type: "number", min: 1, max: maxDevices },
         ]}
         extra={
-          profile?.spec.mode === "SHARED_FIXED"
-            ? "共享规格固定为 1"
+          singleUnit
+            ? "每个实例使用 1 个已登记的共享单元或固定分区"
             : maxDevices
               ? "最多 " + maxDevices + " 张"
               : undefined
         }
       >
         <InputNumber
-          aria-label="每实例 GPU 数量"
+          aria-label="每实例设备 / 分片数量"
           min={1}
           max={maxDevices}
           precision={0}
-          disabled={!profile || profile.spec.mode === "SHARED_FIXED"}
+          disabled={!profile || singleUnit}
         />
       </Form.Item>
       {clusters.data?.next_page_token || profiles.data?.next_page_token ? (

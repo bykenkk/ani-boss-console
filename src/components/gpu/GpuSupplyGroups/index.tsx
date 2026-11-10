@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   acceleratorKeys,
@@ -14,6 +15,8 @@ import {
 } from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { withId } from "@/lib/id";
+import { formatGpuAllocationType } from "../capacity";
+import { GpuGroupCapacityModal } from "../GpuGroupCapacityModal";
 const columns: ListColumn<GpuSupplyGroup>[] = [
   {
     title: "供给组 / ID",
@@ -27,9 +30,12 @@ const columns: ListColumn<GpuSupplyGroup>[] = [
 
   { title: "GPU 型号", dataIndex: "model_key", width: 180, ellipsis: true },
   {
-    title: "模式",
-    render: (_, group) => (group.mode === "SHARED_FIXED" ? "共享" : "整卡"),
-    width: 100,
+    title: "分配类型",
+    render: (_, group) =>
+      group.baseline?.resource_types
+        ?.map((item) => formatGpuAllocationType(item.allocation_type))
+        .join("、") || "-",
+    width: 160,
     ellipsis: true,
   },
   {
@@ -94,6 +100,7 @@ interface GpuSupplyGroupsProps {
 }
 
 export function GpuSupplyGroups({ pool }: GpuSupplyGroupsProps) {
+  const [capacity, setCapacity] = useState<GpuSupplyGroup>();
   const cursor = useCursorPagination(JSON.stringify([pool.cluster_id, pool.pool_id]));
   const params = {
     cluster_id: pool.cluster_id,
@@ -110,16 +117,22 @@ export function GpuSupplyGroups({ pool }: GpuSupplyGroupsProps) {
     },
   });
   return (
-    <TableSectionFrame>
-      <ListDataTable
-        rowKey="group_id"
-        columns={columns}
-        data={query.data?.items ?? []}
-        loading={query.isFetching}
-        pagination={cursor.getPagination(query.data?.next_page_token, query.isFetching)}
-        tableLabel="GPU 供给组"
-        emptyText="暂无 GPU 供给组"
-      />
-    </TableSectionFrame>
+    <>
+      <TableSectionFrame>
+        <ListDataTable
+          rowKey="group_id"
+          columns={columns}
+          data={query.data?.items ?? []}
+          loading={query.isFetching}
+          pagination={cursor.getPagination(query.data?.next_page_token, query.isFetching)}
+          tableLabel="GPU 供给组"
+          emptyText="暂无 GPU 供给组"
+          rowActions={[{ key: "capacity", label: "查看容量", onClick: setCapacity }]}
+        />
+      </TableSectionFrame>
+      {capacity ? (
+        <GpuGroupCapacityModal group={capacity} onCancel={() => setCapacity(undefined)} />
+      ) : null}
+    </>
   );
 }

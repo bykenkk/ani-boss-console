@@ -5,8 +5,19 @@ import type {
   ComputePresetInput,
   ComputePresetList,
   ComputePresetListParams,
+  ComputeGpuReference,
 } from "./types";
 export * from "./types";
+// Even an existing managed summary may only submit the three public inputs.
+function gpuReferenceInput(gpu: ComputeGpuReference | null | undefined) {
+  return gpu
+    ? {
+        profile_id: gpu.profile_id,
+        profile_version: gpu.profile_version,
+        devices_per_instance: gpu.devices_per_instance,
+      }
+    : gpu;
+}
 export const computePresetKeys = { all: ["compute-presets"] as const };
 export function listComputePresets(
   params: ComputePresetListParams,
@@ -16,7 +27,10 @@ export function listComputePresets(
 }
 // Preset CRUD 按当前 Governance 契约使用 data，无幂等 key 或版本锁字段。
 export async function createComputePreset(input: ComputePresetInput): Promise<void> {
-  await adminRequest("/compute-presets", { method: "POST", data: { data: input } });
+  await adminRequest("/compute-presets", {
+    method: "POST",
+    data: { data: { ...input, gpu: gpuReferenceInput(input.gpu) } },
+  });
 }
 export async function updateComputePreset({
   id,
@@ -39,7 +53,12 @@ export async function updateComputePreset({
     .join(",");
   await adminRequest("/compute-presets/" + encodeURIComponent(id), {
     method: "PATCH",
-    data: { data: changes, update_mask },
+    data: {
+      data: Object.prototype.hasOwnProperty.call(changes, "gpu")
+        ? { ...changes, gpu: gpuReferenceInput(changes.gpu) }
+        : changes,
+      update_mask,
+    },
   });
 }
 export async function setComputePresetEnabled({

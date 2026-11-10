@@ -22,6 +22,11 @@ import { useListPagination } from "@/hooks/useListPagination";
 import { formatDateTime } from "@/lib/date";
 import { ComputePresetEditModal } from "../ComputePresetEditModal";
 import { ComputePresetTypeFilter } from "./ComputePresetTypeFilter";
+import {
+  displayGpuSpecValue,
+  gpuAllocationLabels,
+  gpuModeLabels,
+} from "../ComputePresetSummary/gpu";
 const columns: ListColumn<ComputePreset>[] = [
   {
     title: "规格 / ID",
@@ -70,25 +75,42 @@ const columns: ListColumn<ComputePreset>[] = [
     title: "GPU 模式",
     width: 120,
     ellipsis: true,
-    render: (_, row) => (row.gpu ? (row.gpu.mode === "SHARED_FIXED" ? "共享" : "整卡") : "-"),
+    render: (_, row) => (row.gpu ? (gpuModeLabels[row.gpu.mode] ?? "-") : "-"),
   },
   {
-    title: "每实例 GPU 数量",
+    title: "资源类型",
+    width: 140,
+    ellipsis: true,
+    render: (_, row) => (row.gpu ? (gpuAllocationLabels[row.gpu.allocation_type] ?? "-") : "-"),
+  },
+  {
+    title: "每实例设备 / 分片数量",
     width: 180,
     ellipsis: true,
     dataIndex: "gpu.devices_per_instance",
   },
   {
-    title: "每卡显存（MiB）",
+    title: "每单位显存（MiB）",
     width: 170,
     ellipsis: true,
     dataIndex: "gpu.memory_mib_per_device",
+    render: (_, row) => displayGpuSpecValue(row.gpu, "memory_mib_per_device"),
   },
+  {
+    title: "每单位算力（CU）",
+    width: 160,
+    ellipsis: true,
+    render: (_, row) => displayGpuSpecValue(row.gpu, "compute_units_per_device"),
+  },
+  { title: "资源键", width: 240, ellipsis: true, dataIndex: "gpu.resource_key" },
+  { title: "适配器", width: 200, ellipsis: true, dataIndex: "gpu.adapter_id" },
+  { title: "规格摘要", width: 220, ellipsis: true, dataIndex: "gpu.spec_digest" },
   {
     title: "核心比例（%）",
     width: 150,
     ellipsis: true,
     dataIndex: "gpu.core_limit_percent",
+    render: (_, row) => displayGpuSpecValue(row.gpu, "core_limit_percent"),
   },
   {
     title: "描述",

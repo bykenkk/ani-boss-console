@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Button, Form, Input, Modal, Radio, Space, Switch } from "@arco-design/web-react";
+import { Button, Form, Input, Modal, Radio, Switch } from "@arco-design/web-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   createComputePreset,
@@ -15,6 +15,7 @@ import { ModalSteps } from "@/components/common";
 import { showMessage } from "@/lib/feedback";
 import { ComputeGpuFields } from "../ComputeGpuFields";
 import { ComputePresetSummary } from "../ComputePresetSummary";
+import type { GpuProfile } from "@/api/accelerator";
 const positiveInt64 = {
   validator: (value: string | undefined, callback: (error?: string) => void) => {
     callback(
@@ -29,14 +30,26 @@ interface ComputePresetEditModalProps {
   onCancel: () => void;
 }
 
+interface ComputePresetFormValues {
+  code: string;
+  name: string;
+  description: string;
+  compute_type: ComputePresetInput["compute_type"];
+  cpu_millis: string;
+  memory_mib: string;
+  enabled: boolean;
+  gpu?: ComputeGpuReference | null;
+}
+
 export function ComputePresetEditModal({ record, onCancel }: ComputePresetEditModalProps) {
-  const [form] = Form.useForm<ComputePresetInput>();
+  const [form] = Form.useForm<ComputePresetFormValues>();
   const [step, setStep] = useState(1);
   const [summary, setSummary] = useState<ComputePresetInput>();
   const [validating, setValidating] = useState(false);
   const busy = useRef(false);
   const [computeType, setComputeType] = useState<"cpu" | "gpu">(record?.compute_type ?? "cpu");
   const [replaceGpu, setReplaceGpu] = useState(!record?.gpu);
+  const [selectedProfile, setSelectedProfile] = useState<GpuProfile>();
   const client = useQueryClient();
   const mutation = useMutation({
     mutationFn: async (input: { values: ComputePresetInput; changes: ComputePresetChanges }) => {
@@ -68,10 +81,23 @@ export function ComputePresetEditModal({ record, onCancel }: ComputePresetEditMo
         setStep(2);
         return;
       }
-      const values = await validateForm<ComputePresetInput>(form);
+      const values = await validateForm<ComputePresetFormValues>(form);
       const input: ComputePresetInput = {
-        ...values,
-        gpu: values.compute_type === "gpu" ? values.gpu : null,
+        code: values.code,
+        name: values.name,
+        description: values.description,
+        compute_type: values.compute_type,
+        cpu_millis: values.cpu_millis,
+        memory_mib: values.memory_mib,
+        enabled: values.enabled,
+        gpu:
+          values.compute_type === "gpu" && values.gpu
+            ? {
+                profile_id: values.gpu.profile_id,
+                profile_version: values.gpu.profile_version,
+                devices_per_instance: values.gpu.devices_per_instance,
+              }
+            : null,
       };
       if (step === 2) {
         setSummary(input);
@@ -115,7 +141,7 @@ export function ComputePresetEditModal({ record, onCancel }: ComputePresetEditMo
       closable={!pending}
       escToExit={!pending}
       footer={
-        <Space>
+        <div className="flex justify-end gap-2">
           <Button disabled={pending} onClick={onCancel}>
             取消
           </Button>
@@ -124,10 +150,10 @@ export function ComputePresetEditModal({ record, onCancel }: ComputePresetEditMo
               上一步
             </Button>
           )}
-          <Button type="primary" loading={pending} onClick={() => void submit()}>
+          <Button type="primary" loading={pending} onClick={submit}>
             {step === 3 ? (record ? "确认保存" : "确认创建") : "下一步"}
           </Button>
-        </Space>
+        </div>
       }
     >
       <ModalSteps current={step} titles={["基本信息", "规格参数", "摘要信息"]} />
@@ -201,6 +227,7 @@ export function ComputePresetEditModal({ record, onCancel }: ComputePresetEditMo
                 if (type === "cpu") {
                   form.setFieldsValue({ gpu: undefined });
                   setReplaceGpu(true);
+                  setSelectedProfile(undefined);
                 }
               }}
             />
@@ -224,7 +251,7 @@ export function ComputePresetEditModal({ record, onCancel }: ComputePresetEditMo
           </div>
           {computeType === "gpu" ? (
             replaceGpu ? (
-              <ComputeGpuFields />
+              <ComputeGpuFields onProfileChange={setSelectedProfile} />
             ) : (
               <>
                 <Form.Item
@@ -236,13 +263,14 @@ export function ComputePresetEditModal({ record, onCancel }: ComputePresetEditMo
                 >
                   <Input readOnly />
                 </Form.Item>
-                <Form.Item label="每实例 GPU 数量">
+                <Form.Item label="每实例设备 / 分片数量">
                   <Input readOnly value={String(record?.gpu?.devices_per_instance)} />
                 </Form.Item>
                 <Button
                   className="mb-4"
                   onClick={() => {
                     setReplaceGpu(true);
+                    setSelectedProfile(undefined);
                     form.setFieldsValue({ gpu: undefined });
                   }}
                 >
@@ -253,7 +281,13 @@ export function ComputePresetEditModal({ record, onCancel }: ComputePresetEditMo
           ) : null}
         </div>
       </Form>
-      {step === 3 && summary && <ComputePresetSummary values={summary} />}
+      {step === 3 && summary && (
+        <ComputePresetSummary
+          values={summary}
+          profile={selectedProfile}
+          existingGpu={replaceGpu ? undefined : record?.gpu}
+        />
+      )}
     </Modal>
   );
 }

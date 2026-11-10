@@ -7,7 +7,7 @@ import {
   IconThunderbolt,
   IconUserGroup,
 } from "@arco-design/web-react/icon";
-import { formatGpuAmount, type PlatformGpuOverview } from "../gpu-capacity";
+import { formatGpuAmount, formatGpuMiB, type PlatformGpuOverview } from "../gpu-capacity";
 
 interface ResourceUsageSummaryProps {
   overview: PlatformGpuOverview;
@@ -21,14 +21,12 @@ export function ResourceUsageSummary({ overview, tenantCount }: ResourceUsageSum
       label: "物理 GPU 总量",
       value: formatGpuAmount(overview.physicalCount),
       unit: "张",
-      hint: "平台已纳管设备，按设备去重",
+      hint: "各供给组完整库存中的物理设备，不含固定切片",
       icon: <IconThunderbolt />,
     },
     {
-      label: "共享显存总量",
-      value: formatGpuAmount(
-        overview.sharedTotalMiB === undefined ? undefined : overview.sharedTotalMiB / 1024,
-      ),
+      label: "NVIDIA 共享显存总量",
+      value: formatGpuMiB(overview.sharedTotalMiB),
       unit: "GiB",
       hint: "共享供给的显存分配预算",
       icon: <IconStorage />,
@@ -37,14 +35,8 @@ export function ResourceUsageSummary({ overview, tenantCount }: ResourceUsageSum
       label: "未分配资源",
       value: (
         <div className="flex flex-col gap-1 text-base">
-          <span>整卡 {formatGpuAmount(overview.wholeFree)} 张</span>
-          <span>
-            共享显存{" "}
-            {formatGpuAmount(
-              overview.sharedFreeMiB === undefined ? undefined : overview.sharedFreeMiB / 1024,
-            )}{" "}
-            GiB
-          </span>
+          <span>NVIDIA 整卡 {formatGpuAmount(overview.wholeFree)} 张</span>
+          <span>NVIDIA 共享显存 {formatGpuMiB(overview.sharedFreeMiB)} GiB</span>
         </div>
       ),
       hint: "未分配不代表任意规格都能创建",
@@ -54,19 +46,11 @@ export function ResourceUsageSummary({ overview, tenantCount }: ResourceUsageSum
       label: "已分配资源",
       value: (
         <div className="flex flex-col gap-1 text-base">
-          <span>整卡 {formatGpuAmount(overview.wholeAllocated)} 张</span>
-          <span>
-            共享显存{" "}
-            {formatGpuAmount(
-              overview.sharedAllocatedMiB === undefined
-                ? undefined
-                : overview.sharedAllocatedMiB / 1024,
-            )}{" "}
-            GiB
-          </span>
+          <span>NVIDIA 整卡 {formatGpuAmount(overview.wholeAllocated)} 张</span>
+          <span>NVIDIA 共享显存 {formatGpuMiB(overview.sharedAllocatedMiB)} GiB</span>
         </div>
       ),
-      hint: "已承诺资源，与实际使用量分开",
+      hint: "NVIDIA 原生分配，与采集器实际使用量分开",
       icon: <IconApps />,
     },
     {
@@ -79,7 +63,7 @@ export function ResourceUsageSummary({ overview, tenantCount }: ResourceUsageSum
           <span>观测未知 {formatGpuAmount(health?.unknown)}</span>
         </div>
       ),
-      hint: "以设备健康和观测完整性判断",
+      hint: "按完整物理库存报告的健康状态统计",
       icon: <IconExclamationCircle />,
     },
     {

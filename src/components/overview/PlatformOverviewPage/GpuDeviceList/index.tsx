@@ -39,7 +39,7 @@ export function GpuDeviceList({ clusters, allocations }: GpuDeviceListProps) {
       }}
       header={{
         title: "设备列表",
-        description: "按集群查看设备，已分配量表示资源承诺。",
+        description: "按集群查看物理设备与固定切片；节点资源请求不投影为逐卡分配。",
         extra: (
           <Select
             aria-label="设备列表集群"

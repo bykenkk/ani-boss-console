@@ -1,5 +1,5 @@
 import type { PageParams } from "@/api/types";
-import type { GpuMode } from "@/api/accelerator";
+import type { GpuAllocationType, GpuMode } from "@/api/accelerator";
 export interface ComputeGpuReference {
   profile_id: string;
   profile_version: string;
@@ -7,6 +7,11 @@ export interface ComputeGpuReference {
 }
 export interface ComputeGpuSummary extends ComputeGpuReference {
   mode: GpuMode;
+  allocation_type: GpuAllocationType;
+  resource_key: string;
+  compute_units_per_device: number;
+  adapter_id: string;
+  spec_digest: string;
   model_key: string;
   memory_mib_per_device: string;
   memory_mib_total: string;

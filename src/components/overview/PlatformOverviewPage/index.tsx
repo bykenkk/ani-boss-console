@@ -3,17 +3,16 @@ import { IconRefresh } from "@arco-design/web-react/icon";
 import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   acceleratorKeys,
-  getGpuCapacity,
+  getGpuSupplyGroupCapacity,
   listGpuClusterOptions,
   listGpuPools,
-  listGpuProfiles,
   listGpuSupplyGroups,
 } from "@/api/accelerator";
 import { gpuMonitoringKeys, listPhysicalGpuDevices } from "@/api/gpu-monitoring";
 import { listManagement, managementKeys } from "@/api/management";
 import { ResourcePageFrame } from "@/components/common";
 import { withId } from "@/lib/id";
-import { buildGpuOverview, selectCapacityProfiles } from "../gpu-capacity";
+import { buildGpuOverview } from "../gpu-capacity";
 import { PlatformCapacitySummary } from "../PlatformCapacitySummary";
 import { ResourceUsageSummary } from "../ResourceUsageSummary";
 import { GpuDeviceList } from "./GpuDeviceList";
@@ -52,16 +51,6 @@ export function PlatformOverviewPage() {
       },
     })),
   });
-  const profiles = useQueries({
-    queries: items.map((c) => ({
-      queryKey: [...acceleratorKeys.all, "overview-profiles", c.cluster_id],
-      queryFn: ({ signal }: { signal: AbortSignal }) =>
-        listGpuProfiles({ cluster_id: c.cluster_id, page_size: 100 }, signal),
-      meta: {
-        errorNotification: { id: withId("gpu-profiles", c.cluster_id), action: "GPU 规格加载" },
-      },
-    })),
-  });
   const poolItems = pools.flatMap((p) => p.data?.items ?? []);
   const groups = useQueries({
     queries: poolItems.map((p) => ({
@@ -76,19 +65,18 @@ export function PlatformOverviewPage() {
       },
     })),
   });
-  const selectedProfiles = profiles.flatMap((p) => selectCapacityProfiles(p.data?.items ?? []));
+  const selectedGroups = [
+    ...new Map(groups.flatMap((g) => g.data?.items ?? []).map((g) => [g.group_id, g])).values(),
+  ];
   const capacities = useQueries({
-    queries: selectedProfiles.map((p) => ({
-      queryKey: [
-        ...acceleratorKeys.all,
-        "capacity",
-        { profile_id: p.profile_id, profile_version: p.profile_version },
-      ],
-      queryFn: ({ signal }: { signal: AbortSignal }) => getGpuCapacity(p, signal),
+    queries: selectedGroups.map((g) => ({
+      queryKey: [...acceleratorKeys.all, "supply-group-capacity", g.group_id, true],
+      queryFn: ({ signal }: { signal: AbortSignal }) =>
+        getGpuSupplyGroupCapacity(g.group_id, signal, true),
       meta: {
         errorNotification: {
-          id: withId("gpu-capacity", p.profile_id, p.profile_version),
-          action: "GPU 规格容量加载",
+          id: withId("gpu-group-capacity", g.group_id),
+          action: "GPU 供给组容量加载",
         },
       },
     })),
@@ -97,17 +85,14 @@ export function PlatformOverviewPage() {
     cluster,
     inventory: inventories[i]?.data,
     pools: pools[i]?.data,
-    profiles: profiles[i]?.data,
     groups: poolItems.flatMap((p, j) =>
       p.cluster_id === cluster.cluster_id ? [groups[j]?.data] : [],
     ),
-    capacities: selectedProfiles.flatMap((p, j) =>
-      profiles[i]?.data?.items?.some((candidate) => candidate.profile_id === p.profile_id)
-        ? [capacities[j]?.data]
-        : [],
+    capacities: selectedGroups.flatMap((g, j) =>
+      g.cluster_id === cluster.cluster_id ? [capacities[j]?.data] : [],
     ),
   }));
-  const queries = [clusters, ...inventories, ...pools, ...profiles, ...groups, ...capacities];
+  const queries = [clusters, ...inventories, ...pools, ...groups, ...capacities];
   const overview = buildGpuOverview(clusters.data, snapshots);
   const loading = queries.some((q) => q.isPending);
   const refreshing = queries.some((q) => q.isFetching);
@@ -122,7 +107,7 @@ export function PlatformOverviewPage() {
       className="h-auto! min-h-(--app-content-available-height)"
       header={{
         title: "平台概览",
-        subtitle: "平台 GPU 设备、资源承诺和启用租户的一屏总览。",
+        subtitle: "平台 GPU 设备、原生分配与节点资源请求，以及启用租户的一屏总览。",
         extra: (
           <Button
             aria-label="刷新"
@@ -149,7 +134,7 @@ export function PlatformOverviewPage() {
       {!loading && overview.incomplete ? (
         <Alert
           type="info"
-          content="部分 GPU 容量或观测不完整，相应统计显示未知。未配置规格或清单未完整覆盖时，不计为零。"
+          content="部分 GPU 容量或观测不完整，相应统计显示未知。清单或供给组容量未完整覆盖时，不计为零。"
         />
       ) : null}
       <Card>

@@ -1,6 +1,10 @@
 export type GpuMode = "WHOLE_EXCLUSIVE" | "SHARED_FIXED";
+export type GpuAllocationType = "PHYSICAL" | "DYNAMIC_SHARED" | "FIXED_PARTITION";
 export type GpuAdmission = "ADMISSION_OPEN" | "ADMISSION_CLOSED";
 export type GpuProfileState = "PROFILE_ACTIVE" | "PROFILE_DISABLED" | "PROFILE_DELETED";
+export type GpuDeviceKind = "PHYSICAL_DEVICE" | "FIXED_PARTITION_DEVICE";
+export type GpuCapacityBasis = "NATIVE_ALLOCATION" | "BOUND_POD_REQUEST";
+export type GpuCapacityGranularity = "DEVICE" | "NODE_RESOURCE";
 
 // TODO(pagination-migration): 后端支持 page/pageSize 和 items/total 后迁移；当前保留 page_size/page_token，不伪造 total 或遍历汇总分页。
 export interface GpuPageParams {
@@ -34,29 +38,25 @@ export interface GpuPool {
 export interface GpuBaseline {
   baseline_id: string;
   adapter_id: string;
-  volcano_version: string;
-  volcano_image_digest: string;
-  device_plugin_version: string;
-  device_plugin_image_digest: string;
-  hami_core_revision: string;
   memory_block_mib: number;
-  memory_encoding: string;
   split_count: number;
-  memory_scale_percent: number;
-  core_scale_percent: number;
   core_budget_additive: boolean;
-  node_config_digest: string;
-  scheduler_config_digest: string;
-  recipe_version: string;
-  baseline_digest: string;
   runtime_class_name: string;
+  resource_types: GpuResourceTypeConfig[];
+}
+export interface GpuResourceTypeConfig {
+  allocation_type: GpuAllocationType;
+  resource_key: string;
+  memory_capacity_bytes: string;
+  compute_units_per_device: number;
+  max_devices_per_replica: number;
+  max_memory_mib_per_device: string;
 }
 export interface GpuSupplyGroup {
   group_id: string;
   pool_id: string;
   cluster_id: string;
   display_name: string;
-  mode: GpuMode;
   nodes?: GpuNode[];
   model_key: string;
   baseline?: GpuBaseline;
@@ -72,7 +72,10 @@ export interface GpuProfileSpec {
   memory_mib_per_device: string;
   core_limit_percent: number;
   max_devices_per_replica: number;
-  isolation_class: "SOFTWARE_COOPERATIVE" | "WHOLE_DEVICE_EXCLUSIVE";
+  isolation_class: "SOFTWARE_COOPERATIVE" | "WHOLE_DEVICE_EXCLUSIVE" | "FIXED_PARTITION_EXCLUSIVE";
+  allocation_type: GpuAllocationType;
+  resource_key: string;
+  compute_units_per_device: number;
 }
 export interface GpuProfile {
   profile_id: string;
@@ -92,55 +95,64 @@ export interface GpuDevice {
   cluster_id: string;
   group_id: string;
   node?: GpuNode;
-  vendor_device_id: string;
   model_key: string;
-  physical_memory_bytes: string;
   health: string;
   observation?: GpuObservation;
+  device_uid: string;
+  parent_device_uid: string;
+  device_kind: GpuDeviceKind;
+  memory_capacity_bytes?: string;
+  compute_units?: number;
+  pci_bdf: string;
+  adapter_id: string;
+  resource_key: string;
 }
-export interface GpuBinding {
-  binding?: {
-    binding_id: string;
-    container_name: string;
-    state: string;
-    memory_mib: string;
-    core_limit_percent: number;
-    observation?: GpuObservation;
-  };
-  physical_device_id: string;
-  cluster_id: string;
-  pod_namespace: string;
-  pod_name: string;
-  pod_uid: string;
-  evidence_ref: string;
-  tenant_id?: string;
-  owner_service?: string;
-  resource_id?: string;
+// Unknown observations remain null; a known zero is the decimal string "0".
+export interface GpuCapacityTotals {
+  total_units: string | null;
+  allocated_units: string | null;
+  unallocated_units: string | null;
+  total_memory_mib: string | null;
+  allocated_memory_mib: string | null;
+  unallocated_memory_mib: string | null;
 }
-export interface GpuBindings extends GpuPage<GpuBinding> {
-  observation?: GpuObservation;
+export interface GpuCapacityDetail {
+  node_uid: string;
+  node_name: string;
+  device_uid: string;
+  totals: GpuCapacityTotals;
+  nominal_units: string | null;
+  estimated_available_units: string | null;
 }
-export interface GpuDeviceCapacity {
-  device_id: string;
-  nominal_units: string;
-  known_committed_units: string;
-  known_free_units: string;
-  safe_memory_budget_mib: string;
-  committed_memory_mib: string;
-  complete?: boolean;
-  issues?: string[];
-}
-export interface GpuCapacity {
+export interface GpuProfileCapacity {
   profile_id: string;
   profile_version: string;
-  mode: GpuMode;
-  physical_device_count: string;
-  nominal_units: string;
-  known_committed_units: string;
-  known_free_units: string;
-  unplaced_requested_units: string;
-  observation?: GpuObservation;
-  devices?: GpuDeviceCapacity[];
+  allocation_type: GpuAllocationType;
+  resource_key: string;
+  basis: GpuCapacityBasis;
+  granularity: GpuCapacityGranularity;
+  nominal_units: string | null;
+  estimated_available_units: string | null;
+  totals: GpuCapacityTotals;
+  details: GpuCapacityDetail[];
+  observed_at: string;
+  missing_fields: string[];
+}
+export interface GpuResourceTypeCapacity {
+  allocation_type: GpuAllocationType;
+  resource_key: string;
+  basis: GpuCapacityBasis;
+  granularity: GpuCapacityGranularity;
+  totals: GpuCapacityTotals;
+  details: GpuCapacityDetail[];
+  observed_at: string;
+  missing_fields: string[];
+}
+export interface GpuSupplyGroupCapacity {
+  group_id: string;
+  physical_device_count: string | null;
+  resource_types: GpuResourceTypeCapacity[];
+  observed_at: string;
 }
 export interface RegisterGpuClusterInput {
   display_name: string;
@@ -153,7 +165,6 @@ export interface CreateGpuPoolInput {
 export interface AdoptGpuSupplyInput {
   display_name: string;
   pool_id: string;
-  mode: GpuMode;
   nodes: GpuNode[];
   model_key: string;
   baseline: GpuBaseline;

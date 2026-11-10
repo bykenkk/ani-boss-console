@@ -20,6 +20,7 @@ import {
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { withId } from "@/lib/id";
 import { GpuCapacityModal } from "../GpuCapacityModal";
+import { formatGpuAllocationType } from "../capacity";
 const columns: ListColumn<GpuProfile>[] = [
   {
     title: "规格 / ID",
@@ -49,23 +50,39 @@ const columns: ListColumn<GpuProfile>[] = [
     ellipsis: true,
   },
   {
+    title: "分配类型",
+    width: 140,
+    render: (_, profile) => formatGpuAllocationType(profile.spec.allocation_type),
+  },
+  { title: "资源类型", dataIndex: "spec.resource_key", width: 220, ellipsis: true },
+  {
     title: "隔离方式",
     render: (_, profile) =>
-      profile.spec.isolation_class === "SOFTWARE_COOPERATIVE" ? "软件协作隔离" : "整卡独占",
+      ({
+        SOFTWARE_COOPERATIVE: "软件协作隔离",
+        WHOLE_DEVICE_EXCLUSIVE: "整卡独占",
+        FIXED_PARTITION_EXCLUSIVE: "固定切片独占",
+      })[profile.spec.isolation_class] ?? profile.spec.isolation_class,
     width: 160,
     ellipsis: true,
   },
   {
-    title: "每卡显存（MiB）",
-    dataIndex: "spec.memory_mib_per_device",
+    title: "每设备显存（MiB）",
+    render: (_, profile) =>
+      profile.spec.memory_mib_per_device === "0" ? "-" : profile.spec.memory_mib_per_device,
     width: 160,
     ellipsis: true,
   },
   {
     title: "核心比例（%）",
-    dataIndex: "spec.core_limit_percent",
+    render: (_, profile) => profile.spec.core_limit_percent || "-",
     width: 140,
     ellipsis: true,
+  },
+  {
+    title: "计算单元（CU）",
+    render: (_, profile) => profile.spec.compute_units_per_device || "-",
+    width: 160,
   },
   {
     title: "每副本设备上限",

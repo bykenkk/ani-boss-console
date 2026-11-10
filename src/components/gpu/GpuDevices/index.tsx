@@ -12,20 +12,18 @@ import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { withId } from "@/lib/id";
 const columns: ListColumn<GpuDevice>[] = [
   {
-    title: "物理设备 ID",
+    title: "设备 ID",
     dataIndex: "device_id",
     width: 220,
     ellipsis: true,
     render: (_, row) => <ResourceIdentity id={row.device_id} display="id" idLabel="设备 ID" />,
   },
   {
-    title: "GPU UUID",
-    dataIndex: "vendor_device_id",
+    title: "设备 UID",
+    dataIndex: "device_uid",
     width: 260,
     ellipsis: true,
-    render: (_, row) => (
-      <ResourceIdentity id={row.vendor_device_id} display="id" idLabel="GPU UUID" />
-    ),
+    render: (_, row) => <ResourceIdentity id={row.device_uid} display="id" idLabel="设备 UID" />,
   },
   {
     title: "节点 / UID",
@@ -45,7 +43,32 @@ const columns: ListColumn<GpuDevice>[] = [
     ellipsis: true,
     render: (_, row) => <ResourceIdentity id={row.group_id} display="id" idLabel="供给组 ID" />,
   },
-  { title: "物理显存（Bytes）", dataIndex: "physical_memory_bytes", width: 180, ellipsis: true },
+  {
+    title: "设备类型 / 父设备 UID",
+    width: 240,
+    render: (_, row) => (
+      <ResourceIdentity
+        name={
+          row.device_kind === "PHYSICAL_DEVICE"
+            ? "物理设备"
+            : row.device_kind === "FIXED_PARTITION_DEVICE"
+              ? "固定切片"
+              : "未知"
+        }
+        id={row.parent_device_uid || undefined}
+        idLabel="父设备 UID"
+      />
+    ),
+  },
+  { title: "适配器", dataIndex: "adapter_id", width: 150, ellipsis: true },
+  { title: "资源键", dataIndex: "resource_key", width: 220, ellipsis: true },
+  {
+    title: "显存容量（Bytes）",
+    width: 180,
+    render: (_, row) => row.memory_capacity_bytes ?? "未知",
+  },
+  { title: "计算单元（CU）", width: 120, render: (_, row) => row.compute_units ?? "未知" },
+  { title: "PCI BDF", dataIndex: "pci_bdf", width: 150, ellipsis: true },
   {
     title: "健康状态",
     width: 120,
@@ -71,7 +94,7 @@ export function GpuDevices({ clusterId }: GpuDevicesProps) {
     meta: {
       errorNotification: {
         id: withId("gpu-devices", clusterId),
-        action: "GPU 物理库存加载",
+        action: "GPU 设备库存加载",
       },
     },
   });
@@ -94,8 +117,8 @@ export function GpuDevices({ clusterId }: GpuDevicesProps) {
           data={query.data?.items ?? []}
           loading={query.isFetching}
           pagination={cursor.getPagination(query.data?.next_page_token, query.isFetching)}
-          tableLabel="GPU 物理库存"
-          emptyText="暂无 GPU 物理设备"
+          tableLabel="GPU 设备库存"
+          emptyText="暂无 GPU 设备"
         />
       </TableSectionFrame>
     </>

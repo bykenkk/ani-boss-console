@@ -7,8 +7,17 @@ import {
   type ListColumn,
   type ListPagination,
 } from "@/components/common";
+import { formatGpuAllocationType, formatGpuCapacityBasis } from "@/components/gpu/capacity";
 import { formatDateTime } from "@/lib/date";
-import { deviceKey, formatGpuAmount, getDeviceHealth, type GpuAllocation } from "../gpu-capacity";
+import {
+  deviceKey,
+  formatGpuAmount,
+  formatGpuInteger,
+  formatGpuMiB,
+  formatGpuBytesGiB,
+  getDeviceHealth,
+  type GpuAllocation,
+} from "../gpu-capacity";
 
 interface GpuDeviceTableProps {
   data: GpuDevice[];
@@ -17,7 +26,6 @@ interface GpuDeviceTableProps {
   pagination: ListPagination;
   header: SectionHeaderProps;
 }
-
 export function GpuDeviceTable({
   data,
   allocations,
@@ -45,31 +53,54 @@ export function GpuDeviceTable({
       render: (_, row) => <ResourceIdentity id={row.device_id} display="id" idLabel="设备 ID" />,
     },
     {
-      title: "UUID",
-      dataIndex: "vendor_device_id",
+      title: "设备 UID / 父设备 UID",
+      dataIndex: "device_uid",
       width: 260,
       ellipsis: true,
       render: (_, row) => (
-        <ResourceIdentity id={row.vendor_device_id} display="id" idLabel="GPU UUID" />
+        <ResourceIdentity
+          name={row.device_uid}
+          id={row.parent_device_uid || undefined}
+          idLabel="父设备 UID"
+        />
       ),
     },
     { title: "型号", dataIndex: "model_key", width: 200, ellipsis: true },
     {
-      title: "物理显存",
-      width: 140,
+      title: "设备类型",
+      width: 130,
       render: (_, d) =>
-        !d.physical_memory_bytes || Number(d.physical_memory_bytes) <= 0
-          ? "未知"
-          : `${formatGpuAmount(Number(d.physical_memory_bytes) / 1024 ** 3)} GiB`,
+        d.device_kind === "PHYSICAL_DEVICE"
+          ? "物理设备"
+          : d.device_kind === "FIXED_PARTITION_DEVICE"
+            ? "固定切片"
+            : "未知",
     },
     {
-      title: "供给模式",
+      title: "显存容量 / CU",
       width: 160,
+      render: (_, d) => {
+        const memory = d.memory_capacity_bytes;
+        return (
+          <div>
+            <div>{memory === undefined ? "未知" : `${formatGpuBytesGiB(memory)} GiB`}</div>
+            <div>CU {formatGpuAmount(d.compute_units)}</div>
+          </div>
+        );
+      },
+    },
+    {
+      title: "分配类型 / 接单",
+      width: 180,
       render: (_, d) => {
         const a = allocation(d);
         return (
           <div>
-            {a?.mode === "WHOLE_EXCLUSIVE" ? "整卡" : a?.mode === "SHARED_FIXED" ? "共享" : "未知"}
+            {a?.resources.length
+              ? [
+                  ...new Set(a.resources.map((r) => formatGpuAllocationType(r.allocation_type))),
+                ].join(" / ")
+              : "未知"}
             {a?.admission === "ADMISSION_CLOSED" ? (
               <div className="text-xs text-(--color-text-3)">已关闭接单</div>
             ) : null}
@@ -78,19 +109,41 @@ export function GpuDeviceTable({
       },
     },
     {
-      title: "已分配 / 剩余",
-      width: 190,
+      title: "已分配 / 未分配",
+      width: 240,
       render: (_, d) => {
-        const a = allocation(d);
-        const c = a?.capacity;
-        if (!c?.complete || !a?.mode) return "未知";
-        if (a.mode === "WHOLE_EXCLUSIVE")
-          return `${formatGpuAmount(Number(c.known_committed_units))} / ${formatGpuAmount(Number(c.known_free_units))} 张`;
-        const budget = Number(c.safe_memory_budget_mib),
-          used = Number(c.committed_memory_mib);
-        return used > budget
-          ? "未知"
-          : `${formatGpuAmount(used / 1024)} / ${formatGpuAmount((budget - used) / 1024)} GiB`;
+        const rows = allocation(d)?.resources ?? [];
+        if (!rows.length) return "未知";
+        return (
+          <div className="flex flex-col gap-2">
+            {rows.map((r) => {
+              // NODE_RESOURCE is not per-card allocation, even if one card is shown.
+              if (r.granularity !== "DEVICE")
+                return (
+                  <div key={r.resource_key} className="text-xs">
+                    {formatGpuCapacityBasis(r.basis)} · 按节点资源类型统计，见供给组容量
+                  </div>
+                );
+              const detail = r.details?.find(
+                (row) => row.node_uid === d.node?.uid && row.device_uid === d.device_uid,
+              );
+              const shared = r.allocation_type === "DYNAMIC_SHARED";
+              const allocated = shared
+                ? detail?.totals.allocated_memory_mib
+                : detail?.totals.allocated_units;
+              const free = shared
+                ? detail?.totals.unallocated_memory_mib
+                : detail?.totals.unallocated_units;
+              return (
+                <div key={r.resource_key}>
+                  {shared ? formatGpuMiB(allocated) : formatGpuInteger(allocated)} /{" "}
+                  {shared ? formatGpuMiB(free) : formatGpuInteger(free)}{" "}
+                  {shared ? "GiB" : "资源单位"}
+                </div>
+              );
+            })}
+          </div>
+        );
       },
     },
     {
@@ -118,7 +171,7 @@ export function GpuDeviceTable({
       loading={loading}
       tableLabel="GPU 设备列表"
       emptyText="暂无 GPU 设备"
-      scroll={{ x: 1670 }}
+      scroll={{ x: 1900 }}
     />
   );
 }

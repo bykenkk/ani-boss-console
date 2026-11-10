@@ -5,7 +5,6 @@ import { GpuPools } from "../GpuPools";
 import { GpuSupplyGroups } from "../GpuSupplyGroups";
 import { GpuProfiles } from "../GpuProfiles";
 import { GpuDevices } from "../GpuDevices";
-import { GpuBindings } from "../GpuBindings";
 interface GpuClusterResourcesProps {
   cluster: GpuCluster;
 }
@@ -21,11 +20,8 @@ export function GpuClusterResources({ cluster }: GpuClusterResourcesProps) {
         <Tabs.TabPane key="profiles" title="GPU 规格" destroyOnHide>
           <GpuProfiles clusterId={cluster.cluster_id} />
         </Tabs.TabPane>
-        <Tabs.TabPane key="devices" title="物理库存" destroyOnHide>
+        <Tabs.TabPane key="devices" title="设备库存" destroyOnHide>
           <GpuDevices clusterId={cluster.cluster_id} />
-        </Tabs.TabPane>
-        <Tabs.TabPane key="bindings" title="实际绑定" destroyOnHide>
-          <GpuBindings clusterId={cluster.cluster_id} />
         </Tabs.TabPane>
       </Tabs>
       {pool ? (

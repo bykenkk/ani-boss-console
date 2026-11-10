@@ -6,16 +6,16 @@ import type {
   CreateGpuPoolInput,
   CreateGpuProfileInput,
   DeleteGpuProfileInput,
-  GpuBindings,
-  GpuCapacity,
   GpuCluster,
   GpuDevice,
   GpuPage,
   GpuPageParams,
   GpuPool,
   GpuProfile,
+  GpuProfileCapacity,
   GpuProfilePreview,
   GpuSupplyGroup,
+  GpuSupplyGroupCapacity,
   RegisterGpuClusterInput,
   SetGpuAdmissionInput,
   SetGpuProfileStateInput,
@@ -68,25 +68,29 @@ export function listGpuDevices(
 ): Promise<GpuPage<GpuDevice>> {
   return adminRequest("/accelerator/devices", { params, signal });
 }
-// TODO(pagination-migration): 后端支持 page/pageSize 和 items/total 后，切换公共页码分页并复核筛选。
-export function listGpuBindings(
-  params: GpuPageParams & { cluster_id: string; physical_device_id?: string },
-  signal?: AbortSignal,
-): Promise<GpuBindings> {
-  return adminRequest("/accelerator/bindings", { params, signal });
-}
-export function getGpuCapacity(
+export function getGpuProfileCapacity(
   profile: Pick<GpuProfile, "profile_id" | "profile_version">,
   signal?: AbortSignal,
-): Promise<GpuCapacity> {
-  return adminRequest("/accelerator/capacity", {
-    params: { ...profile, include_devices: true },
+  includeDetails = false,
+): Promise<GpuProfileCapacity> {
+  return adminRequest(`/accelerator/profiles/${encodeURIComponent(profile.profile_id)}/capacity`, {
+    params: { profile_version: profile.profile_version, include_details: includeDetails },
+    signal,
+  });
+}
+export function getGpuSupplyGroupCapacity(
+  groupId: string,
+  signal?: AbortSignal,
+  includeDetails = false,
+): Promise<GpuSupplyGroupCapacity> {
+  return adminRequest(`/accelerator/supply-groups/${encodeURIComponent(groupId)}/capacity`, {
+    params: { include_details: includeDetails },
     signal,
   });
 }
 export function previewGpuProfile(
   group_id: string,
-  parts: 2 | 4 | 8,
+  parts: number,
   signal?: AbortSignal,
 ): Promise<GpuProfilePreview> {
   return adminRequest("/accelerator/profiles:preview", { params: { group_id, parts }, signal });
