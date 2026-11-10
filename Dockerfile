@@ -12,7 +12,7 @@ RUN pnpm run build
 
 FROM nginx:1.27-alpine
 
-COPY deploy/nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY --chmod=644 deploy/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80
