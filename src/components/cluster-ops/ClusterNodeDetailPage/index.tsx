@@ -54,6 +54,7 @@ export function ClusterNodeDetailPage({ resourceRef, onBack, onList }: ClusterNo
       : [];
   return (
     <DetailPageFrame
+      loading={query.isLoading || types.isLoading}
       title={resourceRef.name}
       status={summary ? <NodeStatus summary={summary} /> : undefined}
       breadcrumbs={[{ label: "节点管理", onClick: onList }, { label: resourceRef.name }]}

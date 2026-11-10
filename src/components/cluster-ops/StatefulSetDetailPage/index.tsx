@@ -65,6 +65,7 @@ export function StatefulSetDetailPage({ resourceRef, onBack, onList }: StatefulS
       : [];
   return (
     <DetailPageFrame
+      loading={query.isLoading || types.isLoading}
       title={resourceRef.name}
       status={summary?.status ? <StatusBadge {...summary.status} /> : undefined}
       breadcrumbs={[{ label: "有状态副本集", onClick: onList }, { label: resourceRef.name }]}

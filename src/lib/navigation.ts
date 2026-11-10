@@ -12,6 +12,7 @@ export type AppRoute =
   | "/storage-classes"
   | "/config-secrets"
   | "/config-maps"
+  | "/config-service-accounts"
   | "/cluster-nodes"
   | "/cluster-namespaces"
   | "/cluster-crds"

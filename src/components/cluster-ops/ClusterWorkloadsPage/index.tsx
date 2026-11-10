@@ -1,17 +1,15 @@
 import { useEffect, useState } from "react";
-import { Alert, Select } from "@arco-design/web-react";
+import { Select } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ApiError,
   listClusters,
   listResources,
-  listResourceTypes,
   type ClusterOpsResourceRef,
 } from "@/api/cluster-ops";
 import { clusterOpsKeys } from "@/api/cluster-ops/keys";
 import { ListPageFrame } from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
-import { sameResourceType } from "../model";
 import { NamespacePicker } from "../NamespacePicker";
 import { workloadDefinitions, type ClusterWorkloadKind } from "./constants";
 import type { ClusterWorkloadsSearch } from "./search";
@@ -42,13 +40,6 @@ export function ClusterWorkloadsPage({
     if (!clusterId && clusters.data?.items[0])
       onSearchChange({ ...search, cluster_id: clusters.data.items[0].cluster_id });
   }, [clusterId, clusters.data, onSearchChange, search]);
-  const types = useQuery({
-    queryKey: clusterOpsKeys.resourceTypes(clusterId),
-    queryFn: ({ signal }) => listResourceTypes(clusterId, signal),
-    enabled: Boolean(clusterId),
-    meta: { errorNotification: { id: "cluster-resource-types", action: "发现资源类型" } },
-  });
-  const descriptor = types.data?.items.find((item) => sameResourceType(item.type, definition.type));
   const scope = JSON.stringify([kind, clusterId, search.namespace, search.page_size]);
   // TODO(pagination-migration): 当前工作负载使用通用资源接口的 page_size/continue_token；后端提供 page/pageSize 和 items/total 后改用 useListPagination，并迁移路由中的 page_size。
   const paging = useCursorPagination(scope, search.page_size ?? 20);
@@ -63,7 +54,7 @@ export function ClusterWorkloadsPage({
   const resources = useQuery({
     queryKey: clusterOpsKeys.resources(clusterId, params),
     queryFn: ({ signal }) => listResources(clusterId, params, signal),
-    enabled: Boolean(clusterId && descriptor?.actions.includes("list") && !expired),
+    enabled: Boolean(clusterId && !expired),
     meta: { errorNotification: { id: "cluster-resources", action: "读取工作负载" } },
   });
   if (
@@ -118,17 +109,12 @@ export function ClusterWorkloadsPage({
             onClick: () => {
               setExpiredScope(undefined);
               paging.resetPagination();
-              if (!paging.cursor && !expired && descriptor?.actions.includes("list"))
-                resources.refetch();
-              types.refetch();
+              if (!paging.cursor && !expired) resources.refetch();
               clusters.refetch();
             },
           },
         }}
       >
-        {types.data && !descriptor?.actions.includes("list") ? (
-          <Alert type="warning" content={`当前集群未提供 ${definition.title} 查询能力`} />
-        ) : null}
         <WorkloadTable
           kind={kind}
           resources={resources.data?.items ?? []}

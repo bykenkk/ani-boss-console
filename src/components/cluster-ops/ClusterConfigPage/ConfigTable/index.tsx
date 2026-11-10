@@ -7,6 +7,7 @@ import {
 } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { configSummary } from "../config-summary";
+import { serviceAccountSummary } from "../service-account-summary";
 import type { ClusterConfigKind } from "../constants";
 
 interface ConfigTableProps {
@@ -18,7 +19,11 @@ interface ConfigTableProps {
 }
 
 export function ConfigTable({ kind, resources, loading, pagination, onOpen }: ConfigTableProps) {
-  const rows = resources.map((resource) => ({ ...resource, summary: configSummary(resource) }));
+  const rows = resources.map((resource) => ({
+    ...resource,
+    summary: configSummary(resource),
+    serviceAccount: kind === "serviceaccounts" ? serviceAccountSummary(resource) : undefined,
+  }));
   const columns: ListColumn<(typeof rows)[number]>[] = [
     {
       title: "名称",
@@ -33,7 +38,7 @@ export function ConfigTable({ kind, resources, loading, pagination, onOpen }: Co
       ),
     },
     {
-      title: "Namespace",
+      title: kind === "serviceaccounts" ? "命名空间" : "Namespace",
       dataIndex: "ref.namespace",
       width: 200,
       ellipsis: true,
@@ -42,8 +47,19 @@ export function ConfigTable({ kind, resources, loading, pagination, onOpen }: Co
     ...(kind === "secrets"
       ? [{ title: "类型", dataIndex: "summary.type", width: 180, ellipsis: true }]
       : []),
-    { title: "字段数量", dataIndex: "summary.keyCount", width: 100 },
-    { title: "字段", dataIndex: "summary.keyNames", width: 280, ellipsis: true },
+    ...(kind === "serviceaccounts"
+      ? [
+          {
+            title: "保密字典",
+            dataIndex: "serviceAccount.secretNames",
+            width: 280,
+            ellipsis: true,
+          },
+        ]
+      : [
+          { title: "字段数量", dataIndex: "summary.keyCount", width: 100 },
+          { title: "字段", dataIndex: "summary.keyNames", width: 280, ellipsis: true },
+        ]),
     { title: "创建时间", width: 180, render: (_, doc) => formatDateTime(doc.summary.createdAt) },
   ];
   return (

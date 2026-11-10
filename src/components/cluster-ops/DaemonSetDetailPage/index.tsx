@@ -65,6 +65,7 @@ export function DaemonSetDetailPage({ resourceRef, onBack, onList }: DaemonSetDe
       : [];
   return (
     <DetailPageFrame
+      loading={query.isLoading || types.isLoading}
       title={resourceRef.name}
       status={summary?.status ? <StatusBadge {...summary.status} /> : undefined}
       breadcrumbs={[{ label: "守护进程集", onClick: onList }, { label: resourceRef.name }]}

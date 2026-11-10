@@ -58,6 +58,7 @@ export function NamespaceDetailPage({ resourceRef, onBack, onList }: NamespaceDe
       : [];
   return (
     <DetailPageFrame
+      loading={query.isLoading || types.isLoading}
       title={resourceRef.name}
       status={summary?.status ? <StatusBadge {...summary.status} /> : undefined}
       breadcrumbs={[{ label: "命名空间", onClick: onList }, { label: resourceRef.name }]}

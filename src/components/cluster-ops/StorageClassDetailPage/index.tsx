@@ -69,6 +69,7 @@ export function StorageClassDetailPage({
       : [];
   return (
     <DetailPageFrame
+      loading={query.isLoading || types.isLoading}
       title={resourceRef.name}
 
       breadcrumbs={[{ label: "存储类", onClick: onList }, { label: resourceRef.name }]}

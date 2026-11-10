@@ -145,6 +145,7 @@ const visibleAppRoutes = new Set<AppRoute>([
   "/storage-classes",
   "/config-secrets",
   "/config-maps",
+  "/config-service-accounts",
   "/cluster-nodes",
   "/cluster-namespaces",
   "/cluster-crds",
@@ -219,10 +220,10 @@ const completeAppNavigation: readonly NavigationItem[] = [
     children: [
       { label: "部署", to: "/workload-deployments" },
       { label: "有状态副本集", to: "/workload-statefulsets" },
+      { label: "守护进程集", to: "/workload-daemonsets" },
       { label: "任务", to: "/workload-jobs" },
       { label: "容器组", to: "/workload-pods" },
       { label: "服务", to: "/workload-services" },
-      { label: "守护进程集", to: "/workload-daemonsets" },
     ],
   },
   {
@@ -232,6 +233,7 @@ const completeAppNavigation: readonly NavigationItem[] = [
     children: [
       { label: "保密字典", to: "/config-secrets" },
       { label: "配置字典", to: "/config-maps" },
+      { label: "服务账户", to: "/config-service-accounts" },
     ],
   },
   {

@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { Alert, Button, Select } from "@arco-design/web-react";
+import { Select } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { ApiError, listClusters, listResources, listResourceTypes } from "@/api/cluster-ops";
+import { ApiError, listClusters, listResources } from "@/api/cluster-ops";
 import { clusterOpsKeys } from "@/api/cluster-ops/keys";
 import {
   ResourceIdentity,
@@ -12,8 +12,6 @@ import {
 } from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { formatDateTime } from "@/lib/date";
-import { sameResourceType } from "../model";
-import { ResourceCreateModal } from "../ResourceCreateModal";
 import { clusterNodeType } from "./constants";
 import { nodeSummary } from "./node-summary";
 import { NodeStatus } from "../NodeStatus";
@@ -30,7 +28,6 @@ interface ClusterNodesPageProps {
 
 export function ClusterNodesPage({ search, onSearchChange }: ClusterNodesPageProps) {
   const navigate = useNavigate();
-  const [create, setCreate] = useState(false);
   const [expiredScope, setExpiredScope] = useState<string>();
   const clusterId = search.cluster_id ?? "";
   const clusters = useQuery({
@@ -42,13 +39,6 @@ export function ClusterNodesPage({ search, onSearchChange }: ClusterNodesPagePro
     if (!clusterId && clusters.data?.items[0])
       onSearchChange({ ...search, cluster_id: clusters.data.items[0].cluster_id });
   }, [clusterId, clusters.data, onSearchChange, search]);
-  const types = useQuery({
-    queryKey: clusterOpsKeys.resourceTypes(clusterId),
-    queryFn: ({ signal }) => listResourceTypes(clusterId, signal),
-    enabled: Boolean(clusterId),
-    meta: { errorNotification: { id: "cluster-resource-types", action: "发现资源类型" } },
-  });
-  const descriptor = types.data?.items.find((item) => sameResourceType(item.type, clusterNodeType));
   const scope = JSON.stringify([clusterId, search.page_size]);
   // TODO(pagination-migration): 当前节点列表按 page_size/continue_token 翻页；后端支持 page/pageSize 和 items/total 后改用 useListPagination，并迁移路由中的 page_size。
   const paging = useCursorPagination(scope, search.page_size ?? 20);
@@ -63,7 +53,7 @@ export function ClusterNodesPage({ search, onSearchChange }: ClusterNodesPagePro
   const nodes = useQuery({
     queryKey: clusterOpsKeys.resources(clusterId, params),
     queryFn: ({ signal }) => listResources(clusterId, params, signal),
-    enabled: Boolean(clusterId && descriptor?.actions.includes("list") && !expired),
+    enabled: Boolean(clusterId && !expired),
     meta: { errorNotification: { id: "cluster-resources", action: "读取集群节点" } },
   });
   if (nodes.error instanceof ApiError && nodes.error.reason === "LIST_EXPIRED" && !expired) {
@@ -132,72 +122,53 @@ export function ClusterNodesPage({ search, onSearchChange }: ClusterNodesPagePro
     },
   ];
   return (
-    <>
-      <ListPageFrame
-        header={{
-          title: "节点管理",
-          subtitle: "Kubernetes 集群节点及其运行状态",
-          extra: (
-            <div className="flex items-center gap-3">
-              <Select
-                aria-label="集群"
-                placeholder="选择集群"
-                value={clusterId || undefined}
-                loading={clusters.isFetching}
-                filterOption={false}
-                onVisibleChange={(visible) => {
-                  if (visible && !clusters.isFetching) clusters.refetch();
-                }}
-                options={(clusters.data?.items ?? []).map((cluster) => ({
-                  value: cluster.cluster_id,
-                  label: cluster.display_name || cluster.cluster_id,
-                }))}
-                onChange={(value) => onSearchChange({ cluster_id: value })}
-              />
-            </div>
-          ),
-        }}
-        toolbar={{
-          actions: descriptor?.actions.includes("create") ? (
-            <Button type="primary" onClick={() => setCreate(true)}>
-              创建节点
-            </Button>
-          ) : undefined,
-          refresh: {
-            spinning: nodes.isFetching,
-            disabled: !clusterId,
-            onClick: () => {
-              setExpiredScope(undefined);
-              paging.resetPagination();
-              if (!paging.cursor && !expired) nodes.refetch();
-              types.refetch();
-              clusters.refetch();
-            },
+    <ListPageFrame
+      header={{
+        title: "节点管理",
+        subtitle: "Kubernetes 集群节点及其运行状态",
+        extra: (
+          <div className="flex items-center gap-3">
+            <Select
+              aria-label="集群"
+              placeholder="选择集群"
+              value={clusterId || undefined}
+              loading={clusters.isFetching}
+              filterOption={false}
+              onVisibleChange={(visible) => {
+                if (visible && !clusters.isFetching) clusters.refetch();
+              }}
+              options={(clusters.data?.items ?? []).map((cluster) => ({
+                value: cluster.cluster_id,
+                label: cluster.display_name || cluster.cluster_id,
+              }))}
+              onChange={(value) => onSearchChange({ cluster_id: value })}
+            />
+          </div>
+        ),
+      }}
+      toolbar={{
+        refresh: {
+          spinning: nodes.isFetching,
+          disabled: !clusterId,
+          onClick: () => {
+            setExpiredScope(undefined);
+            paging.resetPagination();
+            if (!paging.cursor && !expired) nodes.refetch();
+            clusters.refetch();
           },
+        },
+      }}
+    >
+      <ListDataTable
+        columns={columns}
+        data={rows}
+        rowKey="uid"
+        loading={nodes.isFetching}
+        pagination={{
+          ...paging.getPagination(nodes.data?.next_continue_token, nodes.isFetching || expired),
+          pageSizeOptions: [20, 50, 100, 200],
         }}
-      >
-        {types.data && !descriptor?.actions.includes("list") ? (
-          <Alert type="warning" content="当前集群未提供节点查询能力" />
-        ) : null}
-        <ListDataTable
-          columns={columns}
-          data={rows}
-          rowKey="uid"
-          loading={nodes.isFetching}
-          pagination={{
-            ...paging.getPagination(nodes.data?.next_continue_token, nodes.isFetching || expired),
-            pageSizeOptions: [20, 50, 100, 200],
-          }}
-        />
-      </ListPageFrame>
-      {create && descriptor ? (
-        <ResourceCreateModal
-          clusterId={clusterId}
-          descriptor={descriptor}
-          initialNamespace=""
-          onCancel={() => setCreate(false)}
-        />
-      ) : null}
-    </>
+      />
+    </ListPageFrame>
   );
 }

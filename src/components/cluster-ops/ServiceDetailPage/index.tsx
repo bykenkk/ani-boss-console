@@ -64,6 +64,7 @@ export function ServiceDetailPage({ resourceRef, onBack, onList }: ServiceDetail
       : [];
   return (
     <DetailPageFrame
+      loading={query.isLoading || types.isLoading}
       title={resourceRef.name}
 
       breadcrumbs={[{ label: "服务", onClick: onList }, { label: resourceRef.name }]}

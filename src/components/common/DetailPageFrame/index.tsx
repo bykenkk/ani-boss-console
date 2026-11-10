@@ -1,4 +1,4 @@
-import { Card, Tabs } from "@arco-design/web-react";
+import { Card, Skeleton, Tabs } from "@arco-design/web-react";
 import clsx from "clsx";
 import { useLayoutEffect, useMemo, useState, type ReactNode } from "react";
 import { useNavigationContext } from "@/hooks/useNavigationContext";
@@ -40,6 +40,7 @@ interface DetailPageFrameProps {
   tabExtra?: ReactNode | ((activeTabKey: string) => ReactNode);
   defaultTabKey?: string;
   onBack?: () => void;
+  loading?: boolean;
 }
 
 export function DetailPageFrame({
@@ -55,6 +56,7 @@ export function DetailPageFrame({
   tabExtra,
   defaultTabKey,
   onBack,
+  loading = false,
 }: DetailPageFrameProps) {
   const [activeTabKey, setActiveTabKey] = useState(defaultTabKey ?? tabs?.[0]?.key ?? "");
   const breadcrumbNavigation = useMemo(
@@ -70,78 +72,115 @@ export function DetailPageFrame({
   }, [breadcrumbNavigation, setNavigation]);
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} aria-busy={loading}>
       <section className={styles.headerCard}>
-        <div className={styles.identity}>
-          {icon ? <div className={styles.identityIcon}>{icon}</div> : null}
-          <div className={styles.identityText}>
-            <div className={styles.titleRow}>
-              <h1 className={styles.title} title={typeof title === "string" ? title : undefined}>
-                {title}
-              </h1>
-              {status ? <div className={styles.status}>{status}</div> : null}
-            </div>
-            {subtitle ? (
-              <p
-                className={styles.subtitle}
-                title={typeof subtitle === "string" ? subtitle : undefined}
-              >
-                {subtitle}
-              </p>
-            ) : null}
+        {loading ? (
+          <div
+            className="grid w-full grid-cols-[minmax(0,240px)_minmax(0,1fr)_32px] items-center gap-8"
+            role="status"
+            aria-label="正在加载详情"
+          >
+            <Skeleton loading animation text={{ rows: 1, width: "80%" }} />
+            <Skeleton loading animation text={{ rows: 1, width: "60%" }} />
+            <Skeleton loading animation text={{ rows: 1, width: 32 }} />
           </div>
-        </div>
-
-        <div className={styles.headerItems} aria-label="关键字段">
-          {headerItems.map((item, index) => (
-            <div key={index} className={styles.headerItem}>
-              <span className={styles.headerItemLabel}>{item.label}</span>
-              <span
-                className={styles.headerItemValue}
-                title={
-                  typeof item.value === "string" || typeof item.value === "number"
-                    ? String(item.value)
-                    : undefined
-                }
-              >
-                {item.value ?? "-"}
-              </span>
+        ) : (
+          <>
+            <div className={styles.identity}>
+              {icon ? <div className={styles.identityIcon}>{icon}</div> : null}
+              <div className={styles.identityText}>
+                <div className={styles.titleRow}>
+                  <h1
+                    className={styles.title}
+                    title={typeof title === "string" ? title : undefined}
+                  >
+                    {title}
+                  </h1>
+                  {status ? <div className={styles.status}>{status}</div> : null}
+                </div>
+                {subtitle ? (
+                  <p
+                    className={styles.subtitle}
+                    title={typeof subtitle === "string" ? subtitle : undefined}
+                  >
+                    {subtitle}
+                  </p>
+                ) : null}
+              </div>
             </div>
-          ))}
-        </div>
 
-        {actions ? <div className={styles.headerActions}>{actions}</div> : null}
+            <div className={styles.headerItems} aria-label="关键字段">
+              {headerItems.map((item, index) => (
+                <div key={index} className={styles.headerItem}>
+                  <span className={styles.headerItemLabel}>{item.label}</span>
+                  <span
+                    className={styles.headerItemValue}
+                    title={
+                      typeof item.value === "string" || typeof item.value === "number"
+                        ? String(item.value)
+                        : undefined
+                    }
+                  >
+                    {item.value ?? "-"}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {actions ? <div className={styles.headerActions}>{actions}</div> : null}
+          </>
+        )}
       </section>
 
       <div
-        className={clsx(
-          styles.workspace,
-          tabs?.length ? styles.workspaceSplit : styles.workspaceSingle,
-        )}
+        className={clsx(styles.workspace, tabs ? styles.workspaceSplit : styles.workspaceSingle)}
       >
         <aside className={styles.leftPane} aria-label="详情信息">
           {cards.map((card) => (
             <Card key={card.key} title={card.title} className={styles.infoCard}>
-              {card.content}
+              {loading ? (
+                <Skeleton
+                  loading
+                  animation
+                  text={{ rows: 6, width: ["100%", "82%", "94%", "76%", "88%", "80%"] }}
+                />
+              ) : (
+                card.content
+              )}
             </Card>
           ))}
         </aside>
 
-        {tabs?.length ? (
+        {tabs ? (
           <section className={styles.rightPane}>
-            <Tabs
-              defaultActiveTab={defaultTabKey ?? tabs[0].key}
-              extra={typeof tabExtra === "function" ? tabExtra(activeTabKey) : tabExtra}
-              onChange={setActiveTabKey}
-              className={styles.tabs}
-              type="line"
-            >
-              {tabs.map((tab) => (
-                <Tabs.TabPane key={tab.key} title={tab.title} destroyOnHide={tab.destroyOnHide}>
-                  {tab.content}
-                </Tabs.TabPane>
-              ))}
-            </Tabs>
+            {loading ? (
+              <div className="flex min-h-0 flex-1 flex-col" aria-hidden="true">
+                <div className="border-b border-(--color-border-2) p-4">
+                  <Skeleton loading animation text={{ rows: 1, width: "36%" }} />
+                </div>
+                <div className="p-4">
+                  <Skeleton
+                    loading
+                    animation
+                    text={{ rows: 6, width: ["28%", "72%", "66%", "84%", "76%", "56%"] }}
+                  />
+                </div>
+              </div>
+            ) : tabs.length > 0 ? (
+              <Tabs
+                defaultActiveTab={defaultTabKey ?? tabs[0].key}
+                extra={typeof tabExtra === "function" ? tabExtra(activeTabKey) : tabExtra}
+                onChange={setActiveTabKey}
+                className={styles.tabs}
+                type="line"
+              >
+                {tabs.map((tab) => (
+                  <Tabs.TabPane key={tab.key} title={tab.title} destroyOnHide={tab.destroyOnHide}>
+                    {tab.content}
+                  </Tabs.TabPane>
+                ))}
+              </Tabs>
+            ) : null}
           </section>
         ) : null}
       </div>

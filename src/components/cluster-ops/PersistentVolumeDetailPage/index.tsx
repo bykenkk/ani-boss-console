@@ -70,6 +70,7 @@ export function PersistentVolumeDetailPage({
       : [];
   return (
     <DetailPageFrame
+      loading={query.isLoading || types.isLoading}
       title={resourceRef.name}
       status={summary?.status ? <StatusBadge {...summary.status} /> : undefined}
       breadcrumbs={[{ label: "持久卷", onClick: onList }, { label: resourceRef.name }]}

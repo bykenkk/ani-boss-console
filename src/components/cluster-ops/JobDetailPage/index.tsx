@@ -66,6 +66,7 @@ export function JobDetailPage({ resourceRef, onBack, onList }: JobDetailPageProp
       : [];
   return (
     <DetailPageFrame
+      loading={query.isLoading || types.isLoading}
       title={resourceRef.name}
       status={summary?.status ? <StatusBadge {...summary.status} /> : undefined}
       breadcrumbs={[{ label: "任务", onClick: onList }, { label: resourceRef.name }]}

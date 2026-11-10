@@ -16,6 +16,7 @@ import { Route as ClusterNodesRouteImport } from './routes/cluster-nodes'
 import { Route as ClusterOperationsRouteImport } from './routes/cluster-operations'
 import { Route as ConfigMapsRouteImport } from './routes/config-maps'
 import { Route as ConfigSecretsRouteImport } from './routes/config-secrets'
+import { Route as ConfigServiceAccountsRouteImport } from './routes/config-service-accounts'
 import { Route as StorageClaimsRouteImport } from './routes/storage-claims'
 import { Route as StorageClassesRouteImport } from './routes/storage-classes'
 import { Route as StorageVolumesRouteImport } from './routes/storage-volumes'
@@ -47,6 +48,8 @@ import { Route as ConfigMapsIndexRouteImport } from './routes/config-maps/index'
 import { Route as ConfigMapsConfigNameRouteImport } from './routes/config-maps/$configName'
 import { Route as ConfigSecretsIndexRouteImport } from './routes/config-secrets/index'
 import { Route as ConfigSecretsConfigNameRouteImport } from './routes/config-secrets/$configName'
+import { Route as ConfigServiceAccountsIndexRouteImport } from './routes/config-service-accounts/index'
+import { Route as ConfigServiceAccountsConfigNameRouteImport } from './routes/config-service-accounts/$configName'
 import { Route as EipsIndexRouteImport } from './routes/eips/index'
 import { Route as GpuClustersIndexRouteImport } from './routes/gpu-clusters/index'
 import { Route as GpuQuotasIndexRouteImport } from './routes/gpu-quotas/index'
@@ -145,6 +148,11 @@ const ConfigMapsRoute = ConfigMapsRouteImport.update({
 const ConfigSecretsRoute = ConfigSecretsRouteImport.update({
   id: '/config-secrets',
   path: '/config-secrets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfigServiceAccountsRoute = ConfigServiceAccountsRouteImport.update({
+  id: '/config-service-accounts',
+  path: '/config-service-accounts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StorageClaimsRoute = StorageClaimsRouteImport.update({
@@ -303,6 +311,18 @@ const ConfigSecretsConfigNameRoute = ConfigSecretsConfigNameRouteImport.update({
   path: '/$configName',
   getParentRoute: () => ConfigSecretsRoute,
 } as any)
+const ConfigServiceAccountsIndexRoute =
+  ConfigServiceAccountsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => ConfigServiceAccountsRoute,
+  } as any)
+const ConfigServiceAccountsConfigNameRoute =
+  ConfigServiceAccountsConfigNameRouteImport.update({
+    id: '/$configName',
+    path: '/$configName',
+    getParentRoute: () => ConfigServiceAccountsRoute,
+  } as any)
 const EipsIndexRoute = EipsIndexRouteImport.update({
   id: '/eips/',
   path: '/eips/',
@@ -645,6 +665,7 @@ export interface FileRoutesByFullPath {
   '/cluster-operations': typeof ClusterOperationsRouteWithChildren
   '/config-maps': typeof ConfigMapsRouteWithChildren
   '/config-secrets': typeof ConfigSecretsRouteWithChildren
+  '/config-service-accounts': typeof ConfigServiceAccountsRouteWithChildren
   '/storage-claims': typeof StorageClaimsRouteWithChildren
   '/storage-classes': typeof StorageClassesRouteWithChildren
   '/storage-volumes': typeof StorageVolumesRouteWithChildren
@@ -660,6 +681,7 @@ export interface FileRoutesByFullPath {
   '/cluster-nodes/$nodeName': typeof ClusterNodesNodeNameRoute
   '/config-maps/$configName': typeof ConfigMapsConfigNameRoute
   '/config-secrets/$configName': typeof ConfigSecretsConfigNameRoute
+  '/config-service-accounts/$configName': typeof ConfigServiceAccountsConfigNameRoute
   '/storage-claims/$storageName': typeof StorageClaimsStorageNameRoute
   '/storage-classes/$storageName': typeof StorageClassesStorageNameRoute
   '/storage-volumes/$storageName': typeof StorageVolumesStorageNameRoute
@@ -686,6 +708,7 @@ export interface FileRoutesByFullPath {
   '/compute-presets/': typeof ComputePresetsIndexRoute
   '/config-maps/': typeof ConfigMapsIndexRoute
   '/config-secrets/': typeof ConfigSecretsIndexRoute
+  '/config-service-accounts/': typeof ConfigServiceAccountsIndexRoute
   '/eips/': typeof EipsIndexRoute
   '/gpu-clusters/': typeof GpuClustersIndexRoute
   '/gpu-quotas/': typeof GpuQuotasIndexRoute
@@ -748,6 +771,7 @@ export interface FileRoutesByTo {
   '/cluster-nodes/$nodeName': typeof ClusterNodesNodeNameRoute
   '/config-maps/$configName': typeof ConfigMapsConfigNameRoute
   '/config-secrets/$configName': typeof ConfigSecretsConfigNameRoute
+  '/config-service-accounts/$configName': typeof ConfigServiceAccountsConfigNameRoute
   '/storage-claims/$storageName': typeof StorageClaimsStorageNameRoute
   '/storage-classes/$storageName': typeof StorageClassesStorageNameRoute
   '/storage-volumes/$storageName': typeof StorageVolumesStorageNameRoute
@@ -774,6 +798,7 @@ export interface FileRoutesByTo {
   '/compute-presets': typeof ComputePresetsIndexRoute
   '/config-maps': typeof ConfigMapsIndexRoute
   '/config-secrets': typeof ConfigSecretsIndexRoute
+  '/config-service-accounts': typeof ConfigServiceAccountsIndexRoute
   '/eips': typeof EipsIndexRoute
   '/gpu-clusters': typeof GpuClustersIndexRoute
   '/gpu-quotas': typeof GpuQuotasIndexRoute
@@ -838,6 +863,7 @@ export interface FileRoutesById {
   '/cluster-operations': typeof ClusterOperationsRouteWithChildren
   '/config-maps': typeof ConfigMapsRouteWithChildren
   '/config-secrets': typeof ConfigSecretsRouteWithChildren
+  '/config-service-accounts': typeof ConfigServiceAccountsRouteWithChildren
   '/storage-claims': typeof StorageClaimsRouteWithChildren
   '/storage-classes': typeof StorageClassesRouteWithChildren
   '/storage-volumes': typeof StorageVolumesRouteWithChildren
@@ -853,6 +879,7 @@ export interface FileRoutesById {
   '/cluster-nodes/$nodeName': typeof ClusterNodesNodeNameRoute
   '/config-maps/$configName': typeof ConfigMapsConfigNameRoute
   '/config-secrets/$configName': typeof ConfigSecretsConfigNameRoute
+  '/config-service-accounts/$configName': typeof ConfigServiceAccountsConfigNameRoute
   '/storage-claims/$storageName': typeof StorageClaimsStorageNameRoute
   '/storage-classes/$storageName': typeof StorageClassesStorageNameRoute
   '/storage-volumes/$storageName': typeof StorageVolumesStorageNameRoute
@@ -879,6 +906,7 @@ export interface FileRoutesById {
   '/compute-presets/': typeof ComputePresetsIndexRoute
   '/config-maps/': typeof ConfigMapsIndexRoute
   '/config-secrets/': typeof ConfigSecretsIndexRoute
+  '/config-service-accounts/': typeof ConfigServiceAccountsIndexRoute
   '/eips/': typeof EipsIndexRoute
   '/gpu-clusters/': typeof GpuClustersIndexRoute
   '/gpu-quotas/': typeof GpuQuotasIndexRoute
@@ -944,6 +972,7 @@ export interface FileRouteTypes {
     | '/cluster-operations'
     | '/config-maps'
     | '/config-secrets'
+    | '/config-service-accounts'
     | '/storage-claims'
     | '/storage-classes'
     | '/storage-volumes'
@@ -959,6 +988,7 @@ export interface FileRouteTypes {
     | '/cluster-nodes/$nodeName'
     | '/config-maps/$configName'
     | '/config-secrets/$configName'
+    | '/config-service-accounts/$configName'
     | '/storage-claims/$storageName'
     | '/storage-classes/$storageName'
     | '/storage-volumes/$storageName'
@@ -985,6 +1015,7 @@ export interface FileRouteTypes {
     | '/compute-presets/'
     | '/config-maps/'
     | '/config-secrets/'
+    | '/config-service-accounts/'
     | '/eips/'
     | '/gpu-clusters/'
     | '/gpu-quotas/'
@@ -1047,6 +1078,7 @@ export interface FileRouteTypes {
     | '/cluster-nodes/$nodeName'
     | '/config-maps/$configName'
     | '/config-secrets/$configName'
+    | '/config-service-accounts/$configName'
     | '/storage-claims/$storageName'
     | '/storage-classes/$storageName'
     | '/storage-volumes/$storageName'
@@ -1073,6 +1105,7 @@ export interface FileRouteTypes {
     | '/compute-presets'
     | '/config-maps'
     | '/config-secrets'
+    | '/config-service-accounts'
     | '/eips'
     | '/gpu-clusters'
     | '/gpu-quotas'
@@ -1136,6 +1169,7 @@ export interface FileRouteTypes {
     | '/cluster-operations'
     | '/config-maps'
     | '/config-secrets'
+    | '/config-service-accounts'
     | '/storage-claims'
     | '/storage-classes'
     | '/storage-volumes'
@@ -1151,6 +1185,7 @@ export interface FileRouteTypes {
     | '/cluster-nodes/$nodeName'
     | '/config-maps/$configName'
     | '/config-secrets/$configName'
+    | '/config-service-accounts/$configName'
     | '/storage-claims/$storageName'
     | '/storage-classes/$storageName'
     | '/storage-volumes/$storageName'
@@ -1177,6 +1212,7 @@ export interface FileRouteTypes {
     | '/compute-presets/'
     | '/config-maps/'
     | '/config-secrets/'
+    | '/config-service-accounts/'
     | '/eips/'
     | '/gpu-clusters/'
     | '/gpu-quotas/'
@@ -1241,6 +1277,7 @@ export interface RootRouteChildren {
   ClusterOperationsRoute: typeof ClusterOperationsRouteWithChildren
   ConfigMapsRoute: typeof ConfigMapsRouteWithChildren
   ConfigSecretsRoute: typeof ConfigSecretsRouteWithChildren
+  ConfigServiceAccountsRoute: typeof ConfigServiceAccountsRouteWithChildren
   StorageClaimsRoute: typeof StorageClaimsRouteWithChildren
   StorageClassesRoute: typeof StorageClassesRouteWithChildren
   StorageVolumesRoute: typeof StorageVolumesRouteWithChildren
@@ -1357,6 +1394,13 @@ declare module '@tanstack/react-router' {
       path: '/config-secrets'
       fullPath: '/config-secrets'
       preLoaderRoute: typeof ConfigSecretsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/config-service-accounts': {
+      id: '/config-service-accounts'
+      path: '/config-service-accounts'
+      fullPath: '/config-service-accounts'
+      preLoaderRoute: typeof ConfigServiceAccountsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/storage-claims': {
@@ -1575,6 +1619,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/config-secrets/$configName'
       preLoaderRoute: typeof ConfigSecretsConfigNameRouteImport
       parentRoute: typeof ConfigSecretsRoute
+    }
+    '/config-service-accounts/': {
+      id: '/config-service-accounts/'
+      path: '/'
+      fullPath: '/config-service-accounts/'
+      preLoaderRoute: typeof ConfigServiceAccountsIndexRouteImport
+      parentRoute: typeof ConfigServiceAccountsRoute
+    }
+    '/config-service-accounts/$configName': {
+      id: '/config-service-accounts/$configName'
+      path: '/$configName'
+      fullPath: '/config-service-accounts/$configName'
+      preLoaderRoute: typeof ConfigServiceAccountsConfigNameRouteImport
+      parentRoute: typeof ConfigServiceAccountsRoute
     }
     '/eips/': {
       id: '/eips/'
@@ -2107,6 +2165,21 @@ const ConfigSecretsRouteWithChildren = ConfigSecretsRoute._addFileChildren(
   ConfigSecretsRouteChildren,
 )
 
+interface ConfigServiceAccountsRouteChildren {
+  ConfigServiceAccountsConfigNameRoute: typeof ConfigServiceAccountsConfigNameRoute
+  ConfigServiceAccountsIndexRoute: typeof ConfigServiceAccountsIndexRoute
+}
+
+const ConfigServiceAccountsRouteChildren: ConfigServiceAccountsRouteChildren = {
+  ConfigServiceAccountsConfigNameRoute: ConfigServiceAccountsConfigNameRoute,
+  ConfigServiceAccountsIndexRoute: ConfigServiceAccountsIndexRoute,
+}
+
+const ConfigServiceAccountsRouteWithChildren =
+  ConfigServiceAccountsRoute._addFileChildren(
+    ConfigServiceAccountsRouteChildren,
+  )
+
 interface StorageClaimsRouteChildren {
   StorageClaimsStorageNameRoute: typeof StorageClaimsStorageNameRoute
   StorageClaimsIndexRoute: typeof StorageClaimsIndexRoute
@@ -2248,6 +2321,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClusterOperationsRoute: ClusterOperationsRouteWithChildren,
   ConfigMapsRoute: ConfigMapsRouteWithChildren,
   ConfigSecretsRoute: ConfigSecretsRouteWithChildren,
+  ConfigServiceAccountsRoute: ConfigServiceAccountsRouteWithChildren,
   StorageClaimsRoute: StorageClaimsRouteWithChildren,
   StorageClassesRoute: StorageClassesRouteWithChildren,
   StorageVolumesRoute: StorageVolumesRouteWithChildren,

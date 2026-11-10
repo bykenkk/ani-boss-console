@@ -68,6 +68,12 @@ export function resourceDetailDestination(ref: ClusterOpsResourceRef) {
         params: { configName: ref.name },
         search: { cluster_id: ref.cluster_id, namespace: ref.namespace },
       };
+    case "/v1/serviceaccounts":
+      return {
+        to: "/config-service-accounts/$configName" as const,
+        params: { configName: ref.name },
+        search: { cluster_id: ref.cluster_id, namespace: ref.namespace },
+      };
     case "/v1/namespaces":
       return {
         to: "/cluster-namespaces/$namespaceName" as const,

@@ -175,6 +175,7 @@
 
 .infoCard {
   flex: 0 0 auto;
+  min-width: 0;
   overflow: hidden;
   border-color: transparent;
   border-radius: 8px;
@@ -193,6 +194,23 @@
 
   :global(.arco-card-body) {
     padding: 16px;
+  }
+
+  :global(.arco-descriptions-table) {
+    table-layout: fixed;
+  }
+
+  :global(.arco-descriptions-item-label) {
+    width: 36%;
+    padding-right: 12px;
+    vertical-align: top;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  :global(.arco-descriptions-item-value) {
+    vertical-align: top;
+    overflow-wrap: anywhere;
   }
 }
 

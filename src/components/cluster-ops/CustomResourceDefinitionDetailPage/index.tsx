@@ -70,6 +70,7 @@ export function CustomResourceDefinitionDetailPage({
       : [];
   return (
     <DetailPageFrame
+      loading={query.isLoading || types.isLoading}
       title={resourceRef.name}
       status={summary?.status ? <StatusBadge {...summary.status} /> : undefined}
       breadcrumbs={[{ label: "自定义资源", onClick: onList }, { label: resourceRef.name }]}

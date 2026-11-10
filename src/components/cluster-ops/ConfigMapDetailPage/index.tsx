@@ -62,6 +62,7 @@ export function ConfigMapDetailPage({ resourceRef, onBack, onList }: ConfigMapDe
       : [];
   return (
     <DetailPageFrame
+      loading={query.isLoading || types.isLoading}
       title={resourceRef.name}
 
       breadcrumbs={[{ label: "配置字典", onClick: onList }, { label: resourceRef.name }]}

@@ -1,10 +1,13 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, Descriptions, Select } from "@arco-design/web-react";
+import { Select } from "@arco-design/web-react";
 import { getClusterOverview, listClusters } from "@/api/cluster-ops";
 import { clusterOpsKeys } from "@/api/cluster-ops/keys";
-import { ToolbarIconButton, ResourcePageFrame, DataTable } from "@/components/common";
+import { ToolbarIconButton, ResourcePageFrame } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
+import { ClusterOverviewMetrics } from "./ClusterOverviewMetrics";
+import { ClusterResourceCapacity } from "./ClusterResourceCapacity";
+import { ClusterPodPhases } from "./ClusterPodPhases";
 
 interface ClusterOverviewPageProps {
   clusterId?: string;
@@ -26,9 +29,7 @@ export function ClusterOverviewPage({ clusterId, onClusterChange }: ClusterOverv
     meta: { errorNotification: { id: "cluster-overview", action: "读取集群概览" } },
   });
   const data = overview.data;
-  const capacities = Array.from(
-    new Set([...Object.keys(data?.capacity ?? {}), ...Object.keys(data?.allocatable ?? {})]),
-  ).map((name) => ({ name, capacity: data?.capacity[name], allocatable: data?.allocatable[name] }));
+  const showSkeleton = !data && (clusters.isFetching || overview.isFetching);
   return (
     <ResourcePageFrame
       header={{
@@ -40,7 +41,6 @@ export function ClusterOverviewPage({ clusterId, onClusterChange }: ClusterOverv
               aria-label="集群"
               placeholder="选择集群"
               value={clusterId}
-              loading={clusters.isFetching}
               filterOption={false}
               onVisibleChange={(visible) => {
                 if (visible && !clusters.isFetching) clusters.refetch();
@@ -53,6 +53,8 @@ export function ClusterOverviewPage({ clusterId, onClusterChange }: ClusterOverv
             />
             <ToolbarIconButton
               label="刷新"
+              spinning={overview.isFetching || clusters.isFetching}
+              disabled={!clusterId || overview.isFetching}
               onClick={() => {
                 clusters.refetch();
                 overview.refetch();
@@ -62,38 +64,14 @@ export function ClusterOverviewPage({ clusterId, onClusterChange }: ClusterOverv
         ),
       }}
     >
-      <Card loading={overview.isFetching}>
-        <Descriptions
-          column={3}
-          data={[
-            { label: "Kubernetes 版本", value: data?.kubernetes_version ?? "-" },
-            {
-              label: "节点 / Ready",
-              value: data ? `${data.nodes_total} / ${data.nodes_ready}` : "-",
-            },
-            { label: "Namespace", value: data?.namespaces_total ?? "-" },
-            { label: "Pod", value: data?.pods_total ?? "-" },
-            { label: "采样时间", value: formatDateTime(data?.sampled_at) },
-            ...Object.entries(data?.pod_phase_counts ?? {}).map(([phase, count]) => ({
-              label: `Pod ${phase}`,
-              value: count,
-            })),
-          ]}
-        />
-      </Card>
-      <Card>
-        <DataTable
-          header={{ title: "节点资源容量" }}
-          data={capacities}
-          rowKey="name"
-          columns={[
-            { title: "资源", dataIndex: "name", width: 200 },
-            { title: "Capacity", dataIndex: "capacity", width: 200 },
-            { title: "Allocatable", dataIndex: "allocatable", width: 200 },
-          ]}
-          pagination={false}
-        />
-      </Card>
+      <div className="@container/overview flex flex-col gap-4">
+        <ClusterOverviewMetrics data={data} showSkeleton={showSkeleton} />
+        <ClusterResourceCapacity data={data} showSkeleton={showSkeleton} />
+        <ClusterPodPhases counts={data?.pod_phase_counts} showSkeleton={showSkeleton} />
+        <div className="text-right text-xs text-(--color-text-3)">
+          采样时间 {formatDateTime(data?.sampled_at)}
+        </div>
+      </div>
     </ResourcePageFrame>
   );
 }

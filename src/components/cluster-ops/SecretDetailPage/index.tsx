@@ -67,6 +67,7 @@ export function SecretDetailPage({ resourceRef, onBack, onList }: SecretDetailPa
       : [];
   return (
     <DetailPageFrame
+      loading={query.isLoading || types.isLoading}
       title={resourceRef.name}
 
       breadcrumbs={[{ label: "保密字典", onClick: onList }, { label: resourceRef.name }]}

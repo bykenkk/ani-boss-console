@@ -144,6 +144,10 @@ export function RelatedResources({ resource, descriptors }: RelatedResourcesProp
       }
     }
   }
+  if (resource.ref.type.group === "" && resource.ref.type.resource === "serviceaccounts") {
+    for (const secret of array(object.secrets)) add("Secret", field(secret, "name"));
+    for (const secret of array(object.imagePullSecrets)) add("Secret", field(secret, "name"));
+  }
   let selector: string | undefined;
   if (
     (resource.ref.type.group === "apps" &&
