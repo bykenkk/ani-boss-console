@@ -1,8 +1,8 @@
-import { Button, Select, Space } from "@arco-design/web-react";
-import { IconRefresh } from "@arco-design/web-react/icon";
+import { Select, Space } from "@arco-design/web-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
+  ToolbarIconButton,
   ListDataTable,
   ResourceIdentity,
   ResourcePageFrame,
@@ -173,11 +173,7 @@ export const Route = createFileRoute("/nodes/")({
         header={{
           title: "节点状态",
           subtitle: "查看计算节点健康状态、资源规格、调度能力和最后心跳。",
-          extra: (
-            <Button type="primary" disabled icon={<IconRefresh />}>
-              刷新状态
-            </Button>
-          ),
+          extra: <ToolbarIconButton label="刷新状态" type="primary" disabled />,
         }}
       >
         <section className="grid grid-cols-3 gap-3.5 max-[900px]:grid-cols-1">

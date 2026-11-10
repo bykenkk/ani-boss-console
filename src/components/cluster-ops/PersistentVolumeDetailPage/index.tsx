@@ -1,8 +1,8 @@
-import { Button } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { getResource, listResourceTypes, type ClusterOpsResourceRef } from "@/api/cluster-ops";
 import { clusterOpsKeys } from "@/api/cluster-ops/keys";
 import {
+  ToolbarIconButton,
   ResourceIdentity,
   DetailPageFrame,
   StatusBadge,
@@ -81,9 +81,12 @@ export function PersistentVolumeDetailPage({
         },
       ]}
       actions={
-        <Button onClick={() => query.refetch()} loading={query.isFetching}>
-          刷新
-        </Button>
+        <ToolbarIconButton
+          label="刷新"
+          onClick={() => query.refetch()}
+          disabled={query.isFetching}
+          spinning={query.isFetching}
+        />
       }
       cards={[
         {

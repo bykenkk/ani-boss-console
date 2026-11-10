@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@arco-design/web-react";
 import {
   listResources,
   ApiError,
@@ -10,7 +9,7 @@ import {
   type ClusterOpsResourceTypeRef,
 } from "@/api/cluster-ops";
 import { clusterOpsKeys } from "@/api/cluster-ops/keys";
-import { DataTable, ResourceIdentity } from "@/components/common";
+import { ToolbarIconButton, DataTable, ResourceIdentity } from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { array, field, labelSelector, nativeObject, record, resourceState } from "../model";
 import { ResourceLink } from "./ResourceLink";
@@ -60,15 +59,14 @@ function MatchingResources({
       header={{
         title,
         extra: (
-          <Button
+          <ToolbarIconButton
+            label="刷新"
             onClick={() => {
               setExpiredScope(undefined);
               paging.resetPagination();
               if (!paging.cursor && !expired) query.refetch();
             }}
-          >
-            刷新
-          </Button>
+          />
         ),
       }}
       columns={[

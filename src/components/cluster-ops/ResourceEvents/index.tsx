@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Button } from "@arco-design/web-react";
 import { ApiError, listResources, type ClusterOpsResourceDocument } from "@/api/cluster-ops";
 import { clusterOpsKeys } from "@/api/cluster-ops/keys";
-import { DataTable, type ListColumn } from "@/components/common";
+import { ToolbarIconButton, DataTable, type ListColumn } from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { formatDateTime } from "@/lib/date";
 import { field, nativeObject, text } from "../model";
@@ -72,15 +71,14 @@ export function ResourceEvents({ resource }: ResourceEventsProps) {
     <DataTable
       header={{
         extra: (
-          <Button
+          <ToolbarIconButton
+            label="刷新"
             onClick={() => {
               setExpiredScope(undefined);
               paging.resetPagination();
               if (!paging.cursor && !expired) query.refetch();
             }}
-          >
-            刷新
-          </Button>
+          />
         ),
       }}
       columns={columns}

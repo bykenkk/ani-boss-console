@@ -1,9 +1,8 @@
-import { Button, Radio } from "@arco-design/web-react";
-import { IconRefresh } from "@arco-design/web-react/icon";
+import { Radio } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { getResourceUsageOverview, resourceUsageKeys } from "@/api/resource-usage";
-import { ResourcePageFrame, SummaryStrip } from "@/components/common";
+import { ToolbarIconButton, ResourcePageFrame, SummaryStrip } from "@/components/common";
 import {
   formatDateTimeMinute,
   formatMonthDayTime,
@@ -77,13 +76,12 @@ export function PlatformMeteringPage() {
                 setReference(getCurrentTimestamp());
               }}
             />
-            <Button
-              icon={<IconRefresh />}
-              loading={overviewQuery.isFetching}
+            <ToolbarIconButton
+              label="刷新"
+              disabled={overviewQuery.isFetching}
+              spinning={overviewQuery.isFetching}
               onClick={() => setReference(getCurrentTimestamp())}
-            >
-              刷新
-            </Button>
+            />
           </div>
         ),
       }}

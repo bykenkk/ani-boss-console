@@ -1,5 +1,4 @@
-import { Button } from "@arco-design/web-react";
-import { DataTable, type ListColumn } from "@/components/common";
+import { ToolbarIconButton, DataTable, type ListColumn } from "@/components/common";
 import type { TenantBilling } from "../../model";
 
 import type { TenantUsageCost } from "../../model";
@@ -30,9 +29,7 @@ export function BillingUsage({ billing }: BillingUsageProps) {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <Button disabled title="账务功能未接入">
-          刷新用量
-        </Button>
+        <ToolbarIconButton label="刷新用量" disabled title="账务功能未接入" />
       </div>
       <DataTable
         rowKey="metric"

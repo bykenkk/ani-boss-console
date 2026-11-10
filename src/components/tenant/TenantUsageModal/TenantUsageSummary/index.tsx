@@ -1,7 +1,12 @@
-import { Button, Descriptions } from "@arco-design/web-react";
+import { Descriptions } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { getTenantUsage, planKeys, type TenantUsage } from "@/api/plans";
-import { ResourceIdentity, DataTable, type ListColumn } from "@/components/common";
+import {
+  ToolbarIconButton,
+  ResourceIdentity,
+  DataTable,
+  type ListColumn,
+} from "@/components/common";
 import { withId } from "@/lib/id";
 
 interface TenantUsageSummaryProps {
@@ -66,9 +71,12 @@ export function TenantUsageSummary({ tenantId }: TenantUsageSummaryProps) {
           title: "套餐配额上限",
           description: "这里只展示套餐配置，实际占用与执行级别请查看配额账户。",
           extra: (
-            <Button loading={query.isFetching} onClick={() => query.refetch()}>
-              刷新
-            </Button>
+            <ToolbarIconButton
+              label="刷新"
+              disabled={query.isFetching}
+              spinning={query.isFetching}
+              onClick={() => query.refetch()}
+            />
           ),
         }}
         tableLabel="租户套餐配额上限"

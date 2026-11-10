@@ -1,8 +1,8 @@
-import { Button, Progress, Switch } from "@arco-design/web-react";
-import { IconRefresh } from "@arco-design/web-react/icon";
+import { Progress, Switch } from "@arco-design/web-react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import {
+  ToolbarIconButton,
   ListDataTable,
   ResourceIdentity,
   ResourcePageFrame,
@@ -193,11 +193,7 @@ export const Route = createFileRoute("/pool/")({
         header={{
           title: "平台资源池总览",
           subtitle: "维护区域主数据与平台容量，控制租户开通时可选择的区域。",
-          extra: (
-            <Button type="primary" disabled icon={<IconRefresh />}>
-              刷新全部容量
-            </Button>
-          ),
+          extra: <ToolbarIconButton label="刷新全部容量" type="primary" disabled />,
         }}
       >
         <section className="grid grid-cols-4 gap-3.5 max-[1180px]:grid-cols-2">

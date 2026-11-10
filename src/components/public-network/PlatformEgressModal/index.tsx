@@ -1,4 +1,4 @@
-import { ResourceIdentity } from "@/components/common";
+import { ToolbarIconButton, ResourceIdentity } from "@/components/common";
 import { Alert, Button, Descriptions, Form, Modal, Space, Spin } from "@arco-design/web-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -147,9 +147,12 @@ export function PlatformEgressModal({ onCancel }: PlatformEgressModalProps) {
           )
         )}
         <Space className="mt-4 flex! justify-end">
-          <Button disabled={busy} loading={query.isFetching} onClick={() => query.refetch()}>
-            刷新
-          </Button>
+          <ToolbarIconButton
+            label="刷新"
+            disabled={busy || query.isFetching}
+            spinning={query.isFetching}
+            onClick={() => query.refetch()}
+          />
           {item ? (
             <Button
               status="danger"

@@ -1,9 +1,10 @@
-import { Button, Card, Space, Tag, Tooltip } from "@arco-design/web-react";
-import { IconClockCircle, IconRefresh } from "@arco-design/web-react/icon";
+import { Card, Space, Tag, Tooltip } from "@arco-design/web-react";
+import { IconClockCircle } from "@arco-design/web-react/icon";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { fetchPlatformComponents, platformQueryKeys, type PlatformComponent } from "@/api/platform";
 import {
+  ToolbarIconButton,
   ResourceIdentity,
   DataTable,
   ResourcePageFrame,
@@ -143,13 +144,12 @@ export function PlatformHealthPage() {
               <IconClockCircle />
               观测时间 {formatObservedAt(componentsQuery.data?.observedAt)}
             </span>
-            <Button
-              icon={<IconRefresh />}
-              loading={componentsQuery.isFetching}
+            <ToolbarIconButton
+              label="刷新"
+              disabled={componentsQuery.isFetching}
+              spinning={componentsQuery.isFetching}
               onClick={() => componentsQuery.refetch()}
-            >
-              刷新
-            </Button>
+            />
           </Space>
         ),
       }}

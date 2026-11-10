@@ -1,7 +1,5 @@
-import { ResourcePageFrame } from "@/components/common";
+import { ToolbarIconButton, ResourcePageFrame } from "@/components/common";
 import { Metric } from "@/components/overview/Metric";
-import { Button } from "@arco-design/web-react";
-import { IconRefresh } from "@arco-design/web-react/icon";
 import { PlatformAlertTable } from "@/components/overview/PlatformAlertTable";
 import { platformAlerts } from "@/components/overview/model";
 
@@ -20,9 +18,7 @@ export function PlatformAlertsPage() {
         title: "平台告警与待处理",
         subtitle: "跨租户平台级告警收件箱 · 未接入，当前为演示数据",
         extra: (
-          <Button type="primary" disabled title="平台告警功能未接入" icon={<IconRefresh />}>
-            刷新
-          </Button>
+          <ToolbarIconButton label="刷新" type="primary" disabled title="平台告警功能未接入" />
         ),
       }}
     >

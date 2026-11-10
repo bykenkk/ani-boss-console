@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Button, Card, Descriptions, Select } from "@arco-design/web-react";
+import { Card, Descriptions, Select } from "@arco-design/web-react";
 import { getClusterOverview, listClusters } from "@/api/cluster-ops";
 import { clusterOpsKeys } from "@/api/cluster-ops/keys";
-import { ResourcePageFrame, DataTable } from "@/components/common";
+import { ToolbarIconButton, ResourcePageFrame, DataTable } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 
 interface ClusterOverviewPageProps {
@@ -51,14 +51,13 @@ export function ClusterOverviewPage({ clusterId, onClusterChange }: ClusterOverv
               }))}
               onChange={onClusterChange}
             />
-            <Button
+            <ToolbarIconButton
+              label="刷新"
               onClick={() => {
                 clusters.refetch();
                 overview.refetch();
               }}
-            >
-              刷新
-            </Button>
+            />
           </div>
         ),
       }}

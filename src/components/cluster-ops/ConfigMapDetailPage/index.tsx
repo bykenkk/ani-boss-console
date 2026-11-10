@@ -1,8 +1,12 @@
-import { Button } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { getResource, listResourceTypes, type ClusterOpsResourceRef } from "@/api/cluster-ops";
 import { clusterOpsKeys } from "@/api/cluster-ops/keys";
-import { ResourceIdentity, DetailPageFrame, type DetailTab } from "@/components/common";
+import {
+  ToolbarIconButton,
+  ResourceIdentity,
+  DetailPageFrame,
+  type DetailTab,
+} from "@/components/common";
 import { ResourceInfo } from "../ResourceInfo";
 import { ResourceEvents } from "../ResourceEvents";
 import { RelatedResources } from "../RelatedResources";
@@ -73,9 +77,12 @@ export function ConfigMapDetailPage({ resourceRef, onBack, onList }: ConfigMapDe
         },
       ]}
       actions={
-        <Button onClick={() => query.refetch()} loading={query.isFetching}>
-          刷新
-        </Button>
+        <ToolbarIconButton
+          label="刷新"
+          onClick={() => query.refetch()}
+          disabled={query.isFetching}
+          spinning={query.isFetching}
+        />
       }
       cards={[
         {

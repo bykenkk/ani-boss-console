@@ -1,5 +1,4 @@
-import { Button, Radio } from "@arco-design/web-react";
-import { IconRefresh } from "@arco-design/web-react/icon";
+import { Radio } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import {
@@ -8,7 +7,7 @@ import {
   type ResourceUsageOrder,
   type ResourceUsageTenantRow,
 } from "@/api/resource-usage";
-import { ResourcePageFrame } from "@/components/common";
+import { ToolbarIconButton, ResourcePageFrame } from "@/components/common";
 import { useListPagination } from "@/hooks/useListPagination";
 import { getCurrentTimestamp, getResourceUsageRange } from "@/lib/date";
 import { MeteringDimensionCards } from "../MeteringDimensionCards";
@@ -82,16 +81,15 @@ export function TenantUsageRankingPage() {
                 setDetailTenant(undefined);
               }}
             />
-            <Button
-              icon={<IconRefresh />}
-              loading={rankingQuery.isFetching}
+            <ToolbarIconButton
+              label="刷新"
+              disabled={rankingQuery.isFetching}
+              spinning={rankingQuery.isFetching}
               onClick={() => {
                 setReference(getCurrentTimestamp());
                 setDetailTenant(undefined);
               }}
-            >
-              刷新
-            </Button>
+            />
           </div>
         ),
       }}
