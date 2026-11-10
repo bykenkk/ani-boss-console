@@ -1,6 +1,6 @@
 import { withId } from "@/lib/id";
 import { useState } from "react";
-import { Button, Input, Modal, Select, Space } from "@arco-design/web-react";
+import { Button, Input, Modal, Select } from "@arco-design/web-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   computePresetKeys,
@@ -21,6 +21,7 @@ import {
 import { useListPagination } from "@/hooks/useListPagination";
 import { formatDateTime } from "@/lib/date";
 import { ComputePresetEditModal } from "../ComputePresetEditModal";
+import { ComputePresetTypeFilter } from "./ComputePresetTypeFilter";
 const columns: ListColumn<ComputePreset>[] = [
   {
     title: "规格 / ID",
@@ -28,6 +29,16 @@ const columns: ListColumn<ComputePreset>[] = [
     width: 200,
     ellipsis: true,
     render: (_, row) => <ResourceIdentity name={row.name} id={row.id} idLabel="资源 ID" />,
+  },
+  {
+    title: "状态",
+    width: 120,
+    render: (_, row) => (
+      <StatusBadge
+        value={row.enabled ? "启用" : "停用"}
+        tone={row.enabled ? "success" : "default"}
+      />
+    ),
   },
   { title: "规格编码", dataIndex: "code", width: 200, ellipsis: true },
 
@@ -78,16 +89,6 @@ const columns: ListColumn<ComputePreset>[] = [
     width: 150,
     ellipsis: true,
     dataIndex: "gpu.core_limit_percent",
-  },
-  {
-    title: "状态",
-    width: 120,
-    render: (_, row) => (
-      <StatusBadge
-        value={row.enabled ? "启用" : "停用"}
-        tone={row.enabled ? "success" : "default"}
-      />
-    ),
   },
   {
     title: "描述",
@@ -192,7 +193,7 @@ export function ComputePresetsPage() {
             </Button>
           ),
           filters: (
-            <Space>
+            <div className="grid grid-cols-3 items-center gap-3">
               <Input.Search
                 aria-label="规格名称"
                 placeholder="搜索规格名称"
@@ -202,44 +203,15 @@ export function ComputePresetsPage() {
                 }
                 onClear={() => setFilters((value) => ({ ...value, name: undefined }))}
               />
-              <Input.Search
-                aria-label="规格编码"
-                placeholder="搜索规格编码"
-                allowClear
-                onSearch={(code) =>
-                  setFilters((value) => ({ ...value, code: code.trim() || undefined }))
-                }
-                onClear={() => setFilters((value) => ({ ...value, code: undefined }))}
-              />
-              <Select
-                aria-label="规格类型"
-                placeholder="全部类型"
-                allowClear
-                value={filters.compute_type}
-                options={[
-                  { label: "CPU", value: "cpu" },
-                  { label: "GPU", value: "gpu" },
-                ]}
-                onChange={(compute_type: "cpu" | "gpu" | undefined) =>
+              <ComputePresetTypeFilter
+                computeType={filters.compute_type}
+                gpuMode={filters.gpu_mode}
+                onChange={(compute_type, gpu_mode) =>
                   setFilters((value) => ({
                     ...value,
                     compute_type,
-                    gpu_mode: compute_type === "cpu" ? undefined : value.gpu_mode,
+                    gpu_mode,
                   }))
-                }
-              />
-              <Select
-                aria-label="GPU 模式"
-                placeholder="全部 GPU 模式"
-                allowClear
-                value={filters.gpu_mode}
-                disabled={filters.compute_type === "cpu"}
-                options={[
-                  { label: "整卡", value: "WHOLE_EXCLUSIVE" },
-                  { label: "共享", value: "SHARED_FIXED" },
-                ]}
-                onChange={(gpu_mode: ComputePresetListParams["gpu_mode"]) =>
-                  setFilters((value) => ({ ...value, gpu_mode }))
                 }
               />
               <Select
@@ -258,7 +230,7 @@ export function ComputePresetsPage() {
                   }))
                 }
               />
-            </Space>
+            </div>
           ),
           refresh: {
             onClick: refresh,

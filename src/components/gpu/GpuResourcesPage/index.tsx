@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { Alert, Button, Empty, Select, Skeleton, Space } from "@arco-design/web-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Alert, Empty, Select, Skeleton } from "@arco-design/web-react";
+import { useQuery } from "@tanstack/react-query";
 import { acceleratorKeys, listGpuClusterOptions, type GpuCluster } from "@/api/accelerator";
 import { ResourcePageFrame } from "@/components/common";
 import { GpuClusterResources } from "../GpuClusterResources";
 export function GpuResourcesPage() {
-  const client = useQueryClient();
   const [cluster, setCluster] = useState<GpuCluster>();
   const clusters = useQuery({
     queryKey: [...acceleratorKeys.all, "clusters", "options"],
@@ -20,29 +19,23 @@ export function GpuResourcesPage() {
         title: "GPU 资源池",
         subtitle: "切换集群后管理该集群的资源池、供给组、GPU 规格与实际库存。",
         extra: (
-          <Space wrap>
-            <Select
-              aria-label="切换 GPU 集群"
-              placeholder="请选择集群"
-              value={currentCluster?.cluster_id}
-              loading={clusters.isFetching}
-              filterOption={false}
-              options={(clusters.data?.items ?? []).map((item) => ({
-                label: item.display_name,
-                value: item.cluster_id,
-              }))}
-              onChange={(id: string) =>
-                setCluster(clusters.data?.items?.find((item) => item.cluster_id === id))
-              }
-            />
-            <Button
-              onClick={() => {
-                void client.invalidateQueries({ queryKey: acceleratorKeys.all });
-              }}
-            >
-              刷新
-            </Button>
-          </Space>
+          <Select
+            aria-label="切换 GPU 集群"
+            placeholder="请选择集群"
+            value={currentCluster?.cluster_id}
+            loading={clusters.isFetching}
+            filterOption={false}
+            options={(clusters.data?.items ?? []).map((item) => ({
+              label: item.display_name,
+              value: item.cluster_id,
+            }))}
+            onChange={(id: string) =>
+              setCluster(clusters.data?.items?.find((item) => item.cluster_id === id))
+            }
+            onVisibleChange={(visible) => {
+              if (visible && !clusters.isFetching) clusters.refetch();
+            }}
+          />
         ),
       }}
       className="flex flex-col gap-4 min-w-0"

@@ -5,6 +5,7 @@ import {
   TableSectionFrame,
   ListDataTable,
   StatusBadge,
+  ToolbarIconButton,
   type ListColumn,
 } from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
@@ -113,6 +114,16 @@ export function GpuBindings({ clusterId }: GpuBindingsProps) {
   return (
     <TableSectionFrame>
       <ListDataTable
+        header={{
+          extra: (
+            <ToolbarIconButton
+              label="刷新"
+              spinning={query.isFetching}
+              disabled={query.isFetching}
+              onClick={() => query.refetch()}
+            />
+          ),
+        }}
         rowKey={(item) => item.binding?.binding_id ?? `${item.physical_device_id}/${item.pod_uid}`}
         columns={columns}
         data={query.data?.items ?? []}

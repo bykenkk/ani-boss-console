@@ -5,6 +5,7 @@ import {
   TableSectionFrame,
   ListDataTable,
   StatusBadge,
+  ToolbarIconButton,
   type ListColumn,
 } from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
@@ -78,6 +79,16 @@ export function GpuDevices({ clusterId }: GpuDevicesProps) {
     <>
       <TableSectionFrame>
         <ListDataTable
+          header={{
+            extra: (
+              <ToolbarIconButton
+                label="刷新"
+                spinning={query.isFetching}
+                disabled={query.isFetching}
+                onClick={() => query.refetch()}
+              />
+            ),
+          }}
           rowKey="device_id"
           columns={columns}
           data={query.data?.items ?? []}

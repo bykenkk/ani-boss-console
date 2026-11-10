@@ -4,6 +4,7 @@ import {
   ResourceIdentity,
   TableSectionFrame,
   ListDataTable,
+  ToolbarIconButton,
   type ListColumn,
 } from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
@@ -47,6 +48,16 @@ export function GpuPools({ cluster, onSelect }: GpuPoolsProps) {
   return (
     <TableSectionFrame>
       <ListDataTable
+        header={{
+          extra: (
+            <ToolbarIconButton
+              label="刷新"
+              spinning={query.isFetching}
+              disabled={query.isFetching}
+              onClick={() => query.refetch()}
+            />
+          ),
+        }}
         rowKey="pool_id"
         columns={columns}
         data={query.data?.items ?? []}

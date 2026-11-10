@@ -14,6 +14,7 @@ import {
   TableSectionFrame,
   ListDataTable,
   StatusBadge,
+  ToolbarIconButton,
   type ListColumn,
 } from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
@@ -149,6 +150,16 @@ export function GpuProfiles({ clusterId }: GpuProfilesProps) {
     <>
       <TableSectionFrame>
         <ListDataTable
+          header={{
+            extra: (
+              <ToolbarIconButton
+                label="刷新"
+                spinning={query.isFetching}
+                disabled={query.isFetching}
+                onClick={() => query.refetch()}
+              />
+            ),
+          }}
           rowKey="profile_id"
           data={query.data?.items ?? []}
           columns={columns}
