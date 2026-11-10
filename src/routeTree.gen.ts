@@ -10,8 +10,22 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ClusterCrdsRouteImport } from './routes/cluster-crds'
+import { Route as ClusterNamespacesRouteImport } from './routes/cluster-namespaces'
+import { Route as ClusterNodesRouteImport } from './routes/cluster-nodes'
 import { Route as ClusterOperationsRouteImport } from './routes/cluster-operations'
+import { Route as ConfigMapsRouteImport } from './routes/config-maps'
+import { Route as ConfigSecretsRouteImport } from './routes/config-secrets'
+import { Route as StorageClaimsRouteImport } from './routes/storage-claims'
+import { Route as StorageClassesRouteImport } from './routes/storage-classes'
+import { Route as StorageVolumesRouteImport } from './routes/storage-volumes'
 import { Route as TenantsRouteImport } from './routes/tenants'
+import { Route as WorkloadDaemonsetsRouteImport } from './routes/workload-daemonsets'
+import { Route as WorkloadDeploymentsRouteImport } from './routes/workload-deployments'
+import { Route as WorkloadJobsRouteImport } from './routes/workload-jobs'
+import { Route as WorkloadPodsRouteImport } from './routes/workload-pods'
+import { Route as WorkloadServicesRouteImport } from './routes/workload-services'
+import { Route as WorkloadStatefulsetsRouteImport } from './routes/workload-statefulsets'
 import { Route as AlertRulesIndexRouteImport } from './routes/alert-rules/index'
 import { Route as ApisIndexRouteImport } from './routes/apis/index'
 import { Route as AuditApiKeysIndexRouteImport } from './routes/audit-api-keys/index'
@@ -21,9 +35,18 @@ import { Route as AuditInferenceIndexRouteImport } from './routes/audit-inferenc
 import { Route as AuditLoginIndexRouteImport } from './routes/audit-login/index'
 import { Route as AuditOperationIndexRouteImport } from './routes/audit-operation/index'
 import { Route as BasicNetworksIndexRouteImport } from './routes/basic-networks/index'
+import { Route as ClusterCrdsIndexRouteImport } from './routes/cluster-crds/index'
+import { Route as ClusterCrdsCrdNameRouteImport } from './routes/cluster-crds/$crdName'
+import { Route as ClusterNamespacesIndexRouteImport } from './routes/cluster-namespaces/index'
+import { Route as ClusterNamespacesNamespaceNameRouteImport } from './routes/cluster-namespaces/$namespaceName'
+import { Route as ClusterNodesIndexRouteImport } from './routes/cluster-nodes/index'
+import { Route as ClusterNodesNodeNameRouteImport } from './routes/cluster-nodes/$nodeName'
 import { Route as ClusterOperationsIndexRouteImport } from './routes/cluster-operations/index'
-import { Route as ClusterOperationsResourcesRouteImport } from './routes/cluster-operations/resources'
 import { Route as ComputePresetsIndexRouteImport } from './routes/compute-presets/index'
+import { Route as ConfigMapsIndexRouteImport } from './routes/config-maps/index'
+import { Route as ConfigMapsConfigNameRouteImport } from './routes/config-maps/$configName'
+import { Route as ConfigSecretsIndexRouteImport } from './routes/config-secrets/index'
+import { Route as ConfigSecretsConfigNameRouteImport } from './routes/config-secrets/$configName'
 import { Route as EipsIndexRouteImport } from './routes/eips/index'
 import { Route as GpuClustersIndexRouteImport } from './routes/gpu-clusters/index'
 import { Route as GpuQuotasIndexRouteImport } from './routes/gpu-quotas/index'
@@ -59,7 +82,13 @@ import { Route as RegistryQuotaIndexRouteImport } from './routes/registry-quota/
 import { Route as RegistryVulnerabilitiesIndexRouteImport } from './routes/registry-vulnerabilities/index'
 import { Route as SessionIndexRouteImport } from './routes/session/index'
 import { Route as SkillsIndexRouteImport } from './routes/skills/index'
+import { Route as StorageClaimsIndexRouteImport } from './routes/storage-claims/index'
+import { Route as StorageClaimsStorageNameRouteImport } from './routes/storage-claims/$storageName'
+import { Route as StorageClassesIndexRouteImport } from './routes/storage-classes/index'
+import { Route as StorageClassesStorageNameRouteImport } from './routes/storage-classes/$storageName'
 import { Route as StorageQuotasIndexRouteImport } from './routes/storage-quotas/index'
+import { Route as StorageVolumesIndexRouteImport } from './routes/storage-volumes/index'
+import { Route as StorageVolumesStorageNameRouteImport } from './routes/storage-volumes/$storageName'
 import { Route as StorageIndexRouteImport } from './routes/storage/index'
 import { Route as TenantPlansIndexRouteImport } from './routes/tenant-plans/index'
 import { Route as TenantUsageRankingIndexRouteImport } from './routes/tenant-usage-ranking/index'
@@ -70,12 +99,37 @@ import { Route as TenantsIndexRouteImport } from './routes/tenants/index'
 import { Route as TracesIndexRouteImport } from './routes/traces/index'
 import { Route as VirtualSwitchesIndexRouteImport } from './routes/virtual-switches/index'
 import { Route as WebhookIndexRouteImport } from './routes/webhook/index'
-import { Route as ClusterOperationsResourcesIndexRouteImport } from './routes/cluster-operations/resources/index'
-import { Route as ClusterOperationsResourcesDetailRouteImport } from './routes/cluster-operations/resources/detail'
+import { Route as WorkloadDaemonsetsIndexRouteImport } from './routes/workload-daemonsets/index'
+import { Route as WorkloadDaemonsetsWorkloadNameRouteImport } from './routes/workload-daemonsets/$workloadName'
+import { Route as WorkloadDeploymentsIndexRouteImport } from './routes/workload-deployments/index'
+import { Route as WorkloadDeploymentsWorkloadNameRouteImport } from './routes/workload-deployments/$workloadName'
+import { Route as WorkloadJobsIndexRouteImport } from './routes/workload-jobs/index'
+import { Route as WorkloadJobsWorkloadNameRouteImport } from './routes/workload-jobs/$workloadName'
+import { Route as WorkloadPodsIndexRouteImport } from './routes/workload-pods/index'
+import { Route as WorkloadPodsWorkloadNameRouteImport } from './routes/workload-pods/$workloadName'
+import { Route as WorkloadServicesIndexRouteImport } from './routes/workload-services/index'
+import { Route as WorkloadServicesWorkloadNameRouteImport } from './routes/workload-services/$workloadName'
+import { Route as WorkloadStatefulsetsIndexRouteImport } from './routes/workload-statefulsets/index'
+import { Route as WorkloadStatefulsetsWorkloadNameRouteImport } from './routes/workload-statefulsets/$workloadName'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClusterCrdsRoute = ClusterCrdsRouteImport.update({
+  id: '/cluster-crds',
+  path: '/cluster-crds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClusterNamespacesRoute = ClusterNamespacesRouteImport.update({
+  id: '/cluster-namespaces',
+  path: '/cluster-namespaces',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClusterNodesRoute = ClusterNodesRouteImport.update({
+  id: '/cluster-nodes',
+  path: '/cluster-nodes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClusterOperationsRoute = ClusterOperationsRouteImport.update({
@@ -83,9 +137,64 @@ const ClusterOperationsRoute = ClusterOperationsRouteImport.update({
   path: '/cluster-operations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConfigMapsRoute = ConfigMapsRouteImport.update({
+  id: '/config-maps',
+  path: '/config-maps',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfigSecretsRoute = ConfigSecretsRouteImport.update({
+  id: '/config-secrets',
+  path: '/config-secrets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StorageClaimsRoute = StorageClaimsRouteImport.update({
+  id: '/storage-claims',
+  path: '/storage-claims',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StorageClassesRoute = StorageClassesRouteImport.update({
+  id: '/storage-classes',
+  path: '/storage-classes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StorageVolumesRoute = StorageVolumesRouteImport.update({
+  id: '/storage-volumes',
+  path: '/storage-volumes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TenantsRoute = TenantsRouteImport.update({
   id: '/tenants',
   path: '/tenants',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkloadDaemonsetsRoute = WorkloadDaemonsetsRouteImport.update({
+  id: '/workload-daemonsets',
+  path: '/workload-daemonsets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkloadDeploymentsRoute = WorkloadDeploymentsRouteImport.update({
+  id: '/workload-deployments',
+  path: '/workload-deployments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkloadJobsRoute = WorkloadJobsRouteImport.update({
+  id: '/workload-jobs',
+  path: '/workload-jobs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkloadPodsRoute = WorkloadPodsRouteImport.update({
+  id: '/workload-pods',
+  path: '/workload-pods',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkloadServicesRoute = WorkloadServicesRouteImport.update({
+  id: '/workload-services',
+  path: '/workload-services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkloadStatefulsetsRoute = WorkloadStatefulsetsRouteImport.update({
+  id: '/workload-statefulsets',
+  path: '/workload-statefulsets',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AlertRulesIndexRoute = AlertRulesIndexRouteImport.update({
@@ -133,21 +242,66 @@ const BasicNetworksIndexRoute = BasicNetworksIndexRouteImport.update({
   path: '/basic-networks/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClusterCrdsIndexRoute = ClusterCrdsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClusterCrdsRoute,
+} as any)
+const ClusterCrdsCrdNameRoute = ClusterCrdsCrdNameRouteImport.update({
+  id: '/$crdName',
+  path: '/$crdName',
+  getParentRoute: () => ClusterCrdsRoute,
+} as any)
+const ClusterNamespacesIndexRoute = ClusterNamespacesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClusterNamespacesRoute,
+} as any)
+const ClusterNamespacesNamespaceNameRoute =
+  ClusterNamespacesNamespaceNameRouteImport.update({
+    id: '/$namespaceName',
+    path: '/$namespaceName',
+    getParentRoute: () => ClusterNamespacesRoute,
+  } as any)
+const ClusterNodesIndexRoute = ClusterNodesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ClusterNodesRoute,
+} as any)
+const ClusterNodesNodeNameRoute = ClusterNodesNodeNameRouteImport.update({
+  id: '/$nodeName',
+  path: '/$nodeName',
+  getParentRoute: () => ClusterNodesRoute,
+} as any)
 const ClusterOperationsIndexRoute = ClusterOperationsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ClusterOperationsRoute,
 } as any)
-const ClusterOperationsResourcesRoute =
-  ClusterOperationsResourcesRouteImport.update({
-    id: '/resources',
-    path: '/resources',
-    getParentRoute: () => ClusterOperationsRoute,
-  } as any)
 const ComputePresetsIndexRoute = ComputePresetsIndexRouteImport.update({
   id: '/compute-presets/',
   path: '/compute-presets/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ConfigMapsIndexRoute = ConfigMapsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ConfigMapsRoute,
+} as any)
+const ConfigMapsConfigNameRoute = ConfigMapsConfigNameRouteImport.update({
+  id: '/$configName',
+  path: '/$configName',
+  getParentRoute: () => ConfigMapsRoute,
+} as any)
+const ConfigSecretsIndexRoute = ConfigSecretsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ConfigSecretsRoute,
+} as any)
+const ConfigSecretsConfigNameRoute = ConfigSecretsConfigNameRouteImport.update({
+  id: '/$configName',
+  path: '/$configName',
+  getParentRoute: () => ConfigSecretsRoute,
 } as any)
 const EipsIndexRoute = EipsIndexRouteImport.update({
   id: '/eips/',
@@ -326,11 +480,44 @@ const SkillsIndexRoute = SkillsIndexRouteImport.update({
   path: '/skills/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StorageClaimsIndexRoute = StorageClaimsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => StorageClaimsRoute,
+} as any)
+const StorageClaimsStorageNameRoute =
+  StorageClaimsStorageNameRouteImport.update({
+    id: '/$storageName',
+    path: '/$storageName',
+    getParentRoute: () => StorageClaimsRoute,
+  } as any)
+const StorageClassesIndexRoute = StorageClassesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => StorageClassesRoute,
+} as any)
+const StorageClassesStorageNameRoute =
+  StorageClassesStorageNameRouteImport.update({
+    id: '/$storageName',
+    path: '/$storageName',
+    getParentRoute: () => StorageClassesRoute,
+  } as any)
 const StorageQuotasIndexRoute = StorageQuotasIndexRouteImport.update({
   id: '/storage-quotas/',
   path: '/storage-quotas/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StorageVolumesIndexRoute = StorageVolumesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => StorageVolumesRoute,
+} as any)
+const StorageVolumesStorageNameRoute =
+  StorageVolumesStorageNameRouteImport.update({
+    id: '/$storageName',
+    path: '/$storageName',
+    getParentRoute: () => StorageVolumesRoute,
+  } as any)
 const StorageIndexRoute = StorageIndexRouteImport.update({
   id: '/storage/',
   path: '/storage/',
@@ -381,25 +568,108 @@ const WebhookIndexRoute = WebhookIndexRouteImport.update({
   path: '/webhook/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ClusterOperationsResourcesIndexRoute =
-  ClusterOperationsResourcesIndexRouteImport.update({
+const WorkloadDaemonsetsIndexRoute = WorkloadDaemonsetsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => WorkloadDaemonsetsRoute,
+} as any)
+const WorkloadDaemonsetsWorkloadNameRoute =
+  WorkloadDaemonsetsWorkloadNameRouteImport.update({
+    id: '/$workloadName',
+    path: '/$workloadName',
+    getParentRoute: () => WorkloadDaemonsetsRoute,
+  } as any)
+const WorkloadDeploymentsIndexRoute =
+  WorkloadDeploymentsIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => ClusterOperationsResourcesRoute,
+    getParentRoute: () => WorkloadDeploymentsRoute,
   } as any)
-const ClusterOperationsResourcesDetailRoute =
-  ClusterOperationsResourcesDetailRouteImport.update({
-    id: '/detail',
-    path: '/detail',
-    getParentRoute: () => ClusterOperationsResourcesRoute,
+const WorkloadDeploymentsWorkloadNameRoute =
+  WorkloadDeploymentsWorkloadNameRouteImport.update({
+    id: '/$workloadName',
+    path: '/$workloadName',
+    getParentRoute: () => WorkloadDeploymentsRoute,
+  } as any)
+const WorkloadJobsIndexRoute = WorkloadJobsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => WorkloadJobsRoute,
+} as any)
+const WorkloadJobsWorkloadNameRoute =
+  WorkloadJobsWorkloadNameRouteImport.update({
+    id: '/$workloadName',
+    path: '/$workloadName',
+    getParentRoute: () => WorkloadJobsRoute,
+  } as any)
+const WorkloadPodsIndexRoute = WorkloadPodsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => WorkloadPodsRoute,
+} as any)
+const WorkloadPodsWorkloadNameRoute =
+  WorkloadPodsWorkloadNameRouteImport.update({
+    id: '/$workloadName',
+    path: '/$workloadName',
+    getParentRoute: () => WorkloadPodsRoute,
+  } as any)
+const WorkloadServicesIndexRoute = WorkloadServicesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => WorkloadServicesRoute,
+} as any)
+const WorkloadServicesWorkloadNameRoute =
+  WorkloadServicesWorkloadNameRouteImport.update({
+    id: '/$workloadName',
+    path: '/$workloadName',
+    getParentRoute: () => WorkloadServicesRoute,
+  } as any)
+const WorkloadStatefulsetsIndexRoute =
+  WorkloadStatefulsetsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => WorkloadStatefulsetsRoute,
+  } as any)
+const WorkloadStatefulsetsWorkloadNameRoute =
+  WorkloadStatefulsetsWorkloadNameRouteImport.update({
+    id: '/$workloadName',
+    path: '/$workloadName',
+    getParentRoute: () => WorkloadStatefulsetsRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/cluster-crds': typeof ClusterCrdsRouteWithChildren
+  '/cluster-namespaces': typeof ClusterNamespacesRouteWithChildren
+  '/cluster-nodes': typeof ClusterNodesRouteWithChildren
   '/cluster-operations': typeof ClusterOperationsRouteWithChildren
+  '/config-maps': typeof ConfigMapsRouteWithChildren
+  '/config-secrets': typeof ConfigSecretsRouteWithChildren
+  '/storage-claims': typeof StorageClaimsRouteWithChildren
+  '/storage-classes': typeof StorageClassesRouteWithChildren
+  '/storage-volumes': typeof StorageVolumesRouteWithChildren
   '/tenants': typeof TenantsRouteWithChildren
-  '/cluster-operations/resources': typeof ClusterOperationsResourcesRouteWithChildren
+  '/workload-daemonsets': typeof WorkloadDaemonsetsRouteWithChildren
+  '/workload-deployments': typeof WorkloadDeploymentsRouteWithChildren
+  '/workload-jobs': typeof WorkloadJobsRouteWithChildren
+  '/workload-pods': typeof WorkloadPodsRouteWithChildren
+  '/workload-services': typeof WorkloadServicesRouteWithChildren
+  '/workload-statefulsets': typeof WorkloadStatefulsetsRouteWithChildren
+  '/cluster-crds/$crdName': typeof ClusterCrdsCrdNameRoute
+  '/cluster-namespaces/$namespaceName': typeof ClusterNamespacesNamespaceNameRoute
+  '/cluster-nodes/$nodeName': typeof ClusterNodesNodeNameRoute
+  '/config-maps/$configName': typeof ConfigMapsConfigNameRoute
+  '/config-secrets/$configName': typeof ConfigSecretsConfigNameRoute
+  '/storage-claims/$storageName': typeof StorageClaimsStorageNameRoute
+  '/storage-classes/$storageName': typeof StorageClassesStorageNameRoute
+  '/storage-volumes/$storageName': typeof StorageVolumesStorageNameRoute
   '/tenants-billing/$tenantId': typeof TenantsBillingTenantIdRoute
+  '/workload-daemonsets/$workloadName': typeof WorkloadDaemonsetsWorkloadNameRoute
+  '/workload-deployments/$workloadName': typeof WorkloadDeploymentsWorkloadNameRoute
+  '/workload-jobs/$workloadName': typeof WorkloadJobsWorkloadNameRoute
+  '/workload-pods/$workloadName': typeof WorkloadPodsWorkloadNameRoute
+  '/workload-services/$workloadName': typeof WorkloadServicesWorkloadNameRoute
+  '/workload-statefulsets/$workloadName': typeof WorkloadStatefulsetsWorkloadNameRoute
   '/alert-rules/': typeof AlertRulesIndexRoute
   '/apis/': typeof ApisIndexRoute
   '/audit-api-keys/': typeof AuditApiKeysIndexRoute
@@ -409,8 +679,13 @@ export interface FileRoutesByFullPath {
   '/audit-login/': typeof AuditLoginIndexRoute
   '/audit-operation/': typeof AuditOperationIndexRoute
   '/basic-networks/': typeof BasicNetworksIndexRoute
+  '/cluster-crds/': typeof ClusterCrdsIndexRoute
+  '/cluster-namespaces/': typeof ClusterNamespacesIndexRoute
+  '/cluster-nodes/': typeof ClusterNodesIndexRoute
   '/cluster-operations/': typeof ClusterOperationsIndexRoute
   '/compute-presets/': typeof ComputePresetsIndexRoute
+  '/config-maps/': typeof ConfigMapsIndexRoute
+  '/config-secrets/': typeof ConfigSecretsIndexRoute
   '/eips/': typeof EipsIndexRoute
   '/gpu-clusters/': typeof GpuClustersIndexRoute
   '/gpu-quotas/': typeof GpuQuotasIndexRoute
@@ -446,7 +721,10 @@ export interface FileRoutesByFullPath {
   '/registry-vulnerabilities/': typeof RegistryVulnerabilitiesIndexRoute
   '/session/': typeof SessionIndexRoute
   '/skills/': typeof SkillsIndexRoute
+  '/storage-claims/': typeof StorageClaimsIndexRoute
+  '/storage-classes/': typeof StorageClassesIndexRoute
   '/storage-quotas/': typeof StorageQuotasIndexRoute
+  '/storage-volumes/': typeof StorageVolumesIndexRoute
   '/storage/': typeof StorageIndexRoute
   '/tenant-plans/': typeof TenantPlansIndexRoute
   '/tenant-usage-ranking/': typeof TenantUsageRankingIndexRoute
@@ -456,12 +734,30 @@ export interface FileRoutesByFullPath {
   '/traces/': typeof TracesIndexRoute
   '/virtual-switches/': typeof VirtualSwitchesIndexRoute
   '/webhook/': typeof WebhookIndexRoute
-  '/cluster-operations/resources/detail': typeof ClusterOperationsResourcesDetailRoute
-  '/cluster-operations/resources/': typeof ClusterOperationsResourcesIndexRoute
+  '/workload-daemonsets/': typeof WorkloadDaemonsetsIndexRoute
+  '/workload-deployments/': typeof WorkloadDeploymentsIndexRoute
+  '/workload-jobs/': typeof WorkloadJobsIndexRoute
+  '/workload-pods/': typeof WorkloadPodsIndexRoute
+  '/workload-services/': typeof WorkloadServicesIndexRoute
+  '/workload-statefulsets/': typeof WorkloadStatefulsetsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cluster-crds/$crdName': typeof ClusterCrdsCrdNameRoute
+  '/cluster-namespaces/$namespaceName': typeof ClusterNamespacesNamespaceNameRoute
+  '/cluster-nodes/$nodeName': typeof ClusterNodesNodeNameRoute
+  '/config-maps/$configName': typeof ConfigMapsConfigNameRoute
+  '/config-secrets/$configName': typeof ConfigSecretsConfigNameRoute
+  '/storage-claims/$storageName': typeof StorageClaimsStorageNameRoute
+  '/storage-classes/$storageName': typeof StorageClassesStorageNameRoute
+  '/storage-volumes/$storageName': typeof StorageVolumesStorageNameRoute
   '/tenants-billing/$tenantId': typeof TenantsBillingTenantIdRoute
+  '/workload-daemonsets/$workloadName': typeof WorkloadDaemonsetsWorkloadNameRoute
+  '/workload-deployments/$workloadName': typeof WorkloadDeploymentsWorkloadNameRoute
+  '/workload-jobs/$workloadName': typeof WorkloadJobsWorkloadNameRoute
+  '/workload-pods/$workloadName': typeof WorkloadPodsWorkloadNameRoute
+  '/workload-services/$workloadName': typeof WorkloadServicesWorkloadNameRoute
+  '/workload-statefulsets/$workloadName': typeof WorkloadStatefulsetsWorkloadNameRoute
   '/alert-rules': typeof AlertRulesIndexRoute
   '/apis': typeof ApisIndexRoute
   '/audit-api-keys': typeof AuditApiKeysIndexRoute
@@ -471,8 +767,13 @@ export interface FileRoutesByTo {
   '/audit-login': typeof AuditLoginIndexRoute
   '/audit-operation': typeof AuditOperationIndexRoute
   '/basic-networks': typeof BasicNetworksIndexRoute
+  '/cluster-crds': typeof ClusterCrdsIndexRoute
+  '/cluster-namespaces': typeof ClusterNamespacesIndexRoute
+  '/cluster-nodes': typeof ClusterNodesIndexRoute
   '/cluster-operations': typeof ClusterOperationsIndexRoute
   '/compute-presets': typeof ComputePresetsIndexRoute
+  '/config-maps': typeof ConfigMapsIndexRoute
+  '/config-secrets': typeof ConfigSecretsIndexRoute
   '/eips': typeof EipsIndexRoute
   '/gpu-clusters': typeof GpuClustersIndexRoute
   '/gpu-quotas': typeof GpuQuotasIndexRoute
@@ -508,7 +809,10 @@ export interface FileRoutesByTo {
   '/registry-vulnerabilities': typeof RegistryVulnerabilitiesIndexRoute
   '/session': typeof SessionIndexRoute
   '/skills': typeof SkillsIndexRoute
+  '/storage-claims': typeof StorageClaimsIndexRoute
+  '/storage-classes': typeof StorageClassesIndexRoute
   '/storage-quotas': typeof StorageQuotasIndexRoute
+  '/storage-volumes': typeof StorageVolumesIndexRoute
   '/storage': typeof StorageIndexRoute
   '/tenant-plans': typeof TenantPlansIndexRoute
   '/tenant-usage-ranking': typeof TenantUsageRankingIndexRoute
@@ -518,16 +822,47 @@ export interface FileRoutesByTo {
   '/traces': typeof TracesIndexRoute
   '/virtual-switches': typeof VirtualSwitchesIndexRoute
   '/webhook': typeof WebhookIndexRoute
-  '/cluster-operations/resources/detail': typeof ClusterOperationsResourcesDetailRoute
-  '/cluster-operations/resources': typeof ClusterOperationsResourcesIndexRoute
+  '/workload-daemonsets': typeof WorkloadDaemonsetsIndexRoute
+  '/workload-deployments': typeof WorkloadDeploymentsIndexRoute
+  '/workload-jobs': typeof WorkloadJobsIndexRoute
+  '/workload-pods': typeof WorkloadPodsIndexRoute
+  '/workload-services': typeof WorkloadServicesIndexRoute
+  '/workload-statefulsets': typeof WorkloadStatefulsetsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/cluster-crds': typeof ClusterCrdsRouteWithChildren
+  '/cluster-namespaces': typeof ClusterNamespacesRouteWithChildren
+  '/cluster-nodes': typeof ClusterNodesRouteWithChildren
   '/cluster-operations': typeof ClusterOperationsRouteWithChildren
+  '/config-maps': typeof ConfigMapsRouteWithChildren
+  '/config-secrets': typeof ConfigSecretsRouteWithChildren
+  '/storage-claims': typeof StorageClaimsRouteWithChildren
+  '/storage-classes': typeof StorageClassesRouteWithChildren
+  '/storage-volumes': typeof StorageVolumesRouteWithChildren
   '/tenants': typeof TenantsRouteWithChildren
-  '/cluster-operations/resources': typeof ClusterOperationsResourcesRouteWithChildren
+  '/workload-daemonsets': typeof WorkloadDaemonsetsRouteWithChildren
+  '/workload-deployments': typeof WorkloadDeploymentsRouteWithChildren
+  '/workload-jobs': typeof WorkloadJobsRouteWithChildren
+  '/workload-pods': typeof WorkloadPodsRouteWithChildren
+  '/workload-services': typeof WorkloadServicesRouteWithChildren
+  '/workload-statefulsets': typeof WorkloadStatefulsetsRouteWithChildren
+  '/cluster-crds/$crdName': typeof ClusterCrdsCrdNameRoute
+  '/cluster-namespaces/$namespaceName': typeof ClusterNamespacesNamespaceNameRoute
+  '/cluster-nodes/$nodeName': typeof ClusterNodesNodeNameRoute
+  '/config-maps/$configName': typeof ConfigMapsConfigNameRoute
+  '/config-secrets/$configName': typeof ConfigSecretsConfigNameRoute
+  '/storage-claims/$storageName': typeof StorageClaimsStorageNameRoute
+  '/storage-classes/$storageName': typeof StorageClassesStorageNameRoute
+  '/storage-volumes/$storageName': typeof StorageVolumesStorageNameRoute
   '/tenants-billing/$tenantId': typeof TenantsBillingTenantIdRoute
+  '/workload-daemonsets/$workloadName': typeof WorkloadDaemonsetsWorkloadNameRoute
+  '/workload-deployments/$workloadName': typeof WorkloadDeploymentsWorkloadNameRoute
+  '/workload-jobs/$workloadName': typeof WorkloadJobsWorkloadNameRoute
+  '/workload-pods/$workloadName': typeof WorkloadPodsWorkloadNameRoute
+  '/workload-services/$workloadName': typeof WorkloadServicesWorkloadNameRoute
+  '/workload-statefulsets/$workloadName': typeof WorkloadStatefulsetsWorkloadNameRoute
   '/alert-rules/': typeof AlertRulesIndexRoute
   '/apis/': typeof ApisIndexRoute
   '/audit-api-keys/': typeof AuditApiKeysIndexRoute
@@ -537,8 +872,13 @@ export interface FileRoutesById {
   '/audit-login/': typeof AuditLoginIndexRoute
   '/audit-operation/': typeof AuditOperationIndexRoute
   '/basic-networks/': typeof BasicNetworksIndexRoute
+  '/cluster-crds/': typeof ClusterCrdsIndexRoute
+  '/cluster-namespaces/': typeof ClusterNamespacesIndexRoute
+  '/cluster-nodes/': typeof ClusterNodesIndexRoute
   '/cluster-operations/': typeof ClusterOperationsIndexRoute
   '/compute-presets/': typeof ComputePresetsIndexRoute
+  '/config-maps/': typeof ConfigMapsIndexRoute
+  '/config-secrets/': typeof ConfigSecretsIndexRoute
   '/eips/': typeof EipsIndexRoute
   '/gpu-clusters/': typeof GpuClustersIndexRoute
   '/gpu-quotas/': typeof GpuQuotasIndexRoute
@@ -574,7 +914,10 @@ export interface FileRoutesById {
   '/registry-vulnerabilities/': typeof RegistryVulnerabilitiesIndexRoute
   '/session/': typeof SessionIndexRoute
   '/skills/': typeof SkillsIndexRoute
+  '/storage-claims/': typeof StorageClaimsIndexRoute
+  '/storage-classes/': typeof StorageClassesIndexRoute
   '/storage-quotas/': typeof StorageQuotasIndexRoute
+  '/storage-volumes/': typeof StorageVolumesIndexRoute
   '/storage/': typeof StorageIndexRoute
   '/tenant-plans/': typeof TenantPlansIndexRoute
   '/tenant-usage-ranking/': typeof TenantUsageRankingIndexRoute
@@ -584,17 +927,48 @@ export interface FileRoutesById {
   '/traces/': typeof TracesIndexRoute
   '/virtual-switches/': typeof VirtualSwitchesIndexRoute
   '/webhook/': typeof WebhookIndexRoute
-  '/cluster-operations/resources/detail': typeof ClusterOperationsResourcesDetailRoute
-  '/cluster-operations/resources/': typeof ClusterOperationsResourcesIndexRoute
+  '/workload-daemonsets/': typeof WorkloadDaemonsetsIndexRoute
+  '/workload-deployments/': typeof WorkloadDeploymentsIndexRoute
+  '/workload-jobs/': typeof WorkloadJobsIndexRoute
+  '/workload-pods/': typeof WorkloadPodsIndexRoute
+  '/workload-services/': typeof WorkloadServicesIndexRoute
+  '/workload-statefulsets/': typeof WorkloadStatefulsetsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/cluster-crds'
+    | '/cluster-namespaces'
+    | '/cluster-nodes'
     | '/cluster-operations'
+    | '/config-maps'
+    | '/config-secrets'
+    | '/storage-claims'
+    | '/storage-classes'
+    | '/storage-volumes'
     | '/tenants'
-    | '/cluster-operations/resources'
+    | '/workload-daemonsets'
+    | '/workload-deployments'
+    | '/workload-jobs'
+    | '/workload-pods'
+    | '/workload-services'
+    | '/workload-statefulsets'
+    | '/cluster-crds/$crdName'
+    | '/cluster-namespaces/$namespaceName'
+    | '/cluster-nodes/$nodeName'
+    | '/config-maps/$configName'
+    | '/config-secrets/$configName'
+    | '/storage-claims/$storageName'
+    | '/storage-classes/$storageName'
+    | '/storage-volumes/$storageName'
     | '/tenants-billing/$tenantId'
+    | '/workload-daemonsets/$workloadName'
+    | '/workload-deployments/$workloadName'
+    | '/workload-jobs/$workloadName'
+    | '/workload-pods/$workloadName'
+    | '/workload-services/$workloadName'
+    | '/workload-statefulsets/$workloadName'
     | '/alert-rules/'
     | '/apis/'
     | '/audit-api-keys/'
@@ -604,8 +978,13 @@ export interface FileRouteTypes {
     | '/audit-login/'
     | '/audit-operation/'
     | '/basic-networks/'
+    | '/cluster-crds/'
+    | '/cluster-namespaces/'
+    | '/cluster-nodes/'
     | '/cluster-operations/'
     | '/compute-presets/'
+    | '/config-maps/'
+    | '/config-secrets/'
     | '/eips/'
     | '/gpu-clusters/'
     | '/gpu-quotas/'
@@ -641,7 +1020,10 @@ export interface FileRouteTypes {
     | '/registry-vulnerabilities/'
     | '/session/'
     | '/skills/'
+    | '/storage-claims/'
+    | '/storage-classes/'
     | '/storage-quotas/'
+    | '/storage-volumes/'
     | '/storage/'
     | '/tenant-plans/'
     | '/tenant-usage-ranking/'
@@ -651,12 +1033,30 @@ export interface FileRouteTypes {
     | '/traces/'
     | '/virtual-switches/'
     | '/webhook/'
-    | '/cluster-operations/resources/detail'
-    | '/cluster-operations/resources/'
+    | '/workload-daemonsets/'
+    | '/workload-deployments/'
+    | '/workload-jobs/'
+    | '/workload-pods/'
+    | '/workload-services/'
+    | '/workload-statefulsets/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/cluster-crds/$crdName'
+    | '/cluster-namespaces/$namespaceName'
+    | '/cluster-nodes/$nodeName'
+    | '/config-maps/$configName'
+    | '/config-secrets/$configName'
+    | '/storage-claims/$storageName'
+    | '/storage-classes/$storageName'
+    | '/storage-volumes/$storageName'
     | '/tenants-billing/$tenantId'
+    | '/workload-daemonsets/$workloadName'
+    | '/workload-deployments/$workloadName'
+    | '/workload-jobs/$workloadName'
+    | '/workload-pods/$workloadName'
+    | '/workload-services/$workloadName'
+    | '/workload-statefulsets/$workloadName'
     | '/alert-rules'
     | '/apis'
     | '/audit-api-keys'
@@ -666,8 +1066,13 @@ export interface FileRouteTypes {
     | '/audit-login'
     | '/audit-operation'
     | '/basic-networks'
+    | '/cluster-crds'
+    | '/cluster-namespaces'
+    | '/cluster-nodes'
     | '/cluster-operations'
     | '/compute-presets'
+    | '/config-maps'
+    | '/config-secrets'
     | '/eips'
     | '/gpu-clusters'
     | '/gpu-quotas'
@@ -703,7 +1108,10 @@ export interface FileRouteTypes {
     | '/registry-vulnerabilities'
     | '/session'
     | '/skills'
+    | '/storage-claims'
+    | '/storage-classes'
     | '/storage-quotas'
+    | '/storage-volumes'
     | '/storage'
     | '/tenant-plans'
     | '/tenant-usage-ranking'
@@ -713,15 +1121,46 @@ export interface FileRouteTypes {
     | '/traces'
     | '/virtual-switches'
     | '/webhook'
-    | '/cluster-operations/resources/detail'
-    | '/cluster-operations/resources'
+    | '/workload-daemonsets'
+    | '/workload-deployments'
+    | '/workload-jobs'
+    | '/workload-pods'
+    | '/workload-services'
+    | '/workload-statefulsets'
   id:
     | '__root__'
     | '/'
+    | '/cluster-crds'
+    | '/cluster-namespaces'
+    | '/cluster-nodes'
     | '/cluster-operations'
+    | '/config-maps'
+    | '/config-secrets'
+    | '/storage-claims'
+    | '/storage-classes'
+    | '/storage-volumes'
     | '/tenants'
-    | '/cluster-operations/resources'
+    | '/workload-daemonsets'
+    | '/workload-deployments'
+    | '/workload-jobs'
+    | '/workload-pods'
+    | '/workload-services'
+    | '/workload-statefulsets'
+    | '/cluster-crds/$crdName'
+    | '/cluster-namespaces/$namespaceName'
+    | '/cluster-nodes/$nodeName'
+    | '/config-maps/$configName'
+    | '/config-secrets/$configName'
+    | '/storage-claims/$storageName'
+    | '/storage-classes/$storageName'
+    | '/storage-volumes/$storageName'
     | '/tenants-billing/$tenantId'
+    | '/workload-daemonsets/$workloadName'
+    | '/workload-deployments/$workloadName'
+    | '/workload-jobs/$workloadName'
+    | '/workload-pods/$workloadName'
+    | '/workload-services/$workloadName'
+    | '/workload-statefulsets/$workloadName'
     | '/alert-rules/'
     | '/apis/'
     | '/audit-api-keys/'
@@ -731,8 +1170,13 @@ export interface FileRouteTypes {
     | '/audit-login/'
     | '/audit-operation/'
     | '/basic-networks/'
+    | '/cluster-crds/'
+    | '/cluster-namespaces/'
+    | '/cluster-nodes/'
     | '/cluster-operations/'
     | '/compute-presets/'
+    | '/config-maps/'
+    | '/config-secrets/'
     | '/eips/'
     | '/gpu-clusters/'
     | '/gpu-quotas/'
@@ -768,7 +1212,10 @@ export interface FileRouteTypes {
     | '/registry-vulnerabilities/'
     | '/session/'
     | '/skills/'
+    | '/storage-claims/'
+    | '/storage-classes/'
     | '/storage-quotas/'
+    | '/storage-volumes/'
     | '/storage/'
     | '/tenant-plans/'
     | '/tenant-usage-ranking/'
@@ -778,14 +1225,32 @@ export interface FileRouteTypes {
     | '/traces/'
     | '/virtual-switches/'
     | '/webhook/'
-    | '/cluster-operations/resources/detail'
-    | '/cluster-operations/resources/'
+    | '/workload-daemonsets/'
+    | '/workload-deployments/'
+    | '/workload-jobs/'
+    | '/workload-pods/'
+    | '/workload-services/'
+    | '/workload-statefulsets/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ClusterCrdsRoute: typeof ClusterCrdsRouteWithChildren
+  ClusterNamespacesRoute: typeof ClusterNamespacesRouteWithChildren
+  ClusterNodesRoute: typeof ClusterNodesRouteWithChildren
   ClusterOperationsRoute: typeof ClusterOperationsRouteWithChildren
+  ConfigMapsRoute: typeof ConfigMapsRouteWithChildren
+  ConfigSecretsRoute: typeof ConfigSecretsRouteWithChildren
+  StorageClaimsRoute: typeof StorageClaimsRouteWithChildren
+  StorageClassesRoute: typeof StorageClassesRouteWithChildren
+  StorageVolumesRoute: typeof StorageVolumesRouteWithChildren
   TenantsRoute: typeof TenantsRouteWithChildren
+  WorkloadDaemonsetsRoute: typeof WorkloadDaemonsetsRouteWithChildren
+  WorkloadDeploymentsRoute: typeof WorkloadDeploymentsRouteWithChildren
+  WorkloadJobsRoute: typeof WorkloadJobsRouteWithChildren
+  WorkloadPodsRoute: typeof WorkloadPodsRouteWithChildren
+  WorkloadServicesRoute: typeof WorkloadServicesRouteWithChildren
+  WorkloadStatefulsetsRoute: typeof WorkloadStatefulsetsRouteWithChildren
   TenantsBillingTenantIdRoute: typeof TenantsBillingTenantIdRoute
   AlertRulesIndexRoute: typeof AlertRulesIndexRoute
   ApisIndexRoute: typeof ApisIndexRoute
@@ -852,6 +1317,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cluster-crds': {
+      id: '/cluster-crds'
+      path: '/cluster-crds'
+      fullPath: '/cluster-crds'
+      preLoaderRoute: typeof ClusterCrdsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cluster-namespaces': {
+      id: '/cluster-namespaces'
+      path: '/cluster-namespaces'
+      fullPath: '/cluster-namespaces'
+      preLoaderRoute: typeof ClusterNamespacesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cluster-nodes': {
+      id: '/cluster-nodes'
+      path: '/cluster-nodes'
+      fullPath: '/cluster-nodes'
+      preLoaderRoute: typeof ClusterNodesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cluster-operations': {
       id: '/cluster-operations'
       path: '/cluster-operations'
@@ -859,11 +1345,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClusterOperationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/config-maps': {
+      id: '/config-maps'
+      path: '/config-maps'
+      fullPath: '/config-maps'
+      preLoaderRoute: typeof ConfigMapsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/config-secrets': {
+      id: '/config-secrets'
+      path: '/config-secrets'
+      fullPath: '/config-secrets'
+      preLoaderRoute: typeof ConfigSecretsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/storage-claims': {
+      id: '/storage-claims'
+      path: '/storage-claims'
+      fullPath: '/storage-claims'
+      preLoaderRoute: typeof StorageClaimsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/storage-classes': {
+      id: '/storage-classes'
+      path: '/storage-classes'
+      fullPath: '/storage-classes'
+      preLoaderRoute: typeof StorageClassesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/storage-volumes': {
+      id: '/storage-volumes'
+      path: '/storage-volumes'
+      fullPath: '/storage-volumes'
+      preLoaderRoute: typeof StorageVolumesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/tenants': {
       id: '/tenants'
       path: '/tenants'
       fullPath: '/tenants'
       preLoaderRoute: typeof TenantsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workload-daemonsets': {
+      id: '/workload-daemonsets'
+      path: '/workload-daemonsets'
+      fullPath: '/workload-daemonsets'
+      preLoaderRoute: typeof WorkloadDaemonsetsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workload-deployments': {
+      id: '/workload-deployments'
+      path: '/workload-deployments'
+      fullPath: '/workload-deployments'
+      preLoaderRoute: typeof WorkloadDeploymentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workload-jobs': {
+      id: '/workload-jobs'
+      path: '/workload-jobs'
+      fullPath: '/workload-jobs'
+      preLoaderRoute: typeof WorkloadJobsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workload-pods': {
+      id: '/workload-pods'
+      path: '/workload-pods'
+      fullPath: '/workload-pods'
+      preLoaderRoute: typeof WorkloadPodsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workload-services': {
+      id: '/workload-services'
+      path: '/workload-services'
+      fullPath: '/workload-services'
+      preLoaderRoute: typeof WorkloadServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workload-statefulsets': {
+      id: '/workload-statefulsets'
+      path: '/workload-statefulsets'
+      fullPath: '/workload-statefulsets'
+      preLoaderRoute: typeof WorkloadStatefulsetsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/alert-rules/': {
@@ -929,18 +1492,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BasicNetworksIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cluster-crds/': {
+      id: '/cluster-crds/'
+      path: '/'
+      fullPath: '/cluster-crds/'
+      preLoaderRoute: typeof ClusterCrdsIndexRouteImport
+      parentRoute: typeof ClusterCrdsRoute
+    }
+    '/cluster-crds/$crdName': {
+      id: '/cluster-crds/$crdName'
+      path: '/$crdName'
+      fullPath: '/cluster-crds/$crdName'
+      preLoaderRoute: typeof ClusterCrdsCrdNameRouteImport
+      parentRoute: typeof ClusterCrdsRoute
+    }
+    '/cluster-namespaces/': {
+      id: '/cluster-namespaces/'
+      path: '/'
+      fullPath: '/cluster-namespaces/'
+      preLoaderRoute: typeof ClusterNamespacesIndexRouteImport
+      parentRoute: typeof ClusterNamespacesRoute
+    }
+    '/cluster-namespaces/$namespaceName': {
+      id: '/cluster-namespaces/$namespaceName'
+      path: '/$namespaceName'
+      fullPath: '/cluster-namespaces/$namespaceName'
+      preLoaderRoute: typeof ClusterNamespacesNamespaceNameRouteImport
+      parentRoute: typeof ClusterNamespacesRoute
+    }
+    '/cluster-nodes/': {
+      id: '/cluster-nodes/'
+      path: '/'
+      fullPath: '/cluster-nodes/'
+      preLoaderRoute: typeof ClusterNodesIndexRouteImport
+      parentRoute: typeof ClusterNodesRoute
+    }
+    '/cluster-nodes/$nodeName': {
+      id: '/cluster-nodes/$nodeName'
+      path: '/$nodeName'
+      fullPath: '/cluster-nodes/$nodeName'
+      preLoaderRoute: typeof ClusterNodesNodeNameRouteImport
+      parentRoute: typeof ClusterNodesRoute
+    }
     '/cluster-operations/': {
       id: '/cluster-operations/'
       path: '/'
       fullPath: '/cluster-operations/'
       preLoaderRoute: typeof ClusterOperationsIndexRouteImport
-      parentRoute: typeof ClusterOperationsRoute
-    }
-    '/cluster-operations/resources': {
-      id: '/cluster-operations/resources'
-      path: '/resources'
-      fullPath: '/cluster-operations/resources'
-      preLoaderRoute: typeof ClusterOperationsResourcesRouteImport
       parentRoute: typeof ClusterOperationsRoute
     }
     '/compute-presets/': {
@@ -949,6 +1547,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/compute-presets/'
       preLoaderRoute: typeof ComputePresetsIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/config-maps/': {
+      id: '/config-maps/'
+      path: '/'
+      fullPath: '/config-maps/'
+      preLoaderRoute: typeof ConfigMapsIndexRouteImport
+      parentRoute: typeof ConfigMapsRoute
+    }
+    '/config-maps/$configName': {
+      id: '/config-maps/$configName'
+      path: '/$configName'
+      fullPath: '/config-maps/$configName'
+      preLoaderRoute: typeof ConfigMapsConfigNameRouteImport
+      parentRoute: typeof ConfigMapsRoute
+    }
+    '/config-secrets/': {
+      id: '/config-secrets/'
+      path: '/'
+      fullPath: '/config-secrets/'
+      preLoaderRoute: typeof ConfigSecretsIndexRouteImport
+      parentRoute: typeof ConfigSecretsRoute
+    }
+    '/config-secrets/$configName': {
+      id: '/config-secrets/$configName'
+      path: '/$configName'
+      fullPath: '/config-secrets/$configName'
+      preLoaderRoute: typeof ConfigSecretsConfigNameRouteImport
+      parentRoute: typeof ConfigSecretsRoute
     }
     '/eips/': {
       id: '/eips/'
@@ -1195,12 +1821,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SkillsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/storage-claims/': {
+      id: '/storage-claims/'
+      path: '/'
+      fullPath: '/storage-claims/'
+      preLoaderRoute: typeof StorageClaimsIndexRouteImport
+      parentRoute: typeof StorageClaimsRoute
+    }
+    '/storage-claims/$storageName': {
+      id: '/storage-claims/$storageName'
+      path: '/$storageName'
+      fullPath: '/storage-claims/$storageName'
+      preLoaderRoute: typeof StorageClaimsStorageNameRouteImport
+      parentRoute: typeof StorageClaimsRoute
+    }
+    '/storage-classes/': {
+      id: '/storage-classes/'
+      path: '/'
+      fullPath: '/storage-classes/'
+      preLoaderRoute: typeof StorageClassesIndexRouteImport
+      parentRoute: typeof StorageClassesRoute
+    }
+    '/storage-classes/$storageName': {
+      id: '/storage-classes/$storageName'
+      path: '/$storageName'
+      fullPath: '/storage-classes/$storageName'
+      preLoaderRoute: typeof StorageClassesStorageNameRouteImport
+      parentRoute: typeof StorageClassesRoute
+    }
     '/storage-quotas/': {
       id: '/storage-quotas/'
       path: '/storage-quotas'
       fullPath: '/storage-quotas/'
       preLoaderRoute: typeof StorageQuotasIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/storage-volumes/': {
+      id: '/storage-volumes/'
+      path: '/'
+      fullPath: '/storage-volumes/'
+      preLoaderRoute: typeof StorageVolumesIndexRouteImport
+      parentRoute: typeof StorageVolumesRoute
+    }
+    '/storage-volumes/$storageName': {
+      id: '/storage-volumes/$storageName'
+      path: '/$storageName'
+      fullPath: '/storage-volumes/$storageName'
+      preLoaderRoute: typeof StorageVolumesStorageNameRouteImport
+      parentRoute: typeof StorageVolumesRoute
     }
     '/storage/': {
       id: '/storage/'
@@ -1272,52 +1940,214 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WebhookIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/cluster-operations/resources/': {
-      id: '/cluster-operations/resources/'
+    '/workload-daemonsets/': {
+      id: '/workload-daemonsets/'
       path: '/'
-      fullPath: '/cluster-operations/resources/'
-      preLoaderRoute: typeof ClusterOperationsResourcesIndexRouteImport
-      parentRoute: typeof ClusterOperationsResourcesRoute
+      fullPath: '/workload-daemonsets/'
+      preLoaderRoute: typeof WorkloadDaemonsetsIndexRouteImport
+      parentRoute: typeof WorkloadDaemonsetsRoute
     }
-    '/cluster-operations/resources/detail': {
-      id: '/cluster-operations/resources/detail'
-      path: '/detail'
-      fullPath: '/cluster-operations/resources/detail'
-      preLoaderRoute: typeof ClusterOperationsResourcesDetailRouteImport
-      parentRoute: typeof ClusterOperationsResourcesRoute
+    '/workload-daemonsets/$workloadName': {
+      id: '/workload-daemonsets/$workloadName'
+      path: '/$workloadName'
+      fullPath: '/workload-daemonsets/$workloadName'
+      preLoaderRoute: typeof WorkloadDaemonsetsWorkloadNameRouteImport
+      parentRoute: typeof WorkloadDaemonsetsRoute
+    }
+    '/workload-deployments/': {
+      id: '/workload-deployments/'
+      path: '/'
+      fullPath: '/workload-deployments/'
+      preLoaderRoute: typeof WorkloadDeploymentsIndexRouteImport
+      parentRoute: typeof WorkloadDeploymentsRoute
+    }
+    '/workload-deployments/$workloadName': {
+      id: '/workload-deployments/$workloadName'
+      path: '/$workloadName'
+      fullPath: '/workload-deployments/$workloadName'
+      preLoaderRoute: typeof WorkloadDeploymentsWorkloadNameRouteImport
+      parentRoute: typeof WorkloadDeploymentsRoute
+    }
+    '/workload-jobs/': {
+      id: '/workload-jobs/'
+      path: '/'
+      fullPath: '/workload-jobs/'
+      preLoaderRoute: typeof WorkloadJobsIndexRouteImport
+      parentRoute: typeof WorkloadJobsRoute
+    }
+    '/workload-jobs/$workloadName': {
+      id: '/workload-jobs/$workloadName'
+      path: '/$workloadName'
+      fullPath: '/workload-jobs/$workloadName'
+      preLoaderRoute: typeof WorkloadJobsWorkloadNameRouteImport
+      parentRoute: typeof WorkloadJobsRoute
+    }
+    '/workload-pods/': {
+      id: '/workload-pods/'
+      path: '/'
+      fullPath: '/workload-pods/'
+      preLoaderRoute: typeof WorkloadPodsIndexRouteImport
+      parentRoute: typeof WorkloadPodsRoute
+    }
+    '/workload-pods/$workloadName': {
+      id: '/workload-pods/$workloadName'
+      path: '/$workloadName'
+      fullPath: '/workload-pods/$workloadName'
+      preLoaderRoute: typeof WorkloadPodsWorkloadNameRouteImport
+      parentRoute: typeof WorkloadPodsRoute
+    }
+    '/workload-services/': {
+      id: '/workload-services/'
+      path: '/'
+      fullPath: '/workload-services/'
+      preLoaderRoute: typeof WorkloadServicesIndexRouteImport
+      parentRoute: typeof WorkloadServicesRoute
+    }
+    '/workload-services/$workloadName': {
+      id: '/workload-services/$workloadName'
+      path: '/$workloadName'
+      fullPath: '/workload-services/$workloadName'
+      preLoaderRoute: typeof WorkloadServicesWorkloadNameRouteImport
+      parentRoute: typeof WorkloadServicesRoute
+    }
+    '/workload-statefulsets/': {
+      id: '/workload-statefulsets/'
+      path: '/'
+      fullPath: '/workload-statefulsets/'
+      preLoaderRoute: typeof WorkloadStatefulsetsIndexRouteImport
+      parentRoute: typeof WorkloadStatefulsetsRoute
+    }
+    '/workload-statefulsets/$workloadName': {
+      id: '/workload-statefulsets/$workloadName'
+      path: '/$workloadName'
+      fullPath: '/workload-statefulsets/$workloadName'
+      preLoaderRoute: typeof WorkloadStatefulsetsWorkloadNameRouteImport
+      parentRoute: typeof WorkloadStatefulsetsRoute
     }
   }
 }
 
-interface ClusterOperationsResourcesRouteChildren {
-  ClusterOperationsResourcesDetailRoute: typeof ClusterOperationsResourcesDetailRoute
-  ClusterOperationsResourcesIndexRoute: typeof ClusterOperationsResourcesIndexRoute
+interface ClusterCrdsRouteChildren {
+  ClusterCrdsCrdNameRoute: typeof ClusterCrdsCrdNameRoute
+  ClusterCrdsIndexRoute: typeof ClusterCrdsIndexRoute
 }
 
-const ClusterOperationsResourcesRouteChildren: ClusterOperationsResourcesRouteChildren =
-  {
-    ClusterOperationsResourcesDetailRoute:
-      ClusterOperationsResourcesDetailRoute,
-    ClusterOperationsResourcesIndexRoute: ClusterOperationsResourcesIndexRoute,
-  }
+const ClusterCrdsRouteChildren: ClusterCrdsRouteChildren = {
+  ClusterCrdsCrdNameRoute: ClusterCrdsCrdNameRoute,
+  ClusterCrdsIndexRoute: ClusterCrdsIndexRoute,
+}
 
-const ClusterOperationsResourcesRouteWithChildren =
-  ClusterOperationsResourcesRoute._addFileChildren(
-    ClusterOperationsResourcesRouteChildren,
-  )
+const ClusterCrdsRouteWithChildren = ClusterCrdsRoute._addFileChildren(
+  ClusterCrdsRouteChildren,
+)
+
+interface ClusterNamespacesRouteChildren {
+  ClusterNamespacesNamespaceNameRoute: typeof ClusterNamespacesNamespaceNameRoute
+  ClusterNamespacesIndexRoute: typeof ClusterNamespacesIndexRoute
+}
+
+const ClusterNamespacesRouteChildren: ClusterNamespacesRouteChildren = {
+  ClusterNamespacesNamespaceNameRoute: ClusterNamespacesNamespaceNameRoute,
+  ClusterNamespacesIndexRoute: ClusterNamespacesIndexRoute,
+}
+
+const ClusterNamespacesRouteWithChildren =
+  ClusterNamespacesRoute._addFileChildren(ClusterNamespacesRouteChildren)
+
+interface ClusterNodesRouteChildren {
+  ClusterNodesNodeNameRoute: typeof ClusterNodesNodeNameRoute
+  ClusterNodesIndexRoute: typeof ClusterNodesIndexRoute
+}
+
+const ClusterNodesRouteChildren: ClusterNodesRouteChildren = {
+  ClusterNodesNodeNameRoute: ClusterNodesNodeNameRoute,
+  ClusterNodesIndexRoute: ClusterNodesIndexRoute,
+}
+
+const ClusterNodesRouteWithChildren = ClusterNodesRoute._addFileChildren(
+  ClusterNodesRouteChildren,
+)
 
 interface ClusterOperationsRouteChildren {
-  ClusterOperationsResourcesRoute: typeof ClusterOperationsResourcesRouteWithChildren
   ClusterOperationsIndexRoute: typeof ClusterOperationsIndexRoute
 }
 
 const ClusterOperationsRouteChildren: ClusterOperationsRouteChildren = {
-  ClusterOperationsResourcesRoute: ClusterOperationsResourcesRouteWithChildren,
   ClusterOperationsIndexRoute: ClusterOperationsIndexRoute,
 }
 
 const ClusterOperationsRouteWithChildren =
   ClusterOperationsRoute._addFileChildren(ClusterOperationsRouteChildren)
+
+interface ConfigMapsRouteChildren {
+  ConfigMapsConfigNameRoute: typeof ConfigMapsConfigNameRoute
+  ConfigMapsIndexRoute: typeof ConfigMapsIndexRoute
+}
+
+const ConfigMapsRouteChildren: ConfigMapsRouteChildren = {
+  ConfigMapsConfigNameRoute: ConfigMapsConfigNameRoute,
+  ConfigMapsIndexRoute: ConfigMapsIndexRoute,
+}
+
+const ConfigMapsRouteWithChildren = ConfigMapsRoute._addFileChildren(
+  ConfigMapsRouteChildren,
+)
+
+interface ConfigSecretsRouteChildren {
+  ConfigSecretsConfigNameRoute: typeof ConfigSecretsConfigNameRoute
+  ConfigSecretsIndexRoute: typeof ConfigSecretsIndexRoute
+}
+
+const ConfigSecretsRouteChildren: ConfigSecretsRouteChildren = {
+  ConfigSecretsConfigNameRoute: ConfigSecretsConfigNameRoute,
+  ConfigSecretsIndexRoute: ConfigSecretsIndexRoute,
+}
+
+const ConfigSecretsRouteWithChildren = ConfigSecretsRoute._addFileChildren(
+  ConfigSecretsRouteChildren,
+)
+
+interface StorageClaimsRouteChildren {
+  StorageClaimsStorageNameRoute: typeof StorageClaimsStorageNameRoute
+  StorageClaimsIndexRoute: typeof StorageClaimsIndexRoute
+}
+
+const StorageClaimsRouteChildren: StorageClaimsRouteChildren = {
+  StorageClaimsStorageNameRoute: StorageClaimsStorageNameRoute,
+  StorageClaimsIndexRoute: StorageClaimsIndexRoute,
+}
+
+const StorageClaimsRouteWithChildren = StorageClaimsRoute._addFileChildren(
+  StorageClaimsRouteChildren,
+)
+
+interface StorageClassesRouteChildren {
+  StorageClassesStorageNameRoute: typeof StorageClassesStorageNameRoute
+  StorageClassesIndexRoute: typeof StorageClassesIndexRoute
+}
+
+const StorageClassesRouteChildren: StorageClassesRouteChildren = {
+  StorageClassesStorageNameRoute: StorageClassesStorageNameRoute,
+  StorageClassesIndexRoute: StorageClassesIndexRoute,
+}
+
+const StorageClassesRouteWithChildren = StorageClassesRoute._addFileChildren(
+  StorageClassesRouteChildren,
+)
+
+interface StorageVolumesRouteChildren {
+  StorageVolumesStorageNameRoute: typeof StorageVolumesStorageNameRoute
+  StorageVolumesIndexRoute: typeof StorageVolumesIndexRoute
+}
+
+const StorageVolumesRouteChildren: StorageVolumesRouteChildren = {
+  StorageVolumesStorageNameRoute: StorageVolumesStorageNameRoute,
+  StorageVolumesIndexRoute: StorageVolumesIndexRoute,
+}
+
+const StorageVolumesRouteWithChildren = StorageVolumesRoute._addFileChildren(
+  StorageVolumesRouteChildren,
+)
 
 interface TenantsRouteChildren {
   TenantsIndexRoute: typeof TenantsIndexRoute
@@ -1330,10 +2160,104 @@ const TenantsRouteChildren: TenantsRouteChildren = {
 const TenantsRouteWithChildren =
   TenantsRoute._addFileChildren(TenantsRouteChildren)
 
+interface WorkloadDaemonsetsRouteChildren {
+  WorkloadDaemonsetsWorkloadNameRoute: typeof WorkloadDaemonsetsWorkloadNameRoute
+  WorkloadDaemonsetsIndexRoute: typeof WorkloadDaemonsetsIndexRoute
+}
+
+const WorkloadDaemonsetsRouteChildren: WorkloadDaemonsetsRouteChildren = {
+  WorkloadDaemonsetsWorkloadNameRoute: WorkloadDaemonsetsWorkloadNameRoute,
+  WorkloadDaemonsetsIndexRoute: WorkloadDaemonsetsIndexRoute,
+}
+
+const WorkloadDaemonsetsRouteWithChildren =
+  WorkloadDaemonsetsRoute._addFileChildren(WorkloadDaemonsetsRouteChildren)
+
+interface WorkloadDeploymentsRouteChildren {
+  WorkloadDeploymentsWorkloadNameRoute: typeof WorkloadDeploymentsWorkloadNameRoute
+  WorkloadDeploymentsIndexRoute: typeof WorkloadDeploymentsIndexRoute
+}
+
+const WorkloadDeploymentsRouteChildren: WorkloadDeploymentsRouteChildren = {
+  WorkloadDeploymentsWorkloadNameRoute: WorkloadDeploymentsWorkloadNameRoute,
+  WorkloadDeploymentsIndexRoute: WorkloadDeploymentsIndexRoute,
+}
+
+const WorkloadDeploymentsRouteWithChildren =
+  WorkloadDeploymentsRoute._addFileChildren(WorkloadDeploymentsRouteChildren)
+
+interface WorkloadJobsRouteChildren {
+  WorkloadJobsWorkloadNameRoute: typeof WorkloadJobsWorkloadNameRoute
+  WorkloadJobsIndexRoute: typeof WorkloadJobsIndexRoute
+}
+
+const WorkloadJobsRouteChildren: WorkloadJobsRouteChildren = {
+  WorkloadJobsWorkloadNameRoute: WorkloadJobsWorkloadNameRoute,
+  WorkloadJobsIndexRoute: WorkloadJobsIndexRoute,
+}
+
+const WorkloadJobsRouteWithChildren = WorkloadJobsRoute._addFileChildren(
+  WorkloadJobsRouteChildren,
+)
+
+interface WorkloadPodsRouteChildren {
+  WorkloadPodsWorkloadNameRoute: typeof WorkloadPodsWorkloadNameRoute
+  WorkloadPodsIndexRoute: typeof WorkloadPodsIndexRoute
+}
+
+const WorkloadPodsRouteChildren: WorkloadPodsRouteChildren = {
+  WorkloadPodsWorkloadNameRoute: WorkloadPodsWorkloadNameRoute,
+  WorkloadPodsIndexRoute: WorkloadPodsIndexRoute,
+}
+
+const WorkloadPodsRouteWithChildren = WorkloadPodsRoute._addFileChildren(
+  WorkloadPodsRouteChildren,
+)
+
+interface WorkloadServicesRouteChildren {
+  WorkloadServicesWorkloadNameRoute: typeof WorkloadServicesWorkloadNameRoute
+  WorkloadServicesIndexRoute: typeof WorkloadServicesIndexRoute
+}
+
+const WorkloadServicesRouteChildren: WorkloadServicesRouteChildren = {
+  WorkloadServicesWorkloadNameRoute: WorkloadServicesWorkloadNameRoute,
+  WorkloadServicesIndexRoute: WorkloadServicesIndexRoute,
+}
+
+const WorkloadServicesRouteWithChildren =
+  WorkloadServicesRoute._addFileChildren(WorkloadServicesRouteChildren)
+
+interface WorkloadStatefulsetsRouteChildren {
+  WorkloadStatefulsetsWorkloadNameRoute: typeof WorkloadStatefulsetsWorkloadNameRoute
+  WorkloadStatefulsetsIndexRoute: typeof WorkloadStatefulsetsIndexRoute
+}
+
+const WorkloadStatefulsetsRouteChildren: WorkloadStatefulsetsRouteChildren = {
+  WorkloadStatefulsetsWorkloadNameRoute: WorkloadStatefulsetsWorkloadNameRoute,
+  WorkloadStatefulsetsIndexRoute: WorkloadStatefulsetsIndexRoute,
+}
+
+const WorkloadStatefulsetsRouteWithChildren =
+  WorkloadStatefulsetsRoute._addFileChildren(WorkloadStatefulsetsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ClusterCrdsRoute: ClusterCrdsRouteWithChildren,
+  ClusterNamespacesRoute: ClusterNamespacesRouteWithChildren,
+  ClusterNodesRoute: ClusterNodesRouteWithChildren,
   ClusterOperationsRoute: ClusterOperationsRouteWithChildren,
+  ConfigMapsRoute: ConfigMapsRouteWithChildren,
+  ConfigSecretsRoute: ConfigSecretsRouteWithChildren,
+  StorageClaimsRoute: StorageClaimsRouteWithChildren,
+  StorageClassesRoute: StorageClassesRouteWithChildren,
+  StorageVolumesRoute: StorageVolumesRouteWithChildren,
   TenantsRoute: TenantsRouteWithChildren,
+  WorkloadDaemonsetsRoute: WorkloadDaemonsetsRouteWithChildren,
+  WorkloadDeploymentsRoute: WorkloadDeploymentsRouteWithChildren,
+  WorkloadJobsRoute: WorkloadJobsRouteWithChildren,
+  WorkloadPodsRoute: WorkloadPodsRouteWithChildren,
+  WorkloadServicesRoute: WorkloadServicesRouteWithChildren,
+  WorkloadStatefulsetsRoute: WorkloadStatefulsetsRouteWithChildren,
   TenantsBillingTenantIdRoute: TenantsBillingTenantIdRoute,
   AlertRulesIndexRoute: AlertRulesIndexRoute,
   ApisIndexRoute: ApisIndexRoute,

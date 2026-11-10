@@ -2,10 +2,8 @@ import type {
   ClusterOpsAction,
   ClusterOpsResourceDescriptor,
   ClusterOpsResourceDocument,
-  ClusterOpsResourceRef,
   ClusterOpsResourceTypeRef,
 } from "@/api/cluster-ops";
-import { formatDateTime } from "@/lib/date";
 
 const writeActions: ClusterOpsAction[] = ["create", "update", "delete", "scale", "restart"];
 export function canResourceAction(
@@ -25,16 +23,6 @@ export function readOnlyMessage(reason: string): string {
       } as Record<string, string>
     )[reason] ?? (reason ? `当前资源只读（${reason}）` : "")
   );
-}
-export function resourceDetailSearch(ref: ClusterOpsResourceRef): Record<string, string> & {
-  cluster_id: string;
-  group: string;
-  version: string;
-  resource: string;
-  namespace: string;
-  name: string;
-} {
-  return { cluster_id: ref.cluster_id, ...ref.type, namespace: ref.namespace, name: ref.name };
 }
 export function sameResourceType(
   a: ClusterOpsResourceTypeRef,
@@ -162,111 +150,4 @@ export function labelSelector(value: unknown): string | undefined {
     else return undefined;
   }
   return labels.length ? labels.join(",") : undefined;
-}
-
-export function resourceFacts(doc: ClusterOpsResourceDocument): { label: string; value: string }[] {
-  if (!hasKnownSummary(doc.ref.type)) return [];
-  const object = nativeObject(doc);
-  const fact = (label: string, ...path: string[]) => ({
-    label,
-    value: text(field(object, ...path)),
-  });
-  switch (doc.ref.type.resource) {
-    case "pods": {
-      const containers = array(field(object, "status", "containerStatuses"));
-      const restarts = containers.reduce<number>(
-        (sum, container) =>
-          sum +
-          (typeof field(container, "restartCount") === "number"
-            ? Number(field(container, "restartCount"))
-            : 0),
-        0,
-      );
-      return [
-        fact("Phase", "status", "phase"),
-        {
-          label: "普通容器 Ready",
-          value: `${containers.filter((container) => field(container, "ready") === true).length}/${containers.length}`,
-        },
-        { label: "重启次数", value: String(restarts) },
-        fact("节点", "spec", "nodeName"),
-        fact("Pod IP", "status", "podIP"),
-      ];
-    }
-    case "deployments":
-    case "statefulsets":
-      return [
-        fact("期望副本", "spec", "replicas"),
-        fact("观察副本", "status", "replicas"),
-        fact("Ready 副本", "status", "readyReplicas"),
-        fact("已更新副本", "status", "updatedReplicas"),
-      ];
-    case "daemonsets":
-      return [
-        fact("期望调度", "status", "desiredNumberScheduled"),
-        fact("当前调度", "status", "currentNumberScheduled"),
-        fact("Ready", "status", "numberReady"),
-      ];
-    case "jobs":
-      return [
-        fact("Active", "status", "active"),
-        fact("Succeeded", "status", "succeeded"),
-        fact("Failed", "status", "failed"),
-        {
-          label: "Conditions",
-          value:
-            array(field(object, "status", "conditions"))
-              .map(
-                (condition) =>
-                  `${text(field(condition, "type"))}=${text(field(condition, "status"))}`,
-              )
-              .join(", ") || "-",
-        },
-      ];
-    case "cronjobs":
-      return [
-        fact("计划", "spec", "schedule"),
-        fact("暂停", "spec", "suspend"),
-        {
-          label: "最后调度时间",
-          value: formatDateTime(String(field(object, "status", "lastScheduleTime") ?? "")),
-        },
-      ];
-    case "nodes":
-      return [
-        {
-          label: "Ready",
-          value: text(
-            field(
-              array(field(object, "status", "conditions")).find(
-                (condition) => field(condition, "type") === "Ready",
-              ),
-              "status",
-            ),
-          ),
-        },
-        fact("不可调度", "spec", "unschedulable"),
-        { label: "Capacity", value: JSON.stringify(record(field(object, "status", "capacity"))) },
-        {
-          label: "Allocatable",
-          value: JSON.stringify(record(field(object, "status", "allocatable"))),
-        },
-      ];
-    case "persistentvolumeclaims":
-      return [
-        fact("Phase", "status", "phase"),
-        fact("容量", "status", "capacity", "storage"),
-        fact("请求容量", "spec", "resources", "requests", "storage"),
-        fact("绑定 PV", "spec", "volumeName"),
-      ];
-    case "persistentvolumes":
-      return [
-        fact("Phase", "status", "phase"),
-        fact("容量", "spec", "capacity", "storage"),
-        fact("绑定 Namespace", "spec", "claimRef", "namespace"),
-        fact("绑定 PVC", "spec", "claimRef", "name"),
-      ];
-    default:
-      return [];
-  }
 }

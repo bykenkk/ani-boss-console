@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@arco-design/web-react";
 import {
   listResources,
@@ -13,15 +12,8 @@ import {
 import { clusterOpsKeys } from "@/api/cluster-ops/keys";
 import { DataTable } from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
-import {
-  array,
-  field,
-  labelSelector,
-  nativeObject,
-  record,
-  resourceDetailSearch,
-  resourceState,
-} from "../model";
+import { array, field, labelSelector, nativeObject, record, resourceState } from "../model";
+import { ResourceLink } from "./ResourceLink";
 
 interface RelatedResourcesProps {
   resource: ClusterOpsResourceDocument;
@@ -32,7 +24,7 @@ interface MatchingResourcesProps {
   namespace: string;
   type: ClusterOpsResourceTypeRef;
   selector: string;
-  title: string;
+  title?: string;
 }
 function MatchingResources({
   clusterId,
@@ -41,7 +33,6 @@ function MatchingResources({
   selector,
   title,
 }: MatchingResourcesProps) {
-  const navigate = useNavigate();
   const scope = JSON.stringify([clusterId, namespace, type, selector]);
   const [expiredScope, setExpiredScope] = useState<string>();
   const expired = expiredScope === scope;
@@ -68,7 +59,6 @@ function MatchingResources({
     <DataTable
       header={{
         title,
-        description: `Label selector: ${selector}`,
         extra: (
           <Button
             onClick={() => {
@@ -86,19 +76,7 @@ function MatchingResources({
           title: "名称",
           width: 200,
           ellipsis: true,
-          render: (_, doc) => (
-            <Button
-              type="text"
-              onClick={() =>
-                navigate({
-                  to: "/cluster-operations/resources/detail",
-                  search: resourceDetailSearch(doc.ref),
-                })
-              }
-            >
-              {doc.ref.name}
-            </Button>
-          ),
+          render: (_, doc) => <ResourceLink resourceRef={doc.ref} label={doc.ref.name} />,
         },
         { title: "状态", width: 120, render: (_, doc) => resourceState(doc) },
       ]}
@@ -113,7 +91,6 @@ function MatchingResources({
   );
 }
 export function RelatedResources({ resource, descriptors }: RelatedResourcesProps) {
-  const navigate = useNavigate();
   const object = nativeObject(resource);
   const refs: { ref?: ClusterOpsResourceRef; label: string }[] = [];
   const add = (kind: string, name: unknown, apiVersion = "v1") => {
@@ -192,44 +169,40 @@ export function RelatedResources({ resource, descriptors }: RelatedResourcesProp
     (entry) => entry.type.resource === "endpointslices" && entry.actions.includes("list"),
   );
   const unique = Array.from(new Map(refs.map((entry) => [entry.label, entry])).values());
+  const showPods = Boolean(selector && podType);
+  const showEndpoints = Boolean(service && endpointType);
+  const showReferences = unique.length > 0 || (!showPods && !showEndpoints);
+  const showTitles = Number(showReferences) + Number(showPods) + Number(showEndpoints) > 1;
   return (
     <div className="flex flex-col gap-5">
-      <DataTable
-        header={{ title: "直接引用" }}
-        data={unique}
-        rowKey="label"
-        columns={[
-          {
-            title: "资源",
-            width: 200,
-            ellipsis: true,
-            render: (_, entry) =>
-              entry.ref ? (
-                <Button
-                  type="text"
-                  onClick={() =>
-                    navigate({
-                      to: "/cluster-operations/resources/detail",
-                      search: resourceDetailSearch(entry.ref!),
-                    })
-                  }
-                >
-                  {entry.label}
-                </Button>
-              ) : (
-                entry.label
-              ),
-          },
-        ]}
-        pagination={false}
-      />
+      {showReferences ? (
+        <DataTable
+          header={showTitles ? { title: "引用资源" } : undefined}
+          data={unique}
+          rowKey="label"
+          columns={[
+            {
+              title: "资源",
+              width: 200,
+              ellipsis: true,
+              render: (_, entry) =>
+                entry.ref ? (
+                  <ResourceLink resourceRef={entry.ref} label={entry.label} />
+                ) : (
+                  entry.label
+                ),
+            },
+          ]}
+          pagination={false}
+        />
+      ) : null}
       {selector && podType ? (
         <MatchingResources
           clusterId={resource.ref.cluster_id}
           namespace={resource.ref.namespace}
           type={podType.type}
           selector={selector}
-          title="匹配选择器的 Pod"
+          title={showTitles ? "容器组" : undefined}
         />
       ) : null}
       {service && endpointType ? (
@@ -238,7 +211,7 @@ export function RelatedResources({ resource, descriptors }: RelatedResourcesProp
           namespace={resource.ref.namespace}
           type={endpointType.type}
           selector={`kubernetes.io/service-name=${resource.ref.name}`}
-          title="Service EndpointSlice"
+          title={showTitles ? "服务端点" : undefined}
         />
       ) : null}
     </div>

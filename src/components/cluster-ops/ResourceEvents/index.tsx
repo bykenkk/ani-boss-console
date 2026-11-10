@@ -40,20 +40,20 @@ export function ResourceEvents({ resource }: ResourceEventsProps) {
   const columns: ListColumn<ClusterOpsResourceDocument>[] = [
     { title: "类型", width: 110, render: (_, doc) => text(field(nativeObject(doc), "type")) },
     {
-      title: "Reason",
+      title: "事件原因",
       width: 180,
       ellipsis: true,
       render: (_, doc) => text(field(nativeObject(doc), "reason")),
     },
     {
-      title: "Message",
+      title: "事件信息",
       width: 400,
       ellipsis: true,
       render: (_, doc) => text(field(nativeObject(doc), "message")),
     },
-    { title: "Count", width: 90, render: (_, doc) => text(field(nativeObject(doc), "count")) },
+    { title: "发生次数", width: 90, render: (_, doc) => text(field(nativeObject(doc), "count")) },
     {
-      title: "时间",
+      title: "发生时间",
       width: 180,
       render: (_, doc) => {
         const object = nativeObject(doc);
@@ -71,8 +71,6 @@ export function ResourceEvents({ resource }: ResourceEventsProps) {
   return (
     <DataTable
       header={{
-        title: "原生事件",
-        description: "按当前对象 UID 查询，不混入同名旧对象",
         extra: (
           <Button
             onClick={() => {

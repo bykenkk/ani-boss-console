@@ -1,0 +1,26 @@
+.indicatorTrigger {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  display: inline-flex;
+}
+
+.indicator.indicator {
+  box-sizing: content-box;
+  width: 14px;
+  height: 14px;
+  min-height: 14px;
+  justify-content: center;
+  padding: 0;
+  border: 2px solid var(--color-bg-2);
+
+  :global(.arco-badge-status-text) {
+    display: none;
+  }
+
+  :global(.arco-badge-status-dot) {
+    width: 8px;
+    height: 8px;
+    margin: 0;
+  }
+}

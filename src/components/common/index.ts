@@ -1,7 +1,7 @@
 export { DataTable, DataTableRowActionButton, DataTableRowActions } from "./DataTable";
 export type {
   DataTableProps,
-  DataTableSectionHeaderProps,
+  SectionHeaderProps,
   ListColumn,
   ListPagination,
   RowAction,
@@ -18,6 +18,7 @@ export { ListDataTable } from "./ListDataTable";
 export { ModalSteps } from "./ModalSteps";
 export type { ListDataTableProps } from "./ListDataTable";
 export { ListPageFrame } from "./ListPageFrame";
+export { ToolbarIconButton } from "./ListPageFrame/ListToolbar";
 export type {
   ListPageFrameProps,
   ListPageRefreshConfig,

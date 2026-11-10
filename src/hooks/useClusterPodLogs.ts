@@ -8,13 +8,14 @@ import {
   type ClusterOpsPodLogTarget,
 } from "@/api/cluster-ops";
 import { consumeClusterPodLogStream } from "@/components/cluster-ops/PodLogs/log-stream";
-import { showNotification } from "@/lib/feedback";
+import { closeNotification, showNotification } from "@/lib/feedback";
 
 type ClusterPodLogState = "idle" | "connecting" | "streaming" | "ended" | "stopped" | "error";
 const DISPLAY_UNITS = 2 * 1024 * 1024;
 export function useClusterPodLogs(
   target: ClusterOpsPodLogTarget,
   options: ClusterOpsPodLogOptions,
+  autoStart = false,
 ) {
   const [state, setState] = useState<ClusterPodLogState>("idle");
   const [text, setText] = useState("");
@@ -23,7 +24,6 @@ export function useClusterPodLogs(
   const [endReason, setEndReason] = useState<"EOF" | "STREAM_LIMIT_REACHED">();
   const controller = useRef<AbortController>();
   const sequence = useRef(0);
-  const scope = JSON.stringify([target, options]);
   const stop = useCallback(() => {
     sequence.current += 1;
     controller.current?.abort();
@@ -38,8 +38,11 @@ export function useClusterPodLogs(
     setEndReason(undefined);
     setState("idle");
   }, [stop]);
-  useEffect(() => stop, [scope, stop]);
-  const start = async () => {
+  const clearDisplay = useCallback(() => {
+    setText("");
+    setTruncated(false);
+  }, []);
+  const start = useCallback(async () => {
     stop();
     const current = ++sequence.current;
     const connection = new AbortController();
@@ -79,7 +82,10 @@ export function useClusterPodLogs(
       }
       await consumeClusterPodLogStream(stream, connection.signal, {
         onReady: () => {
-          if (active()) setState("streaming");
+          if (active()) {
+            setState("streaming");
+            closeNotification("cluster-pod-logs");
+          }
         },
         onText: (part) => {
           if (!active() || !part) return;
@@ -108,6 +114,18 @@ export function useClusterPodLogs(
       session.removeEventListener("abort", cancelSession);
       if (current === sequence.current) controller.current = undefined;
     }
-  };
-  return { state, text, truncated, error, endReason, start, stop, clear };
+  }, [target, options, stop]);
+  useEffect(() => {
+    let disposed = false;
+    // 卸载或连续切换时，取消尚未开始的自动连接。
+    if (autoStart)
+      Promise.resolve().then(() => {
+        if (!disposed) return start();
+      });
+    return () => {
+      disposed = true;
+      stop();
+    };
+  }, [autoStart, start, stop]);
+  return { state, text, truncated, error, endReason, start, stop, clear, clearDisplay };
 }

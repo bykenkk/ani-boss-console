@@ -1,9 +1,21 @@
 import type { ReactNode } from "react";
 
 export type AppRoute =
+  | "/workload-deployments"
+  | "/workload-statefulsets"
+  | "/workload-jobs"
+  | "/workload-pods"
+  | "/workload-services"
+  | "/workload-daemonsets"
+  | "/storage-claims"
+  | "/storage-volumes"
+  | "/storage-classes"
+  | "/config-secrets"
+  | "/config-maps"
+  | "/cluster-nodes"
+  | "/cluster-namespaces"
+  | "/cluster-crds"
   | "/cluster-operations"
-  | "/cluster-operations/resources"
-  | "/cluster-operations/resources/detail"
   | "/notification-channels"
   | "/tenant-plans"
   | "/permissions"

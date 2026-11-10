@@ -1,10 +1,11 @@
 import { Button, Select, Space } from "@arco-design/web-react";
-import type { ListPagination } from "..";
-export function CursorPagination({
-  pagination,
-}: {
+import type { ListPagination } from "../DataTable";
+
+interface CursorPaginationProps {
   pagination: Extract<ListPagination, { mode: "legacy-cursor" }>;
-}) {
+}
+
+export default function CursorPagination({ pagination }: CursorPaginationProps) {
   return (
     <Space className="justify-end p-4 w-full">
       <Select

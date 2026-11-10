@@ -40,6 +40,11 @@ export function ClusterOverviewPage({ clusterId, onClusterChange }: ClusterOverv
               aria-label="集群"
               placeholder="选择集群"
               value={clusterId}
+              loading={clusters.isFetching}
+              filterOption={false}
+              onVisibleChange={(visible) => {
+                if (visible && !clusters.isFetching) clusters.refetch();
+              }}
               options={(clusters.data?.items ?? []).map((cluster) => ({
                 value: cluster.cluster_id,
                 label: cluster.display_name || cluster.cluster_id,

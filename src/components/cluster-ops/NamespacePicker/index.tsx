@@ -1,9 +1,7 @@
-import { useState } from "react";
-import { Button, Input, Select } from "@arco-design/web-react";
-import { useQuery } from "@tanstack/react-query";
+import { Select } from "@arco-design/web-react";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError, getResource, listResources } from "@/api/cluster-ops";
 import { clusterOpsKeys } from "@/api/cluster-ops/keys";
-import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { readOnlyMessage } from "../model";
 
 interface NamespacePickerProps {
@@ -11,49 +9,35 @@ interface NamespacePickerProps {
   value: string;
   onChange: (namespace: string) => void;
   allowAll?: boolean;
+  disabled?: boolean;
 }
 export function NamespacePicker({
   clusterId,
   value,
   onChange,
   allowAll = false,
+  disabled = false,
 }: NamespacePickerProps) {
-  const [exact, setExact] = useState("");
-  const scope = JSON.stringify([clusterId, exact]);
-  const [expiredScope, setExpiredScope] = useState<string>();
-  const expired = expiredScope === scope;
-  // TODO(pagination-migration): 当前 Namespace 候选按 page_size/continue_token 加载；后端支持 page/pageSize 和 items/total 后改用 useListPagination。
-  const paging = useCursorPagination(scope, 50);
+  const client = useQueryClient();
+  // TODO(pagination-migration): 当前按 page_size/continue_token 滚动加载；后端支持页码分页后复用 PageParams，并将续页参数改为页码。
   const params = {
     group: "",
     version: "v1",
     resource: "namespaces",
-    page_size: paging.limit,
-    continue_token: paging.cursor,
-    name: exact || undefined,
+    page_size: 50,
   };
-  const query = useQuery({
-    queryKey: clusterOpsKeys.resources(clusterId, params),
-    queryFn: ({ signal }) => listResources(clusterId, params, signal),
-    enabled: Boolean(clusterId && !exact && !expired),
+  const queryKey = [...clusterOpsKeys.resources(clusterId, params), "options"];
+  const query = useInfiniteQuery({
+    queryKey,
+    queryFn: ({ signal, pageParam }) =>
+      listResources(clusterId, { ...params, continue_token: pageParam || undefined }, signal),
+    initialPageParam: "",
+    getNextPageParam: (page) => page.next_continue_token || undefined,
+    enabled: Boolean(clusterId && !disabled),
+    staleTime: Infinity,
     meta: { errorNotification: { id: "cluster-namespaces", action: "读取命名空间" } },
   });
-  if (query.error instanceof ApiError && query.error.reason === "LIST_EXPIRED" && !expired) {
-    setExpiredScope(scope);
-    paging.resetPagination();
-  }
-  const exactRef = {
-    cluster_id: clusterId,
-    type: { group: "", version: "v1", resource: "namespaces" },
-    namespace: "",
-    name: exact,
-  };
-  const exactQuery = useQuery({
-    queryKey: clusterOpsKeys.resource(exactRef),
-    queryFn: ({ signal }) => getResource(exactRef, { signal }),
-    enabled: Boolean(clusterId && exact),
-    meta: { errorNotification: { id: "cluster-exact-namespace", action: "精确读取命名空间" } },
-  });
+  const expired = query.error instanceof ApiError && query.error.reason === "LIST_EXPIRED";
   const selected = {
     cluster_id: clusterId,
     type: { group: "", version: "v1", resource: "namespaces" },
@@ -63,64 +47,43 @@ export function NamespacePicker({
   const namespace = useQuery({
     queryKey: clusterOpsKeys.resource(selected),
     queryFn: ({ signal }) => getResource(selected, { signal }),
-    enabled: Boolean(clusterId && value),
+    enabled: Boolean(clusterId && value && !disabled),
     meta: { errorNotification: { id: "cluster-namespace", action: "读取目标命名空间" } },
   });
-  const options = (
-    exact ? (exactQuery.data ? [exactQuery.data.resource] : []) : (query.data?.items ?? [])
-  ).map((doc) => ({
+  const options = (query.data?.pages.flatMap((page) => page.items) ?? []).map((doc) => ({
     value: doc.ref.name,
     label: `${doc.ref.name}${doc.read_only ? "（只读）" : ""}`,
   }));
   if (value && !options.some((option) => option.value === value))
     options.unshift({ value, label: value });
   if (allowAll) options.unshift({ value: "", label: "全部 Namespace" });
-  const pagination = paging.getPagination(
-    query.data?.next_continue_token,
-    query.isFetching || expired,
-  );
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex min-w-0 flex-nowrap items-center gap-2">
       <Select
         aria-label="Namespace"
         placeholder="选择具体 Namespace"
         value={value || (allowAll ? "" : undefined)}
         options={options}
+        disabled={disabled}
+        loading={query.isFetching}
         filterOption={false}
         onChange={onChange}
-      />
-      <Input.Search
-        aria-label="精确查找 Namespace"
-        placeholder="精确查找 Namespace"
-        onSearch={(name) => {
-          setExact(name);
-          paging.resetPagination();
+        onVisibleChange={(visible) => {
+          if (visible && expired && !disabled && !query.isFetching)
+            client.resetQueries({ queryKey, exact: true }).catch(() => undefined);
         }}
-        searchButton="查找"
-      />
-      <Button
-        disabled={Boolean(exact) || pagination.disabled || pagination.page === 1}
-        onClick={() => pagination.onPageChange(pagination.page - 1)}
-      >
-        上一批
-      </Button>
-      <Button
-        disabled={Boolean(exact) || pagination.disabled || !query.data?.next_continue_token}
-        onClick={() => pagination.onPageChange(pagination.page + 1)}
-      >
-        下一批
-      </Button>
-      <Button
-        onClick={() => {
-          setExpiredScope(undefined);
-          paging.resetPagination();
-          if (exact) exactQuery.refetch();
-          else if (!paging.cursor && !expired) query.refetch();
+        onPopupScroll={(element: HTMLElement) => {
+          if (
+            !disabled &&
+            !expired &&
+            query.hasNextPage &&
+            !query.isFetching &&
+            element.scrollHeight - element.scrollTop - element.clientHeight <= 24
+          )
+            query.fetchNextPage({ cancelRefetch: false }).catch(() => undefined);
         }}
-      >
-        刷新候选
-      </Button>
-      {namespace.data?.resource.read_only ? (
+      />
+      {!disabled && namespace.data?.resource.read_only ? (
         <span>{readOnlyMessage(namespace.data.resource.read_only_reason)}</span>
       ) : null}
     </div>

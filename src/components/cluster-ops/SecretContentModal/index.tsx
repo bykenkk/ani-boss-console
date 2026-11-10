@@ -6,16 +6,9 @@ import { clusterOpsKeys } from "@/api/cluster-ops/keys";
 
 interface SecretContentModalProps {
   resourceRef: ClusterOpsResourceRef;
-  editable: boolean;
-  onEdit: () => void;
   onCancel: () => void;
 }
-export function SecretContentModal({
-  resourceRef,
-  editable,
-  onEdit,
-  onCancel,
-}: SecretContentModalProps) {
+export function SecretContentModal({ resourceRef, onCancel }: SecretContentModalProps) {
   const client = useQueryClient();
   const query = useQuery({
     queryKey: clusterOpsKeys.resource(resourceRef, true),
@@ -37,19 +30,6 @@ export function SecretContentModal({
       footer={
         <div className="flex justify-end gap-3">
           <Button onClick={onCancel}>关闭</Button>
-          {editable ? (
-            <Button
-              type="primary"
-              disabled={
-                !query.data?.manifest_yaml ||
-                query.data.resource.secret_data_redacted ||
-                query.data.resource.read_only
-              }
-              onClick={onEdit}
-            >
-              编辑内容
-            </Button>
-          ) : null}
         </div>
       }
     >

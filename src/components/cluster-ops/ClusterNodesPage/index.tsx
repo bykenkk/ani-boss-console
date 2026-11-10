@@ -1,0 +1,201 @@
+import { useEffect, useState } from "react";
+import { Alert, Button, Select } from "@arco-design/web-react";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import { ApiError, listClusters, listResources, listResourceTypes } from "@/api/cluster-ops";
+import { clusterOpsKeys } from "@/api/cluster-ops/keys";
+import { ListDataTable, ListPageFrame, type ListColumn } from "@/components/common";
+import { useCursorPagination } from "@/hooks/useCursorPagination";
+import { formatDateTime } from "@/lib/date";
+import { sameResourceType } from "../model";
+import { ResourceCreateModal } from "../ResourceCreateModal";
+import { clusterNodeType } from "./constants";
+import { nodeSummary } from "./node-summary";
+import { NodeStatus } from "../NodeStatus";
+
+export interface ClusterNodesSearch {
+  cluster_id?: string;
+  page_size?: number;
+}
+
+interface ClusterNodesPageProps {
+  search: ClusterNodesSearch;
+  onSearchChange: (value: ClusterNodesSearch) => void;
+}
+
+export function ClusterNodesPage({ search, onSearchChange }: ClusterNodesPageProps) {
+  const navigate = useNavigate();
+  const [create, setCreate] = useState(false);
+  const [expiredScope, setExpiredScope] = useState<string>();
+  const clusterId = search.cluster_id ?? "";
+  const clusters = useQuery({
+    queryKey: clusterOpsKeys.clusters(),
+    queryFn: ({ signal }) => listClusters(signal),
+    meta: { errorNotification: { id: "cluster-list", action: "读取集群" } },
+  });
+  useEffect(() => {
+    if (!clusterId && clusters.data?.items[0])
+      onSearchChange({ ...search, cluster_id: clusters.data.items[0].cluster_id });
+  }, [clusterId, clusters.data, onSearchChange, search]);
+  const types = useQuery({
+    queryKey: clusterOpsKeys.resourceTypes(clusterId),
+    queryFn: ({ signal }) => listResourceTypes(clusterId, signal),
+    enabled: Boolean(clusterId),
+    meta: { errorNotification: { id: "cluster-resource-types", action: "发现资源类型" } },
+  });
+  const descriptor = types.data?.items.find((item) => sameResourceType(item.type, clusterNodeType));
+  const scope = JSON.stringify([clusterId, search.page_size]);
+  // TODO(pagination-migration): 当前节点列表按 page_size/continue_token 翻页；后端支持 page/pageSize 和 items/total 后改用 useListPagination，并迁移路由中的 page_size。
+  const paging = useCursorPagination(scope, search.page_size ?? 20);
+  const expired = expiredScope === scope;
+  const params = {
+    ...clusterNodeType,
+    namespace: "",
+    all_namespaces: false,
+    page_size: paging.limit,
+    continue_token: paging.cursor,
+  };
+  const nodes = useQuery({
+    queryKey: clusterOpsKeys.resources(clusterId, params),
+    queryFn: ({ signal }) => listResources(clusterId, params, signal),
+    enabled: Boolean(clusterId && descriptor?.actions.includes("list") && !expired),
+    meta: { errorNotification: { id: "cluster-resources", action: "读取集群节点" } },
+  });
+  if (nodes.error instanceof ApiError && nodes.error.reason === "LIST_EXPIRED" && !expired) {
+    setExpiredScope(scope);
+    paging.resetPagination();
+  }
+  const rows = (nodes.data?.items ?? []).map((doc) => ({ ...doc, summary: nodeSummary(doc) }));
+  const columns: ListColumn<(typeof rows)[number]>[] = [
+    {
+      title: "名称",
+      key: "name",
+      dataIndex: "ref.name",
+      width: 200,
+      bodyCellStyle: { maxWidth: 200 },
+      fixed: "left",
+      ellipsis: true,
+      render: (_, doc) => (
+        <div className="flex min-w-0 flex-col gap-1">
+          <Button
+            type="text"
+            className="h-auto! max-w-full! self-start! p-0!"
+            title={doc.ref.name}
+            onClick={() =>
+              navigate({
+                to: "/cluster-nodes/$nodeName",
+                params: { nodeName: doc.ref.name },
+                search: { cluster_id: clusterId },
+              })
+            }
+          >
+            <span className="block truncate">{doc.ref.name}</span>
+          </Button>
+          <span className="truncate text-xs text-(--color-text-3)" title={doc.summary.internalIPs}>
+            {doc.summary.internalIPs}
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "状态",
+      width: 120,
+      render: (_, { summary }) => <NodeStatus summary={summary} vertical />,
+    },
+    {
+      title: "角色",
+      width: 160,
+      ellipsis: true,
+      render: (_, doc) => doc.summary.roles,
+    },
+    {
+      title: "配置（总容量）",
+      width: 160,
+      render: (_, doc) => (
+        <div className="flex flex-col gap-1">
+          <span>CPU {doc.summary.cpu}</span>
+          <span className="text-xs text-(--color-text-3)">内存 {doc.summary.memory}</span>
+        </div>
+      ),
+    },
+    {
+      title: "Kubelet 版本",
+      width: 140,
+      ellipsis: true,
+      render: (_, doc) => doc.summary.kubeletVersion,
+    },
+    {
+      title: "创建时间",
+      render: (_, doc) => formatDateTime(doc.summary.createdAt),
+    },
+  ];
+  return (
+    <>
+      <ListPageFrame
+        header={{
+          title: "节点管理",
+          subtitle: "Kubernetes 集群节点及其运行状态",
+          extra: (
+            <div className="flex items-center gap-3">
+              <Select
+                aria-label="集群"
+                placeholder="选择集群"
+                value={clusterId || undefined}
+                loading={clusters.isFetching}
+                filterOption={false}
+                onVisibleChange={(visible) => {
+                  if (visible && !clusters.isFetching) clusters.refetch();
+                }}
+                options={(clusters.data?.items ?? []).map((cluster) => ({
+                  value: cluster.cluster_id,
+                  label: cluster.display_name || cluster.cluster_id,
+                }))}
+                onChange={(value) => onSearchChange({ cluster_id: value })}
+              />
+            </div>
+          ),
+        }}
+        toolbar={{
+          actions: descriptor?.actions.includes("create") ? (
+            <Button type="primary" onClick={() => setCreate(true)}>
+              创建节点
+            </Button>
+          ) : undefined,
+          refresh: {
+            spinning: nodes.isFetching,
+            disabled: !clusterId,
+            onClick: () => {
+              setExpiredScope(undefined);
+              paging.resetPagination();
+              if (!paging.cursor && !expired) nodes.refetch();
+              types.refetch();
+              clusters.refetch();
+            },
+          },
+        }}
+      >
+        {types.data && !descriptor?.actions.includes("list") ? (
+          <Alert type="warning" content="当前集群未提供节点查询能力" />
+        ) : null}
+        <ListDataTable
+          columns={columns}
+          data={rows}
+          rowKey="uid"
+          loading={nodes.isFetching}
+          pagination={{
+            ...paging.getPagination(nodes.data?.next_continue_token, nodes.isFetching || expired),
+            pageSizeOptions: [20, 50, 100, 200],
+          }}
+        />
+      </ListPageFrame>
+      {create && descriptor ? (
+        <ResourceCreateModal
+          clusterId={clusterId}
+          descriptor={descriptor}
+          initialNamespace=""
+          onCancel={() => setCreate(false)}
+        />
+      ) : null}
+    </>
+  );
+}

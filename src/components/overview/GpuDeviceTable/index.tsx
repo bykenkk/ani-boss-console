@@ -2,7 +2,7 @@ import type { GpuDevice } from "@/api/accelerator";
 import {
   ListDataTable,
   StatusBadge,
-  type DataTableSectionHeaderProps,
+  type SectionHeaderProps,
   type ListColumn,
   type ListPagination,
 } from "@/components/common";
@@ -14,7 +14,7 @@ interface GpuDeviceTableProps {
   allocations: Map<string, GpuAllocation>;
   loading: boolean;
   pagination: ListPagination;
-  header: DataTableSectionHeaderProps;
+  header: SectionHeaderProps;
 }
 
 export function GpuDeviceTable({
