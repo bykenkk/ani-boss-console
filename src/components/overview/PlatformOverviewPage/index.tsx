@@ -125,6 +125,8 @@ export function PlatformOverviewPage() {
         subtitle: "平台 GPU 设备、资源承诺和启用租户的一屏总览。",
         extra: (
           <Button
+            aria-label="刷新"
+            title="刷新"
             icon={<IconRefresh />}
             loading={refreshing || tenants.isFetching}
             onClick={() =>
@@ -136,9 +138,7 @@ export function PlatformOverviewPage() {
                 }),
               ])
             }
-          >
-            刷新
-          </Button>
+          />
         ),
       }}
     >

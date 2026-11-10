@@ -23,6 +23,7 @@
 - 所有 Arco `Card` 统一无外边框、圆角 `8px`，由根级 `ConfigProvider.componentConfig.Card` 配置；业务侧不得覆盖为其他边框或圆角。此规则仅适用于 `Card` 组件。
 - 不自行仿造 Arco 已提供的 Button、Form、Modal 等基础组件。
 - 业务代码不得直接使用 Arco `Table`：普通组件、详情页和嵌入式表格使用 `DataTable`，标准列表页使用 `ListDataTable`。
+- 表格区与所属卡片或面板的四周边缘统一保留 `16px` 内边距，由所属容器负责；工具栏、表格和分页左右对齐，已有容器内边距时不重复叠加。分页与表体之间保留 `16px` 间距。
 - 需要展示的表格区块标题统一通过 `DataTable` / `ListDataTable` 的 `header` 配置，由内部 `SectionHeader` 子组件渲染标题、说明和右侧操作；不得使用 `Card.title` 或另写标题栏充当表格标题。`TableSectionFrame` 只负责表格区域布局、筛选和工具栏；是否保留区块标题仍遵循下文的页面标题去重规则。
 - 颜色和状态语义优先使用 Arco Token；Tailwind CSS 主要负责布局、尺寸和间距。
 - 页面布局不使用 Arco `Space` 组件，统一使用 TailwindCSS 的 Flex、Grid、gap 等工具类完成排列与间距。此项是“优先使用 Arco 组件”原则的明确例外，页面布局可直接使用 TailwindCSS，无需先尝试 `Space`。

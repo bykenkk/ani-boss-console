@@ -1,4 +1,4 @@
-import { Button, Select, Space } from "@arco-design/web-react";
+import { Button, Select } from "@arco-design/web-react";
 import type { ListPagination } from "../DataTable";
 
 interface CursorPaginationProps {
@@ -7,8 +7,9 @@ interface CursorPaginationProps {
 
 export default function CursorPagination({ pagination }: CursorPaginationProps) {
   return (
-    <Space className="justify-end p-4 w-full">
+    <div className="flex w-full flex-wrap items-center justify-end gap-2 pt-4">
       <Select
+        className="w-auto! shrink-0"
         aria-label="每页条数"
         value={pagination.pageSize}
         disabled={pagination.disabled}
@@ -31,6 +32,6 @@ export default function CursorPagination({ pagination }: CursorPaginationProps) 
       >
         下一页
       </Button>
-    </Space>
+    </div>
   );
 }

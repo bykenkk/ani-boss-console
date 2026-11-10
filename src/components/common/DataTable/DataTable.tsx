@@ -84,9 +84,8 @@ export function DataTable<T>({
   const resolvedColumns = hasRowActions
     ? normalizeDataTableColumns(columnsWithActions)
     : columnsWithActions;
-  const resolvedScroll = hasRowActions
-    ? resolveDataTableScroll(resolvedColumns, scroll)
-    : { x: "max-content" as const, ...scroll };
+  // 表头与表体共用按列宽计算的宽度，避免自定义 render 内容撑开列。
+  const resolvedScroll = resolveDataTableScroll(resolvedColumns, scroll);
   const tablePagination =
     pagination === false || (pagination !== "client" && pagination.mode === "legacy-cursor")
       ? false
@@ -117,6 +116,7 @@ export function DataTable<T>({
     <div className={clsx("flex min-h-0 min-w-0 flex-col", scroll?.y && "flex-1", className)}>
       {header ? <SectionHeader {...header} /> : null}
       <Table<T>
+        className="[&_.arco-table-container]:overflow-hidden"
         aria-label={tableLabel}
         rowKey={rowKey}
         columns={resolvedColumns}

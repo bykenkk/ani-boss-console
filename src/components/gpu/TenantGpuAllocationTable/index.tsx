@@ -16,6 +16,12 @@ interface TenantGpuAllocationTableProps {
   pagination: ListPagination;
 }
 
+interface TenantGpuAllocationRow extends TenantQuotaSummary {
+  quotaLimit?: string;
+  quotaOccupied?: string;
+  quotaAvailable?: string;
+}
+
 export function TenantGpuAllocationTable({
   data,
   quotaCode,
@@ -23,61 +29,33 @@ export function TenantGpuAllocationTable({
   pagination,
 }: TenantGpuAllocationTableProps) {
   const account = (tenant: TenantQuotaSummary) =>
-    tenant.accounts?.find((a) => a.quotaCode === quotaCode);
+    tenant.accounts?.find((item) => item.quotaCode === quotaCode);
   const unit = quotaCode === "gpu.physical.count" ? "张" : "GiB";
-  const columns: ListColumn<TenantQuotaSummary>[] = [
+  const rows: TenantGpuAllocationRow[] = data.map((tenant) => {
+    const current = account(tenant);
+    return {
+      ...tenant,
+      quotaLimit:
+        current?.configured === false || current?.limit === undefined
+          ? undefined
+          : formatQuotaUnits(current.limit, quotaCode),
+      quotaOccupied:
+        current?.occupied === undefined ? undefined : formatQuotaUnits(current.occupied, quotaCode),
+      quotaAvailable:
+        current?.configured === false || current?.available === undefined
+          ? undefined
+          : formatQuotaUnits(current.available, quotaCode),
+    };
+  });
+  const columns: ListColumn<TenantGpuAllocationRow>[] = [
     {
       key: "name",
       title: "租户",
       width: 200,
+      fixed: "left",
       render: (_, tenant) => (
         <ResourceIdentity name={tenant.tenantName || tenant.tenantCode} id={tenant.tenantId} />
       ),
-    },
-    { title: "所属套餐", dataIndex: "planName", width: 160, ellipsis: true },
-    {
-      title: `配额上限（${unit}）`,
-      width: 160,
-      render: (_, tenant) =>
-        account(tenant)?.configured === false
-          ? "未配置"
-          : formatQuotaUnits(account(tenant)?.limit, quotaCode),
-    },
-    {
-      title: `配额占用（${unit}）`,
-      width: 160,
-      render: (_, tenant) => formatQuotaUnits(account(tenant)?.occupied, quotaCode),
-    },
-    {
-      title: `剩余配额（${unit}）`,
-      width: 160,
-      render: (_, tenant) =>
-        account(tenant)?.configured === false
-          ? "未配置"
-          : formatQuotaUnits(account(tenant)?.available, quotaCode),
-    },
-    {
-      title: "配额占用率",
-      width: 180,
-      render: (_, tenant) => {
-        const current = account(tenant);
-        const limit = quotaInteger(current?.limit);
-        const occupied = quotaInteger(current?.occupied);
-        if (current?.configured !== true || limit === undefined || occupied === undefined)
-          return "-";
-        if (limit === 0n) return occupied > 0n ? "超限" : "-";
-        const percent = Number((occupied * 1000n) / limit) / 10;
-        return (
-          <Tooltip content="配额占用 / 配额上限；不代表 GPU 实际利用率">
-            <div className="flex items-center gap-2">
-              <Progress percent={Math.min(100, percent)} showText={false} strokeWidth={6} />
-              <strong className="shrink-0 whitespace-nowrap text-xs tabular-nums">
-                {percent.toFixed(1)}%
-              </strong>
-            </div>
-          </Tooltip>
-        );
-      },
     },
     {
       title: "配置状态",
@@ -100,13 +78,56 @@ export function TenantGpuAllocationTable({
         );
       },
     },
+    { title: "所属套餐", dataIndex: "planName", width: 160, ellipsis: true },
+    {
+      title: "配额占用率",
+      width: 100,
+      align: "center",
+      render: (_, tenant) => {
+        const current = account(tenant);
+        if (current?.configured === false) return "-";
+        const limit = quotaInteger(current?.limit);
+        const occupied = quotaInteger(current?.occupied);
+        const percent =
+          current?.configured === true &&
+          limit !== undefined &&
+          occupied !== undefined &&
+          limit > 0n
+            ? Number((occupied * 1000n) / limit) / 10
+            : undefined;
+        const overLimit =
+          current?.configured === true && limit === 0n && occupied !== undefined && occupied > 0n;
+        const text = overLimit
+          ? "超限"
+          : percent === undefined
+            ? undefined
+            : `${Number(percent.toFixed(1))}%`;
+        return (
+          <Tooltip content="配额占用 / 配额上限；不代表 GPU 实际利用率">
+            <Progress
+              type="circle"
+              width={40}
+              strokeWidth={3}
+              percent={overLimit ? 100 : Math.min(100, percent ?? 0)}
+              showText={text !== undefined}
+              formatText={() => (
+                <span className="text-[10px] whitespace-nowrap tabular-nums">{text}</span>
+              )}
+            />
+          </Tooltip>
+        );
+      },
+    },
+    { title: `配额上限（${unit}）`, dataIndex: "quotaLimit", width: 160 },
+    { title: `配额占用（${unit}）`, dataIndex: "quotaOccupied", width: 160 },
+    { title: `剩余配额（${unit}）`, dataIndex: "quotaAvailable", width: 160 },
   ];
   return (
     <ListDataTable
       tableLabel="租户 GPU 配额"
       rowKey={(tenant) => String(tenant.tenantId)}
       columns={columns}
-      data={data}
+      data={rows}
       loading={loading}
       pagination={pagination}
     />

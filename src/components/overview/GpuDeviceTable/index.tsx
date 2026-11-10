@@ -38,16 +38,19 @@ export function GpuDeviceTable({
       ),
     },
     {
-      title: "设备 ID / UUID",
-      width: 280,
+      title: "设备 ID",
+      dataIndex: "device_id",
+      width: 220,
+      ellipsis: true,
+      render: (_, row) => <ResourceIdentity id={row.device_id} display="id" idLabel="设备 ID" />,
+    },
+    {
+      title: "UUID",
+      dataIndex: "vendor_device_id",
+      width: 260,
       ellipsis: true,
       render: (_, row) => (
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <ResourceIdentity id={row.device_id} display="id" idLabel="设备 ID" />
-          <span className="text-xs text-(--color-text-2)">
-            <ResourceIdentity id={row.vendor_device_id} display="id" idLabel="GPU UUID" />
-          </span>
-        </div>
+        <ResourceIdentity id={row.vendor_device_id} display="id" idLabel="GPU UUID" />
       ),
     },
     { title: "型号", dataIndex: "model_key", width: 200, ellipsis: true },
@@ -68,7 +71,7 @@ export function GpuDeviceTable({
           <div>
             {a?.mode === "WHOLE_EXCLUSIVE" ? "整卡" : a?.mode === "SHARED_FIXED" ? "共享" : "未知"}
             {a?.admission === "ADMISSION_CLOSED" ? (
-              <div className="text-xs text-[var(--color-text-3)]">已关闭接单</div>
+              <div className="text-xs text-(--color-text-3)">已关闭接单</div>
             ) : null}
           </div>
         );
@@ -115,7 +118,7 @@ export function GpuDeviceTable({
       loading={loading}
       tableLabel="GPU 设备列表"
       emptyText="暂无 GPU 设备"
-      scroll={{ x: 1410 }}
+      scroll={{ x: 1670 }}
     />
   );
 }
