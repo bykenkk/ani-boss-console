@@ -2,7 +2,12 @@ import { Button, Input, Space } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { listVirtualSwitches, virtualSwitchKeys, type VirtualSwitch } from "@/api/virtual-switches";
-import { ListDataTable, ListPageFrame, type ListColumn } from "@/components/common";
+import {
+  ResourceIdentity,
+  ListDataTable,
+  ListPageFrame,
+  type ListColumn,
+} from "@/components/common";
 import { useListPagination } from "@/hooks/useListPagination";
 import { useVirtualSwitchActions } from "@/hooks/useVirtualSwitchActions";
 import { formatDateTime } from "@/lib/date";
@@ -11,11 +16,12 @@ import { VirtualSwitchCreateModal } from "../VirtualSwitchCreateModal";
 const columns: ListColumn<VirtualSwitch>[] = [
   {
     key: "name",
-    title: "名称",
+    title: "名称 / ID",
     dataIndex: "name",
     width: 200,
     fixed: "left",
     ellipsis: true,
+    render: (_, row) => <ResourceIdentity name={row.name} id={row.id} idLabel="资源 ID" />,
   },
   {
     key: "createdAt",

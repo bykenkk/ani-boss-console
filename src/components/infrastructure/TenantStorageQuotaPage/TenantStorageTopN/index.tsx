@@ -1,6 +1,6 @@
 import { Progress } from "@arco-design/web-react";
 import {
-  ResourceNameId,
+  ResourceIdentity,
   ListDataTable,
   TableSectionFrame,
   type ListColumn,
@@ -56,7 +56,7 @@ const columns: ListColumn<TenantHotItem>[] = [
     title: "租户 / ID",
     dataIndex: "name",
     width: 200,
-    render: (_, item) => <ResourceNameId name={item.name} id={item.id} />,
+    render: (_, item) => <ResourceIdentity name={item.name} id={item.id} />,
   },
   {
     title: "最高水位",

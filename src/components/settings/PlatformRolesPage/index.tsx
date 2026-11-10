@@ -8,6 +8,7 @@ import {
   type ManagedRole,
 } from "@/api/management";
 import {
+  ResourceIdentity,
   ListDataTable,
   ListPageFrame,
   StatusBadge,
@@ -22,10 +23,10 @@ const columns: ListColumn<ManagedRole>[] = [
   {
     key: "name",
     dataIndex: "name",
-    title: "角色名称",
+    title: "角色 / ID",
     width: 200,
     ellipsis: true,
-    render: (value) => String(value ?? "-"),
+    render: (_, row) => <ResourceIdentity name={row.name} id={row.id} idLabel="资源 ID" />,
   },
   {
     key: "code",
@@ -58,9 +59,14 @@ const columns: ListColumn<ManagedRole>[] = [
     key: "tenantName",
     dataIndex: "tenantName",
     title: "所属租户",
-    width: 160,
+    width: 200,
     ellipsis: true,
-    render: (value, row) => (row.tenantId === 0 ? "-" : String(value ?? "-")),
+    render: (_, row) =>
+      row.tenantId === 0 ? (
+        "-"
+      ) : (
+        <ResourceIdentity name={row.tenantName} id={row.tenantId} idLabel="租户 ID" />
+      ),
   },
   {
     key: "createdAt",

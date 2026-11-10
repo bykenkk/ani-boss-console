@@ -1,4 +1,5 @@
 import { Descriptions, Modal } from "@arco-design/web-react";
+import { ResourceIdentity } from "@/components/common";
 import type { PlatformNetwork } from "@/api/platform-networks";
 import { PlatformNetworkStatus } from "@/components/network/PlatformNetworkStatus";
 import { formatDateTime } from "@/lib/date";
@@ -16,8 +17,7 @@ export function BasicNetworkDetailModal({ network, onCancel }: BasicNetworkDetai
         column={1}
         className="break-all"
         data={[
-          { label: "名称", value: network.name },
-          { label: "ID", value: network.id },
+          { label: "名称 / ID", value: <ResourceIdentity name={network.name} id={network.id} /> },
           { label: "简介", value: network.description || "-" },
           { label: "状态", value: <PlatformNetworkStatus state={network.state} /> },
           { label: "IPv4 CIDR", value: pool?.cidr || "-" },

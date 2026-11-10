@@ -1,6 +1,6 @@
-import { Button } from "@arco-design/web-react";
 import type { ClusterOpsResourceDocument, ClusterOpsResourceRef } from "@/api/cluster-ops";
 import {
+  ResourceIdentity,
   ListDataTable,
   StatusBadge,
   type ListColumn,
@@ -39,14 +39,7 @@ export function ScopedResourcesTable({
       fixed: "left",
       ellipsis: true,
       render: (_, doc) => (
-        <Button
-          type="text"
-          className="h-auto! max-w-full! p-0!"
-          title={doc.ref.name}
-          onClick={() => onOpen(doc.ref)}
-        >
-          <span className="block truncate">{doc.ref.name}</span>
-        </Button>
+        <ResourceIdentity name={doc.ref.name} display="name" onOpen={() => onOpen(doc.ref)} />
       ),
     },
     { title: "状态", width: 120, render: (_, doc) => <StatusBadge {...doc.summary.status} /> },
@@ -59,7 +52,7 @@ export function ScopedResourcesTable({
           { title: "服务版本", dataIndex: "summary.servedVersions", width: 160, ellipsis: true },
           { title: "存储版本", dataIndex: "summary.storageVersion", width: 120, ellipsis: true },
         ]),
-    { title: "创建时间", render: (_, doc) => formatDateTime(doc.summary.createdAt) },
+    { title: "创建时间", width: 180, render: (_, doc) => formatDateTime(doc.summary.createdAt) },
   ];
   return (
     <ListDataTable

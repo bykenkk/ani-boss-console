@@ -2,7 +2,7 @@ import { Progress, Select, Space } from "@arco-design/web-react";
 import clsx from "clsx";
 import { useMemo, useState } from "react";
 import {
-  ResourceNameId,
+  ResourceIdentity,
   ListDataTable,
   ResourcePageFrame,
   TableSectionFrame,
@@ -156,7 +156,9 @@ export function NetworkInfrastructurePage() {
       dataIndex: "name",
       width: 200,
       fixed: "left",
-      render: (_, component) => <ResourceNameId name={component.name} id={component.type} />,
+      render: (_, component) => (
+        <ResourceIdentity name={component.name} id={component.type} copyable={false} />
+      ),
     },
     {
       title: "状态",
@@ -214,7 +216,7 @@ export function NetworkInfrastructurePage() {
       title: "地址池",
       dataIndex: "name",
       width: 200,
-      render: (_, pool) => <ResourceNameId name={pool.name} id={pool.id} />,
+      render: (_, pool) => <ResourceIdentity name={pool.name} id={pool.id} />,
     },
     { title: "CIDR", dataIndex: "cidr", width: 160 },
     { title: "区域", dataIndex: "region", width: 130 },

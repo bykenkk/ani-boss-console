@@ -6,21 +6,41 @@ import {
   platformNetworkKeys,
   type PlatformNetwork,
 } from "@/api/platform-networks";
-import { ListDataTable, ListPageFrame, type ListColumn } from "@/components/common";
+import {
+  ResourceIdentity,
+  ListDataTable,
+  ListPageFrame,
+  type ListColumn,
+} from "@/components/common";
 import { PlatformNetworkStatus } from "@/components/network/PlatformNetworkStatus";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { useLayer2NetworkActions } from "@/hooks/useLayer2NetworkActions";
 import { Layer2NetworkCreateModal } from "../Layer2NetworkCreateModal";
 const kind = "vlan-networks";
 const columns: ListColumn<PlatformNetwork>[] = [
-  { key: "name", title: "名称", dataIndex: "name", width: 200, fixed: "left", ellipsis: true },
+  {
+    key: "name",
+    title: "名称 / ID",
+    dataIndex: "name",
+    width: 200,
+    fixed: "left",
+    ellipsis: true,
+    render: (_, row) => <ResourceIdentity name={row.name} id={row.id} idLabel="资源 ID" />,
+  },
   {
     key: "state",
     title: "状态",
     width: 120,
     render: (_, item) => <PlatformNetworkStatus state={item.state} />,
   },
-  { key: "cluster", title: "集群 ID", dataIndex: "cluster_id", width: 180, ellipsis: true },
+  {
+    key: "cluster",
+    title: "集群 ID",
+    dataIndex: "cluster_id",
+    width: 180,
+    ellipsis: true,
+    render: (_, row) => <ResourceIdentity id={row.cluster_id} display="id" idLabel="集群 ID" />,
+  },
   { key: "nic", title: "网卡", dataIndex: "vlan.device_name", width: 140 },
   { key: "vlan", title: "VLAN ID", dataIndex: "vlan.vlan_id", width: 130 },
   {
@@ -29,6 +49,9 @@ const columns: ListColumn<PlatformNetwork>[] = [
     dataIndex: "vlan.virtual_switch_id",
     width: 220,
     ellipsis: true,
+    render: (_, row) => (
+      <ResourceIdentity id={row.vlan?.virtual_switch_id} display="id" idLabel="虚拟交换机 ID" />
+    ),
   },
 ];
 export function Layer2NetworksPage() {

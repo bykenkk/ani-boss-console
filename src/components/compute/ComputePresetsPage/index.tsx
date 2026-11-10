@@ -11,6 +11,7 @@ import {
   type ComputePresetListParams,
 } from "@/api/compute-presets";
 import {
+  ResourceIdentity,
   ListDataTable,
   ListPageFrame,
   StatusBadge,
@@ -21,9 +22,15 @@ import { useListPagination } from "@/hooks/useListPagination";
 import { formatDateTime } from "@/lib/date";
 import { ComputePresetEditModal } from "../ComputePresetEditModal";
 const columns: ListColumn<ComputePreset>[] = [
-  { title: "规格名称", dataIndex: "name", width: 200, ellipsis: true },
+  {
+    title: "规格 / ID",
+    dataIndex: "name",
+    width: 200,
+    ellipsis: true,
+    render: (_, row) => <ResourceIdentity name={row.name} id={row.id} idLabel="资源 ID" />,
+  },
   { title: "规格编码", dataIndex: "code", width: 200, ellipsis: true },
-  { title: "规格 ID", dataIndex: "id", width: 220, ellipsis: true },
+
   {
     title: "规格类型",
     width: 110,
@@ -37,6 +44,9 @@ const columns: ListColumn<ComputePreset>[] = [
     width: 220,
     ellipsis: true,
     dataIndex: "gpu.profile_id",
+    render: (_, row) => (
+      <ResourceIdentity id={row.gpu?.profile_id} display="id" idLabel="GPU 规格 ID" />
+    ),
   },
   {
     title: "GPU 规格版本",

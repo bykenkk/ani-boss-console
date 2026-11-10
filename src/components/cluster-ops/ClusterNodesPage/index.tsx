@@ -4,7 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { ApiError, listClusters, listResources, listResourceTypes } from "@/api/cluster-ops";
 import { clusterOpsKeys } from "@/api/cluster-ops/keys";
-import { ListDataTable, ListPageFrame, type ListColumn } from "@/components/common";
+import {
+  ResourceIdentity,
+  ListDataTable,
+  ListPageFrame,
+  type ListColumn,
+} from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { formatDateTime } from "@/lib/date";
 import { sameResourceType } from "../model";
@@ -77,21 +82,18 @@ export function ClusterNodesPage({ search, onSearchChange }: ClusterNodesPagePro
       ellipsis: true,
       render: (_, doc) => (
         <div className="flex min-w-0 flex-col gap-1">
-          <Button
-            type="text"
-            className="h-auto! max-w-full! self-start! p-0!"
-            title={doc.ref.name}
-            onClick={() =>
+          <ResourceIdentity
+            name={doc.ref.name}
+            display="name"
+            onOpen={() =>
               navigate({
                 to: "/cluster-nodes/$nodeName",
                 params: { nodeName: doc.ref.name },
                 search: { cluster_id: clusterId },
               })
             }
-          >
-            <span className="block truncate">{doc.ref.name}</span>
-          </Button>
-          <span className="truncate text-xs text-(--color-text-3)" title={doc.summary.internalIPs}>
+          />
+          <span className="text-xs text-(--color-text-3)" title={doc.summary.internalIPs}>
             {doc.summary.internalIPs}
           </span>
         </div>

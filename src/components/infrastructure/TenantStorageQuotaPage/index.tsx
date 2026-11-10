@@ -1,7 +1,7 @@
 import { Progress, Select, Space } from "@arco-design/web-react";
 import { useMemo, useState } from "react";
 import {
-  ResourceNameId,
+  ResourceIdentity,
   ListDataTable,
   ResourcePageFrame,
   TableSectionFrame,
@@ -168,7 +168,7 @@ export function TenantStorageQuotaPage() {
       dataIndex: "displayName",
       width: 200,
       fixed: "left",
-      render: (_, tenant) => <ResourceNameId name={tenant.displayName} id={tenant.name} />,
+      render: (_, tenant) => <ResourceIdentity name={tenant.displayName} id={tenant.name} />,
     },
     {
       title: "风险",

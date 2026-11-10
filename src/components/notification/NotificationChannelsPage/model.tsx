@@ -1,10 +1,18 @@
 import type { NotificationChannel } from "@/api/notification-channels";
-import { StatusBadge, type ListColumn } from "@/components/common";
+import { ResourceIdentity, StatusBadge, type ListColumn } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { channelTlsLabels, channelTypeLabels } from "./constants";
 
 export const notificationChannelColumns: ListColumn<NotificationChannel>[] = [
-  { key: "name", title: "渠道名称", dataIndex: "name", width: 200, fixed: "left", ellipsis: true },
+  {
+    key: "name",
+    title: "渠道 / ID",
+    dataIndex: "name",
+    width: 200,
+    fixed: "left",
+    ellipsis: true,
+    render: (_, row) => <ResourceIdentity name={row.name} id={row.id} idLabel="资源 ID" />,
+  },
   {
     key: "type",
     title: "类型",

@@ -6,10 +6,15 @@ import {
   type GpuDeviceCapacity,
   type GpuProfile,
 } from "@/api/accelerator";
-import { DataTable, type ListColumn } from "@/components/common";
+import { ResourceIdentity, DataTable, type ListColumn } from "@/components/common";
 import { withId } from "@/lib/id";
 const columns: ListColumn<GpuDeviceCapacity>[] = [
-  { title: "设备 ID", width: 160, dataIndex: "device_id" },
+  {
+    title: "设备 ID",
+    width: 160,
+    dataIndex: "device_id",
+    render: (_, row) => <ResourceIdentity id={row.device_id} display="id" idLabel="设备 ID" />,
+  },
   { title: "安全预算（MiB）", width: 160, dataIndex: "safe_memory_budget_mib" },
   { title: "实际占用（MiB）", width: 160, dataIndex: "committed_memory_mib" },
   { title: "理论份数", width: 160, dataIndex: "nominal_units" },

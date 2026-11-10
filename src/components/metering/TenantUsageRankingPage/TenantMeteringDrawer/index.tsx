@@ -6,7 +6,7 @@ import {
   type ResourceUsageMetric,
   type ResourceUsagePoint,
 } from "@/api/resource-usage";
-import { DataTable, SummaryStrip, type ListColumn } from "@/components/common";
+import { ResourceIdentity, DataTable, SummaryStrip, type ListColumn } from "@/components/common";
 import { formatDateTimeMinute, formatMonthDayTime } from "@/lib/date";
 import { withId } from "@/lib/id";
 import { UsageQuality, UsageValue } from "../../MeteringPresentation";
@@ -86,8 +86,11 @@ export function TenantMeteringDrawer({
     >
       <div className="space-y-4">
         <div>
-          <div className="text-sm font-medium">{detail?.tenantName ?? tenantName}</div>
-          <div className="mt-1 font-mono text-xs text-gray-500">租户 ID：{tenantId}</div>
+          <ResourceIdentity
+            name={detail?.tenantName ?? tenantName}
+            id={tenantId}
+            idLabel="租户 ID"
+          />
           <div className="mt-2 text-xs text-gray-500">
             查询范围：{formatDateTimeMinute(detail?.start ?? start)} 至{" "}
             {formatDateTimeMinute(detail?.end ?? end)}

@@ -1,5 +1,5 @@
 import type { AuditLog, AuditLogKind } from "@/api/audit-logs";
-import { type ListColumn } from "@/components/common";
+import { ResourceIdentity, type ListColumn } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { AuditResult } from "../AuditResult";
 import { auditActionLabels } from "./constants";
@@ -23,9 +23,11 @@ export function getAuditColumns(kind: AuditLogKind): ListColumn<AuditLog>[] {
     {
       title: "操作者",
       dataIndex: "username",
-      width: 160,
+      width: 200,
       ellipsis: true,
-      render: (value?: string) => value || "-",
+      render: (_, item) => (
+        <ResourceIdentity name={item.username} id={item.userId} idLabel="用户 ID" />
+      ),
     },
     {
       title: "动作",
@@ -84,7 +86,7 @@ export function getAuditColumns(kind: AuditLogKind): ListColumn<AuditLog>[] {
         dataIndex: "resourceId",
         width: 150,
         ellipsis: true,
-        render: (value?: string) => value || "-",
+        render: (value?: string) => <ResourceIdentity id={value} display="id" />,
       },
     );
   } else {
@@ -114,7 +116,7 @@ export function getAuditColumns(kind: AuditLogKind): ListColumn<AuditLog>[] {
       dataIndex: "requestId",
       width: 240,
       ellipsis: true,
-      render: (value?: string) => value || "-",
+      render: (value?: string) => <ResourceIdentity id={value} display="id" idLabel="请求 ID" />,
     });
   } else {
     columns.push({

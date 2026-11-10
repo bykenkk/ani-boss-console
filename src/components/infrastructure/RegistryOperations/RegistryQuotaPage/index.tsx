@@ -1,7 +1,7 @@
 import { Progress, Select, Space } from "@arco-design/web-react";
 import { useMemo, useState } from "react";
 import {
-  ResourceNameId,
+  ResourceIdentity,
   ListDataTable,
   ResourcePageFrame,
   TableSectionFrame,
@@ -55,7 +55,7 @@ export function RegistryQuotaPage() {
       dataIndex: "name",
       width: 200,
       fixed: "left",
-      render: (_, quota) => <ResourceNameId name={quota.name} id={quota.code} />,
+      render: (_, quota) => <ResourceIdentity name={quota.name} id={quota.code} />,
     },
     {
       title: "状态",

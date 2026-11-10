@@ -2,7 +2,13 @@ import { Button, Input, Space } from "@arco-design/web-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { listPlans, planKeys, type Plan } from "@/api/plans";
-import { ListDataTable, ListPageFrame, type ListColumn, type RowAction } from "@/components/common";
+import {
+  ResourceIdentity,
+  ListDataTable,
+  ListPageFrame,
+  type ListColumn,
+  type RowAction,
+} from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
 import { PlanEditModal } from "@/components/tenant/PlanEditModal";
@@ -15,10 +21,10 @@ const columns: ListColumn<Plan>[] = [
   {
     key: "name",
     dataIndex: "name",
-    title: "套餐名称",
+    title: "套餐 / ID",
     width: 200,
     ellipsis: true,
-    render: (value) => String(value ?? "-"),
+    render: (_, row) => <ResourceIdentity name={row.name} id={row.id} idLabel="资源 ID" />,
   },
   {
     key: "version",

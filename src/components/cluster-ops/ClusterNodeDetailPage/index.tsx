@@ -3,7 +3,7 @@ import { IconRefresh } from "@arco-design/web-react/icon";
 import { useQuery } from "@tanstack/react-query";
 import { getResource, listResourceTypes, type ClusterOpsResourceRef } from "@/api/cluster-ops";
 import { clusterOpsKeys } from "@/api/cluster-ops/keys";
-import { DetailPageFrame, type DetailTab } from "@/components/common";
+import { ResourceIdentity, DetailPageFrame, type DetailTab } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { field, nativeObject, text } from "../model";
 import { nodeSummary, formatNodeQuantity } from "../ClusterNodesPage/node-summary";
@@ -82,7 +82,9 @@ export function ClusterNodeDetailPage({ resourceRef, onBack, onList }: ClusterNo
               data={[
                 {
                   label: "集群",
-                  value: <span className="break-all">{resourceRef.cluster_id}</span>,
+                  value: (
+                    <ResourceIdentity id={resourceRef.cluster_id} display="id" idLabel="集群 ID" />
+                  ),
                 },
                 { label: "创建时间", value: formatDateTime(summary?.createdAt) },
               ]}

@@ -1,7 +1,7 @@
 import { Descriptions, Modal, Spin } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { eipKeys, getEIP } from "@/api/eips";
-import { StatusBadge } from "@/components/common";
+import { ResourceIdentity, StatusBadge } from "@/components/common";
 import { PlatformNetworkStatus } from "@/components/network/PlatformNetworkStatus";
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
@@ -24,20 +24,35 @@ export function EIPDetailModal({ id, onCancel }: EIPDetailModalProps) {
         <Descriptions
           column={2}
           data={[
-            { label: "名称", value: item?.name || "-" },
-            { label: "EIP ID", value: id },
+            {
+              label: "EIP",
+              value: <ResourceIdentity name={item?.name} id={id} idLabel="EIP ID" />,
+            },
             { label: "IP 地址", value: item?.address || "-" },
             { label: "状态", value: item ? <PlatformNetworkStatus state={item.state} /> : "-" },
             {
               label: "所属租户",
               value:
-                item?.managed_by === "system" && !item.resource_tenant_id
-                  ? "平台系统"
-                  : item?.tenant_name || item?.resource_tenant_id || "-",
+                item?.managed_by === "system" && !item.resource_tenant_id ? (
+                  "平台系统"
+                ) : (
+                  <ResourceIdentity
+                    name={item?.tenant_name}
+                    id={item?.resource_tenant_id}
+                    idLabel="租户 ID"
+                  />
+                ),
             },
-            { label: "租户 ID", value: item?.tenant_id || "-" },
-            { label: "地址池", value: item?.pool_name || "-" },
-            { label: "地址池 ID", value: item?.pool_id || "-" },
+            {
+              label: "租户 ID",
+              value: <ResourceIdentity id={item?.tenant_id} display="id" idLabel="租户 ID" />,
+            },
+            {
+              label: "地址池",
+              value: (
+                <ResourceIdentity name={item?.pool_name} id={item?.pool_id} idLabel="地址池 ID" />
+              ),
+            },
             {
               label: "地址类型",
               value:
@@ -57,7 +72,16 @@ export function EIPDetailModal({ id, onCancel }: EIPDetailModalProps) {
                     : item?.managed_by || "-",
             },
             { label: "绑定类型", value: item ? eipBindingLabel(item) : "-" },
-            { label: "绑定资源 ID", value: item?.binding_target?.id || "-" },
+            {
+              label: "绑定资源 ID",
+              value: (
+                <ResourceIdentity
+                  id={item?.binding_target?.id}
+                  display="id"
+                  idLabel="绑定资源 ID"
+                />
+              ),
+            },
             { label: "绑定状态", value: item?.binding_target?.state || item?.binding_state || "-" },
             {
               label: "观测状态",

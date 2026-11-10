@@ -10,7 +10,7 @@ import {
   type ClusterOpsResourceTypeRef,
 } from "@/api/cluster-ops";
 import { clusterOpsKeys } from "@/api/cluster-ops/keys";
-import { DataTable } from "@/components/common";
+import { DataTable, ResourceIdentity } from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { array, field, labelSelector, nativeObject, record, resourceState } from "../model";
 import { ResourceLink } from "./ResourceLink";
@@ -76,7 +76,9 @@ function MatchingResources({
           title: "名称",
           width: 200,
           ellipsis: true,
-          render: (_, doc) => <ResourceLink resourceRef={doc.ref} label={doc.ref.name} />,
+          render: (_, doc) => (
+            <ResourceLink resourceRef={doc.ref} label={doc.ref.name} id={doc.uid} />
+          ),
         },
         { title: "状态", width: 120, render: (_, doc) => resourceState(doc) },
       ]}
@@ -189,7 +191,7 @@ export function RelatedResources({ resource, descriptors }: RelatedResourcesProp
                 entry.ref ? (
                   <ResourceLink resourceRef={entry.ref} label={entry.label} />
                 ) : (
-                  entry.label
+                  <ResourceIdentity name={entry.label} display="name" />
                 ),
             },
           ]}

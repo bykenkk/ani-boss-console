@@ -10,6 +10,7 @@ import {
   type GpuProfile,
 } from "@/api/accelerator";
 import {
+  ResourceIdentity,
   TableSectionFrame,
   ListDataTable,
   StatusBadge,
@@ -19,10 +20,26 @@ import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { withId } from "@/lib/id";
 import { GpuCapacityModal } from "../GpuCapacityModal";
 const columns: ListColumn<GpuProfile>[] = [
-  { title: "规格名称", dataIndex: "display_name", width: 200, ellipsis: true },
-  { title: "规格 ID", dataIndex: "profile_id", width: 220, ellipsis: true },
+  {
+    title: "规格 / ID",
+    dataIndex: "display_name",
+    width: 200,
+    ellipsis: true,
+    render: (_, row) => (
+      <ResourceIdentity name={row.display_name} id={row.profile_id} idLabel="资源 ID" />
+    ),
+  },
+
   { title: "规格版本", dataIndex: "profile_version", width: 100, ellipsis: true },
-  { title: "供给组 ID", dataIndex: "spec.group_id", width: 220, ellipsis: true },
+  {
+    title: "供给组 ID",
+    dataIndex: "spec.group_id",
+    width: 220,
+    ellipsis: true,
+    render: (_, row) => (
+      <ResourceIdentity id={row.spec?.group_id} display="id" idLabel="供给组 ID" />
+    ),
+  },
   { title: "GPU 型号", dataIndex: "spec.model_key", width: 180, ellipsis: true },
   {
     title: "模式",

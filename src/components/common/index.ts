@@ -28,8 +28,7 @@ export type {
 } from "./ListPageFrame";
 export { PagePlaceholder } from "./PagePlaceholder";
 export { ResourcePageFrame } from "./ResourcePageFrame";
-export { ResourceNameId } from "./ResourceNameId";
-export type { ResourceNameIdProps } from "./ResourceNameId";
+export { ResourceIdentity } from "./ResourceIdentity";
 export type {
   ResourcePageFrameProps,
   ResourcePageHeaderAction,

@@ -9,7 +9,7 @@ import {
   type PlatformComponentLog,
 } from "@/api/platform";
 import {
-  ResourceNameId,
+  ResourceIdentity,
   ListDataTable,
   ListPageFrame,
   type ListColumn,
@@ -159,7 +159,7 @@ export function PlatformLogsPage({ initialComponent }: PlatformLogsPageProps) {
     {
       title: "Pod / 容器",
       width: 200,
-      render: (_, log) => <ResourceNameId name={log.pod || "-"} id={log.container || "-"} />,
+      render: (_, log) => <ResourceIdentity name={log.pod} id={log.container} copyable={false} />,
     },
     {
       title: "输出流",

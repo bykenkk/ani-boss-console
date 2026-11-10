@@ -2,13 +2,26 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@arco-design/web-react";
 import { acceleratorKeys, listGpuClusters, type GpuCluster } from "@/api/accelerator";
-import { TableSectionFrame, ListDataTable, type ListColumn } from "@/components/common";
+import {
+  ResourceIdentity,
+  TableSectionFrame,
+  ListDataTable,
+  type ListColumn,
+} from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 
 import { RegisterGpuClusterModal } from "../RegisterGpuClusterModal";
 const columns: ListColumn<GpuCluster>[] = [
-  { title: "集群", dataIndex: "display_name", width: 220, ellipsis: true },
-  { title: "集群 ID", dataIndex: "cluster_id", width: 220, ellipsis: true },
+  {
+    title: "集群 / ID",
+    dataIndex: "display_name",
+    width: 200,
+    ellipsis: true,
+    render: (_, row) => (
+      <ResourceIdentity name={row.display_name} id={row.cluster_id} idLabel="资源 ID" />
+    ),
+  },
+
   { title: "连接引用", dataIndex: "connection_ref", width: 260, ellipsis: true },
   { title: "版本", dataIndex: "version", width: 100, ellipsis: true },
 ];

@@ -2,7 +2,7 @@ import { Button, Descriptions, Form, Input, Modal, Space } from "@arco-design/we
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 import { createPublicNetwork, platformNetworkKeys } from "@/api/platform-networks";
-import { ModalSteps } from "@/components/common";
+import { ResourceIdentity, ModalSteps } from "@/components/common";
 import { validateForm } from "@/lib/form";
 import { PublicNetworkAddressFields } from "./PublicNetworkAddressFields";
 import { buildAddressPool } from "./address-pool";
@@ -123,7 +123,10 @@ export function PublicNetworkCreateModal({ onCancel, onSuccess }: PublicNetworkC
           data={[
             { label: "名称", value: summary.name },
             { label: "网络模式", value: "Underlay" },
-            { label: "二层网络 ID", value: summary.vlanId },
+            {
+              label: "二层网络 ID",
+              value: <ResourceIdentity id={summary.vlanId} display="id" idLabel="二层网络 ID" />,
+            },
             { label: "出口网关", value: "由平台自动创建和管理" },
             { label: "IPv4 CIDR", value: summary.cidr },
             {

@@ -9,6 +9,7 @@ import {
   type ManagedApi,
 } from "@/api/management";
 import {
+  ResourceIdentity,
   ListDataTable,
   ListPageFrame,
   StatusBadge,
@@ -23,10 +24,11 @@ const columns: ListColumn<ManagedApi>[] = [
   {
     key: "description",
     dataIndex: "description",
-    title: "API描述",
+    title: "API / ID",
     width: 200,
     fixed: "left",
     ellipsis: true,
+    render: (_, row) => <ResourceIdentity name={row.description} id={row.id} idLabel="资源 ID" />,
   },
   {
     key: "path",

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { acceleratorKeys, listGpuDevices, type GpuDevice } from "@/api/accelerator";
 import {
+  ResourceIdentity,
   TableSectionFrame,
   ListDataTable,
   StatusBadge,
@@ -9,17 +10,40 @@ import {
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { withId } from "@/lib/id";
 const columns: ListColumn<GpuDevice>[] = [
-  { title: "物理设备 ID", dataIndex: "device_id", width: 220, ellipsis: true },
-  { title: "GPU UUID", dataIndex: "vendor_device_id", width: 260, ellipsis: true },
   {
-    title: "节点名称",
+    title: "物理设备 ID",
+    dataIndex: "device_id",
+    width: 220,
+    ellipsis: true,
+    render: (_, row) => <ResourceIdentity id={row.device_id} display="id" idLabel="设备 ID" />,
+  },
+  {
+    title: "GPU UUID",
+    dataIndex: "vendor_device_id",
+    width: 260,
+    ellipsis: true,
+    render: (_, row) => (
+      <ResourceIdentity id={row.vendor_device_id} display="id" idLabel="GPU UUID" />
+    ),
+  },
+  {
+    title: "节点 / UID",
     dataIndex: "node.name",
     width: 200,
     ellipsis: true,
+    render: (_, row) => (
+      <ResourceIdentity name={row.node?.name} id={row.node?.uid} idLabel="节点 UID" />
+    ),
   },
-  { title: "节点 UID", dataIndex: "node.uid", width: 220, ellipsis: true },
+
   { title: "GPU 型号", dataIndex: "model_key", width: 180, ellipsis: true },
-  { title: "供给组 ID", dataIndex: "group_id", width: 220, ellipsis: true },
+  {
+    title: "供给组 ID",
+    dataIndex: "group_id",
+    width: 220,
+    ellipsis: true,
+    render: (_, row) => <ResourceIdentity id={row.group_id} display="id" idLabel="供给组 ID" />,
+  },
   { title: "物理显存（Bytes）", dataIndex: "physical_memory_bytes", width: 180, ellipsis: true },
   {
     title: "健康状态",

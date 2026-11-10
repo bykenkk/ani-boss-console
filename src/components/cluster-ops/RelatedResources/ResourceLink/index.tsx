@@ -1,4 +1,4 @@
-import { Button } from "@arco-design/web-react";
+import { ResourceIdentity } from "@/components/common";
 import { useNavigate } from "@tanstack/react-router";
 import type { ClusterOpsResourceRef } from "@/api/cluster-ops";
 import { resourceDetailDestination } from "../resource-navigation";
@@ -6,15 +6,19 @@ import { resourceDetailDestination } from "../resource-navigation";
 interface ResourceLinkProps {
   resourceRef: ClusterOpsResourceRef;
   label: string;
+  id?: string;
 }
 
-export function ResourceLink({ resourceRef, label }: ResourceLinkProps) {
+export function ResourceLink({ resourceRef, label, id }: ResourceLinkProps) {
   const navigate = useNavigate();
   const destination = resourceDetailDestination(resourceRef);
-  if (!destination) return <span title={label}>{label}</span>;
   return (
-    <Button type="text" title={label} onClick={() => navigate(destination)}>
-      {label}
-    </Button>
+    <ResourceIdentity
+      name={label}
+      id={id}
+      idLabel="UID"
+      display={id ? "all" : "name"}
+      onOpen={destination ? () => navigate(destination) : undefined}
+    />
   );
 }

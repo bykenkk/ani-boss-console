@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { fetchPlatformComponents, platformQueryKeys, type PlatformComponent } from "@/api/platform";
 import {
-  ResourceNameId,
+  ResourceIdentity,
   DataTable,
   ResourcePageFrame,
   StatusBadge,
@@ -54,7 +54,7 @@ export function PlatformHealthPage() {
       width: 200,
       fixed: "left",
       render: (_, component) => (
-        <ResourceNameId name={component.name} id={component.namespace || "-"} />
+        <ResourceIdentity name={component.name} id={component.namespace} copyable={false} />
       ),
     },
     {

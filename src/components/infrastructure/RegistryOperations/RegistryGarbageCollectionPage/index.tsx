@@ -1,6 +1,6 @@
 import { Button } from "@arco-design/web-react";
 import {
-  ResourceNameId,
+  ResourceIdentity,
   ListDataTable,
   ResourcePageFrame,
   TableSectionFrame,
@@ -29,7 +29,7 @@ export function RegistryGarbageCollectionPage() {
       dataIndex: "digest",
       width: 220,
       fixed: "left",
-      render: (_, layer) => <ResourceNameId name={layer.digest} id={layer.id} />,
+      render: (_, layer) => <ResourceIdentity name={layer.digest} id={layer.id} />,
     },
     { title: "所属仓库", dataIndex: "repository", width: 240 },
     {
@@ -52,7 +52,7 @@ export function RegistryGarbageCollectionPage() {
       title: "任务",
       dataIndex: "id",
       width: 170,
-      render: (_, run) => <ResourceNameId name={run.id} id="镜像仓库 GC" />,
+      render: (_, run) => <ResourceIdentity name="镜像仓库 GC" id={run.id} />,
     },
     {
       title: "状态",

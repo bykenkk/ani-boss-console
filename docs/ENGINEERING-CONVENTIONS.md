@@ -98,6 +98,7 @@ src/api/<domain>/
 | 能力 | 必须使用 | 禁止在业务代码中直接使用 |
 |------|----------|--------------------------|
 | 外部链接 | `src/lib/browser.ts` 的 `openExternalUrl`；异步获取地址时先在点击事件中调用 `reserveExternalWindow`，失败或取消时关闭预留窗口 | 未校验协议的 `window.open`、遗漏 `noopener noreferrer` |
+| 剪贴板复制 | `src/lib/clipboard.ts` 的 `copyToClipboard`，使用 `copy-to-clipboard` 提供安全上下文中的异步复制与普通 HTTP 下的兼容回退，并统一反馈复制结果 | 业务代码直接调用 `navigator.clipboard`、`document.execCommand` 或绕过适配层调用复制库 |
 | AES-CBC 协议加密 | `src/lib/crypto.ts` 的 `encryptAesCbcBase64`，统一使用 `@noble/ciphers` 的 JavaScript 实现；协议 key 和 IV 由领域 API 按后端契约提供 | 直接调用 `crypto.subtle` 或绕过适配层调用加密库 |
 
 其他浏览器能力新增使用点时，先检索本项目已有适配器；没有统一入口时，按上述原则在 `src/lib` 提供适配，不将其他项目的模块路径或依赖视为本项目已有能力。

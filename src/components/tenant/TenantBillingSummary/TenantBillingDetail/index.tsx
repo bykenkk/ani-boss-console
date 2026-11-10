@@ -2,6 +2,7 @@ import { Button, Descriptions, Result } from "@arco-design/web-react";
 import { useNavigate } from "@tanstack/react-router";
 import clsx from "clsx";
 import {
+  ResourceIdentity,
   DetailPageFrame,
   type DetailInfoCard,
   type DetailTab,
@@ -42,9 +43,17 @@ export function TenantBillingDetail({ tenantId }: TenantBillingDetailProps) {
         <Descriptions
           column={1}
           data={[
-            { label: "租户 ID", value: billing.tenantId },
+            {
+              label: "租户",
+              value: (
+                <ResourceIdentity
+                  name={billing.tenantDisplayName}
+                  id={billing.tenantId}
+                  idLabel="租户 ID"
+                />
+              ),
+            },
             { label: "接入状态", value: "未接入（演示数据）" },
-            { label: "租户显示名", value: billing.tenantDisplayName },
             {
               label: "状态",
               value: <StatusBadge tone={status.tone} value={status.label} />,

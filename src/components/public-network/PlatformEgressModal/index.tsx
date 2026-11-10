@@ -1,3 +1,4 @@
+import { ResourceIdentity } from "@/components/common";
 import { Alert, Button, Descriptions, Form, Modal, Space, Spin } from "@arco-design/web-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -88,12 +89,29 @@ export function PlatformEgressModal({ onCancel }: PlatformEgressModalProps) {
             column={1}
             className="break-all"
             data={[
-              { label: "VPC", value: `${item.default_vpc_namespace}/${item.default_vpc_name}` },
+              {
+                label: "VPC",
+                value: (
+                  <ResourceIdentity
+                    name={`${item.default_vpc_namespace}/${item.default_vpc_name}`}
+                    display="name"
+                  />
+                ),
+              },
               { label: "出口状态", value: <PlatformNetworkStatus state={item.state} /> },
               { label: "出口 IP", value: item.address || "-" },
-              { label: "EIP ID", value: item.eip_id || "-" },
-              { label: "公网池 ID", value: item.pool_id },
-              { label: "配置 ID", value: item.id },
+              {
+                label: "EIP ID",
+                value: <ResourceIdentity id={item.eip_id} display="id" idLabel="EIP ID" />,
+              },
+              {
+                label: "公网池 ID",
+                value: <ResourceIdentity id={item.pool_id} display="id" idLabel="公网池 ID" />,
+              },
+              {
+                label: "配置 ID",
+                value: <ResourceIdentity id={item.id} display="id" idLabel="配置 ID" />,
+              },
               { label: "观测状态", value: item.observation_stale ? "已过期" : "有效" },
               { label: "最近观测", value: formatDateTime(item.observed_at) },
               { label: "状态说明", value: item.reason || "-" },

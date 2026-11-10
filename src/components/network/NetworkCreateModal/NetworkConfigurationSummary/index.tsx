@@ -1,3 +1,4 @@
+import { ResourceIdentity } from "@/components/common";
 import { Descriptions } from "@arco-design/web-react";
 import type { NetworkCreateFormValues } from "..";
 import { demoLayer2Networks } from "@/components/layer2-network/demo-data";
@@ -20,8 +21,15 @@ export function NetworkConfigurationSummary({ values }: NetworkConfigurationSumm
           ? [
               {
                 label: "二层网络",
-                value:
-                  demoLayer2Networks.find((network) => network.id === values.layer2Id)?.name ?? "-",
+                value: (
+                  <ResourceIdentity
+                    name={
+                      demoLayer2Networks.find((network) => network.id === values.layer2Id)?.name
+                    }
+                    id={values.layer2Id}
+                    idLabel="二层网络 ID"
+                  />
+                ),
               },
             ]
           : []),

@@ -1,4 +1,5 @@
 import { Descriptions } from "@arco-design/web-react";
+import { ResourceIdentity } from "@/components/common";
 import type { ReactNode } from "react";
 import type { ClusterOpsResourceDocument } from "@/api/cluster-ops";
 import { formatDateTime } from "@/lib/date";
@@ -12,7 +13,7 @@ interface ResourceInfoProps {
 export function ResourceInfo({ resource, details = [] }: ResourceInfoProps) {
   const data = resource
     ? [
-        { label: "UID", value: resource.uid },
+        { label: "UID", value: <ResourceIdentity id={resource.uid} display="id" idLabel="UID" /> },
         { label: "资源版本", value: resource.resource_version },
         {
           label: "创建时间",

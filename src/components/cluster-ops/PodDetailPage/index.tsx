@@ -2,7 +2,12 @@ import { Button } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { getResource, listResourceTypes, type ClusterOpsResourceRef } from "@/api/cluster-ops";
 import { clusterOpsKeys } from "@/api/cluster-ops/keys";
-import { DetailPageFrame, StatusBadge, type DetailTab } from "@/components/common";
+import {
+  ResourceIdentity,
+  DetailPageFrame,
+  StatusBadge,
+  type DetailTab,
+} from "@/components/common";
 import { ResourceInfo } from "../ResourceInfo";
 import { ResourceEvents } from "../ResourceEvents";
 import { RelatedResources } from "../RelatedResources";
@@ -33,7 +38,7 @@ export function PodDetailPage({ resourceRef, onBack, onList }: PodDetailPageProp
     ? [
         { label: "就绪容器", value: summary.pod?.ready ?? "-" },
         { label: "重启次数", value: summary.pod?.restarts ?? "-" },
-        { label: "节点", value: summary.pod?.node ?? "-" },
+        { label: "节点", value: <ResourceIdentity name={summary.pod?.node} display="name" /> },
         { label: "容器组 IP", value: summary.pod?.ip ?? "-" },
         { label: "镜像", value: summary.images ?? "-" },
       ]
@@ -83,8 +88,14 @@ export function PodDetailPage({ resourceRef, onBack, onList }: PodDetailPageProp
       breadcrumbs={[{ label: "容器组", onClick: onList }, { label: resourceRef.name }]}
       onBack={onBack}
       headerItems={[
-        { label: "集群", value: resourceRef.cluster_id },
-        { label: "命名空间", value: resourceRef.namespace },
+        {
+          label: "集群",
+          value: <ResourceIdentity id={resourceRef.cluster_id} display="id" idLabel="集群 ID" />,
+        },
+        {
+          label: "命名空间",
+          value: <ResourceIdentity name={resourceRef.namespace} display="name" />,
+        },
       ]}
       actions={
         <Button onClick={() => query.refetch()} loading={query.isFetching}>

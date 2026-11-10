@@ -8,6 +8,7 @@ import {
   type ManagedPermissionGroup,
 } from "@/api/management";
 import {
+  ResourceIdentity,
   ListDataTable,
   ListPageFrame,
   StatusBadge,
@@ -22,10 +23,10 @@ const columns: ListColumn<ManagedPermissionGroup>[] = [
   {
     key: "name",
     dataIndex: "name",
-    title: "分组名称",
+    title: "分组 / ID",
     width: 200,
     ellipsis: true,
-    render: (value) => String(value ?? "-"),
+    render: (_, row) => <ResourceIdentity name={row.name} id={row.id} idLabel="资源 ID" />,
   },
   {
     key: "module",
@@ -41,7 +42,12 @@ const columns: ListColumn<ManagedPermissionGroup>[] = [
     title: "上级分组",
     width: 160,
     ellipsis: true,
-    render: (value) => String(value ?? "-"),
+    render: (_, row) =>
+      row.parentId === 0 ? (
+        "-"
+      ) : (
+        <ResourceIdentity id={row.parentId} display="id" idLabel="分组 ID" />
+      ),
   },
   {
     key: "sortOrder",

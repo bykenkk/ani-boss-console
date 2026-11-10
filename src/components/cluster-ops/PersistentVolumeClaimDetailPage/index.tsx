@@ -2,7 +2,12 @@ import { Button } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { getResource, listResourceTypes, type ClusterOpsResourceRef } from "@/api/cluster-ops";
 import { clusterOpsKeys } from "@/api/cluster-ops/keys";
-import { DetailPageFrame, StatusBadge, type DetailTab } from "@/components/common";
+import {
+  ResourceIdentity,
+  DetailPageFrame,
+  StatusBadge,
+  type DetailTab,
+} from "@/components/common";
 import { ResourceInfo } from "../ResourceInfo";
 import { ResourceEvents } from "../ResourceEvents";
 import { RelatedResources } from "../RelatedResources";
@@ -36,8 +41,8 @@ export function PersistentVolumeClaimDetailPage({
     ? [
         { label: "申请容量", value: summary.requested ?? "-" },
         { label: "容量", value: summary.capacity ?? "-" },
-        { label: "存储类", value: summary.storageClass ?? "-" },
-        { label: "持久卷", value: summary.volume ?? "-" },
+        { label: "存储类", value: <ResourceIdentity name={summary.storageClass} display="name" /> },
+        { label: "持久卷", value: <ResourceIdentity name={summary.volume} display="name" /> },
         { label: "访问模式", value: summary.accessModes ?? "-" },
       ]
     : [];
@@ -70,8 +75,14 @@ export function PersistentVolumeClaimDetailPage({
       breadcrumbs={[{ label: "持久卷声明", onClick: onList }, { label: resourceRef.name }]}
       onBack={onBack}
       headerItems={[
-        { label: "集群", value: resourceRef.cluster_id },
-        { label: "命名空间", value: resourceRef.namespace },
+        {
+          label: "集群",
+          value: <ResourceIdentity id={resourceRef.cluster_id} display="id" idLabel="集群 ID" />,
+        },
+        {
+          label: "命名空间",
+          value: <ResourceIdentity name={resourceRef.namespace} display="name" />,
+        },
       ]}
       actions={
         <Button onClick={() => query.refetch()} loading={query.isFetching}>

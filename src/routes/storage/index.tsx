@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
   ListDataTable,
-  ResourceNameId,
+  ResourceIdentity,
   ResourcePageFrame,
   TableSectionFrame,
   type ListColumn,
@@ -145,7 +145,7 @@ export const Route = createFileRoute("/storage/")({
         dataIndex: "name",
         width: 200,
         fixed: "left",
-        render: (_, backend) => <ResourceNameId name={backend.name} id={backend.id} />,
+        render: (_, backend) => <ResourceIdentity name={backend.name} id={backend.id} />,
       },
       {
         title: "状态",

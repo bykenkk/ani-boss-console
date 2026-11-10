@@ -1,7 +1,7 @@
 import { Progress, Tooltip } from "@arco-design/web-react";
 import type { TenantQuotaSummary } from "@/api/quota";
 import {
-  ResourceNameId,
+  ResourceIdentity,
   ListDataTable,
   StatusBadge,
   type ListColumn,
@@ -31,11 +31,7 @@ export function TenantGpuAllocationTable({
       title: "租户",
       width: 200,
       render: (_, tenant) => (
-        <ResourceNameId
-          avatarText={tenant.tenantName || tenant.tenantCode}
-          name={tenant.tenantName || tenant.tenantCode}
-          id={String(tenant.tenantId)}
-        />
+        <ResourceIdentity name={tenant.tenantName || tenant.tenantCode} id={tenant.tenantId} />
       ),
     },
     { title: "所属套餐", dataIndex: "planName", width: 160, ellipsis: true },

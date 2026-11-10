@@ -2,7 +2,12 @@ import { Button } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { getResource, listResourceTypes, type ClusterOpsResourceRef } from "@/api/cluster-ops";
 import { clusterOpsKeys } from "@/api/cluster-ops/keys";
-import { DetailPageFrame, StatusBadge, type DetailTab } from "@/components/common";
+import {
+  ResourceIdentity,
+  DetailPageFrame,
+  StatusBadge,
+  type DetailTab,
+} from "@/components/common";
 import { ResourceInfo } from "../ResourceInfo";
 import { ResourceEvents } from "../ResourceEvents";
 import { RelatedResources } from "../RelatedResources";
@@ -57,7 +62,12 @@ export function NamespaceDetailPage({ resourceRef, onBack, onList }: NamespaceDe
       status={summary?.status ? <StatusBadge {...summary.status} /> : undefined}
       breadcrumbs={[{ label: "命名空间", onClick: onList }, { label: resourceRef.name }]}
       onBack={onBack}
-      headerItems={[{ label: "集群", value: resourceRef.cluster_id }]}
+      headerItems={[
+        {
+          label: "集群",
+          value: <ResourceIdentity id={resourceRef.cluster_id} display="id" idLabel="集群 ID" />,
+        },
+      ]}
       actions={
         <Button onClick={() => query.refetch()} loading={query.isFetching}>
           刷新

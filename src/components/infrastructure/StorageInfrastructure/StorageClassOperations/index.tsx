@@ -1,6 +1,6 @@
 import {
   ListDataTable,
-  ResourceNameId,
+  ResourceIdentity,
   TableSectionFrame,
   type ListColumn,
   StatusBadge,
@@ -81,7 +81,7 @@ const columns: ListColumn<StorageClassItem>[] = [
     title: "StorageClass / ID",
     dataIndex: "name",
     width: 200,
-    render: (_, item) => <ResourceNameId name={item.name} id={item.id} />,
+    render: (_, item) => <ResourceIdentity name={item.name} id={item.id} />,
   },
   { title: "类型", dataIndex: "type", width: 80 },
   { title: "存储后端", dataIndex: "backend", width: 190 },

@@ -1,5 +1,6 @@
 import type { GpuDevice } from "@/api/accelerator";
 import {
+  ResourceIdentity,
   ListDataTable,
   StatusBadge,
   type SectionHeaderProps,
@@ -26,15 +27,26 @@ export function GpuDeviceTable({
 }: GpuDeviceTableProps) {
   const allocation = (d: GpuDevice) => allocations.get(deviceKey(d.cluster_id, d.device_id));
   const columns: ListColumn<GpuDevice>[] = [
-    { title: "节点", dataIndex: "node.name", width: 140, fixed: "left", ellipsis: true },
+    {
+      title: "节点 / UID",
+      dataIndex: "node.name",
+      width: 200,
+      fixed: "left",
+      ellipsis: true,
+      render: (_, row) => (
+        <ResourceIdentity name={row.node?.name} id={row.node?.uid} idLabel="节点 UID" />
+      ),
+    },
     {
       title: "设备 ID / UUID",
       width: 280,
       ellipsis: true,
-      render: (_, d) => (
-        <div>
-          <div>{d.device_id}</div>
-          <div className="text-xs text-[var(--color-text-3)]">{d.vendor_device_id}</div>
+      render: (_, row) => (
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <ResourceIdentity id={row.device_id} display="id" idLabel="设备 ID" />
+          <span className="text-xs text-(--color-text-2)">
+            <ResourceIdentity id={row.vendor_device_id} display="id" idLabel="GPU UUID" />
+          </span>
         </div>
       ),
     },

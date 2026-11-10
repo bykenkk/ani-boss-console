@@ -6,7 +6,13 @@ import {
   platformNetworkKeys,
   type PlatformNetwork,
 } from "@/api/platform-networks";
-import { ListDataTable, ListPageFrame, StatusBadge, type ListColumn } from "@/components/common";
+import {
+  ResourceIdentity,
+  ListDataTable,
+  ListPageFrame,
+  StatusBadge,
+  type ListColumn,
+} from "@/components/common";
 import { PlatformNetworkStatus } from "@/components/network/PlatformNetworkStatus";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { useBasicNetworkActions } from "@/hooks/useBasicNetworkActions";
@@ -15,7 +21,15 @@ import { BasicNetworkDetailModal } from "../BasicNetworkDetailModal";
 
 const kind = "intranet-address-pools";
 const columns: ListColumn<PlatformNetwork>[] = [
-  { key: "name", title: "名称", dataIndex: "name", width: 200, fixed: "left", ellipsis: true },
+  {
+    key: "name",
+    title: "名称 / ID",
+    dataIndex: "name",
+    width: 200,
+    fixed: "left",
+    ellipsis: true,
+    render: (_, row) => <ResourceIdentity name={row.name} id={row.id} idLabel="资源 ID" />,
+  },
   {
     key: "state",
     title: "状态",

@@ -1,13 +1,32 @@
 import { useQuery } from "@tanstack/react-query";
 import { acceleratorKeys, listGpuPools, type GpuCluster, type GpuPool } from "@/api/accelerator";
-import { TableSectionFrame, ListDataTable, type ListColumn } from "@/components/common";
+import {
+  ResourceIdentity,
+  TableSectionFrame,
+  ListDataTable,
+  type ListColumn,
+} from "@/components/common";
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { withId } from "@/lib/id";
 
 const columns: ListColumn<GpuPool>[] = [
-  { title: "资源池", dataIndex: "display_name", width: 220, ellipsis: true },
-  { title: "资源池 ID", dataIndex: "pool_id", width: 220, ellipsis: true },
-  { title: "集群 ID", dataIndex: "cluster_id", width: 220, ellipsis: true },
+  {
+    title: "资源池 / ID",
+    dataIndex: "display_name",
+    width: 200,
+    ellipsis: true,
+    render: (_, row) => (
+      <ResourceIdentity name={row.display_name} id={row.pool_id} idLabel="资源 ID" />
+    ),
+  },
+
+  {
+    title: "集群 ID",
+    dataIndex: "cluster_id",
+    width: 220,
+    ellipsis: true,
+    render: (_, row) => <ResourceIdentity id={row.cluster_id} display="id" idLabel="集群 ID" />,
+  },
 ];
 interface GpuPoolsProps {
   cluster: GpuCluster;

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Typography } from "@arco-design/web-react";
-import { DataTable, StatusBadge } from "@/components/common";
+import { ResourceIdentity, DataTable, StatusBadge } from "@/components/common";
 import type { AlertItem } from "@/components/overview/model";
 import { formatMonthDayTime } from "@/lib/date";
 import { LevelTag } from "../../LevelTag";
@@ -59,13 +59,11 @@ export function AlertTable({ rows, extra }: AlertTableProps) {
         {
           title: "对象",
           dataIndex: "objectType",
-          width: 150,
-          render: (_: unknown, item: AlertItem) => (
-            <div>
-              <Typography.Text>{item.objectType}</Typography.Text>
-              <Typography.Text type="secondary" className="mt-1 block text-xs">
-                {item.objectName}
-              </Typography.Text>
+          width: 200,
+          render: (_, row) => (
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <ResourceIdentity name={row.objectName} display="name" />
+              <span className="text-xs text-(--color-text-2)">{row.objectType}</span>
             </div>
           ),
         },

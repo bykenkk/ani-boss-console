@@ -1,6 +1,6 @@
 import { Button, Input, Select, Space } from "@arco-design/web-react";
 import type { ResourceUsageOrder, ResourceUsageTenantRow } from "@/api/resource-usage";
-import { ListDataTable, ResourceNameId, type ListColumn } from "@/components/common";
+import { ListDataTable, ResourceIdentity, type ListColumn } from "@/components/common";
 import { UsageQuality, UsageShare, UsageValue } from "../../MeteringPresentation";
 import styles from "../../MeteringPresentation/index.module.less";
 
@@ -49,13 +49,7 @@ export function MeteringTenantTable({
       title: "租户名称 / ID",
       width: 200,
       ellipsis: true,
-      render: (_, row) => (
-        <ResourceNameId
-          name={row.tenantName}
-          id={String(row.tenantId)}
-          avatarText={row.tenantName}
-        />
-      ),
+      render: (_, row) => <ResourceIdentity name={row.tenantName} id={row.tenantId} />,
     },
     {
       title: "周期平均值（" + unit + "）",

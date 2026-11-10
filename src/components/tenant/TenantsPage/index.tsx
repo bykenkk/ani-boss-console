@@ -8,6 +8,7 @@ import {
   type ManagedTenant,
 } from "@/api/management";
 import {
+  ResourceIdentity,
   ListDataTable,
   ListPageFrame,
   StatusBadge,
@@ -23,10 +24,10 @@ const columns: ListColumn<ManagedTenant>[] = [
   {
     key: "name",
     dataIndex: "name",
-    title: "租户名称",
+    title: "租户 / ID",
     width: 200,
     ellipsis: true,
-    render: (value) => String(value ?? "-"),
+    render: (_, row) => <ResourceIdentity name={row.name} id={row.id} idLabel="资源 ID" />,
   },
   {
     key: "code",
@@ -84,9 +85,11 @@ const columns: ListColumn<ManagedTenant>[] = [
     key: "adminUserName",
     dataIndex: "adminUserName",
     title: "管理员用户名",
-    width: 160,
+    width: 200,
     ellipsis: true,
-    render: (value) => String(value ?? "-"),
+    render: (_, row) => (
+      <ResourceIdentity name={row.adminUserName} id={row.adminUserId} idLabel="用户 ID" />
+    ),
   },
   {
     key: "auditStatus",

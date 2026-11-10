@@ -1,11 +1,11 @@
 import { tenantBillingDemoData } from "../demo";
 import { Button, Typography } from "@arco-design/web-react";
 import { IconDownload } from "@arco-design/web-react/icon";
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   ListDataTable,
-  ResourceNameId,
+  ResourceIdentity,
   ListPageFrame,
   type ListColumn,
   StatusBadge,
@@ -15,6 +15,7 @@ import { tenantBillingStatusMeta, type TenantBilling, type TenantBillingStatus }
 import { formatDate, formatDateTimeMinute, formatMonth } from "@/lib/date";
 
 export function TenantBillingList() {
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -25,9 +26,13 @@ export function TenantBillingList() {
       width: 200,
       fixed: "left",
       render: (_, item) => (
-        <Link to="/tenants-billing/$tenantId" params={{ tenantId: item.tenantId }}>
-          <ResourceNameId name={item.tenantName} id={item.tenantId} />
-        </Link>
+        <ResourceIdentity
+          name={item.tenantName}
+          id={item.tenantId}
+          onOpen={() =>
+            navigate({ to: "/tenants-billing/$tenantId", params: { tenantId: item.tenantId } })
+          }
+        />
       ),
     },
     {

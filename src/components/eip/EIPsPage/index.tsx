@@ -1,11 +1,10 @@
-import { Button } from "@arco-design/web-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { eipKeys, listEIPs, type EIP, type EIPListParams } from "@/api/eips";
 import {
   ListDataTable,
   ListPageFrame,
-  ResourceNameId,
+  ResourceIdentity,
   StatusBadge,
   type ListColumn,
 } from "@/components/common";
@@ -37,13 +36,7 @@ export function EIPsPage() {
       fixed: "left",
       ellipsis: true,
       render: (_, item) => (
-        <Button
-          type="text"
-          className="h-auto! p-0! text-left!"
-          onClick={() => setDetailId(item.id)}
-        >
-          <ResourceNameId name={item.name} id={item.id} />
-        </Button>
+        <ResourceIdentity name={item.name} id={item.id} onOpen={() => setDetailId(item.id)} />
       ),
     },
     { key: "address", title: "IP 地址", dataIndex: "address", width: 160 },
@@ -53,9 +46,15 @@ export function EIPsPage() {
       width: 200,
       ellipsis: true,
       render: (_, item) =>
-        item.managed_by === "system" && !item.resource_tenant_id
-          ? "平台系统"
-          : item.tenant_name || item.resource_tenant_id,
+        item.managed_by === "system" && !item.resource_tenant_id ? (
+          "平台系统"
+        ) : (
+          <ResourceIdentity
+            name={item.tenant_name}
+            id={item.resource_tenant_id}
+            idLabel="租户 ID"
+          />
+        ),
     },
     {
       key: "state",
@@ -70,16 +69,31 @@ export function EIPsPage() {
       render: (_, item) =>
         item.scope === "public" ? "公网" : item.scope === "intranet" ? "基础内网" : item.scope,
     },
-    { key: "pool", title: "地址池", dataIndex: "pool_name", width: 200, ellipsis: true },
+    {
+      key: "pool",
+      title: "地址池",
+      dataIndex: "pool_name",
+      width: 200,
+      ellipsis: true,
+      render: (_, item) => (
+        <ResourceIdentity name={item.pool_name} id={item.pool_id} idLabel="地址池 ID" />
+      ),
+    },
     {
       key: "binding",
       title: "绑定资源",
       width: 220,
       ellipsis: true,
       render: (_, item) =>
-        item.binding_target
-          ? `${eipBindingLabel(item)} · ${item.binding_target.id}`
-          : eipBindingLabel(item),
+        item.binding_target ? (
+          <ResourceIdentity
+            name={eipBindingLabel(item)}
+            id={item.binding_target.id}
+            idLabel="绑定资源 ID"
+          />
+        ) : (
+          <ResourceIdentity name={eipBindingLabel(item)} display="name" />
+        ),
     },
     {
       key: "observation",

@@ -8,6 +8,7 @@ import {
   type ManagedUser,
 } from "@/api/management";
 import {
+  ResourceIdentity,
   ListDataTable,
   ListPageFrame,
   StatusBadge,
@@ -26,11 +27,11 @@ const columns: ListColumn<ManagedUser>[] = [
   {
     key: "username",
     dataIndex: "username",
-    title: "用户名",
+    title: "用户 / ID",
     width: 200,
     fixed: "left",
     ellipsis: true,
-    render: (value) => String(value ?? "-"),
+    render: (_, row) => <ResourceIdentity name={row.username} id={row.id} idLabel="用户 ID" />,
   },
   {
     key: "realname",
@@ -38,23 +39,27 @@ const columns: ListColumn<ManagedUser>[] = [
     title: "真实姓名",
     width: 200,
     ellipsis: true,
-    render: (value) => String(value ?? "-"),
+    render: (_, row) => <ResourceIdentity name={row.realname} display="name" />,
   },
   {
     key: "tenantName",
     dataIndex: "tenantName",
     title: "所属租户",
-    width: 160,
+    width: 200,
     ellipsis: true,
-    render: (value) => String(value ?? "-"),
+    render: (_, row) => (
+      <ResourceIdentity name={row.tenantName} id={row.tenantId} idLabel="租户 ID" />
+    ),
   },
   {
     key: "roleNames",
     dataIndex: "roleNames",
     title: "角色",
-    width: 160,
+    width: 200,
     ellipsis: true,
-    render: (value: string[] | undefined) => value?.join("、") || "-",
+    render: (value: string[] | undefined) => (
+      <ResourceIdentity name={value?.join("、")} display="name" />
+    ),
   },
   {
     key: "email",

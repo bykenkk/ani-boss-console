@@ -1,5 +1,10 @@
 import clsx from "clsx";
-import { ListDataTable, TableSectionFrame, type ListColumn } from "@/components/common";
+import {
+  ResourceIdentity,
+  ListDataTable,
+  TableSectionFrame,
+  type ListColumn,
+} from "@/components/common";
 import { formatDateTimeMinute } from "@/lib/date";
 
 interface TenantStorageEvent {
@@ -69,7 +74,12 @@ const columns: ListColumn<TenantStorageEvent>[] = [
       </span>
     ),
   },
-  { title: "租户", dataIndex: "tenant", width: 190 },
+  {
+    title: "租户",
+    dataIndex: "tenant",
+    width: 200,
+    render: (_, row) => <ResourceIdentity name={row.tenant} display="name" />,
+  },
   { title: "事件", width: 240, dataIndex: "message" },
 ];
 

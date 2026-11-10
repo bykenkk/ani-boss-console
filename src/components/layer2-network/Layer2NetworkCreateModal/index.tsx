@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { validateForm } from "@/lib/form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createLayer2Network, platformNetworkKeys } from "@/api/platform-networks";
-import { ModalSteps } from "@/components/common";
+import { ResourceIdentity, ModalSteps } from "@/components/common";
 import { Layer2ConfigurationFields } from "./Layer2ConfigurationFields";
 
 interface Layer2NetworkCreateModalProps {
@@ -165,13 +165,17 @@ export function Layer2NetworkCreateModal({ onCancel, onSuccess }: Layer2NetworkC
             { label: "简介", value: summary.description?.trim() || "-" },
             {
               label: "集群",
-              value: clusterName,
+              value: (
+                <ResourceIdentity name={clusterName} id={summary.clusterId} idLabel="集群 ID" />
+              ),
             },
             { label: "网卡", value: summary.nic.trim() },
             { label: "VLAN ID", value: summary.vlanId },
             {
               label: "虚拟交换机",
-              value: summary.switchId,
+              value: (
+                <ResourceIdentity id={summary.switchId} display="id" idLabel="虚拟交换机 ID" />
+              ),
             },
           ]}
         />

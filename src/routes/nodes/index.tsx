@@ -4,7 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
   ListDataTable,
-  ResourceNameId,
+  ResourceIdentity,
   ResourcePageFrame,
   TableSectionFrame,
   type ListColumn,
@@ -125,7 +125,7 @@ export const Route = createFileRoute("/nodes/")({
         dataIndex: "name",
         width: 200,
         fixed: "left",
-        render: (_, node) => <ResourceNameId name={node.name} id={node.id} />,
+        render: (_, node) => <ResourceIdentity name={node.name} id={node.id} />,
       },
       {
         title: "状态",

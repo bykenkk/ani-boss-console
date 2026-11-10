@@ -6,6 +6,7 @@ import {
   type GpuSupplyGroup,
 } from "@/api/accelerator";
 import {
+  ResourceIdentity,
   TableSectionFrame,
   ListDataTable,
   StatusBadge,
@@ -14,8 +15,16 @@ import {
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 import { withId } from "@/lib/id";
 const columns: ListColumn<GpuSupplyGroup>[] = [
-  { title: "供给组名称", dataIndex: "display_name", width: 200, ellipsis: true },
-  { title: "供给组 ID", dataIndex: "group_id", width: 220, ellipsis: true },
+  {
+    title: "供给组 / ID",
+    dataIndex: "display_name",
+    width: 200,
+    ellipsis: true,
+    render: (_, row) => (
+      <ResourceIdentity name={row.display_name} id={row.group_id} idLabel="资源 ID" />
+    ),
+  },
+
   { title: "GPU 型号", dataIndex: "model_key", width: 180, ellipsis: true },
   {
     title: "模式",
@@ -24,26 +33,43 @@ const columns: ListColumn<GpuSupplyGroup>[] = [
     ellipsis: true,
   },
   {
-    title: "节点名称",
-    render: (_, group) =>
-      group.nodes?.length ? group.nodes.map((node) => node.name).join("、") : "-",
+    title: "节点 / UID",
+    render: (_, row) => (
+      <div className="flex min-w-0 flex-col gap-2">
+        {row.nodes?.length ? (
+          row.nodes.map((node) => (
+            <ResourceIdentity
+              key={node.uid || node.name}
+              name={node.name}
+              id={node.uid}
+              idLabel="节点 UID"
+            />
+          ))
+        ) : (
+          <ResourceIdentity display="name" />
+        )}
+      </div>
+    ),
     width: 200,
     ellipsis: true,
   },
-  {
-    title: "节点 UID",
-    render: (_, group) =>
-      group.nodes?.length ? group.nodes.map((node) => node.uid).join("、") : "-",
-    width: 220,
-    ellipsis: true,
-  },
+
   {
     title: "基线 ID",
     dataIndex: "baseline.baseline_id",
     width: 220,
     ellipsis: true,
+    render: (_, row) => (
+      <ResourceIdentity id={row.baseline?.baseline_id} display="id" idLabel="基线 ID" />
+    ),
   },
-  { title: "队列名称", dataIndex: "queue_name", width: 200, ellipsis: true },
+  {
+    title: "队列名称",
+    dataIndex: "queue_name",
+    width: 200,
+    ellipsis: true,
+    render: (_, row) => <ResourceIdentity name={row.queue_name} display="name" />,
+  },
   { title: "版本", dataIndex: "version", width: 100, ellipsis: true },
   {
     title: "供给状态",

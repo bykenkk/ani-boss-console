@@ -1,7 +1,7 @@
 import { Button, Descriptions } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
 import { getTenantUsage, planKeys, type TenantUsage } from "@/api/plans";
-import { DataTable, type ListColumn } from "@/components/common";
+import { ResourceIdentity, DataTable, type ListColumn } from "@/components/common";
 import { withId } from "@/lib/id";
 
 interface TenantUsageSummaryProps {
@@ -44,9 +44,15 @@ export function TenantUsageSummary({ tenantId }: TenantUsageSummaryProps) {
       <Descriptions
         column={{ xs: 1, md: 2 }}
         data={[
-          { label: "租户 ID", value: String(tenantId) },
+          {
+            label: "租户 ID",
+            value: <ResourceIdentity id={tenantId} display="id" idLabel="租户 ID" />,
+          },
           { label: "订阅套餐", value: query.data?.planName ?? "-" },
-          { label: "套餐 ID", value: query.data?.planId ?? "-" },
+          {
+            label: "套餐 ID",
+            value: <ResourceIdentity id={query.data?.planId} display="id" idLabel="套餐 ID" />,
+          },
           { label: "当前用户数", value: query.data?.userCount ?? "-" },
           { label: "存储统计占位值（字节）", value: query.data?.storageUsedBytes ?? "-" },
           { label: "API 审计记录数", value: query.data?.apiCallCount ?? "-" },

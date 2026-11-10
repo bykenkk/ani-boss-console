@@ -1,3 +1,4 @@
+import { ResourceIdentity } from "@/components/common";
 import { Descriptions } from "@arco-design/web-react";
 import type { ComputePresetInput } from "@/api/compute-presets";
 
@@ -16,7 +17,12 @@ export function ComputePresetSummary({ values }: { values: ComputePresetInput })
         { label: "内存", value: values.memory_mib + " MiB" },
         ...(values.compute_type === "gpu" && values.gpu
           ? [
-              { label: "GPU 规格 ID", value: values.gpu.profile_id },
+              {
+                label: "GPU 规格 ID",
+                value: (
+                  <ResourceIdentity id={values.gpu.profile_id} display="id" idLabel="GPU 规格 ID" />
+                ),
+              },
               { label: "GPU 规格版本", value: values.gpu.profile_version },
               { label: "每实例 GPU 数量", value: String(values.gpu.devices_per_instance) },
             ]

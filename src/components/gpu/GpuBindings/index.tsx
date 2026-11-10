@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { acceleratorKeys, listGpuBindings, type GpuBinding } from "@/api/accelerator";
 import {
+  ResourceIdentity,
   TableSectionFrame,
   ListDataTable,
   StatusBadge,
@@ -14,14 +15,26 @@ const columns: ListColumn<GpuBinding>[] = [
     dataIndex: "binding.binding_id",
     width: 220,
     ellipsis: true,
+    render: (_, row) => (
+      <ResourceIdentity id={row.binding?.binding_id} display="id" idLabel="绑定 ID" />
+    ),
   },
   {
     title: "容器名称",
     dataIndex: "binding.container_name",
     width: 200,
     ellipsis: true,
+    render: (_, row) => <ResourceIdentity name={row.binding?.container_name} display="name" />,
   },
-  { title: "物理设备 ID", dataIndex: "physical_device_id", width: 220, ellipsis: true },
+  {
+    title: "物理设备 ID",
+    dataIndex: "physical_device_id",
+    width: 220,
+    ellipsis: true,
+    render: (_, row) => (
+      <ResourceIdentity id={row.physical_device_id} display="id" idLabel="设备 ID" />
+    ),
+  },
   {
     title: "分配状态",
     width: 120,
@@ -45,16 +58,35 @@ const columns: ListColumn<GpuBinding>[] = [
     width: 140,
     ellipsis: true,
   },
-  { title: "Pod 命名空间", dataIndex: "pod_namespace", width: 180, ellipsis: true },
-  { title: "Pod 名称", dataIndex: "pod_name", width: 200, ellipsis: true },
-  { title: "Pod UID", dataIndex: "pod_uid", width: 220, ellipsis: true },
+  {
+    title: "Pod 命名空间",
+    dataIndex: "pod_namespace",
+    width: 200,
+    ellipsis: true,
+    render: (_, row) => <ResourceIdentity name={row.pod_namespace} display="name" />,
+  },
+  {
+    title: "Pod / UID",
+    dataIndex: "pod_name",
+    width: 200,
+    ellipsis: true,
+    render: (_, row) => <ResourceIdentity name={row.pod_name} id={row.pod_uid} idLabel="Pod UID" />,
+  },
+
   {
     title: "租户 ID",
     dataIndex: "tenant_id",
     width: 220,
     ellipsis: true,
+    render: (_, row) => <ResourceIdentity id={row.tenant_id} display="id" idLabel="租户 ID" />,
   },
-  { title: "所属服务", dataIndex: "owner_service", width: 180, ellipsis: true },
+  {
+    title: "所属服务",
+    dataIndex: "owner_service",
+    width: 200,
+    ellipsis: true,
+    render: (_, row) => <ResourceIdentity name={row.owner_service} display="name" />,
+  },
 ];
 interface GpuBindingsProps {
   clusterId: string;

@@ -1,4 +1,5 @@
 import { Descriptions, Drawer, Spin } from "@arco-design/web-react";
+import { ResourceIdentity } from "@/components/common";
 import { useQuery } from "@tanstack/react-query";
 import { auditLogKeys, getAuditLog, type AuditLogKind } from "@/api/audit-logs";
 import { formatDateTime } from "@/lib/date";
@@ -67,27 +68,53 @@ export function AuditLogDetailDrawer({ kind, id, onClose }: AuditLogDetailDrawer
             column={1}
             border
             data={[
-              { label: "日志 ID", value: item.id ?? "-" },
+              {
+                label: "日志 ID",
+                value: <ResourceIdentity id={item.id} display="id" idLabel="日志 ID" />,
+              },
               { label: "时间", value: formatDateTime(item.createdAt) },
-              { label: "租户 ID", value: item.tenantId ?? "-" },
-              { label: "租户名称", value: item.tenantName || "-" },
-              { label: "用户 ID", value: item.userId ?? "-" },
-              { label: "操作者", value: item.username || "-" },
+              {
+                label: "租户",
+                value: (
+                  <ResourceIdentity name={item.tenantName} id={item.tenantId} idLabel="租户 ID" />
+                ),
+              },
+              {
+                label: "操作者",
+                value: <ResourceIdentity name={item.username} id={item.userId} idLabel="用户 ID" />,
+              },
               { label: "IP 地址", value: item.ipAddress || "-" },
               { label: "动作", value: getAuditAction(item) },
               { label: "结果", value: <AuditResult item={item} /> },
               ...Object.entries(labels)
                 .filter(([key]) => key in record)
-                .map(([key, label]) => ({
-                  label,
-                  value: (
-                    <pre className="m-0 whitespace-pre-wrap break-all">
-                      {formatDetailValue(record[key], key)}
-                    </pre>
-                  ),
-                })),
-              { label: "请求 ID", value: item.requestId || "-" },
-              { label: "Trace ID", value: item.traceId || "-" },
+                .map(([key, label]) => {
+                  const value = record[key];
+                  return {
+                    label,
+                    value: ["sessionId", "subject_id", "spanId", "resourceId"].includes(key) ? (
+                      <ResourceIdentity
+                        id={
+                          typeof value === "string" || typeof value === "number" ? value : undefined
+                        }
+                        display="id"
+                        idLabel={label}
+                      />
+                    ) : (
+                      <pre className="m-0 whitespace-pre-wrap break-all">
+                        {formatDetailValue(value, key)}
+                      </pre>
+                    ),
+                  };
+                }),
+              {
+                label: "请求 ID",
+                value: <ResourceIdentity id={item.requestId} display="id" idLabel="请求 ID" />,
+              },
+              {
+                label: "Trace ID",
+                value: <ResourceIdentity id={item.traceId} display="id" idLabel="Trace ID" />,
+              },
               { label: "日志哈希", value: <div className="break-all">{item.logHash || "-"}</div> },
               {
                 label: "数字签名",

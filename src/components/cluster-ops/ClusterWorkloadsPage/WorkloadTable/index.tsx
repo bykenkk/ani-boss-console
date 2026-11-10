@@ -1,6 +1,6 @@
-import { Button } from "@arco-design/web-react";
 import type { ClusterOpsResourceDocument, ClusterOpsResourceRef } from "@/api/cluster-ops";
 import {
+  ResourceIdentity,
   ListDataTable,
   StatusBadge,
   type ListColumn,
@@ -37,7 +37,13 @@ function resourceColumns(kind: ClusterWorkloadKind): ListColumn<WorkloadRow>[] {
     return [
       { title: "就绪容器", dataIndex: "summary.pod.ready", width: 120 },
       { title: "重启次数", dataIndex: "summary.pod.restarts", width: 100 },
-      { title: "节点", dataIndex: "summary.pod.node", width: 160, ellipsis: true },
+      {
+        title: "节点",
+        dataIndex: "summary.pod.node",
+        width: 200,
+        ellipsis: true,
+        render: (_, doc) => <ResourceIdentity name={doc.summary.pod?.node} display="name" />,
+      },
       { title: "容器组 IP", dataIndex: "summary.pod.ip", width: 160, ellipsis: true },
     ];
   if (kind === "jobs")
@@ -82,14 +88,7 @@ export function WorkloadTable({
       fixed: "left",
       ellipsis: true,
       render: (_, doc) => (
-        <Button
-          type="text"
-          className="h-auto! max-w-full! p-0!"
-          title={doc.ref.name}
-          onClick={() => onOpen(doc.ref)}
-        >
-          <span className="block truncate">{doc.ref.name}</span>
-        </Button>
+        <ResourceIdentity name={doc.ref.name} display="name" onOpen={() => onOpen(doc.ref)} />
       ),
     },
     ...(kind === "services"
@@ -101,12 +100,18 @@ export function WorkloadTable({
             render: (_: unknown, doc: WorkloadRow) => <StatusBadge {...doc.summary.status} />,
           },
         ]),
-    { title: "Namespace", dataIndex: "ref.namespace", width: 180, ellipsis: true },
+    {
+      title: "Namespace",
+      dataIndex: "ref.namespace",
+      width: 200,
+      ellipsis: true,
+      render: (_, doc) => <ResourceIdentity name={doc.ref.namespace} display="name" />,
+    },
     ...resourceColumns(kind),
     ...(kind === "services"
       ? []
       : [{ title: "镜像", dataIndex: "summary.images", width: 280, ellipsis: true }]),
-    { title: "创建时间", render: (_, doc) => formatDateTime(doc.summary.createdAt) },
+    { title: "创建时间", width: 180, render: (_, doc) => formatDateTime(doc.summary.createdAt) },
   ];
   return (
     <ListDataTable

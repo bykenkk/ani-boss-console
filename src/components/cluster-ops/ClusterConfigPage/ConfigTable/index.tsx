@@ -1,6 +1,10 @@
-import { Button } from "@arco-design/web-react";
 import type { ClusterOpsResourceDocument, ClusterOpsResourceRef } from "@/api/cluster-ops";
-import { ListDataTable, type ListColumn, type ListPagination } from "@/components/common";
+import {
+  ResourceIdentity,
+  ListDataTable,
+  type ListColumn,
+  type ListPagination,
+} from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { configSummary } from "../config-summary";
 import type { ClusterConfigKind } from "../constants";
@@ -25,23 +29,22 @@ export function ConfigTable({ kind, resources, loading, pagination, onOpen }: Co
       fixed: "left",
       ellipsis: true,
       render: (_, doc) => (
-        <Button
-          type="text"
-          className="h-auto! max-w-full! p-0!"
-          title={doc.ref.name}
-          onClick={() => onOpen(doc.ref)}
-        >
-          <span className="block truncate">{doc.ref.name}</span>
-        </Button>
+        <ResourceIdentity name={doc.ref.name} display="name" onOpen={() => onOpen(doc.ref)} />
       ),
     },
-    { title: "Namespace", dataIndex: "ref.namespace", width: 180, ellipsis: true },
+    {
+      title: "Namespace",
+      dataIndex: "ref.namespace",
+      width: 200,
+      ellipsis: true,
+      render: (_, doc) => <ResourceIdentity name={doc.ref.namespace} display="name" />,
+    },
     ...(kind === "secrets"
       ? [{ title: "类型", dataIndex: "summary.type", width: 180, ellipsis: true }]
       : []),
     { title: "字段数量", dataIndex: "summary.keyCount", width: 100 },
     { title: "字段", dataIndex: "summary.keyNames", width: 280, ellipsis: true },
-    { title: "创建时间", render: (_, doc) => formatDateTime(doc.summary.createdAt) },
+    { title: "创建时间", width: 180, render: (_, doc) => formatDateTime(doc.summary.createdAt) },
   ];
   return (
     <ListDataTable
