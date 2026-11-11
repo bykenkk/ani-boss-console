@@ -29,7 +29,7 @@ export default function SectionHeader({
           </Typography.Title>
         ) : null}
         {description ? (
-          <div className="mt-1 text-xs text-[var(--color-text-3)]">{description}</div>
+          <div className="mt-1 text-xs text-(--color-text-3)">{description}</div>
         ) : null}
       </div>
       {extra ? <div className="shrink-0">{extra}</div> : null}

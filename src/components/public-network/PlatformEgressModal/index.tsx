@@ -79,7 +79,7 @@ export function PlatformEgressModal({ onCancel }: PlatformEgressModalProps) {
       style={{ width: 680 }}
     >
       <Spin loading={query.isLoading} className="block!">
-        <p className="mb-4 text-[var(--color-text-3)]">
+        <p className="mb-4 text-(--color-text-3)">
           为默认 VPC 内的 Pod 配置系统专用弹性 IP 和 SNAT。
         </p>
         {query.isError ? (

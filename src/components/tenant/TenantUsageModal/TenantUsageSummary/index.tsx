@@ -63,7 +63,7 @@ export function TenantUsageSummary({ tenantId }: TenantUsageSummaryProps) {
           { label: "API 审计记录数", value: query.data?.apiCallCount ?? "-" },
         ]}
       />
-      <p className="m-0 text-sm text-[var(--color-text-3)]">
+      <p className="m-0 text-sm text-(--color-text-3)">
         存储统计当前固定为 0，并非真实存储用量；API 审计记录数是事后聚合结果，不代表计费周期用量。
       </p>
       <DataTable

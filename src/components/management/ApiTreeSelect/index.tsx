@@ -22,7 +22,7 @@ export function ApiTreeSelect({ value = [], onChange }: Props) {
   return (
     <div aria-label="关联 API">
       <Spin loading={query.isPending} className="w-full">
-        <div className="max-h-80 overflow-auto rounded border border-[var(--color-border-2)] p-3">
+        <div className="max-h-80 overflow-auto rounded border border-(--color-border-2) p-3">
           {treeData.length ? (
             <Tree
               checkable

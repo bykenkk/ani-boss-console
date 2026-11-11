@@ -19,7 +19,7 @@ export function ResourceManifest({ value, raw = false, onRevealSecret }: Resourc
     );
   return (
     <pre
-      className="m-0 whitespace-pre-wrap break-all rounded bg-(--color-menu-dark-bg) p-4 font-mono text-xs text-(--color-white)"
+      className="m-0 whitespace-pre-wrap break-all rounded bg-(--color-menu-dark-bg) p-4 font-mono text-xs text-white"
       aria-label={raw ? "原始 JSON" : "资源 YAML"}
     >
       {raw ? value.resource.object_json : value.manifest_yaml || "当前未取得可展示的 YAML"}

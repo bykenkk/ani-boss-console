@@ -33,7 +33,7 @@ export function Metric({ label, value, hint, tone = "", onClick }: MetricProps) 
               "text-xs",
               tone === "danger" || tone === "warning"
                 ? "text-[rgb(var(--warning-6))]"
-                : "text-[var(--color-text-2)]",
+                : "text-(--color-text-2)",
             )}
           >
             {hint}
