@@ -44,6 +44,12 @@ export function GpuClusters() {
     <>
       <TableSectionFrame
         toolbar={{
+          refresh: {
+            label: "刷新集群列表",
+            onClick: () => query.refetch(),
+            spinning: query.isFetching,
+            disabled: query.isFetching,
+          },
           actions: (
             <Button type="primary" onClick={() => setCreating(true)}>
               登记集群
