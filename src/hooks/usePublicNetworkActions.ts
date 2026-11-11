@@ -60,7 +60,7 @@ export function usePublicNetworkActions(onDeleted: () => void) {
         if (defaultDisabled(item)) return;
         Modal.confirm({
           title: "设为默认公网池",
-          content: `将「${item.name}」设为默认公网池？后续租户新建 EIP 将使用该地址池。`,
+          content: `将「${item.name}」设为默认公网池？后续租户新建弹性 IP 将使用该地址池。`,
           onOk: () => defaultPool.mutateAsync(item),
         });
       },

@@ -125,8 +125,8 @@ export function useBasicNetworkActions(onDeleted: () => void) {
         Modal.confirm({
           title: enabled ? "开启新建 VPC 自动分配" : "关闭新建 VPC 自动分配",
           content: enabled
-            ? `将「${item.name}」设为默认基础网络并开启地址分配，后续租户新建 VPC 将自动创建基础 EIP 和 SNAT。已有 VPC 不变。`
-            : `关闭「${item.name}」的新建 VPC 自动分配？已有 VPC 的基础 EIP 和 SNAT 保留。`,
+            ? `将「${item.name}」设为默认基础网络并开启地址分配，后续租户新建 VPC 将自动创建基础弹性 IP 和 SNAT。已有 VPC 不变。`
+            : `关闭「${item.name}」的新建 VPC 自动分配？已有 VPC 的基础弹性 IP 和 SNAT 保留。`,
           onOk: () => autoAllocation.mutateAsync({ item, enabled }),
         });
       },
@@ -146,7 +146,7 @@ export function useBasicNetworkActions(onDeleted: () => void) {
           title: enabled ? "开启基础网络地址分配" : "关闭基础网络地址分配",
           content: enabled
             ? `开启「${item.name}」的地址分配？新建 VPC 自动分配仍需单独开启。`
-            : `关闭「${item.name}」的地址分配？已有 VPC 的基础 EIP 和 SNAT 保留。`,
+            : `关闭「${item.name}」的地址分配？已有 VPC 的基础弹性 IP 和 SNAT 保留。`,
           onOk: () => allocation.mutateAsync({ item, enabled }),
         });
       },

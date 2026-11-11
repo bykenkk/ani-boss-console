@@ -15,18 +15,18 @@ export function EIPDetailModal({ id, onCancel }: EIPDetailModalProps) {
   const query = useQuery({
     queryKey: eipKeys.detail(id),
     queryFn: ({ signal }) => getEIP(id, signal),
-    meta: { errorNotification: { id: withId("eip-detail", id), action: "EIP 详情加载" } },
+    meta: { errorNotification: { id: withId("eip-detail", id), action: "弹性 IP 详情加载" } },
   });
   const item = query.data;
   return (
-    <Modal visible title="EIP 详情" footer={null} onCancel={onCancel} style={{ width: 840 }}>
+    <Modal visible title="弹性 IP 详情" footer={null} onCancel={onCancel} style={{ width: 840 }}>
       <Spin loading={query.isLoading} className="block!">
         <Descriptions
           column={2}
           data={[
             {
-              label: "EIP",
-              value: <ResourceIdentity name={item?.name} id={id} idLabel="EIP ID" />,
+              label: "弹性 IP",
+              value: <ResourceIdentity name={item?.name} id={id} idLabel="弹性 IP ID" />,
             },
             { label: "IP 地址", value: item?.address || "-" },
             { label: "状态", value: item ? <PlatformNetworkStatus state={item.state} /> : "-" },

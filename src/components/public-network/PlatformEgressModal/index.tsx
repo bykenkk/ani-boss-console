@@ -80,7 +80,7 @@ export function PlatformEgressModal({ onCancel }: PlatformEgressModalProps) {
     >
       <Spin loading={query.isLoading} className="block!">
         <p className="mb-4 text-[var(--color-text-3)]">
-          为默认 VPC 内的 Pod 配置系统专用 EIP 和 SNAT。
+          为默认 VPC 内的 Pod 配置系统专用弹性 IP 和 SNAT。
         </p>
         {query.isError ? (
           <Alert type="error" content="无法加载出网配置，请刷新重试。" />
@@ -101,8 +101,8 @@ export function PlatformEgressModal({ onCancel }: PlatformEgressModalProps) {
               { label: "出口状态", value: <PlatformNetworkStatus state={item.state} /> },
               { label: "出口 IP", value: item.address || "-" },
               {
-                label: "EIP ID",
-                value: <ResourceIdentity id={item.eip_id} display="id" idLabel="EIP ID" />,
+                label: "弹性 IP ID",
+                value: <ResourceIdentity id={item.eip_id} display="id" idLabel="弹性 IP ID" />,
               },
               {
                 label: "公网池 ID",
@@ -162,7 +162,7 @@ export function PlatformEgressModal({ onCancel }: PlatformEgressModalProps) {
                 Modal.confirm({
                   title: "删除平台组件出网配置",
                   content:
-                    "删除后，依赖此出口的 kcn-cluster Pod 将失去这条出网路径，系统 EIP 将被回收。确定删除？",
+                    "删除后，依赖此出口的 kcn-cluster Pod 将失去这条出网路径，系统弹性 IP 将被回收。确定删除？",
                   okButtonProps: { status: "danger" },
                   onOk: () => remove.mutateAsync(item.id),
                 })

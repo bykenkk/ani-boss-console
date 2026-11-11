@@ -70,7 +70,7 @@ const networkNavigation: readonly NavigationLeaf[] = [
   { label: "二层网络", to: "/layer2-networks" },
   { label: "基础网络", to: "/basic-networks" },
   { label: "公有网络", to: "/public-networks" },
-  { label: "EIP 管理", to: "/eips" },
+  { label: "弹性 IP", to: "/eips" },
 ];
 
 const observabilityNavigation: readonly NavigationLeaf[] = [

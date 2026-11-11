@@ -12,7 +12,7 @@ export function useEIPActions(onReleased: () => void) {
       feedback: {
         channel: "notification",
         id: "eip-release",
-        action: "释放 EIP",
+        action: "释放弹性 IP",
         successText: "释放已提交",
       },
     },
@@ -33,7 +33,7 @@ export function useEIPActions(onReleased: () => void) {
       onClick: (item) => {
         if (disabled(item)) return;
         Modal.confirm({
-          title: "释放 EIP",
+          title: "释放弹性 IP",
           content: `确定释放「${item.name}」${item.address ? `（${item.address}）` : ""}？地址回收后将不可继续使用。`,
           okButtonProps: { status: "danger" },
           onOk: () => release.mutateAsync(item),

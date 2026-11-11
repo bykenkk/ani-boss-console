@@ -4,13 +4,19 @@ import { useQuery } from "@tanstack/react-query";
 import { listManagementOptions, managementKeys } from "@/api/management";
 import { withId } from "@/lib/id";
 
-interface Props {
+interface TenantSelectProps {
   value?: number;
   onChange?: (value: number | undefined) => void;
   disabled?: boolean;
+  placeholder?: string;
 }
 
-export function TenantSelect({ value, onChange, disabled }: Props) {
+export function TenantSelect({
+  value,
+  onChange,
+  disabled,
+  placeholder = "请选择",
+}: TenantSelectProps) {
   const [search, setSearch] = useState("");
   const filters = { ...(search ? { name__contains: search } : {}) };
   const query = useQuery({
@@ -36,7 +42,7 @@ export function TenantSelect({ value, onChange, disabled }: Props) {
       options={options}
       loading={query.isFetching}
       disabled={disabled || query.isError}
-      placeholder="请选择"
+      placeholder={placeholder}
     />
   );
 }

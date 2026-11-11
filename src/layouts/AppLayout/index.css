@@ -1463,6 +1463,7 @@
 
 /* Product design: shared console surfaces. */
 .app-layout {
+  --app-control-radius: 10px;
   --topnav-height: 56px;
   --primary-6: 43, 92, 230;
   --color-text-1: #1f2533;
@@ -1538,9 +1539,20 @@
 }
 .app-layout .arco-input-wrapper,
 .app-layout .arco-select-view {
-  border-radius: 10px;
+  border-radius: var(--app-control-radius);
   background: #fff;
   border-color: #e8ecf3;
+}
+.app-layout .arco-input,
+.app-layout .arco-input-inner-wrapper {
+  border-radius: var(--app-control-radius);
+}
+.app-layout .arco-input-group-compact {
+  --border-radius-small: var(--app-control-radius);
+}
+.app-layout .arco-input-group-compact > .arco-select:first-child .arco-select-view {
+  border-top-left-radius: var(--app-control-radius);
+  border-bottom-left-radius: var(--app-control-radius);
 }
 .app-layout .arco-tag {
   border-radius: 6px;

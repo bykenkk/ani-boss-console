@@ -9,7 +9,9 @@ export function ListToolbar({ actions, filters, tools }: ListToolbarProps) {
   return (
     <div className={styles.toolbar}>
       {actions ? <div className={styles.toolbarActions}>{actions}</div> : null}
-      {filters ? <Space className={styles.toolbarFilters}>{filters}</Space> : null}
+      {filters ? (
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">{filters}</div>
+      ) : null}
       {tools ? <div className={styles.toolbarTools}>{tools}</div> : null}
     </div>
   );

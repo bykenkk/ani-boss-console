@@ -98,7 +98,7 @@ export function BasicNetworksPage() {
       <ListPageFrame
         header={{
           title: "基础网络",
-          subtitle: "管理基础网络，自动为租户新建 VPC 分配基础 EIP 和 SNAT。",
+          subtitle: "管理基础网络，自动为租户新建 VPC 分配基础弹性 IP 和 SNAT。",
         }}
         toolbar={{
           actions: (
@@ -107,19 +107,21 @@ export function BasicNetworksPage() {
             </Button>
           ),
           filters: (
-            <Input.Search
-              placeholder="搜索基础网络名称"
-              aria-label="搜索基础网络名称"
-              allowClear
-              onSearch={(value) => {
-                setKeyword(value.trim());
-                paging.resetPagination();
-              }}
-              onClear={() => {
-                setKeyword("");
-                paging.resetPagination();
-              }}
-            />
+            <div className="flex">
+              <Input.Search
+                placeholder="搜索基础网络名称"
+                aria-label="搜索基础网络名称"
+                allowClear
+                onSearch={(value) => {
+                  setKeyword(value.trim());
+                  paging.resetPagination();
+                }}
+                onClear={() => {
+                  setKeyword("");
+                  paging.resetPagination();
+                }}
+              />
+            </div>
           ),
           refresh: {
             spinning: query.isFetching,

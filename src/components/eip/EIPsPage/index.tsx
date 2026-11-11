@@ -25,7 +25,7 @@ export function EIPsPage() {
   const query = useQuery({
     queryKey: eipKeys.list(params),
     queryFn: ({ signal }) => listEIPs(params, signal),
-    meta: { errorNotification: { id: "eip-list", action: "EIP 列表加载" } },
+    meta: { errorNotification: { id: "eip-list", action: "弹性 IP 列表加载" } },
   });
   const { actions } = useEIPActions(pagination.resetPagination);
   const columns: ListColumn<EIP>[] = [
@@ -117,7 +117,10 @@ export function EIPsPage() {
   return (
     <>
       <ListPageFrame
-        header={{ title: "EIP 管理", subtitle: "统一查看全平台 EIP 的归属、分配和绑定状态。" }}
+        header={{
+          title: "弹性 IP",
+          subtitle: "查看平台弹性 IP 的所属租户、地址类型和资源绑定情况。",
+        }}
         toolbar={{
           filters: (
             <EIPFilters
@@ -138,7 +141,7 @@ export function EIPsPage() {
         }}
       >
         <ListDataTable
-          tableLabel="EIP"
+          tableLabel="弹性 IP"
           columns={columns}
           data={query.data?.items ?? []}
           loading={query.isLoading}

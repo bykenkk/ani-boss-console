@@ -25,7 +25,10 @@ export function BasicNetworkDetailModal({ network, onCancel }: BasicNetworkDetai
           { label: "预留 IP", value: pool?.excluded_ips.join("、") || "-" },
           { label: "默认基础网络", value: pool?.is_default ? "是" : "否" },
           { label: "地址分配", value: pool?.allocation_enabled ? "开启" : "关闭" },
-          { label: "新建 VPC 自动分配 EIP/SNAT", value: pool?.new_vpcs_enabled ? "开启" : "关闭" },
+          {
+            label: "新建 VPC 自动分配弹性 IP/SNAT",
+            value: pool?.new_vpcs_enabled ? "开启" : "关闭",
+          },
           { label: "观测状态", value: network.observation_stale ? "已过期" : "有效" },
           { label: "最近观测", value: formatDateTime(network.observed_at) },
           { label: "状态说明", value: network.reason_message || network.reason || "-" },
