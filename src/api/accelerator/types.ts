@@ -1,3 +1,5 @@
+import type { PageParams } from "@/api/types";
+
 export type GpuMode = "WHOLE_EXCLUSIVE" | "SHARED_FIXED";
 export type GpuAllocationType = "PHYSICAL" | "DYNAMIC_SHARED" | "FIXED_PARTITION";
 export type GpuAdmission = "ADMISSION_OPEN" | "ADMISSION_CLOSED";
@@ -189,4 +191,154 @@ export interface SetGpuProfileStateInput {
 export interface DeleteGpuProfileInput {
   profile_id: string;
   expected_revision: string;
+}
+
+export interface GpuProviderConfig {
+  provider_config_ref: string;
+  adapter_id: string;
+  allocation_types?: GpuAllocationType[];
+}
+
+export interface GpuDiscoveredNode {
+  node?: GpuNode;
+  group_id?: string;
+  selectable?: boolean;
+  blocking_reasons?: string[];
+  devices?: Array<
+    Partial<Omit<GpuDevice, "memory_capacity_bytes" | "compute_units">> & {
+      memory_capacity_bytes?: string | null;
+      compute_units?: number | null;
+    }
+  >;
+  provider_configs?: GpuProviderConfig[];
+}
+
+export interface GpuDiscoveredNodes {
+  items?: GpuDiscoveredNode[];
+  total?: string;
+  discovery_revision?: string;
+}
+
+export interface GpuDiscoveryParams extends PageParams {
+  connection_ref: string;
+}
+
+export interface GpuInitializationCheck {
+  key?: string;
+  source?: string;
+  state?: string;
+  reason?: string;
+}
+
+// 本地供给准备草稿，不是初始化 HTTP 请求体；尚无供给配置保存/应用接口。
+export interface GpuSupplyPreparationDraft {
+  allocation_type: Exclude<GpuAllocationType, "DYNAMIC_SHARED">;
+  node_uids: string[];
+  model_source: "observation" | "verified";
+  model_key: string;
+  evidence: string;
+  ref: string;
+  display_name: string;
+  resource_key: string;
+  max_devices_per_replica: string;
+  memory_capacity_bytes: string;
+  compute_units_per_device: string;
+  runtime_class_name: string;
+}
+
+export interface GpuInitialization {
+  registered?: boolean;
+  connection_ref?: string;
+  cluster_id?: string;
+  display_name?: string;
+  configuration_state?: string;
+  configuration_complete?: boolean;
+  checks?: GpuInitializationCheck[];
+  latest_operation?: GpuInitializationOperation;
+}
+
+export interface GpuInitializationStep {
+  step_id?: string;
+  object_key?: string;
+  kind?: string;
+  state?: string;
+  resource_id?: string;
+  input_group_version?: string;
+  output_group_version?: string;
+  reason?: string;
+}
+
+export interface GpuInitializationOperation {
+  operation_id?: string;
+  version?: string;
+  state?: string;
+  created_at?: string;
+  updated_at?: string;
+  current_step?: string;
+  retryable?: boolean;
+  reason?: string;
+  required_actions?: string[];
+  cluster_id?: string;
+  pools?: Array<{ client_key?: string; pool_id?: string }>;
+  groups?: Array<{
+    client_key?: string;
+    group_id?: string;
+    recorded_group_version?: string;
+    auto_open_result?: string;
+    admission?: string;
+  }>;
+  profiles?: Array<{
+    client_key?: string;
+    profile_id?: string;
+    recorded_revision?: string;
+    recorded_state?: string;
+  }>;
+  steps?: GpuInitializationStep[];
+}
+
+export interface GpuInitializationProfileInput {
+  client_key: string;
+  group_key: string;
+  display_name: string;
+  memory_mib_per_device: string;
+  core_limit_percent: number;
+  max_devices_per_replica: number;
+  allocation_type: GpuAllocationType;
+  resource_key: string;
+  compute_units_per_device: number;
+}
+
+export interface GpuInitializationInput {
+  connection_ref: string;
+  discovery_revision: string;
+  pools: Array<
+    { client_key: string } & (
+      | { new_pool: { display_name: string }; existing_pool_id?: never }
+      | { existing_pool_id: string; new_pool?: never }
+    )
+  >;
+  groups: Array<{
+    client_key: string;
+    new_group: {
+      pool_key: string;
+      display_name: string;
+      nodes: GpuNode[];
+      provider_config_ref: string;
+      queue_name: string;
+    };
+  }>;
+  profiles: GpuInitializationProfileInput[];
+}
+
+export interface RetryGpuInitializationInput {
+  operation_id: string;
+  expected_version: string;
+}
+
+export interface CreateGpuInitializationRequest {
+  data: GpuInitializationInput & { idempotency_key: string };
+}
+
+export interface RetryGpuInitializationRequest {
+  data: { expected_version: string; idempotency_key: string };
 }

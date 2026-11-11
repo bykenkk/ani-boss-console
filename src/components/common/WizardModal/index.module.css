@@ -1,0 +1,10 @@
+.modal :global(.arco-modal-content) {
+  display: flex;
+  flex-direction: column;
+  height: min(70vh, 720px);
+  overflow: hidden;
+}
+
+.steps :global(.arco-steps-item:last-child) {
+  flex: 0 0 auto;
+}

@@ -16,6 +16,8 @@ export type {
 } from "./DetailPageFrame";
 export { ListDataTable } from "./ListDataTable";
 export { ModalSteps } from "./ModalSteps";
+export { default as WizardModal } from "./WizardModal";
+export { default as WizardSteps } from "./WizardSteps";
 export type { ListDataTableProps } from "./ListDataTable";
 export { ListPageFrame } from "./ListPageFrame";
 export { ToolbarIconButton } from "./ListPageFrame/ListToolbar";

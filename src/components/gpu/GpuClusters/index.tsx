@@ -11,6 +11,9 @@ import {
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 
 import { RegisterGpuClusterModal } from "../RegisterGpuClusterModal";
+import { InitializeGpuPoolModal } from "../InitializeGpuPoolModal";
+import { GpuInitializationOperationModal } from "../GpuInitializationOperationModal";
+import { GpuClusterResourcesModal } from "../GpuClusterResourcesModal";
 const columns: ListColumn<GpuCluster>[] = [
   {
     title: "集群 / ID",
@@ -27,6 +30,9 @@ const columns: ListColumn<GpuCluster>[] = [
 ];
 export function GpuClusters() {
   const [creating, setCreating] = useState(false);
+  const [initializing, setInitializing] = useState<GpuCluster>();
+  const [operation, setOperation] = useState<{ cluster: GpuCluster; id: string }>();
+  const [resources, setResources] = useState<GpuCluster>();
   const cursor = useCursorPagination("gpu-clusters");
   const params = { page_size: cursor.limit, page_token: cursor.cursor };
   const query = useQuery({
@@ -53,9 +59,41 @@ export function GpuClusters() {
           pagination={cursor.getPagination(query.data?.next_page_token, query.isFetching)}
           emptyText="暂无可展示的 GPU 集群"
           tableLabel="GPU 集群"
+          rowActions={[
+            {
+              key: "initialize",
+              label: "初始化资源池",
+              disabled: (cluster) => !cluster.connection_ref,
+              onClick: setInitializing,
+            },
+          ]}
         />
       </TableSectionFrame>
       {creating ? <RegisterGpuClusterModal onCancel={() => setCreating(false)} /> : null}
+      {initializing ? (
+        <InitializeGpuPoolModal
+          cluster={initializing}
+          onCancel={() => setInitializing(undefined)}
+          onOperation={(id) => {
+            setOperation({ cluster: initializing, id });
+            setInitializing(undefined);
+          }}
+        />
+      ) : null}
+      {operation ? (
+        <GpuInitializationOperationModal
+          cluster={operation.cluster}
+          operationId={operation.id}
+          onCancel={() => setOperation(undefined)}
+          onViewResources={() => {
+            setResources(operation.cluster);
+            setOperation(undefined);
+          }}
+        />
+      ) : null}
+      {resources ? (
+        <GpuClusterResourcesModal cluster={resources} onCancel={() => setResources(undefined)} />
+      ) : null}
     </>
   );
 }

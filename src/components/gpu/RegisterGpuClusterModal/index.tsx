@@ -34,15 +34,15 @@ export function RegisterGpuClusterModal({ onCancel }: { onCancel: () => void }) 
           label="集群名称"
           rules={[{ required: true, match: /\S/, message: "请输入集群名称" }]}
         >
-          <Input />
+          <Input placeholder="请输入集群名称" />
         </Form.Item>
         <Form.Item
           field="connection_ref"
           label="受管连接引用"
-          extra="填写平台提供的连接引用"
+          extra="使用已配置的连接，不在此上传凭据。"
           rules={[{ required: true, match: /\S/, message: "请输入受管连接引用" }]}
         >
-          <Input />
+          <Input placeholder="填写由运维提供的连接引用" />
         </Form.Item>
       </Form>
     </Modal>

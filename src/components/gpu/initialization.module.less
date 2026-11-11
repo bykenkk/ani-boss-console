@@ -1,0 +1,138 @@
+.modal {
+  border-radius: 12px;
+
+  :global(.arco-modal-header) {
+    height: auto;
+    padding: 24px 28px 18px;
+    border-bottom: 0;
+    text-align: left;
+  }
+
+  :global(.arco-modal-content) {
+    padding: 0 28px 24px;
+  }
+
+  :global(.arco-modal-footer) {
+    padding: 16px 28px;
+  }
+
+  :global(.arco-form-item-label > label) {
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  :global(.arco-form-message) {
+    font-size: 12px;
+  }
+
+  :global(.arco-input),
+  :global(.arco-input-number),
+  :global(.arco-select-view) {
+    border-radius: 6px;
+  }
+}
+
+.wizard:global(.arco-modal) :global(.arco-modal-content) {
+  height: min(72vh, 760px);
+}
+
+.poolChoice {
+  :global(.arco-radio-text) {
+    min-width: 0;
+  }
+}
+
+.nodeTable {
+  :global(.arco-table-row-checked .arco-table-td) {
+    background: rgb(var(--primary-1));
+  }
+}
+
+.task:global(.arco-modal) :global(.arco-modal-content) {
+  max-height: min(72vh, 760px);
+  overflow: auto;
+}
+
+.environmentChecks {
+  display: flex;
+  min-height: 48px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 22px;
+  border: 1px solid var(--color-border-2);
+  border-radius: 6px;
+  padding: 12px 14px;
+  background: var(--color-bg-2);
+}
+
+.environmentCheck {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  vertical-align: middle;
+
+  > svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 3;
+  }
+
+  .checkStatus {
+    min-height: 0;
+    border-radius: 0;
+    padding: 0;
+    background: transparent;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 20px;
+
+    :global(.arco-badge-status-dot) {
+      display: none;
+    }
+
+    :global(.arco-badge-status-text) {
+      margin-left: 0;
+    }
+  }
+}
+
+.checkSuccess {
+  color: #009b78;
+
+  + .checkStatus {
+    color: #009b78;
+  }
+}
+
+.checkWarning {
+  color: rgb(var(--warning-6));
+}
+
+.checkPending {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border: 1px dashed #718198;
+  border-radius: 50%;
+
+  + .checkStatus {
+    color: #718198;
+  }
+}
+
+@media (max-width: 640px) {
+  .modal {
+    :global(.arco-modal-header) {
+      padding: 20px 16px 16px;
+    }
+
+    :global(.arco-modal-content) {
+      padding-right: 16px;
+      padding-left: 16px;
+    }
+
+    :global(.arco-modal-footer) {
+      padding: 14px 16px;
+    }
+  }
+}

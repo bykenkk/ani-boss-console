@@ -21,6 +21,7 @@ import type {
   SetGpuProfileStateInput,
 } from "./types";
 export * from "./types";
+export * from "./initialization";
 
 export const acceleratorKeys = { all: ["accelerator"] as const };
 const registerScope = createIdempotencyScope("gpu-cluster-register", ["POST"]);
