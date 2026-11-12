@@ -118,7 +118,7 @@ src/api/<domain>/
 
 默认由项目负责人手动完成功能、布局和页面交互验证。除非用户明确要求，Agent 不运行 `pnpm build`、`pnpm verify` 或启动应用。
 
-所有 `pnpm` 命令必须在 Codex 沙箱外的系统环境运行，由系统 Corepack 根据 `package.json` 的 `packageManager` 选择 pnpm 版本；不得使用沙箱内的 fallback pnpm，也不得绕过项目声明手动选择其他版本。
+本机 `pnpm` 命令的运行环境与版本选择遵循 [AGENTS.md](../AGENTS.md#验证)。
 
 ### 纯文档修改
 

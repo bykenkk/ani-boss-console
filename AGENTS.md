@@ -24,7 +24,8 @@
 
 ## 验证
 
-- 所有 `pnpm` 命令必须在 Codex 沙箱外的系统环境运行，由系统 Corepack 根据 `package.json` 的 `packageManager` 选择版本；不得使用沙箱内的 fallback pnpm，也不得绕过项目声明手动选择其他版本。
+- 在本机执行 `pnpm` 命令时，必须在 Codex 沙箱外的系统环境运行，使用 `package.json` 的 `packageManager` 声明的 pnpm 版本；不得使用沙箱内的 fallback pnpm，也不得绕过项目声明手动选择其他版本。
+- 不要求额外安装 Corepack；系统已有 Corepack 时可由其选择版本，否则读取 `packageManager` 声明安装并使用对应版本的 pnpm。
 - 完成修改后、最终回复前按 [工程约定](./docs/ENGINEERING-CONVENTIONS.md#验证) 区分纯文档修改与代码或工程配置修改，执行对应验证清单和 GitNexus 变更检测；提交前若检测后又有修改，必须重新执行变更检测，确保结果覆盖待提交的最新变更。检查失败时先修复，无法在当前范围处理的既有问题必须如实记录。
 
 ## GitNexus

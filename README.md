@@ -2,6 +2,17 @@
 
 ANI 平台管理端前端。
 
+## 开发环境
+
+- Node.js 版本以 [.nvmrc](./.nvmrc) 为准。
+- pnpm 版本以 [package.json](./package.json) 的 `packageManager` 声明为准。
+
+Node.js 26 不内置 Corepack，无需额外安装。已有 Corepack 时可用其选择 pnpm 版本；否则在项目根目录执行以下命令，直接安装项目声明的 pnpm：
+
+```bash
+npm install --global "$(node -p 'require("./package.json").packageManager')"
+```
+
 ## 开发
 
 ```bash
@@ -11,7 +22,7 @@ pnpm dev
 
 开发服务默认访问 `http://localhost:5174`。
 
-环境变量按 [Vite 的 Env Variables and Modes](https://v6.vite.dev/guide/env-and-mode) 约定配置；本地覆盖可写入不提交的 `.env.local`。
+环境变量按 [Vite 的 Env Variables and Modes](https://vite.dev/guide/env-and-mode) 约定配置；本地覆盖可写入不提交的 `.env.local`。
 
 ## 常用命令
 
