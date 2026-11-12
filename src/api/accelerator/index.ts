@@ -1,3 +1,4 @@
+import { requireGpuScope, type GpuOperationScope } from "./scope";
 import { adminRequest } from "@/api/request";
 import { runIdempotentRequest } from "@/api/idempotency";
 import { createIdempotencyScope } from "@/lib/idempotency";
@@ -7,6 +8,7 @@ import type {
   CreateGpuProfileInput,
   DeleteGpuProfileInput,
   GpuCluster,
+  GpuClusterTarget,
   GpuDevice,
   GpuPage,
   GpuPageParams,
@@ -28,6 +30,9 @@ export * from "./volcano-queues";
 export * from "./group-policy";
 export * from "./types-group-policy";
 
+export function getGpuClusterTarget(signal?: AbortSignal): Promise<GpuClusterTarget> {
+  return adminRequest("/accelerator/cluster-target", { signal });
+}
 export const acceleratorKeys = { all: ["accelerator"] as const };
 const registerScope = createIdempotencyScope("gpu-cluster-register", ["POST"]);
 const poolScope = createIdempotencyScope("gpu-pool-create", ["POST"]);
@@ -52,7 +57,6 @@ export function listGpuPools(
   return adminRequest("/accelerator/pools", { params, signal });
 }
 // TODO(pagination-migration): 后端支持 page/pageSize 和 items/total 后，切换公共页码分页并复核筛选。
-// FIXME(cluster-scope): Gov 当前只转发 pool_id，尚未强制集群过滤；需补齐 cluster_id 转发及其与 pool_id 的一致性校验。
 export function listGpuSupplyGroups(
   params: GpuPageParams & { cluster_id: string; pool_id: string },
   signal?: AbortSignal,
@@ -102,25 +106,62 @@ export function previewGpuProfile(
   return adminRequest("/accelerator/profiles:preview", { params: { group_id, parts }, signal });
 }
 // TODO(request-migration): 后端移除 data 包装后，同步调整请求体；联调验证当前写请求的权限、幂等重试及实际结果。
-export async function registerGpuCluster(input: RegisterGpuClusterInput): Promise<void> {
-  await runIdempotentRequest(registerScope, input, async (data) => {
-    await adminRequest("/accelerator/clusters", { method: "POST", data: { data } });
-  });
+export async function registerGpuCluster(
+  input: RegisterGpuClusterInput,
+  scope: GpuOperationScope,
+): Promise<void> {
+  requireGpuScope(scope);
+  if (input.expected_cluster_id !== scope.cluster_id) throw new Error("请先确认平台主体和目标集群");
+  await runIdempotentRequest(
+    registerScope,
+    input,
+    async (data) => {
+      const cluster = await adminRequest<GpuCluster, { data: typeof data }>(
+        "/accelerator/clusters",
+        { method: "POST", data: { data } },
+      );
+      if (cluster.cluster_id !== input.expected_cluster_id)
+        throw new Error("登记结果与确认目标不一致，请刷新目标并核对原提交");
+    },
+    [scope.principal, scope.connection_ref, scope.cluster_id],
+  );
 }
 // TODO(request-migration): 后端移除 data 包装后，同步调整请求体；联调验证当前写请求的权限、幂等重试及实际结果。
-export async function createGpuPool(input: CreateGpuPoolInput): Promise<void> {
-  await runIdempotentRequest(poolScope, input, async (data) => {
-    await adminRequest("/accelerator/pools", { method: "POST", data: { data } });
-  });
+export async function createGpuPool(
+  input: CreateGpuPoolInput,
+  scope: GpuOperationScope,
+): Promise<void> {
+  requireGpuScope(scope);
+  await runIdempotentRequest(
+    poolScope,
+    input,
+    async (data) => {
+      await adminRequest("/accelerator/pools", { method: "POST", data: { data } });
+    },
+    [scope.principal, scope.connection_ref, scope.cluster_id],
+  );
 }
 // TODO(request-migration): 后端移除 data 包装后，同步调整请求体；联调验证当前写请求的权限、幂等重试及实际结果。
-export async function adoptGpuSupply(input: AdoptGpuSupplyInput): Promise<void> {
-  await runIdempotentRequest(adoptScope, input, async (data) => {
-    await adminRequest("/accelerator/supply-groups:adopt", { method: "POST", data: { data } });
-  });
+export async function adoptGpuSupply(
+  input: AdoptGpuSupplyInput,
+  scope: GpuOperationScope,
+): Promise<void> {
+  requireGpuScope(scope);
+  await runIdempotentRequest(
+    adoptScope,
+    input,
+    async (data) => {
+      await adminRequest("/accelerator/supply-groups:adopt", { method: "POST", data: { data } });
+    },
+    [scope.principal, scope.connection_ref, scope.cluster_id],
+  );
 }
 // TODO(request-migration): 后端移除 data 包装后，同步调整请求体；联调验证当前写请求的权限、幂等重试及实际结果。
-export async function setGpuAdmission({ group_id, ...input }: SetGpuAdmissionInput): Promise<void> {
+export async function setGpuAdmission(
+  { group_id, ...input }: SetGpuAdmissionInput,
+  scope: GpuOperationScope,
+): Promise<void> {
+  requireGpuScope(scope);
   await runIdempotentRequest(
     admissionScope,
     input,
@@ -130,20 +171,30 @@ export async function setGpuAdmission({ group_id, ...input }: SetGpuAdmissionInp
         { method: "POST", data: { data } },
       );
     },
-    [group_id],
+    [scope.principal, scope.connection_ref, scope.cluster_id, group_id],
   );
 }
 // TODO(request-migration): 后端移除 data 包装后，同步调整请求体；联调验证当前写请求的权限、幂等重试及实际结果。
-export async function createGpuProfile(input: CreateGpuProfileInput): Promise<void> {
-  await runIdempotentRequest(profileScope, input, async (data) => {
-    await adminRequest("/accelerator/profiles", { method: "POST", data: { data } });
-  });
+export async function createGpuProfile(
+  input: CreateGpuProfileInput,
+  scope: GpuOperationScope,
+): Promise<void> {
+  requireGpuScope(scope);
+  await runIdempotentRequest(
+    profileScope,
+    input,
+    async (data) => {
+      await adminRequest("/accelerator/profiles", { method: "POST", data: { data } });
+    },
+    [scope.principal, scope.connection_ref, scope.cluster_id],
+  );
 }
 // TODO(request-migration): 后端移除 data 包装后，同步调整请求体；联调验证当前写请求的权限、幂等重试及实际结果。
-export async function setGpuProfileState({
-  profile_id,
-  ...input
-}: SetGpuProfileStateInput): Promise<void> {
+export async function setGpuProfileState(
+  { profile_id, ...input }: SetGpuProfileStateInput,
+  scope: GpuOperationScope,
+): Promise<void> {
+  requireGpuScope(scope);
   await runIdempotentRequest(
     stateScope,
     input,
@@ -153,14 +204,15 @@ export async function setGpuProfileState({
         data: { data },
       });
     },
-    [profile_id],
+    [scope.principal, scope.connection_ref, scope.cluster_id, profile_id],
   );
 }
 // TODO(request-migration): 后端移除 data 包装后，同步调整请求体；联调验证当前写请求的权限、幂等重试及实际结果。
-export async function deleteGpuProfile({
-  profile_id,
-  ...input
-}: DeleteGpuProfileInput): Promise<void> {
+export async function deleteGpuProfile(
+  { profile_id, ...input }: DeleteGpuProfileInput,
+  scope: GpuOperationScope,
+): Promise<void> {
+  requireGpuScope(scope);
   await runIdempotentRequest(
     deleteScope,
     input,
@@ -170,7 +222,7 @@ export async function deleteGpuProfile({
         data: { data },
       });
     },
-    [profile_id],
+    [scope.principal, scope.connection_ref, scope.cluster_id, profile_id],
   );
 }
 

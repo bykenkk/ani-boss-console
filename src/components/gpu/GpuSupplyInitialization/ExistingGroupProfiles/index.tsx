@@ -1,3 +1,4 @@
+import { gpuScopeKey, type GpuOperationScope } from "@/api/accelerator/scope";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, Button, Form, Input, InputNumber, Select } from "@arco-design/web-react";
@@ -12,11 +13,13 @@ import {
 import { withId } from "@/lib/id";
 import { policyLabel } from "../policy";
 interface ExistingGroupProfilesProps {
+  scope: GpuOperationScope;
   cluster: GpuCluster;
   onSubmit: (input: CreateInitializationInput) => void;
   submitting: boolean;
 }
 export function ExistingGroupProfiles({
+  scope,
   cluster,
   onSubmit,
   submitting,
@@ -30,7 +33,7 @@ export function ExistingGroupProfiles({
   const [units, setUnits] = useState(0);
   const [maxDevices, setMaxDevices] = useState(1);
   const pools = useQuery({
-    queryKey: ["accelerator", "pool-options", cluster.cluster_id],
+    queryKey: ["accelerator", "pool-options", gpuScopeKey(scope)],
     queryFn: ({ signal }) =>
       listGpuPools({ cluster_id: cluster.cluster_id, page_size: 100 }, signal),
     meta: {
@@ -41,7 +44,7 @@ export function ExistingGroupProfiles({
     },
   });
   const groups = useQuery({
-    queryKey: ["accelerator", "group-options", cluster.cluster_id, poolId],
+    queryKey: ["accelerator", "group-options", gpuScopeKey(scope), poolId],
     queryFn: ({ signal }) =>
       listGpuSupplyGroups(
         { cluster_id: cluster.cluster_id, pool_id: poolId, page_size: 100 },

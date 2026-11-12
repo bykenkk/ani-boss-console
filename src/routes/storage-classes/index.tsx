@@ -28,7 +28,7 @@ export const Route = createFileRoute("/storage-classes/")({
             params: { storageName: ref.name },
             search: {
               cluster_id: ref.cluster_id,
-              namespace: ref.namespace || undefined,
+              namespace: ref.namespace ?? "",
               page_size: search.page_size,
             },
           })

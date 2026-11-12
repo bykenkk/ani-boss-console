@@ -1,3 +1,4 @@
+import { useGpuCatalogScope } from "@/hooks/useGpuTarget";
 import { policyLabel } from "../GpuSupplyInitialization/policy";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -110,6 +111,7 @@ interface GpuSupplyGroupsProps {
 
 export function GpuSupplyGroups({ pool }: GpuSupplyGroupsProps) {
   const [capacity, setCapacity] = useState<GpuSupplyGroup>();
+  const { scopeKey } = useGpuCatalogScope(pool.cluster_id);
   const cursor = useCursorPagination(JSON.stringify([pool.cluster_id, pool.pool_id]));
   const params = {
     cluster_id: pool.cluster_id,
@@ -118,7 +120,7 @@ export function GpuSupplyGroups({ pool }: GpuSupplyGroupsProps) {
     page_token: cursor.cursor,
   };
   const query = useQuery({
-    queryKey: [...acceleratorKeys.all, "groups", params],
+    queryKey: [...acceleratorKeys.all, "groups", scopeKey, params],
     queryFn: ({ signal }) => listGpuSupplyGroups(params, signal),
     enabled: Boolean(pool.cluster_id) && Boolean(pool.pool_id),
     meta: {

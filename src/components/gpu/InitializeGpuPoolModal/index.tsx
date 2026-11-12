@@ -1,3 +1,5 @@
+import { requireGpuOperationTarget, requireGpuSupplyTarget } from "@/api/accelerator/scope";
+import { useGpuOperationScope, useGpuPermissions } from "@/hooks/useGpuTarget";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import { Alert, Button, Checkbox, Form, Typography } from "@arco-design/web-react";
@@ -13,6 +15,7 @@ import {
   type GpuCluster,
   type GpuDiscoveredNode,
   type GpuInitializationInput,
+  type GpuInitialization,
   type GpuRegisteredSupplyConfiguration,
   type GpuSupplyRegistrationResult,
   type GpuProviderConfig,
@@ -72,15 +75,11 @@ export function InitializeGpuPoolModal({
   onCancel,
   onOperation,
 }: InitializeGpuPoolModalProps) {
+  const { scope, scopeKey } = useGpuOperationScope(cluster);
+  const { can } = useGpuPermissions();
   const [form] = Form.useForm<GpuPoolInitializationFormValues>();
-  const frozen = useStore(
-    gpuInitializationIntents,
-    (state) => state.creates[cluster.connection_ref],
-  );
-  const pendingSupply = useStore(
-    gpuSupplyRegistrationIntents,
-    (state) => state.inputs[cluster.connection_ref],
-  );
+  const frozen = useStore(gpuInitializationIntents, (state) => state.creates[scopeKey]);
+  const pendingSupply = useStore(gpuSupplyRegistrationIntents, (state) => state.inputs[scopeKey]);
   const [step, setStep] = useState(frozen ? 4 : 1);
   const [nodes, setNodes] = useState<GpuDiscoveredNode[]>([]);
   const [preparation, setPreparation] = useState(false);
@@ -112,6 +111,7 @@ export function InitializeGpuPoolModal({
     refresh: refreshSupplyFacts,
     loadMore: loadMoreSupplyFacts,
   } = useGpuInitializationSupply({
+    scope,
     connectionRef: cluster.connection_ref,
     nodes,
     config,
@@ -147,7 +147,7 @@ export function InitializeGpuPoolModal({
   }, [facts, form, frozen]);
   const rememberRegistration = useCallback(
     (registration: GpuSupplyRegistrationResult) => {
-      rememberGpuSupplyRegistration(registration);
+      rememberGpuSupplyRegistration(registration, scope);
       setRegisteredConfigurations((current) => ({
         ...current,
         ...Object.fromEntries(
@@ -157,12 +157,21 @@ export function InitializeGpuPoolModal({
         ),
       }));
     },
-    [cluster.connection_ref],
+    [cluster.connection_ref, scope],
   );
   const conflictingModels = gpuNodesHaveConflictingModels(nodes);
   const status = useQuery({
-    queryKey: [...acceleratorKeys.all, "initialization", cluster.connection_ref],
-    queryFn: ({ signal }) => getGpuInitialization(cluster.connection_ref, signal),
+    queryKey: [...acceleratorKeys.all, "initialization", scopeKey],
+    queryFn: async ({ signal }) =>
+      requireGpuOperationTarget(
+        requireGpuSupplyTarget(
+          (await getGpuInitialization(cluster.connection_ref, signal)) as GpuInitialization & {
+            connection_ref: string;
+          },
+          scope,
+        ),
+        scope,
+      ),
     refetchOnMount: "always",
     meta: {
       errorNotification: {
@@ -174,7 +183,7 @@ export function InitializeGpuPoolModal({
   const latest = status.data?.latest_operation;
   const unfinished = gpuInitializationIsRunning(latest?.state) || latest?.state === "BLOCKED";
   const mutation = useMutation({
-    mutationFn: createGpuInitialization,
+    mutationFn: (input: GpuInitializationInput) => createGpuInitialization(input, scope),
     retry: false,
     meta: {
       feedback: {
@@ -190,12 +199,12 @@ export function InitializeGpuPoolModal({
       );
       await client.invalidateQueries({ queryKey: acceleratorKeys.all });
       onOperation(operation.operation_id!);
-      setGpuInitializationIntent(cluster.connection_ref);
+      setGpuInitializationIntent(scope);
     },
     onError: async (error) => {
       // 传输失败、超时和服务端故障都可能已经产生副作用，只能重发冻结的原请求。
       if (error instanceof ApiError && error.status && error.status < 500 && error.status !== 408) {
-        setGpuInitializationIntent(cluster.connection_ref);
+        setGpuInitializationIntent(scope);
         if (error.status === 409 || error.status === 412) {
           revisionRef.current = "";
           setRevision("");
@@ -210,7 +219,11 @@ export function InitializeGpuPoolModal({
       lock.current = false;
     },
   });
-  const busy = validating || mutation.isPending;
+  const busy =
+    !scope.principal ||
+    !can("accelerator:initialization:create") ||
+    validating ||
+    mutation.isPending;
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = 0;
   }, [step]);
@@ -363,7 +376,7 @@ export function InitializeGpuPoolModal({
         setStep(4);
       } else if (confirmed && (frozen || summary)) {
         const input = frozen ?? summary!;
-        setGpuInitializationIntent(cluster.connection_ref, input);
+        setGpuInitializationIntent(scope, input);
         submitted = true;
         mutation.mutate(input);
       }

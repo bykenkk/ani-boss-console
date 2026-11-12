@@ -1,3 +1,4 @@
+import { useGpuOperationScope, useGpuPermissions } from "@/hooks/useGpuTarget";
 import { useRef } from "react";
 import { Alert, Button, Modal } from "@arco-design/web-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -16,23 +17,22 @@ export function InitializeGpuSupplyModal({
   onCancel,
   onOperation,
 }: InitializeGpuSupplyModalProps) {
+  const { scope, scopeKey } = useGpuOperationScope(cluster);
+  const { can } = useGpuPermissions();
   const client = useQueryClient();
-  const frozen = useStore(
-    gpuInitializationIntents,
-    (state) => state.creates[cluster.connection_ref],
-  );
+  const frozen = useStore(gpuInitializationIntents, (state) => state.creates[scopeKey]);
   const lock = useRef(false);
   const replay = useMutation({
     mutationFn: () => {
       if (!frozen) throw new Error("未找到先前的初始化意图");
-      return createGpuInitialization(frozen);
+      return createGpuInitialization(frozen, scope);
     },
     retry: false,
     meta: {
       feedback: { channel: "message", action: "恢复原初始化提交", successText: "已恢复初始化任务" },
     },
     onSuccess: async (operation) => {
-      setGpuInitializationIntent(cluster.connection_ref);
+      setGpuInitializationIntent(scope);
       await client.invalidateQueries({ queryKey: acceleratorKeys.all });
       if (operation.operation_id) onOperation(operation.operation_id);
     },
@@ -45,7 +45,7 @@ export function InitializeGpuSupplyModal({
       title: "确认开始新初始化意图",
       content:
         "先前提交的结果尚未确认。开始新意图不会取消已受理的旧任务；应先重发原请求或查询原任务。确认后仅清除此浏览器的待恢复标记。",
-      onOk: () => setGpuInitializationIntent(cluster.connection_ref),
+      onOk: () => setGpuInitializationIntent(scope),
     });
   return (
     <Modal
@@ -55,7 +55,9 @@ export function InitializeGpuSupplyModal({
       style={{ width: "min(1280px, calc(100vw - 48px))" }}
       onCancel={onCancel}
     >
-      {frozen ? (
+      {!scope.principal || !can("accelerator:initialization:create") ? (
+        <Alert type="warning" content="当前主体缺少初始化提交权限。" />
+      ) : frozen ? (
         <div className="flex flex-col gap-4">
           <Alert
             type="warning"

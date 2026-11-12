@@ -160,9 +160,20 @@ export interface GpuSupplyGroupCapacity {
   resource_types: GpuResourceTypeCapacity[];
   observed_at: string;
 }
-export interface RegisterGpuClusterInput {
+export interface GpuClusterTarget {
+  cluster_id: string;
   display_name: string;
   connection_ref: string;
+  registration_state:
+    | "GPU_TARGET_REGISTRATION_STATE_REGISTERED"
+    | "GPU_TARGET_REGISTRATION_STATE_UNREGISTERED"
+    | "GPU_TARGET_REGISTRATION_STATE_UNKNOWN"
+    | "GPU_TARGET_REGISTRATION_STATE_UNSPECIFIED";
+  reason?: string;
+}
+export interface RegisterGpuClusterInput {
+  display_name: string;
+  expected_cluster_id: string;
 }
 export interface CreateGpuPoolInput {
   cluster_id: string;

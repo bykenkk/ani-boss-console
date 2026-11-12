@@ -1,3 +1,9 @@
+import { useGpuPermissions } from "@/hooks/useGpuTarget";
+import {
+  gpuScopeKey,
+  requireGpuSupplyTarget,
+  type GpuOperationScope,
+} from "@/api/accelerator/scope";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, Button, Form, Input, Radio, Select } from "@arco-design/web-react";
@@ -20,6 +26,7 @@ import { PolicyShape } from "../PolicyShape";
 import { policyLabel } from "../policy";
 import { supplyReasonText } from "../reasons";
 interface GroupPolicySetupProps {
+  scope: GpuOperationScope;
   cluster: GpuCluster;
   providerRef: string;
   onProviderChange: (value: string) => void;
@@ -49,12 +56,15 @@ const columns: ListColumn<DiscoveredSupplyNode>[] = [
   },
 ];
 export function GroupPolicySetup({
+  scope,
   cluster,
   providerRef,
   onProviderChange,
   onSubmit,
   submitting,
 }: GroupPolicySetupProps) {
+  const { can } = useGpuPermissions();
+  const canReadQueues = can("cluster:ops:read");
   const [page, setPage] = useState(1);
   const [selection, setSelection] = useState<{ context: string; nodes: GpuNode[] }>({
     context: "",
@@ -68,8 +78,9 @@ export function GroupPolicySetup({
   const [queueName, setQueueName] = useState("");
   const [profileName, setProfileName] = useState("");
   const discovery = useQuery<DiscoveredNodes>({
-    queryKey: ["accelerator", "discovered-nodes", cluster.connection_ref, page],
-    placeholderData: (previous) => previous,
+    queryKey: ["accelerator", "discovered-nodes", gpuScopeKey(scope), page],
+    placeholderData: (previous, previousQuery) =>
+      previousQuery?.queryKey[2] === gpuScopeKey(scope) ? previous : undefined,
     queryFn: ({ signal }) =>
       listDiscoveredNodes({ connection_ref: cluster.connection_ref, page, pageSize: 100 }, signal),
     meta: {
@@ -80,8 +91,12 @@ export function GroupPolicySetup({
     },
   });
   const configuration = useQuery({
-    queryKey: ["accelerator", "supply-configuration", cluster.connection_ref, providerRef],
-    queryFn: ({ signal }) => getSupplyConfiguration(cluster.connection_ref, providerRef, signal),
+    queryKey: ["accelerator", "supply-configuration", gpuScopeKey(scope), providerRef],
+    queryFn: async ({ signal }) =>
+      requireGpuSupplyTarget(
+        await getSupplyConfiguration(cluster.connection_ref, providerRef, signal),
+        scope,
+      ),
     enabled: Boolean(providerRef),
     meta: {
       errorNotification: {
@@ -91,7 +106,7 @@ export function GroupPolicySetup({
     },
   });
   const pools = useQuery({
-    queryKey: ["accelerator", "pool-options", cluster.cluster_id],
+    queryKey: ["accelerator", "pool-options", gpuScopeKey(scope)],
     queryFn: ({ signal }) =>
       listGpuPools({ cluster_id: cluster.cluster_id, page_size: 100 }, signal),
     enabled: poolKind === "existing",
@@ -103,9 +118,9 @@ export function GroupPolicySetup({
     },
   });
   const queues = useQuery({
-    queryKey: ["accelerator", "volcano-queue-options", cluster.cluster_id],
+    queryKey: ["accelerator", "volcano-queue-options", gpuScopeKey(scope)],
     queryFn: ({ signal }) => listGpuVolcanoQueueOptions(cluster.cluster_id, signal),
-    enabled: Boolean(cluster.cluster_id),
+    enabled: Boolean(cluster.cluster_id) && canReadQueues,
     meta: {
       errorNotification: {
         id: withId("gpu-volcano-queue-options", cluster.cluster_id),
@@ -118,6 +133,7 @@ export function GroupPolicySetup({
     if (nextQueue !== queueName) setQueueName(nextQueue);
   }
   const queueAvailable =
+    canReadQueues &&
     !queues.isError &&
     !queues.isFetching &&
     queues.data?.items.some((queue) => queue.name === queueName && queue.available);
@@ -147,7 +163,7 @@ export function GroupPolicySetup({
   );
   const previewContext = JSON.stringify(previewInput);
   const preview = useQuery({
-    queryKey: ["accelerator", "group-policy-preview", previewInput],
+    queryKey: ["accelerator", "group-policy-preview", gpuScopeKey(scope), previewInput],
     queryFn: ({ signal }) => previewSupplyGroupPolicy(previewInput, signal),
     enabled: Boolean(
       providerRef &&
@@ -220,6 +236,12 @@ export function GroupPolicySetup({
   };
   return (
     <div className="flex flex-col gap-4">
+      {!canReadQueues ? (
+        <Alert
+          type="warning"
+          content="读取真实 Volcano 队列需要 cluster:ops:read 权限。当前不能选择队列或提交初始化，请联系授权管理员。"
+        />
+      ) : null}
       <Alert
         type="info"
         content="选择已登记供给和完整节点集合。每个节点只属于一个组，组创建后策略固定。登记后的节点发现版本与供给候选版本分别使用。"

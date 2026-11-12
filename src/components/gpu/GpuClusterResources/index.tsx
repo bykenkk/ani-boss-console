@@ -1,3 +1,4 @@
+import { useGpuPermissions } from "@/hooks/useGpuTarget";
 import { useState } from "react";
 import { Button, Drawer, Tabs } from "@arco-design/web-react";
 import type { GpuCluster, GpuPool } from "@/api/accelerator";
@@ -12,13 +13,18 @@ interface GpuClusterResourcesProps {
 }
 
 export function GpuClusterResources({ cluster }: GpuClusterResourcesProps) {
+  const { can } = useGpuPermissions();
   const [pool, setPool] = useState<GpuPool>();
   const [initializing, setInitializing] = useState(false);
   const [operationId, setOperationId] = useState<string>();
   return (
     <>
       <div className="mb-4 flex justify-end">
-        <Button type="primary" onClick={() => setInitializing(true)}>
+        <Button
+          type="primary"
+          disabled={!can("accelerator:initialization:create") || !can("accelerator:discovery:list")}
+          onClick={() => setInitializing(true)}
+        >
           初始化资源池
         </Button>
       </div>

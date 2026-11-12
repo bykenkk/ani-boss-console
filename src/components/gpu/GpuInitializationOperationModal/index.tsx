@@ -1,3 +1,5 @@
+import { requireGpuOperationTarget } from "@/api/accelerator/scope";
+import { useGpuOperationScope, useGpuPermissions } from "@/hooks/useGpuTarget";
 import { useEffect, useRef, useState } from "react";
 import { Alert, Button, Collapse, Descriptions, Modal } from "@arco-design/web-react";
 import { IconCloud } from "@arco-design/web-react/icon";
@@ -10,6 +12,7 @@ import {
   retryGpuInitialization,
   type GpuCluster,
   type GpuInitializationStep,
+  type RetryGpuInitializationInput,
 } from "@/api/accelerator";
 import { ApiError } from "@/api/request";
 import { DataTable, StatusBadge, type ListColumn } from "@/components/common";
@@ -76,15 +79,21 @@ export function GpuInitializationOperationModal({
   onCancel,
   onViewResources,
 }: GpuInitializationOperationModalProps) {
+  const { scope, scopeKey } = useGpuOperationScope(cluster);
+  const { can } = useGpuPermissions();
   const client = useQueryClient();
-  const frozen = useStore(gpuInitializationIntents, (state) => state.retries[operationId]);
+  const frozen = useStore(
+    gpuInitializationIntents,
+    (state) => state.retries[`${scopeKey}:${encodeURIComponent(operationId)}`],
+  );
   const [checking, setChecking] = useState(false);
   const lock = useRef(false);
-  const queryKey = [...acceleratorKeys.all, "initialization-operation", operationId];
+  const queryKey = [...acceleratorKeys.all, "initialization-operation", scopeKey, operationId];
   // GPU 初始化需要真实任务闭环，局部接入轮询；其他资源创建/删除的 task 暂缓规则不变。
   const query = useQuery({
     queryKey,
-    queryFn: ({ signal }) => getGpuInitializationOperation(operationId, signal),
+    queryFn: async ({ signal }) =>
+      requireGpuOperationTarget(await getGpuInitializationOperation(operationId, signal), scope),
     refetchOnMount: "always",
     refetchInterval: (query) =>
       gpuInitializationIsRunning(query.state.data?.state) ? 3000 : false,
@@ -126,7 +135,7 @@ export function GpuInitializationOperationModal({
     [feedbackId],
   );
   const mutation = useMutation({
-    mutationFn: retryGpuInitialization,
+    mutationFn: (input: RetryGpuInitializationInput) => retryGpuInitialization(input, scope),
     retry: false,
     meta: {
       feedback: {
@@ -137,13 +146,13 @@ export function GpuInitializationOperationModal({
       },
     },
     onSuccess: async (next) => {
-      setGpuInitializationRetryIntent(operationId);
+      setGpuInitializationRetryIntent(scope, operationId);
       client.setQueryData(queryKey, next);
       await client.invalidateQueries({ queryKey: acceleratorKeys.all });
     },
     onError: async (error) => {
       if (error instanceof ApiError && error.status && error.status < 500 && error.status !== 408) {
-        setGpuInitializationRetryIntent(operationId);
+        setGpuInitializationRetryIntent(scope, operationId);
         await query.refetch();
       }
     },
@@ -157,12 +166,15 @@ export function GpuInitializationOperationModal({
     setChecking(true);
     let submitted = false;
     try {
+      if (!can("accelerator:initialization:retry") || operation?.cluster_id !== scope.cluster_id)
+        return;
       let input = frozen;
       if (!input) {
         const result = await query.refetch();
         if (result.error) return;
         const current = result.data;
         if (
+          current?.cluster_id !== scope.cluster_id ||
           !gpuInitializationCanRetry(current?.state, current?.retryable) ||
           !/^[1-9]\d*$/.test(current?.version ?? "")
         ) {
@@ -172,7 +184,7 @@ export function GpuInitializationOperationModal({
         input = { operation_id: operationId, expected_version: current!.version! };
       }
       // 重试请求自身结果未知时重发原版本与原正文，不以新查询版本改写同一幂等意图。
-      setGpuInitializationRetryIntent(operationId, input);
+      setGpuInitializationRetryIntent(scope, operationId, input);
       submitted = true;
       mutation.mutate(input);
     } finally {
@@ -220,7 +232,9 @@ export function GpuInitializationOperationModal({
             >
               刷新进度
             </Button>
-            {frozen || gpuInitializationCanRetry(operation?.state, operation?.retryable) ? (
+            {can("accelerator:initialization:retry") &&
+            operation?.cluster_id === scope.cluster_id &&
+            (frozen || gpuInitializationCanRetry(operation?.state, operation?.retryable)) ? (
               <Button type="primary" loading={busy} onClick={retry}>
                 {frozen ? "重发原重试请求" : "重试当前任务"}
               </Button>
@@ -238,6 +252,7 @@ export function GpuInitializationOperationModal({
     >
       <div className="flex min-w-0 flex-col gap-4">
         <GpuInitializationContext cluster={cluster} />
+        {query.error ? <Alert type="error" content={query.error.message} /> : null}
         <GpuInitializationProgress operation={operation} stepLabels={stepLabels} />
         {operation?.state === "SUCCEEDED" ? (
           <Alert content="目录初始化已完成。接单状态以实际结果为准，实机计算和监控需独立验收。" />

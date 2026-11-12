@@ -1,3 +1,11 @@
+import { useStore } from "zustand";
+import {
+  gpuSupplyRegistrationIntents,
+  rememberGpuSupplyRegistration,
+  setGpuPolicySupplyRegistrationIntent,
+} from "@/stores/gpu-supply-registration";
+import { gpuScopeKey, type GpuOperationScope } from "@/api/accelerator/scope";
+import { useGpuPermissions } from "@/hooks/useGpuTarget";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert, Button, Checkbox, Form, Input, InputNumber, Select } from "@arco-design/web-react";
@@ -22,7 +30,7 @@ import {
   supplyRegistrationProblems,
 } from "./registration";
 interface SupplyRegistrationProps {
-  connectionRef: string;
+  scope: GpuOperationScope;
   onRegistered: (configuration: RegisteredSupplyConfiguration) => void;
 }
 const columns: ListColumn<SupplyCandidate>[] = [
@@ -90,8 +98,12 @@ const columns: ListColumn<SupplyCandidate>[] = [
       )),
   },
 ];
-export function SupplyRegistration({ connectionRef, onRegistered }: SupplyRegistrationProps) {
+export function SupplyRegistration({ scope, onRegistered }: SupplyRegistrationProps) {
   const client = useQueryClient();
+  const connectionRef = scope.connection_ref;
+  const scopeKey = gpuScopeKey(scope);
+  const { can } = useGpuPermissions();
+  const canRegister = can("accelerator:supply:register");
   const [page, setPage] = useState(1);
   const [selection, setSelection] = useState<{ revision: string; rows: SupplyCandidate[] }>({
     revision: "",
@@ -103,9 +115,11 @@ export function SupplyRegistration({ connectionRef, onRegistered }: SupplyRegist
   const [declarations, setDeclarations] = useState<SupplyDeclaration[]>([]);
   const [mappingConfirmed, setMappingConfirmed] = useState(false);
   const [mappingSource, setMappingSource] = useState("");
-  const [pending, setPending] = useState<RegisterSupplyConfigurationInput>();
+  const pending = useStore(gpuSupplyRegistrationIntents, (state) => state.policyInputs[scopeKey]);
+  const setPending = (input?: RegisterSupplyConfigurationInput) =>
+    setGpuPolicySupplyRegistrationIntent(scope, input);
   const query = useQuery({
-    queryKey: ["accelerator", "supply-candidates", connectionRef, page],
+    queryKey: ["accelerator", "supply-candidates", scopeKey, page],
     queryFn: ({ signal }) =>
       listSupplyCandidates({ connection_ref: connectionRef, page, pageSize: 20 }, signal),
     enabled: !pending,
@@ -152,7 +166,8 @@ export function SupplyRegistration({ connectionRef, onRegistered }: SupplyRegist
   };
   const registrationProblems = supplyRegistrationProblems(registrationForm);
   const mutation = useMutation({
-    mutationFn: registerSupplyConfiguration,
+    mutationFn: (input: RegisterSupplyConfigurationInput) =>
+      registerSupplyConfiguration(input, scope),
     retry: false,
     onMutate: (input: RegisterSupplyConfigurationInput) => setPending(input),
     onError: (error) => {
@@ -167,20 +182,25 @@ export function SupplyRegistration({ connectionRef, onRegistered }: SupplyRegist
     },
     meta: { feedback: { channel: "message", action: "GPU 供给登记", successText: "供给已登记" } },
     onSuccess: async (result) => {
+      if (result.configurations)
+        rememberGpuSupplyRegistration({ ...result, configurations: result.configurations }, scope);
       setPending(undefined);
       await client.invalidateQueries({
-        queryKey: ["accelerator", "discovered-nodes", connectionRef],
+        queryKey: ["accelerator", "discovered-nodes", scopeKey],
       });
       setSelected([]);
       const configuration = result.configurations?.[0];
       if (configuration) onRegistered(configuration);
     },
   });
-  const busy = Boolean(pending) || mutation.isPending;
+  const busy = !canRegister || Boolean(pending) || mutation.isPending;
   const updateDeclaration = (index: number, patch: Partial<SupplyDeclaration>) =>
     setDeclarations((rows) => rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
   return (
     <div className="flex flex-col gap-4">
+      {!canRegister ? (
+        <Alert type="warning" content="需要 accelerator:supply:register 权限才能登记供给。" />
+      ) : null}
       <Alert
         type="info"
         content="已有登记可直接进入下一步。供给发现只读；实际驱动、插件和分区由集群运维维护。"
@@ -429,6 +449,7 @@ export function SupplyRegistration({ connectionRef, onRegistered }: SupplyRegist
           type="primary"
           loading={mutation.isPending}
           disabled={
+            !canRegister ||
             mutation.isPending ||
             (!pending && (query.isFetching || query.isError || registrationProblems.length > 0))
           }

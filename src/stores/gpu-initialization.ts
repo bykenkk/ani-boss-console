@@ -1,3 +1,4 @@
+import { gpuScopeKey, type GpuOperationScope } from "@/api/accelerator/scope";
 import { createStore } from "zustand/vanilla";
 import type { GpuInitializationInput, RetryGpuInitializationInput } from "@/api/accelerator";
 
@@ -13,17 +14,24 @@ export const gpuInitializationIntents = createStore<GpuInitializationIntents>(()
   retries: {},
 }));
 
-export function setGpuInitializationIntent(connectionRef: string, input?: GpuInitializationInput) {
+export function setGpuInitializationIntent(
+  scope: GpuOperationScope,
+  input?: GpuInitializationInput,
+) {
   gpuInitializationIntents.setState((state) => ({
-    creates: { ...state.creates, [connectionRef]: input },
+    creates: { ...state.creates, [gpuScopeKey(scope)]: input },
   }));
 }
 
 export function setGpuInitializationRetryIntent(
+  scope: GpuOperationScope,
   operationId: string,
   input?: RetryGpuInitializationInput,
 ) {
   gpuInitializationIntents.setState((state) => ({
-    retries: { ...state.retries, [operationId]: input },
+    retries: {
+      ...state.retries,
+      [`${gpuScopeKey(scope)}:${encodeURIComponent(operationId)}`]: input,
+    },
   }));
 }

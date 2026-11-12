@@ -1,3 +1,4 @@
+import { useGpuCatalogScope } from "@/hooks/useGpuTarget";
 import { ApiError } from "@/api/request";
 import { useState } from "react";
 import { Modal } from "@arco-design/web-react";
@@ -116,19 +117,21 @@ interface GpuProfilesProps {
 }
 
 export function GpuProfiles({ clusterId }: GpuProfilesProps) {
+  const { scope, scopeKey, can } = useGpuCatalogScope(clusterId);
   const cursor = useCursorPagination(clusterId);
   const client = useQueryClient();
   const [capacity, setCapacity] = useState<GpuProfile>();
   const params = { cluster_id: clusterId, page_size: cursor.limit, page_token: cursor.cursor };
   const query = useQuery({
-    queryKey: [...acceleratorKeys.all, "profiles", params],
+    queryKey: [...acceleratorKeys.all, "profiles", scopeKey, params],
     queryFn: ({ signal }) => listGpuProfiles(params, signal),
     enabled: Boolean(clusterId),
     meta: { errorNotification: { id: withId("gpu-profiles", clusterId), action: "GPU 规格加载" } },
   });
   const refresh = () => client.invalidateQueries({ queryKey: acceleratorKeys.all });
   const stateMutation = useMutation({
-    mutationFn: setGpuProfileState,
+    mutationFn: (input: Parameters<typeof setGpuProfileState>[0]) =>
+      setGpuProfileState(input, scope),
     meta: {
       feedback: (variables) => {
         const input = variables as Parameters<typeof setGpuProfileState>[0];
@@ -148,7 +151,7 @@ export function GpuProfiles({ clusterId }: GpuProfilesProps) {
     },
   });
   const deleteMutation = useMutation({
-    mutationFn: deleteGpuProfile,
+    mutationFn: (input: Parameters<typeof deleteGpuProfile>[0]) => deleteGpuProfile(input, scope),
     meta: {
       feedback: {
         channel: "notification",
@@ -187,6 +190,7 @@ export function GpuProfiles({ clusterId }: GpuProfilesProps) {
           rowActions={[
             {
               key: "capacity",
+              disabled: () => !can("accelerator:profile:capacity-read"),
               label: "查看容量",
               onClick: setCapacity,
             },
@@ -195,6 +199,8 @@ export function GpuProfiles({ clusterId }: GpuProfilesProps) {
               label: (profile) => (profile.state === "PROFILE_ACTIVE" ? "停用" : "启用"),
               widthLabel: "停用",
               disabled: (profile) =>
+                !can("accelerator:profile:set-state") ||
+                !scope.connection_ref ||
                 profile.state === "PROFILE_DELETED" ||
                 stateMutation.isPending ||
                 deleteMutation.isPending,
@@ -218,6 +224,8 @@ export function GpuProfiles({ clusterId }: GpuProfilesProps) {
               label: "删除",
               intent: "danger",
               disabled: (profile) =>
+                !can("accelerator:profile:delete") ||
+                !scope.connection_ref ||
                 profile.state === "PROFILE_DELETED" ||
                 stateMutation.isPending ||
                 deleteMutation.isPending,

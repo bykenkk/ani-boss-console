@@ -37,7 +37,9 @@ function storageColumns(kind: ClusterStorageKind): ListColumn<StorageRow>[] {
             dataIndex: "ref.namespace",
             width: 200,
             ellipsis: true,
-            render: (_, doc) => <ResourceIdentity name={doc.ref.namespace} display="name" />,
+            render: (_: unknown, doc: StorageRow) => (
+              <ResourceIdentity name={doc.ref.namespace} display="name" />
+            ),
           },
         ]
       : []),

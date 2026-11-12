@@ -1,3 +1,8 @@
+import {
+  gpuScopeKey,
+  requireGpuSupplyTarget,
+  type GpuOperationScope,
+} from "@/api/accelerator/scope";
 import { useState } from "react";
 import { Alert, Button, Collapse, Input, Select } from "@arco-design/web-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -5,36 +10,39 @@ import { useStore } from "zustand";
 import {
   getSupplyConfiguration,
   getGpuSupplyRegistration,
-  registerGpuSupplyConfiguration,
+  registerSupplyConfiguration,
 } from "@/api/accelerator";
 import { DataTable } from "@/components/common";
 import {
   gpuSupplyRegistrationIntents,
   rememberGpuSupplyRegistration,
-  setGpuSupplyRegistrationIntent,
+  setGpuPolicySupplyRegistrationIntent,
 } from "@/stores/gpu-supply-registration";
 import { withId } from "@/lib/id";
 interface SupplyConfigurationRecoveryProps {
-  connectionRef: string;
+  scope: GpuOperationScope;
   onSelect: (providerRef: string) => void;
 }
 const emptyReferences: Record<string, string> = {};
-export function SupplyConfigurationRecovery({
-  connectionRef,
-  onSelect,
-}: SupplyConfigurationRecoveryProps) {
+export function SupplyConfigurationRecovery({ scope, onSelect }: SupplyConfigurationRecoveryProps) {
   const client = useQueryClient();
+  const connectionRef = scope.connection_ref;
+  const scopeKey = gpuScopeKey(scope);
   const references = useStore(
     gpuSupplyRegistrationIntents,
-    (state) => state.registrations[connectionRef] ?? emptyReferences,
+    (state) => state.registrations[scopeKey] ?? emptyReferences,
   );
-  const pending = useStore(gpuSupplyRegistrationIntents, (state) => state.inputs[connectionRef]);
+  const pending = useStore(gpuSupplyRegistrationIntents, (state) => state.policyInputs[scopeKey]);
   const [providerRef, setProviderRef] = useState("");
   const [lookupRef, setLookupRef] = useState("");
   const [receiptId, setReceiptId] = useState("");
   const configuration = useQuery({
-    queryKey: ["accelerator", "supply-configuration", connectionRef, providerRef],
-    queryFn: ({ signal }) => getSupplyConfiguration(connectionRef, providerRef, signal),
+    queryKey: ["accelerator", "supply-configuration", scopeKey, providerRef],
+    queryFn: async ({ signal }) =>
+      requireGpuSupplyTarget(
+        await getSupplyConfiguration(connectionRef, providerRef, signal),
+        scope,
+      ),
     enabled: Boolean(providerRef),
     meta: {
       errorNotification: {
@@ -44,8 +52,9 @@ export function SupplyConfigurationRecovery({
     },
   });
   const receipt = useQuery({
-    queryKey: ["accelerator", "supply-registration", receiptId],
-    queryFn: ({ signal }) => getGpuSupplyRegistration(receiptId, signal),
+    queryKey: ["accelerator", "supply-registration", scopeKey, receiptId],
+    queryFn: async ({ signal }) =>
+      requireGpuSupplyTarget(await getGpuSupplyRegistration(receiptId, signal), scope),
     enabled: Boolean(receiptId),
     meta: {
       errorNotification: {
@@ -57,19 +66,22 @@ export function SupplyConfigurationRecovery({
   const replay = useMutation({
     mutationFn: () => {
       if (!pending) throw new Error("未找到原登记提交");
-      return registerGpuSupplyConfiguration(pending);
+      return registerSupplyConfiguration(pending, scope);
     },
     retry: false,
     meta: {
       feedback: { channel: "message", action: "恢复原供给登记", successText: "原供给登记已确认" },
     },
     onSuccess: async (result) => {
-      rememberGpuSupplyRegistration(result);
-      setGpuSupplyRegistrationIntent(connectionRef);
+      rememberGpuSupplyRegistration(
+        { ...result, configurations: result.configurations ?? [] },
+        scope,
+      );
+      setGpuPolicySupplyRegistrationIntent(scope);
       await client.invalidateQueries({
-        queryKey: ["accelerator", "discovered-nodes", connectionRef],
+        queryKey: ["accelerator", "discovered-nodes", scopeKey],
       });
-      const ref = result.configurations[0]?.provider_config_ref;
+      const ref = result.configurations?.[0]?.provider_config_ref;
       if (ref) setProviderRef(ref);
     },
   });

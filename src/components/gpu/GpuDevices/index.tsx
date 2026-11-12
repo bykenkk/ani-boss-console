@@ -1,3 +1,4 @@
+import { useGpuCatalogScope } from "@/hooks/useGpuTarget";
 import { useQuery } from "@tanstack/react-query";
 import { acceleratorKeys, listGpuDevices, type GpuDevice } from "@/api/accelerator";
 import {
@@ -81,6 +82,7 @@ interface GpuDevicesProps {
 }
 
 export function GpuDevices({ clusterId }: GpuDevicesProps) {
+  const { scopeKey } = useGpuCatalogScope(clusterId);
   const cursor = useCursorPagination(clusterId);
   const params = {
     cluster_id: clusterId,
@@ -88,7 +90,7 @@ export function GpuDevices({ clusterId }: GpuDevicesProps) {
     page_token: cursor.cursor,
   };
   const query = useQuery({
-    queryKey: [...acceleratorKeys.all, "devices", params],
+    queryKey: [...acceleratorKeys.all, "devices", scopeKey, params],
     queryFn: ({ signal }) => listGpuDevices(params, signal),
     enabled: Boolean(clusterId),
     meta: {

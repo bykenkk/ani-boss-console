@@ -1,3 +1,9 @@
+import {
+  requireGpuScope,
+  requireGpuOperationTarget,
+  requireGpuSupplyTarget,
+  type GpuOperationScope,
+} from "./scope";
 import { adminRequest } from "@/api/request";
 import { runIdempotentRequest } from "@/api/idempotency";
 import { createIdempotencyScope } from "@/lib/idempotency";
@@ -25,15 +31,24 @@ export function listSupplyCandidates(
 }
 export function registerSupplyConfiguration(
   input: RegisterSupplyConfigurationInput,
+  scope: GpuOperationScope,
 ): Promise<SupplyRegistrationResult> {
-  return runIdempotentRequest(registrationScope, input, async (data) => {
-    const result = await adminRequest<SupplyRegistrationResult, { data: typeof data }>(
-      "/accelerator/supply-registrations",
-      { method: "POST", data: { data } },
-    );
-    if (!result?.registration_id) throw new Error("供给登记响应缺少登记 ID，请重发原请求确认结果");
-    return result;
-  });
+  requireGpuScope(scope, input.connection_ref);
+  return runIdempotentRequest(
+    registrationScope,
+    input,
+    async (data) => {
+      const result = await adminRequest<SupplyRegistrationResult, { data: typeof data }>(
+        "/accelerator/supply-registrations",
+        { method: "POST", data: { data } },
+      );
+      if (!result?.registration_id)
+        throw new Error("供给登记响应缺少登记 ID，请重发原请求确认结果");
+      requireGpuSupplyTarget(result, scope);
+      return result;
+    },
+    [scope.principal, scope.connection_ref, scope.cluster_id],
+  );
 }
 export function getSupplyRegistration(
   registration_id: string,
@@ -77,17 +92,18 @@ export function getInitialization(
 }
 export async function createInitialization(
   input: CreateInitializationInput,
-  principal: string,
+  scope: GpuOperationScope,
   signal?: AbortSignal,
 ): Promise<InitializationOperation> {
-  const data = initializationRequest(principal, input);
+  const data = initializationRequest(scope, input);
   // Cancellation, timeout and transport failure leave this persisted request untouched.
   const result = await adminRequest<InitializationOperation, { data: typeof data }>(
     "/accelerator/initializations",
     { method: "POST", data: { data }, signal },
   );
   if (!result?.operation_id) throw new Error("初始化响应缺少任务 ID，请重发原请求确认结果");
-  rememberInitializationOperation(principal, input.connection_ref, result);
+  requireGpuOperationTarget(result, scope);
+  rememberInitializationOperation(scope, result);
   return result;
 }
 export function getInitializationOperation(
@@ -101,16 +117,24 @@ export function getInitializationOperation(
 export function retryInitializationOperation(
   operation_id: string,
   expected_version: string,
+  scope: GpuOperationScope,
 ): Promise<InitializationOperation> {
+  requireGpuScope(scope);
   return runIdempotentRequest(
     retryScope,
     { expected_version },
-    (data) =>
-      adminRequest(`/accelerator/initializations/${encodeURIComponent(operation_id)}:retry`, {
-        method: "POST",
-        data: { data },
-      }),
-    [operation_id],
+    async (data) =>
+      requireGpuOperationTarget(
+        await adminRequest<InitializationOperation, { data: typeof data }>(
+          `/accelerator/initializations/${encodeURIComponent(operation_id)}:retry`,
+          {
+            method: "POST",
+            data: { data },
+          },
+        ),
+        scope,
+      ),
+    [scope.principal, scope.connection_ref, scope.cluster_id, operation_id],
   );
 }
 export { readInitializationDraft, beginNewInitializationIntent } from "./initialization-draft";

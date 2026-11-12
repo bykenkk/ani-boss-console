@@ -1,3 +1,4 @@
+import { requireGpuScope, requireGpuSupplyTarget, type GpuOperationScope } from "./scope";
 import { adminRequest } from "@/api/request";
 import { runIdempotentRequest } from "@/api/idempotency";
 import { createIdempotencyScope } from "@/lib/idempotency";
@@ -22,7 +23,9 @@ export function listGpuSupplyCandidates(
 // 登记成功后仍需重新发现节点，不能复用登记前的初始化 revision。
 export function registerGpuSupplyConfiguration(
   input: RegisterGpuSupplyConfigurationInput,
+  scope: GpuOperationScope,
 ): Promise<GpuSupplyRegistrationResult> {
+  requireGpuScope(scope, input.connection_ref);
   return runIdempotentRequest(
     registerScope,
     input,
@@ -34,9 +37,9 @@ export function registerGpuSupplyConfiguration(
       if (!result?.registration_id) {
         throw new Error("供给登记响应缺少登记 ID，请重发原请求确认结果");
       }
-      return result;
+      return requireGpuSupplyTarget(result, scope);
     },
-    [input.connection_ref],
+    [scope.principal, scope.connection_ref, scope.cluster_id],
   );
 }
 

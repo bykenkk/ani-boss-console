@@ -1,56 +1,72 @@
-import { useState } from "react";
-import { Alert, Empty, Select, Skeleton } from "@arco-design/web-react";
+import { Alert, Empty, Skeleton } from "@arco-design/web-react";
 import { useQuery } from "@tanstack/react-query";
-import { acceleratorKeys, listGpuClusterOptions, type GpuCluster } from "@/api/accelerator";
+import { acceleratorKeys, listGpuClusterOptions } from "@/api/accelerator";
 import { ResourcePageFrame } from "@/components/common";
+import { useGpuTarget } from "@/hooks/useGpuTarget";
 import { GpuClusterResources } from "../GpuClusterResources";
+import { GpuTargetSummary } from "../GpuTargetSummary";
 export function GpuResourcesPage() {
-  const [cluster, setCluster] = useState<GpuCluster>();
+  const { principal, can, target, permissions } = useGpuTarget();
   const clusters = useQuery({
-    queryKey: [...acceleratorKeys.all, "clusters", "options"],
+    queryKey: [...acceleratorKeys.all, "clusters", "options", principal, target.data?.cluster_id],
     queryFn: ({ signal }) => listGpuClusterOptions(signal),
-    meta: { errorNotification: { id: "gpu-cluster-options", action: "GPU 集群选项加载" } },
+    enabled:
+      Boolean(principal) &&
+      can("accelerator:cluster:list") &&
+      target.data?.registration_state === "GPU_TARGET_REGISTRATION_STATE_REGISTERED",
   });
-  const currentCluster = cluster ?? clusters.data?.items?.[0];
-  const loadingClusters = !currentCluster && clusters.isPending;
+  const currentCluster = clusters.data?.items?.find(
+    (item) =>
+      item.cluster_id === target.data?.cluster_id &&
+      item.connection_ref === target.data?.connection_ref,
+  );
+  const scopeKey = `${principal}:${target.data?.connection_ref}:${target.data?.cluster_id}`;
   return (
     <ResourcePageFrame
       header={{
         title: "GPU 资源池",
-        subtitle: "切换集群后管理该集群的资源池、供给组、GPU 规格与实际库存。",
-        extra: (
-          <Select
-            aria-label="切换 GPU 集群"
-            placeholder="请选择集群"
-            value={currentCluster?.cluster_id}
-            loading={clusters.isFetching}
-            filterOption={false}
-            options={(clusters.data?.items ?? []).map((item) => ({
-              label: item.display_name,
-              value: item.cluster_id,
-            }))}
-            onChange={(id: string) =>
-              setCluster(clusters.data?.items?.find((item) => item.cluster_id === id))
-            }
-            onVisibleChange={(visible) => {
-              if (visible && !clusters.isFetching) clusters.refetch();
-            }}
-          />
-        ),
+        subtitle: "管理已确认目标的资源池、供给组、GPU 规格与实际库存。",
       }}
       className="flex flex-col gap-4 min-w-0"
     >
-      {clusters.data?.next_page_token ? (
-        <Alert content="集群切换暂显示前 100 个集群，完整集群列表请进入管理集群查看。" />
-      ) : null}
-      {loadingClusters ? (
-        <div role="status" aria-label="GPU 集群加载中" aria-busy="true">
-          <Skeleton animation text={{ rows: 8, width: "100%" }} />
-        </div>
-      ) : currentCluster ? (
-        <GpuClusterResources key={currentCluster.cluster_id} cluster={currentCluster} />
+      {!principal || permissions.isPending ? (
+        <Skeleton animation text={{ rows: 4 }} />
+      ) : !can("accelerator:cluster:list") ? (
+        <Alert type="warning" content="需要 accelerator:cluster:list 权限才能查看 GPU 目标。" />
       ) : (
-        <Empty description="请先在顶部选择集群" />
+        <>
+          <GpuTargetSummary
+            key={scopeKey}
+            target={target.data}
+            principal={principal}
+            canRegister={can("accelerator:cluster:register")}
+            loading={target.isFetching}
+            error={target.error}
+            onRefresh={() => {
+              target.refetch();
+              clusters.refetch();
+            }}
+          />
+          {target.isSuccess &&
+          !target.isFetching &&
+          target.data?.registration_state === "GPU_TARGET_REGISTRATION_STATE_REGISTERED" ? (
+            clusters.isPending ? (
+              <Skeleton animation text={{ rows: 8 }} />
+            ) : currentCluster ? (
+              <GpuClusterResources key={scopeKey} cluster={currentCluster} />
+            ) : (
+              <Alert
+                type="warning"
+                content={
+                  clusters.error?.message ??
+                  "尚未读到目标的原目录记录，请刷新目录。不会创建替代目录或资源池。"
+                }
+              />
+            )
+          ) : (
+            <Empty description="确认并启用当前目标后，可管理 GPU 资源池。" />
+          )}
+        </>
       )}
     </ResourcePageFrame>
   );

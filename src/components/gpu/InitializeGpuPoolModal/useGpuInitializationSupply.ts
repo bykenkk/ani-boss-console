@@ -1,3 +1,4 @@
+import { gpuScopeKey, type GpuOperationScope } from "@/api/accelerator/scope";
 import { useId, useMemo } from "react";
 import {
   useInfiniteQuery,
@@ -22,6 +23,7 @@ import { gpuSupplyRegistrationIntents } from "@/stores/gpu-supply-registration";
 import { resolveGpuInitializationSupply } from "./supply-facts";
 
 export function useGpuInitializationSupply({
+  scope,
   connectionRef,
   nodes,
   config,
@@ -31,6 +33,7 @@ export function useGpuInitializationSupply({
   discoveryRevision,
   enabled,
 }: {
+  scope: GpuOperationScope;
   connectionRef: string;
   nodes: GpuDiscoveredNode[];
   config?: GpuProviderConfig;
@@ -43,10 +46,10 @@ export function useGpuInitializationSupply({
   const client = useQueryClient();
   const lookupInstance = useId();
   const registrationId = useStore(gpuSupplyRegistrationIntents, (state) =>
-    config ? state.registrations[connectionRef]?.[config.provider_config_ref] : undefined,
+    config ? state.registrations[gpuScopeKey(scope)]?.[config.provider_config_ref] : undefined,
   );
   const receipt = useQuery({
-    queryKey: [...acceleratorKeys.all, "supply-registration", registrationId],
+    queryKey: [...acceleratorKeys.all, "supply-registration", gpuScopeKey(scope), registrationId],
     queryFn: ({ signal }) => getGpuSupplyRegistration(registrationId!, signal),
     enabled: enabled && Boolean(registrationId) && !registration,
     meta: {
@@ -78,7 +81,7 @@ export function useGpuInitializationSupply({
     ...acceleratorKeys.all,
     "initialization-supply-facts",
     lookupInstance,
-    connectionRef,
+    gpuScopeKey(scope),
     discoveryRevision,
     config?.provider_config_ref,
     allocationType,

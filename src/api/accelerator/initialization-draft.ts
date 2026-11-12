@@ -1,3 +1,4 @@
+import { requireGpuScope, requireGpuOperationTarget, type GpuOperationScope } from "./scope";
 import { createIdempotencyScope } from "@/lib/idempotency";
 import type { CreateInitializationInput, InitializationOperation } from "./types-group-policy";
 
@@ -7,10 +8,9 @@ interface InitializationDraft {
   operation_id?: string;
 }
 const memory = new Map<string, InitializationDraft>();
-const scope = createIdempotencyScope("gpu-initialization", ["POST"]);
-function storageKey(principal: string, connection: string) {
-  if (!principal) throw new Error("未取得平台主体，无法保存初始化意图");
-  return `gpu-initialization:${encodeURIComponent(principal)}:${encodeURIComponent(connection)}`;
+const idempotency = createIdempotencyScope("gpu-initialization", ["POST"]);
+function storageKey(scope: GpuOperationScope) {
+  return `gpu-initialization:v2:${requireGpuScope(scope)}`;
 }
 function load(key: string): InitializationDraft | undefined {
   if (memory.has(key)) return memory.get(key);
@@ -32,17 +32,18 @@ function save(key: string, draft: InitializationDraft) {
   localStorage.setItem(key, JSON.stringify(draft));
   memory.set(key, draft);
 }
-export function readInitializationDraft(principal: string, connection: string) {
-  const draft = load(storageKey(principal, connection));
-  return draft?.input.connection_ref === connection
+export function readInitializationDraft(scope: GpuOperationScope) {
+  const draft = load(storageKey(scope));
+  return draft?.input.connection_ref === scope.connection_ref
     ? {
         input: JSON.parse(JSON.stringify(draft.input)) as CreateInitializationInput,
         operation_id: draft.operation_id,
       }
     : undefined;
 }
-export function initializationRequest(principal: string, input: CreateInitializationInput) {
-  const key = storageKey(principal, input.connection_ref);
+export function initializationRequest(scope: GpuOperationScope, input: CreateInitializationInput) {
+  requireGpuScope(scope, input.connection_ref);
+  const key = storageKey(scope);
   const previous = load(key);
   if (previous) {
     if (JSON.stringify(previous.input) !== JSON.stringify(input))
@@ -50,16 +51,20 @@ export function initializationRequest(principal: string, input: CreateInitializa
     return previous.request;
   }
   const snapshot: CreateInitializationInput = JSON.parse(JSON.stringify(input));
-  const request = scope.withKey({ ...snapshot }, [principal, input.connection_ref]);
+  const request = idempotency.withKey({ ...snapshot }, [
+    scope.principal,
+    scope.connection_ref,
+    scope.cluster_id,
+  ]);
   save(key, { input: snapshot, request });
   return request;
 }
 export function rememberInitializationOperation(
-  principal: string,
-  connection: string,
+  scope: GpuOperationScope,
   operation: InitializationOperation,
 ) {
-  const key = storageKey(principal, connection);
+  requireGpuOperationTarget(operation, scope);
+  const key = storageKey(scope);
   const draft = load(key);
   if (draft) {
     const updated = { ...draft, operation_id: operation.operation_id };
@@ -72,9 +77,9 @@ export function rememberInitializationOperation(
     }
   }
 }
-export function beginNewInitializationIntent(principal: string, connection: string) {
-  const key = storageKey(principal, connection);
+export function beginNewInitializationIntent(scope: GpuOperationScope) {
+  const key = storageKey(scope);
   localStorage.removeItem(key);
   memory.delete(key);
-  scope.reset([principal, connection]);
+  idempotency.reset([scope.principal, scope.connection_ref, scope.cluster_id]);
 }

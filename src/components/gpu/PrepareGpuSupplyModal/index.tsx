@@ -1,3 +1,4 @@
+import { useGpuOperationScope, useGpuPermissions } from "@/hooks/useGpuTarget";
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { Alert, Button, Modal, Tooltip } from "@arco-design/web-react";
@@ -138,10 +139,9 @@ export function PrepareGpuSupplyModal({
   onFeedback,
   onRegistered,
 }: PrepareGpuSupplyModalProps) {
-  const frozen = useStore(
-    gpuSupplyRegistrationIntents,
-    (state) => state.inputs[cluster.connection_ref],
-  );
+  const { scope, scopeKey } = useGpuOperationScope(cluster);
+  const { can } = useGpuPermissions();
+  const frozen = useStore(gpuSupplyRegistrationIntents, (state) => state.inputs[scopeKey]);
   const [selected, setSelected] = useState<GpuSupplyCandidate[]>([]);
   const [drafts, setDrafts] = useState<Record<string, SupplyCandidateDraft>>({});
   const [receipt, setReceipt] = useState<GpuSupplyRegistrationResult>();
@@ -173,7 +173,8 @@ export function PrepareGpuSupplyModal({
     setDrafts({});
   }, [query.data]);
   const mutation = useMutation({
-    mutationFn: registerGpuSupplyConfiguration,
+    mutationFn: (input: RegisterGpuSupplyConfigurationInput) =>
+      registerGpuSupplyConfiguration(input, scope),
     retry: false,
     meta: {
       feedback: {
@@ -182,10 +183,10 @@ export function PrepareGpuSupplyModal({
         successText: "供给已登记，请返回刷新状态",
       },
     },
-    onMutate: (input) => setGpuSupplyRegistrationIntent(cluster.connection_ref, input),
+    onMutate: (input) => setGpuSupplyRegistrationIntent(scope, input),
     onSuccess: (result) => {
       setReceipt(result);
-      setGpuSupplyRegistrationIntent(cluster.connection_ref);
+      setGpuSupplyRegistrationIntent(scope);
       onRegistered(result);
       onFeedback({
         state: "registered",
@@ -199,7 +200,7 @@ export function PrepareGpuSupplyModal({
         Boolean(error.status) &&
         error.status! < 500 &&
         error.status !== 408;
-      if (definitive) setGpuSupplyRegistrationIntent(cluster.connection_ref);
+      if (definitive) setGpuSupplyRegistrationIntent(scope);
       onFeedback({
         state: definitive ? "failed" : "unknown",
         message: describeRegistrationError(error),
@@ -209,7 +210,7 @@ export function PrepareGpuSupplyModal({
       lock.current = false;
     },
   });
-  const busy = mutation.isPending;
+  const busy = !scope.principal || !can("accelerator:supply:register") || mutation.isPending;
   const selectedNeedsFacts = selected.some(
     (candidate) =>
       missingSupplyRegistrationFacts(candidate, drafts[candidate.candidate_id]).length > 0,

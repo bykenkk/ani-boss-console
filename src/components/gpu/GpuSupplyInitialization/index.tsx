@@ -1,3 +1,8 @@
+import {
+  gpuScopeKey,
+  requireGpuOperationTarget,
+  requireGpuSupplyTarget,
+} from "@/api/accelerator/scope";
 import { useReducer, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert, Button, Input, Modal, Tabs } from "@arco-design/web-react";
@@ -36,7 +41,7 @@ export function GpuSupplyInitialization({ cluster, onOperation }: GpuSupplyIniti
     return <Alert type="info" content="正在读取平台主体，以恢复此连接的初始化意图。" />;
   return (
     <GpuSupplyInitializationFlow
-      key={`${me.data.id}:${cluster.connection_ref}`}
+      key={`${me.data.id}:${cluster.connection_ref}:${cluster.cluster_id}`}
       cluster={cluster}
       principal={String(me.data.id)}
       onOperation={onOperation}
@@ -54,15 +59,25 @@ function GpuSupplyInitializationFlow({
   onOperation,
 }: GpuSupplyInitializationFlowProps) {
   const client = useQueryClient();
+  const scope = {
+    principal,
+    connection_ref: cluster.connection_ref,
+    cluster_id: cluster.cluster_id,
+  };
+  const scopeKey = gpuScopeKey(scope);
   const [flow, dispatch] = useReducer(initializationFlowReducer, undefined, () =>
-    restoreInitializationFlow(readInitializationDraft(principal, cluster.connection_ref)),
+    restoreInitializationFlow(readInitializationDraft(scope)),
   );
   const { tab, providerRef, operationId, pending, rejectedReason } = flow;
   const hasSubmission = initializationFlowHasSubmission(flow);
   const [lookupOperation, setLookupOperation] = useState("");
   const status = useQuery({
-    queryKey: ["accelerator", "initialization", cluster.connection_ref],
-    queryFn: ({ signal }) => getInitialization(cluster.connection_ref, signal),
+    queryKey: ["accelerator", "initialization", scopeKey],
+    queryFn: async ({ signal }) =>
+      requireGpuOperationTarget(
+        requireGpuSupplyTarget(await getInitialization(cluster.connection_ref, signal), scope),
+        scope,
+      ),
     meta: {
       errorNotification: {
         id: withId("gpu-initialization", cluster.connection_ref),
@@ -71,7 +86,7 @@ function GpuSupplyInitializationFlow({
     },
   });
   const submit = useMutation({
-    mutationFn: (input: CreateInitializationInput) => createInitialization(input, principal),
+    mutationFn: (input: CreateInitializationInput) => createInitialization(input, scope),
     onMutate: (input) => {
       dispatch({ type: "submitting", input });
     },
@@ -101,10 +116,10 @@ function GpuSupplyInitializationFlow({
         ? "当前提交结果尚未确认，应先按原文重试或查询任务。确认开始新意图将使用新的提交键，且不会取消已受理的旧任务。"
         : "下一次初始化将使用新的提交键和重新预览的配置。已登记供给和已受理的旧任务都会保留，可继续查看旧任务结果。",
       onOk: () => {
-        beginNewInitializationIntent(principal, cluster.connection_ref);
+        beginNewInitializationIntent(scope);
         dispatch({ type: "new-intent-confirmed" });
         client.invalidateQueries({
-          queryKey: ["accelerator", "discovered-nodes", cluster.connection_ref],
+          queryKey: ["accelerator", "discovered-nodes", scopeKey],
         });
       },
     });
@@ -144,7 +159,7 @@ function GpuSupplyInitializationFlow({
       {status.data?.registered === false ? (
         <Alert
           type="warning"
-          content="请先使用“登记 GPU 集群”建立目录，并确认 Obs 采集范围使用该目录 ID。"
+          content="目标尚未启用。请返回目标页确认并启用 GPU 管理；监控可独立先部署。"
         />
       ) : null}
       {pending ? (
@@ -176,13 +191,13 @@ function GpuSupplyInitializationFlow({
       <Tabs activeTab={tab} onChange={(tab) => dispatch({ type: "tab", tab })}>
         <Tabs.TabPane key="supply" title="供给登记 / 读取">
           <SupplyConfigurationRecovery
-            connectionRef={cluster.connection_ref}
+            scope={scope}
             onSelect={(ref) => {
               dispatch({ type: "provider", providerRef: ref, continue: true });
             }}
           />
           <SupplyRegistration
-            connectionRef={cluster.connection_ref}
+            scope={scope}
             onRegistered={(configuration) => {
               dispatch({
                 type: "provider",
@@ -197,6 +212,7 @@ function GpuSupplyInitializationFlow({
             submissionNotice
           ) : (
             <GroupPolicySetup
+              scope={scope}
               cluster={cluster}
               providerRef={providerRef}
               onProviderChange={(providerRef) => dispatch({ type: "provider", providerRef })}
@@ -210,6 +226,7 @@ function GpuSupplyInitializationFlow({
             submissionNotice
           ) : (
             <ExistingGroupProfiles
+              scope={scope}
               cluster={cluster}
               onSubmit={(input) => submit.mutate(input)}
               submitting={submit.isPending || !principal}
@@ -233,7 +250,7 @@ function GpuSupplyInitializationFlow({
               >
                 查询操作
               </Button>
-              {status.data?.latest_operation ? (
+              {status.data?.latest_operation?.cluster_id === cluster.cluster_id ? (
                 <Button
                   onClick={() =>
                     dispatch({
@@ -257,11 +274,15 @@ function GpuSupplyInitializationFlow({
               </div>
             ) : null}
             {operationId ? (
-              <InitializationOperation key={operationId} operationId={operationId} />
+              <InitializationOperation
+                key={`${scopeKey}:${operationId}`}
+                scope={scope}
+                operationId={operationId}
+              />
             ) : (
               <Alert
                 type="info"
-                content="受理后保留 operation ID，可在此继续查询。同一浏览器会恢复该平台主体与连接的草稿；新浏览器可选择既有供给或查看最近任务。"
+                content="受理后保留 operation ID，可在此继续查询。同一浏览器会恢复该平台主体、连接与目标 UID 的草稿；新浏览器可选择既有供给或查看最近任务。"
               />
             )}
           </div>

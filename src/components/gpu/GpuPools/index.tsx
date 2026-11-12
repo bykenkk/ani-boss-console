@@ -1,3 +1,4 @@
+import { useGpuOperationScope } from "@/hooks/useGpuTarget";
 import { useQuery } from "@tanstack/react-query";
 import { acceleratorKeys, listGpuPools, type GpuCluster, type GpuPool } from "@/api/accelerator";
 import {
@@ -35,10 +36,11 @@ interface GpuPoolsProps {
 }
 
 export function GpuPools({ cluster, onSelect }: GpuPoolsProps) {
+  const { scopeKey } = useGpuOperationScope(cluster);
   const cursor = useCursorPagination(cluster.cluster_id);
   const params = { page_size: cursor.limit, page_token: cursor.cursor };
   const query = useQuery({
-    queryKey: [...acceleratorKeys.all, "pools", cluster.cluster_id, params],
+    queryKey: [...acceleratorKeys.all, "pools", scopeKey, params],
     queryFn: ({ signal }) => listGpuPools({ ...params, cluster_id: cluster.cluster_id }, signal),
     enabled: Boolean(cluster.cluster_id),
     meta: {

@@ -1,3 +1,9 @@
+import {
+  gpuScopeKey,
+  requireGpuOperationTarget,
+  type GpuOperationScope,
+} from "@/api/accelerator/scope";
+import { useGpuPermissions } from "@/hooks/useGpuTarget";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Alert, Button } from "@arco-design/web-react";
 import { DataTable, StatusBadge, type ListColumn } from "@/components/common";
@@ -9,6 +15,7 @@ import {
 import { withId } from "@/lib/id";
 import { supplyReasonText } from "../reasons";
 interface InitializationOperationProps {
+  scope: GpuOperationScope;
   operationId: string;
 }
 const columns: ListColumn<NonNullable<Operation["steps"]>[number]>[] = [
@@ -37,12 +44,14 @@ const columns: ListColumn<NonNullable<Operation["steps"]>[number]>[] = [
     render: (_, step) => (step.reason ? supplyReasonText(step.reason) : "-"),
   },
 ];
-export function InitializationOperation({ operationId }: InitializationOperationProps) {
+export function InitializationOperation({ operationId, scope }: InitializationOperationProps) {
   const client = useQueryClient();
-  const queryKey = ["accelerator", "initialization-operation", operationId];
+  const { can } = useGpuPermissions();
+  const queryKey = ["accelerator", "initialization-operation", gpuScopeKey(scope), operationId];
   const query = useQuery({
     queryKey,
-    queryFn: ({ signal }) => getInitializationOperation(operationId, signal),
+    queryFn: async ({ signal }) =>
+      requireGpuOperationTarget(await getInitializationOperation(operationId, signal), scope),
     refetchInterval: (state) =>
       ["ACCEPTED", "RUNNING"].includes(state.state.data?.state ?? "") ? 2000 : false,
     meta: {
@@ -53,7 +62,7 @@ export function InitializationOperation({ operationId }: InitializationOperation
     },
   });
   const retry = useMutation({
-    mutationFn: () => retryInitializationOperation(operationId, query.data!.version),
+    mutationFn: () => retryInitializationOperation(operationId, query.data!.version, scope),
     meta: {
       feedback: { channel: "message", action: "重试初始化", successText: "初始化重试已受理" },
     },
@@ -75,6 +84,7 @@ export function InitializationOperation({ operationId }: InitializationOperation
     );
   return (
     <div className="flex flex-col gap-4">
+      {query.error ? <Alert type="error" content={query.error.message} /> : null}
       <div className="break-all">操作 ID：{operationId}</div>
       <div className="flex items-center gap-4">
         <StatusBadge
@@ -89,7 +99,7 @@ export function InitializationOperation({ operationId }: InitializationOperation
         </Button>
         <Button
           type="primary"
-          disabled={!operation?.retryable}
+          disabled={!operation?.retryable || !can("accelerator:initialization:retry")}
           loading={retry.isPending}
           onClick={() => retry.mutate()}
         >
