@@ -35,16 +35,23 @@ export function GpuInitializationEnvironment({
           const unverifiedInventory = missingConfig && check.key === "inventory";
           const confirmed = check.state === "PASS" && !unverifiedInventory;
           const warning = !unverifiedInventory && Boolean(check.reason);
+          const key = check.key ?? "";
+          const nodeName = key.slice(key.lastIndexOf(":") + 1);
+          const checkName = key.startsWith("registered_mode:")
+            ? `${nodeName} 供给模式`
+            : key.startsWith("nvidia_units:")
+              ? `${nodeName} 插件计量单位`
+              : (checkLabels[key] ?? "供给检查");
           const label =
             check.key === "connection" && confirmed
               ? "集群连接正常"
               : check.key === "provider_configs" && confirmed
                 ? "供给配置已就绪"
                 : check.key === "provider_configs" && missingConfig
-                  ? "供给配置待补齐"
+                  ? "尚未登记可用供给"
                   : unverifiedInventory
                     ? "设备观测未核验"
-                    : `${checkLabels[check.key ?? ""] ?? check.key}${check.reason ? formatGpuInitializationReason(check.reason) : confirmed ? "已确认" : "待确认"}`;
+                    : `${checkName}${check.reason ? `：${formatGpuInitializationReason(check.reason)}` : confirmed ? "已确认" : "待确认"}`;
           const descriptions: Record<string, string> = {
             connection: confirmed
               ? "当前集群的受管连接检查已通过。"
@@ -52,13 +59,13 @@ export function GpuInitializationEnvironment({
             provider_configs: confirmed
               ? "受管供给配置检查已通过，可按节点共同支持的配置继续组织资源。"
               : missingConfig
-                ? "尚未登记可用的供给配置。请先准备供给配置，交由运维应用后刷新节点复检。"
-                : "供给配置检查尚未通过，请核对受管配置后刷新节点。",
+                ? "先查询后端收集的供给信息，确认并登记可用供给，返回后手动刷新状态。"
+                : "供给配置检查尚未通过，请查询登记信息后刷新状态。",
             inventory: unverifiedInventory
-              ? "供给配置尚未登记，设备观测结果暂不能确认。请先补齐并应用供给配置，再刷新节点复检。"
+              ? "当前初始化状态尚不能确认设备观测。请打开查询登记查看实际供给信息，登记后刷新状态。"
               : confirmed
                 ? "设备观测检查已通过，型号和显存仍以节点返回的数据为准。容量未知不影响目录初始化。"
-                : "设备观测信息尚未就绪，请核对供给配置和设备观测服务后刷新节点。",
+                : "设备观测信息尚未就绪，请核对供给登记和设备观测服务后刷新状态。",
           };
           return (
             <div key={`${check.key}-${index}`}>
@@ -70,7 +77,7 @@ export function GpuInitializationEnvironment({
                       {descriptions[check.key ?? ""] ??
                         (confirmed
                           ? "该项检查已通过。"
-                          : "该项检查尚未通过，请核对配置后刷新节点。")}
+                          : "该项检查尚未通过，请核对供给信息后刷新状态。")}
                     </p>
                   </div>
                 }
@@ -95,31 +102,33 @@ export function GpuInitializationEnvironment({
           );
         })}
       </div>
-      {missingConfig ? (
-        <Alert
-          type="warning"
-          title="供给配置尚未准备完成"
-          content={
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className="min-w-0 flex-1">
-                准备真实供给参数与配置交接单，由运维应用后返回复检。固定片需核实真实显存与 CU。
+      <Alert
+        type={missingConfig ? "warning" : "info"}
+        title={missingConfig ? "尚未登记可用供给" : "查询登记供给"}
+        content={
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="min-w-0 flex-1">
+              {missingConfig
+                ? "查询后端收集的供给信息，确认后登记。完成后返回点击“刷新状态”，再选择节点继续初始化。"
+                : "可查询实际供给信息并追加登记，完成后返回手动刷新状态。"}
+            </span>
+            <Button
+              type="text"
+              size="small"
+              className="shrink-0 bg-transparent! px-0! hover:underline"
+              aria-disabled={prepareDisabled}
+              onClick={() => {
+                if (!prepareDisabled) onPrepareSupply();
+              }}
+            >
+              <span className="inline-flex items-center gap-1.5">
+                查询登记
+                <IconArrowRight />
               </span>
-              <Button
-                type="text"
-                size="small"
-                className="shrink-0 bg-transparent! px-0! hover:underline"
-                onClick={onPrepareSupply}
-                disabled={prepareDisabled}
-              >
-                <span className="inline-flex items-center gap-1.5">
-                  准备供给配置
-                  <IconArrowRight />
-                </span>
-              </Button>
-            </div>
-          }
-        />
-      ) : null}
+            </Button>
+          </div>
+        }
+      />
     </div>
   );
 }

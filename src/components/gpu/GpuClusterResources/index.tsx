@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { Drawer, Tabs } from "@arco-design/web-react";
+import { Button, Drawer, Tabs } from "@arco-design/web-react";
 import type { GpuCluster, GpuPool } from "@/api/accelerator";
+import { InitializeGpuSupplyModal } from "../InitializeGpuSupplyModal";
+import { GpuInitializationOperationModal } from "../GpuInitializationOperationModal";
 import { GpuPools } from "../GpuPools";
 import { GpuSupplyGroups } from "../GpuSupplyGroups";
 import { GpuProfiles } from "../GpuProfiles";
@@ -11,8 +13,33 @@ interface GpuClusterResourcesProps {
 
 export function GpuClusterResources({ cluster }: GpuClusterResourcesProps) {
   const [pool, setPool] = useState<GpuPool>();
+  const [initializing, setInitializing] = useState(false);
+  const [operationId, setOperationId] = useState<string>();
   return (
     <>
+      <div className="mb-4 flex justify-end">
+        <Button type="primary" onClick={() => setInitializing(true)}>
+          初始化资源池
+        </Button>
+      </div>
+      {initializing ? (
+        <InitializeGpuSupplyModal
+          cluster={cluster}
+          onCancel={() => setInitializing(false)}
+          onOperation={(id) => {
+            setOperationId(id);
+            setInitializing(false);
+          }}
+        />
+      ) : null}
+      {operationId ? (
+        <GpuInitializationOperationModal
+          cluster={cluster}
+          operationId={operationId}
+          onCancel={() => setOperationId(undefined)}
+          onViewResources={() => setOperationId(undefined)}
+        />
+      ) : null}
       <Tabs>
         <Tabs.TabPane key="pools" title="资源池" destroyOnHide>
           <GpuPools cluster={cluster} onSelect={setPool} />

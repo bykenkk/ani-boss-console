@@ -22,6 +22,11 @@ import type {
 } from "./types";
 export * from "./types";
 export * from "./initialization";
+export * from "./supply";
+export * from "./types-supply";
+export * from "./volcano-queues";
+export * from "./group-policy";
+export * from "./types-group-policy";
 
 export const acceleratorKeys = { all: ["accelerator"] as const };
 const registerScope = createIdempotencyScope("gpu-cluster-register", ["POST"]);

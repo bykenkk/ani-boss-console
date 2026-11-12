@@ -11,7 +11,7 @@ import {
 import { useCursorPagination } from "@/hooks/useCursorPagination";
 
 import { RegisterGpuClusterModal } from "../RegisterGpuClusterModal";
-import { InitializeGpuPoolModal } from "../InitializeGpuPoolModal";
+import { InitializeGpuSupplyModal } from "../InitializeGpuSupplyModal";
 import { GpuInitializationOperationModal } from "../GpuInitializationOperationModal";
 import { GpuClusterResourcesModal } from "../GpuClusterResourcesModal";
 const columns: ListColumn<GpuCluster>[] = [
@@ -77,7 +77,7 @@ export function GpuClusters() {
       </TableSectionFrame>
       {creating ? <RegisterGpuClusterModal onCancel={() => setCreating(false)} /> : null}
       {initializing ? (
-        <InitializeGpuPoolModal
+        <InitializeGpuSupplyModal
           cluster={initializing}
           onCancel={() => setInitializing(undefined)}
           onOperation={(id) => {

@@ -12,12 +12,14 @@ export function commonGpuProviderConfigs(nodes: GpuDiscoveredNode[]): GpuProvide
       ),
     );
     if (matches.some((match) => !match)) return [];
+    const allocationTypes = (config.allocation_types ?? []).filter((allocation) =>
+      matches.every((match) => match?.allocation_types?.includes(allocation)),
+    );
+    if (!allocationTypes.length) return [];
     return [
       {
         ...config,
-        allocation_types: (config.allocation_types ?? []).filter((allocation) =>
-          matches.every((match) => match?.allocation_types?.includes(allocation)),
-        ),
+        allocation_types: allocationTypes,
       },
     ];
   });

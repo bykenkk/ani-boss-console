@@ -1,3 +1,4 @@
+import type { SupplyGroupPolicy } from "./types-group-policy";
 import type { PageParams } from "@/api/types";
 
 export type GpuMode = "WHOLE_EXCLUSIVE" | "SHARED_FIXED";
@@ -42,7 +43,7 @@ export interface GpuBaseline {
   adapter_id: string;
   memory_block_mib: number;
   split_count: number;
-  core_budget_additive: boolean;
+  core_budget_additive?: boolean;
   runtime_class_name: string;
   resource_types: GpuResourceTypeConfig[];
 }
@@ -55,6 +56,9 @@ export interface GpuResourceTypeConfig {
   max_memory_mib_per_device: string;
 }
 export interface GpuSupplyGroup {
+  provider_config_ref?: string;
+  provider_config_version?: string;
+  policy?: SupplyGroupPolicy;
   group_id: string;
   pool_id: string;
   cluster_id: string;

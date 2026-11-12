@@ -27,6 +27,7 @@ import {
 import { GpuInitializationResults } from "./GpuInitializationResults";
 import { GpuInitializationProgress } from "./GpuInitializationProgress";
 import { GpuInitializationContext } from "../GpuInitializationContext";
+import { formatGpuInitializationError } from "../InitializeGpuPoolModal/presentation";
 import styles from "../initialization.module.less";
 
 interface GpuInitializationOperationModalProps {
@@ -284,7 +285,23 @@ export function GpuInitializationOperationModal({
             }
           />
         ) : null}
-        {frozen ? (
+        {mutation.error ? (
+          <Alert
+            type={frozen ? "warning" : "error"}
+            title="初始化重试失败"
+            content={
+              <div className="flex flex-col gap-2">
+                <span className="break-all">{formatGpuInitializationError(mutation.error)}</span>
+                {frozen ? (
+                  <span>
+                    本次请求结果仍未确认。原始内容、幂等键和任务版本已保留，请使用“重发原重试请求”确认结果，不另建重试意图。
+                  </span>
+                ) : null}
+              </div>
+            }
+          />
+        ) : null}
+        {frozen && !mutation.error ? (
           <Alert
             type="warning"
             content="上次重试请求的结果尚未确认。重发将使用原幂等键和原任务版本，不会创建新的重试意图。"
@@ -322,7 +339,7 @@ export function GpuInitializationOperationModal({
           </Collapse.Item>
           {operation &&
           (operation.groups?.length || operation.pools?.length || operation.profiles?.length) ? (
-            <Collapse.Item name="results" header="已创建资源与接单结果">
+            <Collapse.Item name="results" header="资源标识与执行结果">
               <GpuInitializationResults operation={operation} />
             </Collapse.Item>
           ) : null}

@@ -1,3 +1,4 @@
+import { policyLabel } from "../GpuSupplyInitialization/policy";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -28,6 +29,14 @@ const columns: ListColumn<GpuSupplyGroup>[] = [
     ),
   },
 
+  {
+    title: "冻结策略",
+    width: 240,
+    render: (_, group) => (group.policy ? policyLabel(group.policy) : "历史组：沿用已存规格"),
+  },
+  { title: "供给引用", dataIndex: "provider_config_ref", width: 240, ellipsis: true },
+  { title: "登记版本", dataIndex: "provider_config_version", width: 120 },
+  { title: "插件实际槽数 K", dataIndex: "baseline.split_count", width: 140 },
   { title: "GPU 型号", dataIndex: "model_key", width: 180, ellipsis: true },
   {
     title: "分配类型",

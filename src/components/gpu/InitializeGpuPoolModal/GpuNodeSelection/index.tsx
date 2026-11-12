@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Tooltip } from "@arco-design/web-react";
-import { IconInfoCircle, IconQuestionCircle } from "@arco-design/web-react/icon";
+import { IconInfoCircle, IconQuestionCircle, IconRefresh } from "@arco-design/web-react/icon";
 import { useQuery } from "@tanstack/react-query";
 import {
   acceleratorKeys,
@@ -8,7 +8,7 @@ import {
   type GpuDiscoveredNode,
   type GpuInitializationCheck,
 } from "@/api/accelerator";
-import { DataTable, StatusBadge, ToolbarIconButton, type ListColumn } from "@/components/common";
+import { DataTable, StatusBadge, type ListColumn } from "@/components/common";
 import { useListPagination } from "@/hooks/useListPagination";
 import { withId } from "@/lib/id";
 import { formatGpuInitializationReason } from "../presentation";
@@ -22,14 +22,15 @@ interface GpuNodeSelectionProps {
   onChange: (nodes: GpuDiscoveredNode[]) => void;
   onSnapshot: (revision: string) => void;
   checks: GpuInitializationCheck[];
-  onPrepareSupply: (nodes: GpuDiscoveredNode[], revision: string) => void;
+  onPrepareSupply: () => void;
+  onRefreshStatus: () => Promise<unknown>;
+  statusRefreshing: boolean;
   prepareDisabled: boolean;
 }
 
 const blockingReasonDescriptions: Record<string, string> = {
-  NODE_MODEL_REQUIRED:
-    "尚未确定节点型号。请核实设备型号，供给配置应用后刷新节点，等待设备观测确认。",
-  PROVIDER_CONFIG_REQUIRED: "尚未登记可用的供给配置。请先准备并应用供给配置，再刷新节点。",
+  NODE_MODEL_REQUIRED: "尚未确定节点型号。请在查询登记中核实设备事实和必要声明，登记后刷新状态。",
+  PROVIDER_CONFIG_REQUIRED: "尚未登记可用供给。请先查询并确认登记，再刷新状态。",
 };
 
 const columns: ListColumn<GpuDiscoveredNode>[] = [
@@ -132,8 +133,13 @@ export function GpuNodeSelection({
   onSnapshot,
   checks,
   onPrepareSupply,
+  onRefreshStatus,
+  statusRefreshing,
   prepareDisabled,
 }: GpuNodeSelectionProps) {
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshFailed, setRefreshFailed] = useState(false);
+  const refreshLock = useRef(false);
   const pagination = useListPagination(connectionRef);
   const params = {
     connection_ref: connectionRef,
@@ -152,16 +158,69 @@ export function GpuNodeSelection({
     },
   });
   useEffect(() => {
-    if (query.data?.discovery_revision) onSnapshot(query.data.discovery_revision);
-  }, [query.data, query.dataUpdatedAt, onSnapshot]);
+    if (
+      !refreshing &&
+      !refreshFailed &&
+      !statusRefreshing &&
+      !query.isFetching &&
+      query.isSuccess &&
+      query.data.discovery_revision
+    ) {
+      onSnapshot(query.data.discovery_revision);
+    }
+  }, [
+    query.data,
+    query.dataUpdatedAt,
+    query.isFetching,
+    query.isSuccess,
+    refreshing,
+    refreshFailed,
+    statusRefreshing,
+    onSnapshot,
+  ]);
   const rows = query.data?.items ?? [];
-  const ready = Boolean(revision && revision === query.data?.discovery_revision);
+  const interactionsBlocked = refreshing || statusRefreshing || query.isFetching;
+  const ready = Boolean(
+    !refreshFailed && !query.isError && revision && revision === query.data?.discovery_revision,
+  );
+  const refreshStatus = async () => {
+    if (refreshLock.current || interactionsBlocked) return;
+    refreshLock.current = true;
+    setRefreshing(true);
+    setRefreshFailed(true);
+    onSnapshot("");
+    try {
+      // Each branch settles without rejecting, so a failure still waits for both reads.
+      const [nodesResult, statusSucceeded] = await Promise.all([
+        query.refetch({ throwOnError: true }).then(
+          (result) => result,
+          () => undefined,
+        ),
+        Promise.resolve()
+          .then(onRefreshStatus)
+          .then(
+            () => true,
+            () => false,
+          ),
+      ]);
+      const nextRevision = nodesResult?.data?.discovery_revision;
+      if (nodesResult?.isSuccess && nextRevision && statusSucceeded) {
+        setRefreshFailed(false);
+        onSnapshot(nextRevision);
+      } else {
+        onSnapshot("");
+      }
+    } finally {
+      refreshLock.current = false;
+      setRefreshing(false);
+    }
+  };
   return (
     <div className="flex min-w-0 flex-col gap-4">
       <GpuInitializationEnvironment
         checks={checks}
-        onPrepareSupply={() => onPrepareSupply(rows, query.data?.discovery_revision ?? "")}
-        prepareDisabled={prepareDisabled || query.isFetching || !ready}
+        onPrepareSupply={onPrepareSupply}
+        prepareDisabled={prepareDisabled || interactionsBlocked}
       />
       <div>
         <DataTable
@@ -171,25 +230,24 @@ export function GpuNodeSelection({
             title: "节点选择",
             extra: (
               <div className="mt-3 sm:absolute sm:top-0 sm:right-0 sm:mt-0">
-                <ToolbarIconButton
-                  label="刷新节点"
-                  spinning={query.isFetching}
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<IconRefresh spin={interactionsBlocked} />}
                   // 保持按钮可聚焦，避免刷新时原生 disabled 让弹窗把焦点转给显存问号。
-                  aria-disabled={query.isFetching}
-                  aria-busy={query.isFetching}
-                  onClick={() => {
-                    if (query.isFetching) return;
-                    onSnapshot("");
-                    query.refetch();
-                  }}
-                />
+                  aria-disabled={interactionsBlocked}
+                  aria-busy={interactionsBlocked}
+                  onClick={refreshStatus}
+                >
+                  刷新状态
+                </Button>
               </div>
             ),
           }}
           rowKey={(row) => row.node?.uid ?? ""}
           columns={columns}
           data={rows}
-          loading={query.isFetching}
+          loading={interactionsBlocked}
           tableLabel="可纳管 GPU 节点"
           pagination={
             Number(query.data?.total ?? "0") <= pagination.pageSize && pagination.page === 1
@@ -198,10 +256,14 @@ export function GpuNodeSelection({
                   page: pagination.page,
                   pageSize: pagination.pageSize,
                   total: Number(query.data?.total ?? "0"),
-                  onPageChange: pagination.setPage,
-                  onPageSizeChange: pagination.setPageSize,
+                  onPageChange: (page) => {
+                    if (!interactionsBlocked) pagination.setPage(page);
+                  },
+                  onPageSizeChange: (size) => {
+                    if (!interactionsBlocked) pagination.setPageSize(size);
+                  },
                   pageSizeOptions: [20, 50, 100],
-                  disabled: query.isFetching,
+                  disabled: interactionsBlocked,
                 }
           }
           rowSelection={{
@@ -212,9 +274,14 @@ export function GpuNodeSelection({
             selectedRowKeys: value.map((item) => item.node!.uid),
             checkboxProps: (row) => ({
               disabled:
-                !ready || query.isFetching || !row.selectable || !row.node?.uid || !row.node.name,
+                !ready ||
+                interactionsBlocked ||
+                !row.selectable ||
+                !row.node?.uid ||
+                !row.node.name,
             }),
             onChange: (keys) => {
+              if (interactionsBlocked || !ready) return;
               const available = new Map([...value, ...rows].map((item) => [item.node?.uid, item]));
               onChange(
                 keys.flatMap((key) => {
@@ -244,8 +311,10 @@ export function GpuNodeSelection({
             <Button
               type="text"
               size="mini"
-              disabled={query.isFetching}
-              onClick={() => onChange([])}
+              aria-disabled={interactionsBlocked}
+              onClick={() => {
+                if (!interactionsBlocked) onChange([]);
+              }}
             >
               清空选择
             </Button>
