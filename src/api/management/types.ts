@@ -9,19 +9,19 @@ export interface ManagementRecord {
   createdAt?: string;
   updatedAt?: string;
 }
-export interface ManagedTenant extends ManagementRecord {
-  type?: "TRIAL" | "PAID" | "INTERNAL" | "PARTNER" | "CUSTOM";
+// 按当前已确认的租户列表、详情响应字段维护，独立于写入字段和通用管理资源类型。
+export interface ManagedTenant {
+  id: number;
+  name?: string;
+  code?: string;
+  type?: "TENANT_TYPE_UNSPECIFIED" | "TRIAL" | "PAID" | "INTERNAL" | "PARTNER" | "CUSTOM";
   status?: EnabledStatus | "EXPIRED" | "FREEZE";
-  domain?: string;
-  industry?: string;
-  remark?: string;
   planId?: number;
   adminUserId?: number;
   adminUserName?: string;
-  expiredAt?: string;
-  subscriptionPlan?: string;
   memberCount?: number;
-  auditStatus?: "PENDING" | "APPROVED" | "REJECTED";
+  createdBy?: number;
+  createdAt?: string;
 }
 export interface ManagedUser extends ManagementRecord {
   tenantId?: number;
@@ -94,8 +94,19 @@ export interface SaveManagementInput {
   id?: number;
   values: EditValues;
 }
+// 写入字段按现有新建、编辑流程维护，不从读取响应类型派生。
+interface TenantInput {
+  name?: string;
+  code?: string;
+  type?: ManagedTenant["type"];
+  status?: ManagedTenant["status"];
+  auditStatus?: "TENANT_AUDIT_STATUS_UNSPECIFIED" | "PENDING" | "APPROVED" | "REJECTED";
+  planId?: number;
+  expiredAt?: string | null;
+  remark?: string;
+}
 export interface TenantWithAdministratorInput {
-  tenant: Omit<ManagedTenant, "id">;
+  tenant: TenantInput;
   user: Pick<ManagedUser, "username" | "email" | "realname">;
   password: string;
 }

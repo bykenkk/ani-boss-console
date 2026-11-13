@@ -61,6 +61,7 @@ const infrastructureNavigation: readonly NavigationLeaf[] = [
   { label: "租户存储配额", to: "/storage-quotas" },
   { label: "网络基础设施", to: "/network" },
   { label: "镜像配额", to: "/registry-quota" },
+  { label: "容器镜像", to: "/container-images", icon: <IconApps /> },
   { label: "漏洞扫描", to: "/registry-vulnerabilities" },
   { label: "垃圾回收", to: "/registry-gc" },
 ];
@@ -134,6 +135,7 @@ const integrationNavigation: readonly NavigationLeaf[] = [
 ];
 
 const visibleAppRoutes = new Set<AppRoute>([
+  "/container-images",
   "/workload-deployments",
   "/workload-statefulsets",
   "/workload-jobs",

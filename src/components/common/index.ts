@@ -1,4 +1,5 @@
 export { DataTable, DataTableRowActionButton, DataTableRowActions } from "./DataTable";
+export { ConfiguredDataTableRowActions } from "./DataTable/RowActions";
 export type {
   DataTableProps,
   SectionHeaderProps,

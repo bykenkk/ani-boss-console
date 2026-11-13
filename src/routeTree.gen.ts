@@ -50,6 +50,7 @@ import { Route as ConfigSecretsIndexRouteImport } from './routes/config-secrets/
 import { Route as ConfigSecretsConfigNameRouteImport } from './routes/config-secrets/$configName'
 import { Route as ConfigServiceAccountsIndexRouteImport } from './routes/config-service-accounts/index'
 import { Route as ConfigServiceAccountsConfigNameRouteImport } from './routes/config-service-accounts/$configName'
+import { Route as ContainerImagesIndexRouteImport } from './routes/container-images/index'
 import { Route as EipsIndexRouteImport } from './routes/eips/index'
 import { Route as GpuClustersIndexRouteImport } from './routes/gpu-clusters/index'
 import { Route as GpuQuotasIndexRouteImport } from './routes/gpu-quotas/index'
@@ -99,6 +100,7 @@ import { Route as TenantsAdminsIndexRouteImport } from './routes/tenants-admins/
 import { Route as TenantsBillingIndexRouteImport } from './routes/tenants-billing/index'
 import { Route as TenantsBillingTenantIdRouteImport } from './routes/tenants-billing/$tenantId'
 import { Route as TenantsIndexRouteImport } from './routes/tenants/index'
+import { Route as TenantsTenantIdRouteImport } from './routes/tenants/$tenantId'
 import { Route as TracesIndexRouteImport } from './routes/traces/index'
 import { Route as VirtualSwitchesIndexRouteImport } from './routes/virtual-switches/index'
 import { Route as WebhookIndexRouteImport } from './routes/webhook/index'
@@ -323,6 +325,11 @@ const ConfigServiceAccountsConfigNameRoute =
     path: '/$configName',
     getParentRoute: () => ConfigServiceAccountsRoute,
   } as any)
+const ContainerImagesIndexRoute = ContainerImagesIndexRouteImport.update({
+  id: '/container-images/',
+  path: '/container-images/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EipsIndexRoute = EipsIndexRouteImport.update({
   id: '/eips/',
   path: '/eips/',
@@ -573,6 +580,11 @@ const TenantsIndexRoute = TenantsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => TenantsRoute,
 } as any)
+const TenantsTenantIdRoute = TenantsTenantIdRouteImport.update({
+  id: '/$tenantId',
+  path: '/$tenantId',
+  getParentRoute: () => TenantsRoute,
+} as any)
 const TracesIndexRoute = TracesIndexRouteImport.update({
   id: '/traces/',
   path: '/traces/',
@@ -686,6 +698,7 @@ export interface FileRoutesByFullPath {
   '/storage-classes/$storageName': typeof StorageClassesStorageNameRoute
   '/storage-volumes/$storageName': typeof StorageVolumesStorageNameRoute
   '/tenants-billing/$tenantId': typeof TenantsBillingTenantIdRoute
+  '/tenants/$tenantId': typeof TenantsTenantIdRoute
   '/workload-daemonsets/$workloadName': typeof WorkloadDaemonsetsWorkloadNameRoute
   '/workload-deployments/$workloadName': typeof WorkloadDeploymentsWorkloadNameRoute
   '/workload-jobs/$workloadName': typeof WorkloadJobsWorkloadNameRoute
@@ -709,6 +722,7 @@ export interface FileRoutesByFullPath {
   '/config-maps/': typeof ConfigMapsIndexRoute
   '/config-secrets/': typeof ConfigSecretsIndexRoute
   '/config-service-accounts/': typeof ConfigServiceAccountsIndexRoute
+  '/container-images/': typeof ContainerImagesIndexRoute
   '/eips/': typeof EipsIndexRoute
   '/gpu-clusters/': typeof GpuClustersIndexRoute
   '/gpu-quotas/': typeof GpuQuotasIndexRoute
@@ -776,6 +790,7 @@ export interface FileRoutesByTo {
   '/storage-classes/$storageName': typeof StorageClassesStorageNameRoute
   '/storage-volumes/$storageName': typeof StorageVolumesStorageNameRoute
   '/tenants-billing/$tenantId': typeof TenantsBillingTenantIdRoute
+  '/tenants/$tenantId': typeof TenantsTenantIdRoute
   '/workload-daemonsets/$workloadName': typeof WorkloadDaemonsetsWorkloadNameRoute
   '/workload-deployments/$workloadName': typeof WorkloadDeploymentsWorkloadNameRoute
   '/workload-jobs/$workloadName': typeof WorkloadJobsWorkloadNameRoute
@@ -799,6 +814,7 @@ export interface FileRoutesByTo {
   '/config-maps': typeof ConfigMapsIndexRoute
   '/config-secrets': typeof ConfigSecretsIndexRoute
   '/config-service-accounts': typeof ConfigServiceAccountsIndexRoute
+  '/container-images': typeof ContainerImagesIndexRoute
   '/eips': typeof EipsIndexRoute
   '/gpu-clusters': typeof GpuClustersIndexRoute
   '/gpu-quotas': typeof GpuQuotasIndexRoute
@@ -884,6 +900,7 @@ export interface FileRoutesById {
   '/storage-classes/$storageName': typeof StorageClassesStorageNameRoute
   '/storage-volumes/$storageName': typeof StorageVolumesStorageNameRoute
   '/tenants-billing/$tenantId': typeof TenantsBillingTenantIdRoute
+  '/tenants/$tenantId': typeof TenantsTenantIdRoute
   '/workload-daemonsets/$workloadName': typeof WorkloadDaemonsetsWorkloadNameRoute
   '/workload-deployments/$workloadName': typeof WorkloadDeploymentsWorkloadNameRoute
   '/workload-jobs/$workloadName': typeof WorkloadJobsWorkloadNameRoute
@@ -907,6 +924,7 @@ export interface FileRoutesById {
   '/config-maps/': typeof ConfigMapsIndexRoute
   '/config-secrets/': typeof ConfigSecretsIndexRoute
   '/config-service-accounts/': typeof ConfigServiceAccountsIndexRoute
+  '/container-images/': typeof ContainerImagesIndexRoute
   '/eips/': typeof EipsIndexRoute
   '/gpu-clusters/': typeof GpuClustersIndexRoute
   '/gpu-quotas/': typeof GpuQuotasIndexRoute
@@ -993,6 +1011,7 @@ export interface FileRouteTypes {
     | '/storage-classes/$storageName'
     | '/storage-volumes/$storageName'
     | '/tenants-billing/$tenantId'
+    | '/tenants/$tenantId'
     | '/workload-daemonsets/$workloadName'
     | '/workload-deployments/$workloadName'
     | '/workload-jobs/$workloadName'
@@ -1016,6 +1035,7 @@ export interface FileRouteTypes {
     | '/config-maps/'
     | '/config-secrets/'
     | '/config-service-accounts/'
+    | '/container-images/'
     | '/eips/'
     | '/gpu-clusters/'
     | '/gpu-quotas/'
@@ -1083,6 +1103,7 @@ export interface FileRouteTypes {
     | '/storage-classes/$storageName'
     | '/storage-volumes/$storageName'
     | '/tenants-billing/$tenantId'
+    | '/tenants/$tenantId'
     | '/workload-daemonsets/$workloadName'
     | '/workload-deployments/$workloadName'
     | '/workload-jobs/$workloadName'
@@ -1106,6 +1127,7 @@ export interface FileRouteTypes {
     | '/config-maps'
     | '/config-secrets'
     | '/config-service-accounts'
+    | '/container-images'
     | '/eips'
     | '/gpu-clusters'
     | '/gpu-quotas'
@@ -1190,6 +1212,7 @@ export interface FileRouteTypes {
     | '/storage-classes/$storageName'
     | '/storage-volumes/$storageName'
     | '/tenants-billing/$tenantId'
+    | '/tenants/$tenantId'
     | '/workload-daemonsets/$workloadName'
     | '/workload-deployments/$workloadName'
     | '/workload-jobs/$workloadName'
@@ -1213,6 +1236,7 @@ export interface FileRouteTypes {
     | '/config-maps/'
     | '/config-secrets/'
     | '/config-service-accounts/'
+    | '/container-images/'
     | '/eips/'
     | '/gpu-clusters/'
     | '/gpu-quotas/'
@@ -1299,6 +1323,7 @@ export interface RootRouteChildren {
   AuditOperationIndexRoute: typeof AuditOperationIndexRoute
   BasicNetworksIndexRoute: typeof BasicNetworksIndexRoute
   ComputePresetsIndexRoute: typeof ComputePresetsIndexRoute
+  ContainerImagesIndexRoute: typeof ContainerImagesIndexRoute
   EipsIndexRoute: typeof EipsIndexRoute
   GpuClustersIndexRoute: typeof GpuClustersIndexRoute
   GpuQuotasIndexRoute: typeof GpuQuotasIndexRoute
@@ -1633,6 +1658,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/config-service-accounts/$configName'
       preLoaderRoute: typeof ConfigServiceAccountsConfigNameRouteImport
       parentRoute: typeof ConfigServiceAccountsRoute
+    }
+    '/container-images/': {
+      id: '/container-images/'
+      path: '/container-images'
+      fullPath: '/container-images/'
+      preLoaderRoute: typeof ContainerImagesIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/eips/': {
       id: '/eips/'
@@ -1977,6 +2009,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TenantsIndexRouteImport
       parentRoute: typeof TenantsRoute
     }
+    '/tenants/$tenantId': {
+      id: '/tenants/$tenantId'
+      path: '/$tenantId'
+      fullPath: '/tenants/$tenantId'
+      preLoaderRoute: typeof TenantsTenantIdRouteImport
+      parentRoute: typeof TenantsRoute
+    }
     '/traces/': {
       id: '/traces/'
       path: '/traces'
@@ -2223,10 +2262,12 @@ const StorageVolumesRouteWithChildren = StorageVolumesRoute._addFileChildren(
 )
 
 interface TenantsRouteChildren {
+  TenantsTenantIdRoute: typeof TenantsTenantIdRoute
   TenantsIndexRoute: typeof TenantsIndexRoute
 }
 
 const TenantsRouteChildren: TenantsRouteChildren = {
+  TenantsTenantIdRoute: TenantsTenantIdRoute,
   TenantsIndexRoute: TenantsIndexRoute,
 }
 
@@ -2343,6 +2384,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuditOperationIndexRoute: AuditOperationIndexRoute,
   BasicNetworksIndexRoute: BasicNetworksIndexRoute,
   ComputePresetsIndexRoute: ComputePresetsIndexRoute,
+  ContainerImagesIndexRoute: ContainerImagesIndexRoute,
   EipsIndexRoute: EipsIndexRoute,
   GpuClustersIndexRoute: GpuClustersIndexRoute,
   GpuQuotasIndexRoute: GpuQuotasIndexRoute,

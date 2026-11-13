@@ -1,151 +1,123 @@
-import { Button, Input, Modal, Select, Space } from "@arco-design/web-react";
+import { Button, Input, Select, Space } from "@arco-design/web-react";
 import { useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  deleteManagement,
-  listManagement,
-  managementKeys,
-  type ManagedTenant,
-} from "@/api/management";
+import { useQuery } from "@tanstack/react-query";
+import { listManagement, managementKeys, type ManagedTenant } from "@/api/management";
 import {
   ResourceIdentity,
   ListDataTable,
   ListPageFrame,
   StatusBadge,
   type ListColumn,
-  type RowAction,
 } from "@/components/common";
 import { formatDateTime } from "@/lib/date";
 import { withId } from "@/lib/id";
 import { TenantEditModal } from "@/components/tenant/TenantEditModal";
-import { TenantUsageModal } from "@/components/tenant/TenantUsageModal";
+import { useTenantActions } from "@/hooks/useTenantActions";
 
-const columns: ListColumn<ManagedTenant>[] = [
-  {
-    key: "name",
-    dataIndex: "name",
-    title: "租户 / ID",
-    width: 200,
-    ellipsis: true,
-    render: (_, row) => <ResourceIdentity name={row.name} id={row.id} idLabel="资源 ID" />,
-  },
-  {
-    key: "code",
-    dataIndex: "code",
-    title: "租户编码",
-    width: 160,
-    ellipsis: true,
-    render: (value) => String(value ?? "-"),
-  },
-  {
-    key: "status",
-    dataIndex: "status",
-    title: "状态",
-    width: 120,
-    ellipsis: true,
-    render: (value: string | undefined) => (
-      <StatusBadge
-        value={
-          ({ ON: "启用", OFF: "禁用", FREEZE: "冻结", EXPIRED: "过期" } as Record<string, string>)[
-            value ?? ""
-          ] ??
-          value ??
-          "-"
-        }
-        tone={
-          value === "ON" || value === "NORMAL"
-            ? "success"
-            : value === "OFF" || value === "DISABLED"
-              ? "default"
-              : "warning"
-        }
-      />
-    ),
-  },
-  {
-    key: "type",
-    dataIndex: "type",
-    title: "租户类型",
-    width: 160,
-    ellipsis: true,
-    render: (value: string | undefined) =>
-      (
-        ({
-          TRIAL: "试用",
-          PAID: "付费",
-          INTERNAL: "内部",
-          PARTNER: "合作伙伴",
-          CUSTOM: "定制",
-        }) as Record<string, string>
-      )[value ?? ""] ??
-      value ??
-      "-",
-  },
-  {
-    key: "adminUserName",
-    dataIndex: "adminUserName",
-    title: "管理员用户名",
-    width: 200,
-    ellipsis: true,
-    render: (_, row) => (
-      <ResourceIdentity name={row.adminUserName} id={row.adminUserId} idLabel="用户 ID" />
-    ),
-  },
-  {
-    key: "auditStatus",
-    dataIndex: "auditStatus",
-    title: "审核状态",
-    width: 120,
-    ellipsis: true,
-    render: (value: string | undefined) => (
-      <StatusBadge
-        value={
-          (
-            {
-              PENDING: "待审核",
-              APPROVED: "已通过",
-              REJECTED: "已拒绝",
-              TENANT_AUDIT_STATUS_UNSPECIFIED: "未指定",
-            } as Record<string, string>
-          )[value ?? ""] ?? value
-        }
-        tone={
-          value === "APPROVED"
-            ? "success"
-            : value === "REJECTED"
-              ? "danger"
-              : value === "PENDING"
-                ? "warning"
-                : "default"
-        }
-      />
-    ),
-  },
-  {
-    key: "memberCount",
-    dataIndex: "memberCount",
-    title: "成员数",
-    width: 160,
-    ellipsis: true,
-    render: (value) => String(value ?? "-"),
-  },
-  {
-    key: "createdAt",
-    title: "创建时间",
-    width: 180,
-    render: (_, row) => formatDateTime(row.createdAt),
-  },
-];
+interface TenantsPageProps {
+  onOpenTenant: (tenantId: number) => void;
+}
 
-export function TenantsPage() {
+export function TenantsPage({ onOpenTenant }: TenantsPageProps) {
+  const columns: ListColumn<ManagedTenant>[] = [
+    {
+      key: "name",
+      dataIndex: "name",
+      title: "租户 / ID",
+      width: 200,
+      ellipsis: true,
+      render: (_, row) => (
+        <ResourceIdentity
+          name={row.name ?? String(row.id)}
+          id={row.id}
+          idLabel="租户 ID"
+          onOpen={() => onOpenTenant(row.id)}
+        />
+      ),
+    },
+    {
+      key: "code",
+      dataIndex: "code",
+      title: "租户编码",
+      width: 160,
+      ellipsis: true,
+      render: (value) => String(value ?? "-"),
+    },
+    {
+      key: "status",
+      dataIndex: "status",
+      title: "状态",
+      width: 120,
+      ellipsis: true,
+      render: (value: string | undefined) => (
+        <StatusBadge
+          value={
+            (
+              { ON: "启用", OFF: "禁用", FREEZE: "冻结", EXPIRED: "过期" } as Record<string, string>
+            )[value ?? ""] ??
+            value ??
+            "-"
+          }
+          tone={
+            value === "ON" || value === "NORMAL"
+              ? "success"
+              : value === "OFF" || value === "DISABLED"
+                ? "default"
+                : "warning"
+          }
+        />
+      ),
+    },
+    {
+      key: "type",
+      dataIndex: "type",
+      title: "租户类型",
+      width: 160,
+      ellipsis: true,
+      render: (value: string | undefined) =>
+        (
+          ({
+            TENANT_TYPE_UNSPECIFIED: "未指定",
+            TRIAL: "试用",
+            PAID: "付费",
+            INTERNAL: "内部",
+            PARTNER: "合作伙伴",
+            CUSTOM: "定制",
+          }) as Record<string, string>
+        )[value ?? ""] ??
+        value ??
+        "-",
+    },
+    {
+      key: "adminUserName",
+      dataIndex: "adminUserName",
+      title: "管理员用户名",
+      width: 200,
+      ellipsis: true,
+      render: (_, row) => <ResourceIdentity name={row.adminUserName} display="name" />,
+    },
+    {
+      key: "memberCount",
+      dataIndex: "memberCount",
+      title: "成员数",
+      width: 160,
+      ellipsis: true,
+      render: (value) => String(value ?? "-"),
+    },
+    {
+      key: "createdAt",
+      title: "创建时间",
+      width: 180,
+      render: (_, row) => formatDateTime(row.createdAt),
+    },
+  ];
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>();
 
   const [editing, setEditing] = useState<ManagedTenant | "create">();
-  const [usageTenant, setUsageTenant] = useState<ManagedTenant>();
-  const client = useQueryClient();
   const input = {
     page,
     pageSize,
@@ -161,40 +133,12 @@ export function TenantsPage() {
       errorNotification: { id: withId("management-list", "tenants"), action: "租户列表加载" },
     },
   });
-  const refresh = () => client.invalidateQueries({ queryKey: managementKeys.all });
-  const removal = useMutation({
-    mutationFn: (id: number) => deleteManagement("tenants", id),
-    meta: {
-      feedback: {
-        channel: "notification",
-        id: withId("management-delete", "tenants"),
-        action: "删除租户",
-      },
-    },
-    onSuccess: async () => {
+  const { actions: rowActions } = useTenantActions({
+    onEdit: setEditing,
+    onDeleted: () => {
       if (query.data?.items.length === 1 && page > 1) setPage(page - 1);
-      await refresh();
     },
   });
-
-  const rowActions: RowAction<ManagedTenant>[] = [
-    { key: "usage", label: "用量与配额", onClick: setUsageTenant },
-    { key: "edit", label: "编辑", onClick: setEditing },
-
-    {
-      key: "delete",
-      label: "删除",
-      intent: "danger",
-      loading: (row) => removal.isPending && removal.variables === row.id,
-      onClick: (row) => {
-        Modal.confirm({
-          title: "删除租户",
-          content: `确认删除“${row.name ?? row.id}”？关联配置可能受影响，此操作无法在页面撤销。`,
-          onOk: () => removal.mutateAsync(row.id),
-        });
-      },
-    },
-  ];
   return (
     <>
       <ListPageFrame
@@ -267,9 +211,6 @@ export function TenantsPage() {
           onCancel={() => setEditing(undefined)}
           onSuccess={() => setEditing(undefined)}
         />
-      )}
-      {usageTenant && (
-        <TenantUsageModal tenant={usageTenant} onCancel={() => setUsageTenant(undefined)} />
       )}
     </>
   );

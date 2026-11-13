@@ -9,7 +9,7 @@ const enforcementLabels: Record<QuotaEnforcement, string> = {
   ENFORCEMENT_UNSPECIFIED: "未指定",
   LEGACY_CONFIG_ONLY: "仅配置",
   LAB_ONLY: "仅实验",
-  ENFORCED: "实际拦截",
+  ENFORCED: "已启用",
   NOT_ENABLED: "未启用",
 };
 

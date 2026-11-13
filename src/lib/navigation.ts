@@ -44,6 +44,7 @@ export type AppRoute =
   | "/public-networks"
   | "/eips"
   | "/registry-quota"
+  | "/container-images"
   | "/registry-vulnerabilities"
   | "/registry-gc"
   | "/health"
