@@ -437,7 +437,7 @@
 
 .sidebar-menu.arco-menu {
   width: 100%;
-  min-height: 100%;
+  min-height: 0;
   padding: 0;
   border: 0;
   background: transparent;
@@ -453,6 +453,7 @@
 }
 
 .sidebar-menu.arco-menu .sidebar-menu-leaf,
+.sidebar-menu.arco-menu .sidebar-menu-flyout-row,
 .sidebar-menu.arco-menu .sidebar-menu-group > .arco-menu-inline-header {
   display: flex;
   align-items: center;
@@ -721,6 +722,7 @@
 }
 
 .sidebar-menu.arco-menu .sidebar-menu-leaf,
+.sidebar-menu.arco-menu .sidebar-menu-flyout-row,
 .sidebar-menu.arco-menu .sidebar-menu-group > .arco-menu-inline-header {
   position: relative;
   box-sizing: border-box;
@@ -819,7 +821,6 @@
 
 .sidebar-menu.arco-menu .sidebar-menu-group--root > .arco-menu-inline-content {
   margin-left: 0;
-  overflow: visible;
 }
 
 .sidebar-menu.arco-menu .sidebar-menu-leaf--depth-1,
@@ -901,14 +902,16 @@
 
 .sidebar-menu-flyout-arrow {
   flex: 0 0 auto;
-  color: rgba(0, 0, 0, 0.4);
+  color: inherit;
   font-size: 12px;
+  opacity: 0.64;
   transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.sidebar-menu-flyout-row:hover .sidebar-menu-flyout-arrow,
 .sidebar-menu-flyout-row.is-active .sidebar-menu-flyout-arrow,
 .sidebar-menu-flyout-row.is-open .sidebar-menu-flyout-arrow {
-  color: #1769e8;
+  opacity: 1;
 }
 
 .sidebar-menu.arco-menu .sidebar-menu-leaf:focus-visible,

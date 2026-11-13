@@ -212,40 +212,40 @@ const completeAppNavigation: readonly NavigationItem[] = [
       { label: "集群概览", to: "/cluster-operations", icon: <IconDashboard /> },
       { label: "节点管理", to: "/cluster-nodes" },
       { label: "命名空间", to: "/cluster-namespaces" },
+      {
+        key: "workloads",
+        label: "工作负载",
+        icon: <IconApps />,
+        children: [
+          { label: "部署", to: "/workload-deployments" },
+          { label: "有状态副本集", to: "/workload-statefulsets" },
+          { label: "守护进程集", to: "/workload-daemonsets" },
+          { label: "任务", to: "/workload-jobs" },
+          { label: "容器组", to: "/workload-pods" },
+          { label: "服务", to: "/workload-services" },
+        ],
+      },
+      {
+        key: "cluster-configuration",
+        label: "配置",
+        icon: <IconSettings />,
+        children: [
+          { label: "保密字典", to: "/config-secrets" },
+          { label: "配置字典", to: "/config-maps" },
+          { label: "服务账户", to: "/config-service-accounts" },
+        ],
+      },
+      {
+        key: "cluster-storage",
+        label: "存储",
+        icon: <IconStorage />,
+        children: [
+          { label: "持久卷声明", to: "/storage-claims" },
+          { label: "持久卷", to: "/storage-volumes" },
+          { label: "存储类", to: "/storage-classes" },
+        ],
+      },
       { label: "自定义资源", to: "/cluster-crds" },
-    ],
-  },
-  {
-    key: "workloads",
-    label: "工作负载",
-    icon: <IconApps />,
-    children: [
-      { label: "部署", to: "/workload-deployments" },
-      { label: "有状态副本集", to: "/workload-statefulsets" },
-      { label: "守护进程集", to: "/workload-daemonsets" },
-      { label: "任务", to: "/workload-jobs" },
-      { label: "容器组", to: "/workload-pods" },
-      { label: "服务", to: "/workload-services" },
-    ],
-  },
-  {
-    key: "cluster-configuration",
-    label: "配置",
-    icon: <IconSettings />,
-    children: [
-      { label: "保密字典", to: "/config-secrets" },
-      { label: "配置字典", to: "/config-maps" },
-      { label: "服务账户", to: "/config-service-accounts" },
-    ],
-  },
-  {
-    key: "cluster-storage",
-    label: "存储",
-    icon: <IconStorage />,
-    children: [
-      { label: "持久卷声明", to: "/storage-claims" },
-      { label: "持久卷", to: "/storage-volumes" },
-      { label: "存储类", to: "/storage-classes" },
     ],
   },
   {
