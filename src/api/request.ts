@@ -11,11 +11,8 @@ import { authStore, clearAuthSession, getAuthState, updateAccessToken } from "@/
 import type { AuthTokenResponse, AuthTokens } from "@/api/auth/types";
 import { normalizeAuthTokens } from "@/api/auth/tokens";
 
-export const CORE_API_BASE = "/api/v1";
-export const SERVICES_API_BASE = "/api/v1/svc";
-export const ADMIN_API_BASE = "/api/v1/admin";
+export const API_BASE = "/api/v1";
 
-export type ApiAuthMode = "required" | "public";
 export type ApiQueryValue = string | number | boolean | null | undefined;
 export type ApiQuery = Record<string, ApiQueryValue | readonly ApiQueryValue[]>;
 
@@ -23,13 +20,11 @@ export interface ApiRequestOptions<TBody = unknown> extends Omit<
   AxiosRequestConfig<TBody>,
   "auth" | "baseURL" | "data" | "params" | "url"
 > {
-  auth?: ApiAuthMode;
   data?: TBody;
   params?: object;
 }
 
 type AniRequestConfig<TBody = unknown> = InternalAxiosRequestConfig<TBody> & {
-  aniAuth?: ApiAuthMode;
   aniRetried?: boolean;
   aniSessionSignal?: AbortSignal;
 };
@@ -103,11 +98,9 @@ function createApiInstance(baseURL: string): AxiosInstance {
   });
 }
 
-const coreAxios = createApiInstance(CORE_API_BASE);
-const servicesAxios = createApiInstance(SERVICES_API_BASE);
-const adminAxios = createApiInstance(ADMIN_API_BASE);
-const refreshAxios = createApiInstance(CORE_API_BASE);
-refreshAxios.defaults.timeout = 15_000;
+const authAxios = createApiInstance(`${API_BASE}/auth`);
+authAxios.defaults.timeout = 15_000;
+const adminAxios = createApiInstance(`${API_BASE}/admin`);
 
 export const AUTH_APPLICATION = "boss" as const;
 
@@ -227,8 +220,8 @@ function assertActiveSession(signal: AbortSignal): void {
 function getCsrfToken(signal: AbortSignal): Promise<string> {
   assertActiveSession(signal);
   if (csrfRequest) return csrfRequest;
-  const promise = refreshAxios
-    .post<{ csrf_token: string }>("/auth/csrf", { application: AUTH_APPLICATION }, { signal })
+  const promise = authAxios
+    .post<{ csrf_token: string }>("/csrf", { application: AUTH_APPLICATION }, { signal })
     .then(({ data }) => {
       assertActiveSession(signal);
       if (typeof data?.csrf_token !== "string" || !data.csrf_token.trim()) {
@@ -251,8 +244,8 @@ async function requestTokenRefresh(signal: AbortSignal): Promise<AuthTokens> {
       assertActiveSession(signal);
       if (authPaused) throw new axios.CanceledError("认证会话续期已暂停");
       try {
-        const response = await refreshAxios.post<AuthTokenResponse>(
-          "/auth/refresh",
+        const response = await authAxios.post<AuthTokenResponse>(
+          "/refresh",
           { application: AUTH_APPLICATION },
           { headers: { "X-CSRF-Token": csrfToken }, signal },
         );
@@ -306,7 +299,6 @@ function refreshAccessToken(signal = sessionController.signal): Promise<AuthToke
 function installAuthInterceptors(instance: AxiosInstance): void {
   instance.interceptors.request.use((config) => {
     const requestConfig = config as AniRequestConfig;
-    if (requestConfig.aniAuth === "public") return config;
     if (requestConfig.aniSessionSignal) assertActiveSession(requestConfig.aniSessionSignal);
     requestConfig.aniSessionSignal ??= sessionController.signal;
     const token = getAuthState().tokens?.access_token;
@@ -321,7 +313,7 @@ function installAuthInterceptors(instance: AxiosInstance): void {
       if (!axios.isAxiosError(error)) throw toApiError(error);
       await readStreamErrorBody(error);
       const config = error.config as AniRequestConfig | undefined;
-      if (error.response?.status !== 401 || !config || config.aniAuth === "public") {
+      if (error.response?.status !== 401 || !config) {
         throw toApiError(error);
       }
       if (authPaused) throw new axios.CanceledError("认证会话续期已暂停");
@@ -393,8 +385,7 @@ export function resumeSessionRefresh(): void {
   scheduleAuthRefresh();
 }
 
-installAuthInterceptors(coreAxios);
-installAuthInterceptors(servicesAxios);
+// 认证基础请求不安装拦截器，避免 CSRF/刷新失败再次进入自动刷新链路。
 installAuthInterceptors(adminAxios);
 
 async function request<TResponse, TBody>(
@@ -402,13 +393,11 @@ async function request<TResponse, TBody>(
   url: string,
   options: ApiRequestOptions<TBody>,
 ): Promise<TResponse> {
-  const { auth = "required", ...axiosOptions } = options;
   try {
     const response = await instance.request<TResponse, AxiosResponse<TResponse>, TBody>({
-      ...axiosOptions,
+      ...options,
       url,
-      aniAuth: auth,
-    } as AxiosRequestConfig<TBody> & { aniAuth: ApiAuthMode });
+    });
     if (response.status === 204 || response.data === "") return undefined as TResponse;
     return response.data;
   } catch (error) {
@@ -417,18 +406,11 @@ async function request<TResponse, TBody>(
   }
 }
 
-export function coreRequest<TResponse, TBody = never>(
+export function authRequest<TResponse, TBody = never>(
   url: string,
   options: ApiRequestOptions<TBody> = {},
 ): Promise<TResponse> {
-  return request<TResponse, TBody>(coreAxios, url, options);
-}
-
-export function servicesRequest<TResponse, TBody = never>(
-  url: string,
-  options: ApiRequestOptions<TBody> = {},
-): Promise<TResponse> {
-  return request<TResponse, TBody>(servicesAxios, url, options);
+  return request<TResponse, TBody>(authAxios, url, options);
 }
 
 export const externalAxios = axios.create();

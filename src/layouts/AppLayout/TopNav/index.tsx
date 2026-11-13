@@ -143,7 +143,7 @@ export function TopNav({ breadcrumbs, onBack }: TopNavProps) {
             placeholder="请输入内容"
             aria-label="全局搜索"
           /> */}
-          {/* TODO(feature-visibility): 后续开放开物入口时恢复按钮、分隔线及相关导入。 */}
+          {/* TODO(api-migration): 开物 Services 入口接口已废弃；替代接口接入并启用按钮后，再恢复入口、分隔线及相关导入。 */}
           {/* <KaiwuEntryButton />
           <span className="topnav-user-divider" aria-hidden="true" /> */}
           <Dropdown

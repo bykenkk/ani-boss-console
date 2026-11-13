@@ -5,37 +5,6 @@ export interface PlatformRuntimeProfile {
   reason: string | null;
 }
 
-export interface PlatformCapacityRegion {
-  id: string;
-  code: string;
-  name: string;
-  displayName: string;
-  status: string;
-  openForTenant: boolean;
-  azs: string[];
-  tenantCount: number;
-  capacity: {
-    gpuTotal: number;
-    gpuFree: number;
-    nodes: number;
-    cpuCores: number;
-    memoryGiB: number;
-  };
-}
-
-export interface PlatformCapacity {
-  regions: PlatformCapacityRegion[];
-  summary: {
-    regionCount: number;
-    gpuTotal: number;
-    gpuFree: number;
-    tenantCount: number;
-    nodes: number;
-    azs: string[];
-  };
-  profile: PlatformRuntimeProfile;
-}
-
 export type PlatformServiceScrapeStatus = "reachable" | "unreachable" | "unknown";
 export type PlatformComponentStatus = "running" | "degraded" | "stopped" | "unknown";
 export type PlatformComponentGroupName = "service" | "dependency" | "platform";
